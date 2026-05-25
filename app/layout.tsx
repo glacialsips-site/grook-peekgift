@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
+import ClerkBoundary from './ClerkBoundary';
 
 export const metadata: Metadata = {
   title: 'peek.gift',
@@ -16,13 +16,13 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const body = <body className="min-h-dvh chrome-bg">{children}</body>;
-  // Only mount ClerkProvider when we have a publishable key — otherwise the
-  // provider tries to fetch Clerk's frontend API and throws.
   return (
     <html lang="en">
-      {pubKey ? <ClerkProvider publishableKey={pubKey}>{body}</ClerkProvider> : body}
+      <body className="min-h-dvh chrome-bg">
+        <ClerkBoundary publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+          {children}
+        </ClerkBoundary>
+      </body>
     </html>
   );
 }
