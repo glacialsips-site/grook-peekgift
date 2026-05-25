@@ -1,0 +1,196 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { getSupabaseBrowser } from '@/lib/supabase/browser';
+
+type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
+
+type Props = {
+  peekId: string;
+  initialStatus: PeekStatus;
+  initialShareUrl: string | null;
+  initialSlug: string;
+  sessionId: string | null;
+  mock: boolean;
+};
+
+type PeekRow = {
+  status: PeekStatus;
+  share_url: string | null;
+  slug: string;
+};
+
+const POLL_INTERVAL_MS = 2500;
+const POLL_TIMEOUT_MS = 60_000;
+
+export function PublishStatus({
+  peekId,
+  initialStatus,
+  initialShareUrl,
+  initialSlug,
+  sessionId,
+  mock,
+}: Props) {
+  const [status, setStatus] = useState<PeekStatus>(initialStatus);
+  const [shareUrl, setShareUrl] = useState<string | null>(initialShareUrl);
+  const [slug, setSlug] = useState<string>(initialSlug);
+  const [copied, setCopied] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (status === 'published' || status === 'claimed') return;
+
+    const sb = getSupabaseBrowser();
+    let cancelled = false;
+    const channel = sb
+      .channel(`publish:${peekId}`)
+      .on(
+        'postgres_changes' as never,
+        {
+          event: 'UPDATE',
+          schema: 'peek_v2',
+          table: 'peeks',
+          filter: `id=eq.${peekId}`,
+        },
+        (payload: { new: Record<string, unknown> }) => {
+          if (cancelled) return;
+          const row = payload.new as Partial<PeekRow>;
+          if (row.status) setStatus(row.status as PeekStatus);
+          if (typeof row.share_url === 'string') setShareUrl(row.share_url);
+          if (typeof row.slug === 'string') setSlug(row.slug);
+        },
+      )
+      .subscribe();
+
+    const startedAt = Date.now();
+    const poll = async () => {
+      if (cancelled) return;
+      const { data } = await sb
+        .from('peeks')
+        .select('status, share_url, slug')
+        .eq('id', peekId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data) {
+        const row = data as PeekRow;
+        setStatus(row.status);
+        if (row.share_url) setShareUrl(row.share_url);
+        if (row.slug) setSlug(row.slug);
+        if (row.status === 'published' || row.status === 'claimed') return;
+      }
+      if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+        setTimedOut(true);
+        return;
+      }
+      window.setTimeout(poll, POLL_INTERVAL_MS);
+    };
+    window.setTimeout(poll, POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      sb.removeChannel(channel);
+    };
+  }, [peekId, status]);
+
+  const isPublished = status === 'published' || status === 'claimed';
+  const finalShareUrl =
+    shareUrl ??
+    (typeof window !== 'undefined'
+      ? `${window.location.origin}/g/${slug}`
+      : `/g/${slug}`);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(finalShareUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  if (!isPublished) {
+    return (
+      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex max-w-md flex-col items-center gap-4 text-center"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <h1 className="text-xl font-semibold">Wrapping it up…</h1>
+          <p className="text-sm text-muted-foreground">
+            {mock
+              ? 'Finalizing your Peek.'
+              : 'Confirming your payment with Stripe. This usually takes a few seconds.'}
+          </p>
+          {sessionId ? (
+            <p className="text-xs text-muted-foreground/70">
+              Session {sessionId.slice(0, 12)}…
+            </p>
+          ) : null}
+          {timedOut ? (
+            <p className="text-xs text-amber-600">
+              Still waiting on confirmation. You can safely refresh this page.
+            </p>
+          ) : null}
+        </motion.div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex w-full max-w-md flex-col items-center gap-6 text-center"
+      >
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+          <Check className="h-7 w-7" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Your Peek is live.
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Share the link with your person — they&apos;ll see it just for them.
+          </p>
+        </div>
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-left">
+            <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate text-sm" title={finalShareUrl}>
+              {finalShareUrl}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={copyLink} className="flex-1" type="button">
+              {copied ? (
+                <>
+                  <Check className="mr-1.5 h-4 w-4" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-1.5 h-4 w-4" />
+                  Copy link
+                </>
+              )}
+            </Button>
+            <Button asChild variant="outline" type="button">
+              <Link href="./share">
+                <Share2 className="mr-1.5 h-4 w-4" />
+                Share
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </main>
+  );
+}
