@@ -10,4 +10,4 @@ Format:
 
 ## Current entries
 
-_(none yet)_
+- `atelier/lib/anthropic/tools/generate_hero_image.ts:tryEvolveVibe` — "intentionally swallowed: vibe evolution is best-effort" — empty catch block needs a WHY so a future reader doesn't think the error swallow is a bug; vibe evolution is a packet-21 background signal and must not fail the user-visible image gen tool turn.

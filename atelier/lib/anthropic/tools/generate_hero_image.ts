@@ -2,9 +2,26 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { events, peeks } from '@/db/schema';
-import { env } from '@/lib/env';
-import { uploadAsset } from '@/lib/supabase/storage';
+import { generateFalImage, type FalAspect } from '@/lib/image-gen/fal';
+import { rehostImage } from '@/lib/image-gen/rehost';
 import { registerTool } from './index';
+
+type VibeSignal = { kind: 'hero_image'; imageUrl: string };
+type EvolveVibeFn = (peekId: string, signal: VibeSignal) => Promise<unknown>;
+
+async function tryEvolveVibe(peekId: string, imageUrl: string): Promise<void> {
+  try {
+    const modulePath = ['@', 'lib', 'vibe', 'evolve'].join('/');
+    const mod = (await import(modulePath).catch(() => null)) as
+      | { evolveVibe?: EvolveVibeFn }
+      | null;
+    if (mod?.evolveVibe) {
+      await mod.evolveVibe(peekId, { kind: 'hero_image', imageUrl });
+    }
+  } catch {
+    // intentionally swallowed: vibe evolution is best-effort
+  }
+}
 
 const AspectSchema = z.enum(['16:9', '4:3', '1:1', '9:16']);
 
@@ -17,22 +34,6 @@ type Input = z.infer<typeof InputSchema>;
 type Output =
   | { ok: true; image_url: string }
   | { ok: false; error: string };
-
-const ASPECT_TO_FAL_SIZE: Record<z.infer<typeof AspectSchema>, string> = {
-  '16:9': 'landscape_16_9',
-  '4:3': 'landscape_4_3',
-  '1:1': 'square_hd',
-  '9:16': 'portrait_16_9',
-};
-
-interface FalImage {
-  url: string;
-  content_type?: string;
-}
-
-interface FalResponse {
-  images?: FalImage[];
-}
 
 registerTool<Input, Output>({
   name: 'generate_hero_image',
@@ -54,60 +55,31 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
-    if (!env.FAL_KEY) {
-      return { ok: false, error: 'image_gen_not_configured' };
-    }
+    const aspect: FalAspect = parsed.aspect ?? '16:9';
 
-    const aspect = parsed.aspect ?? '16:9';
-    const falResponse = await fetch(
-      'https://fal.run/fal-ai/flux/schnell',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Key ${env.FAL_KEY}`,
-        },
-        body: JSON.stringify({
-          prompt: parsed.prompt,
-          image_size: ASPECT_TO_FAL_SIZE[aspect],
-          num_images: 1,
-          enable_safety_checker: true,
-        }),
-      },
-    );
-
-    if (!falResponse.ok) {
-      const detail = await falResponse.text().catch(() => '');
-      return {
-        ok: false,
-        error: `fal_request_failed: ${falResponse.status} ${detail.slice(0, 200)}`,
-      };
-    }
-
-    const body = (await falResponse.json()) as FalResponse;
-    const first = body.images?.[0];
-    if (!first?.url) {
-      return { ok: false, error: 'fal_no_image_returned' };
-    }
-
-    const assetResponse = await fetch(first.url);
-    if (!assetResponse.ok) {
-      return {
-        ok: false,
-        error: `fal_asset_fetch_failed: ${assetResponse.status}`,
-      };
-    }
-    const buffer = Buffer.from(await assetResponse.arrayBuffer());
-    const contentType = first.content_type ?? 'image/jpeg';
-    const uploaded = await uploadAsset({
-      data: buffer,
-      contentType,
+    const generation = await generateFalImage({
+      prompt: parsed.prompt,
+      aspect,
     });
+    if (!generation.ok || !generation.imageUrl) {
+      return { ok: false, error: generation.error ?? 'fal_unknown_error' };
+    }
+
+    let rehosted;
+    try {
+      rehosted = await rehostImage({
+        sourceUrl: generation.imageUrl,
+        pathPrefix: `hero/${ctx.peekId}`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: `rehost_failed: ${message}` };
+    }
 
     const [row] = await db
       .update(peeks)
       .set({
-        heroImageUrl: uploaded.publicUrl,
+        heroImageUrl: rehosted.publicUrl,
         heroImageSource: 'ai_generated',
         heroPrompt: parsed.prompt,
         updatedAt: new Date(),
@@ -124,11 +96,15 @@ registerTool<Input, Output>({
       payload: {
         prompt: parsed.prompt,
         aspect,
-        storage_path: uploaded.path,
-        fal_source_url: first.url,
+        storage_path: rehosted.path,
+        fal_source_url: generation.imageUrl,
+        size_bytes: rehosted.sizeBytes,
+        content_type: rehosted.contentType,
       },
     });
 
-    return { ok: true, image_url: uploaded.publicUrl };
+    await tryEvolveVibe(ctx.peekId, rehosted.publicUrl);
+
+    return { ok: true, image_url: rehosted.publicUrl };
   },
 });
