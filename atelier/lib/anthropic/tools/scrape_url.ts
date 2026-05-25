@@ -70,7 +70,7 @@ registerTool<Input, Output>({
         url: parsed.url,
         ok: true,
         provider: outcome.provider,
-        product: outcome.product,
+        product: outcome.product as unknown as Record<string, unknown>,
         affiliate_url: wrapped.wrappedUrl,
         affiliate_network: wrapped.network,
       },

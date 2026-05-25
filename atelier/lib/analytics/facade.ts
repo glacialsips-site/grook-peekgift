@@ -147,9 +147,14 @@ export type AnalyticsEvent =
       userId: string | null;
       sessionId?: string;
       payload: {
-        source: string;
+        url?: string;
         ok: boolean;
-        latency_ms: number;
+        provider?: string;
+        product?: Record<string, unknown>;
+        affiliate_url?: string;
+        affiliate_network?: string;
+        latency_ms?: number;
+        error?: string;
       };
     }
   | {
