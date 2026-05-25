@@ -138,7 +138,8 @@ All 5 packets (13, 14, 15, 16, 17) pushed clean, each green standalone. Integrat
 |---|---|---|---|---|
 | 13 | Schema fix (nullable `curator_id` + `metadata` jsonb + Vibe type) | `claude/packet-13-schema-fix` | `4c90636` | New migration `0001_powerful_venom.sql`; zero generate-noise; build green 8 routes |
 | 14 | Recipient view `/g/[slug]` + picks API | `claude/packet-14-recipient-view` | `b1857ee`+`7b01964` | 11-component recipient surface + cinematic reveal scaled by `vibe.motion` + variant-group pick semantics + HMAC-signed recipient cookie; build green |
-| 15 | Stripe checkout: publish gate + webhook + mock-mode | `claude/packet-15-checkout` | `8fdd351` | Stripe pinned to `apiVersion: '2026-04-22.dahlia'`; `automatic_tax` OFF pending Tax registration; webhook idempotent; mock-mode bypasses Stripe; build green |
+| 15 | Stripe checkout: publish gate + webhook + mock-mode | `claude/packet-15-checkout` | `60b40ed` | Stripe pinned to `apiVersion: '2026-04-22.dahlia'`; **`automatic_tax: { enabled: true }`** + `tax_id_collection`, `billing_address_collection: 'auto'`, `customer_creation: 'always'` — requires Dashboard prereqs (see "Stripe Dashboard owner-tasks" below); webhook idempotent; mock-mode bypasses Stripe; build green |
+| 28 | ~~Stripe Tax + Adaptive Pricing finalize~~ | — | code-side now done in 15 (`60b40ed`); only Dashboard config remains (see below) |
 | 16 | Share + OG + email | `claude/packet-16-share-og` | `0e1309d` | Next 16 `opengraph-image.tsx` convention; share-sheet with native-share + per-platform deep links; Resend wrapper + 2 templates; lucide brand icons inlined; build green |
 | 17 | Chat plumbing cleanup (shared `SseEvent` + `chatTurn(onToolResult)` + Vibe cast cleanup) | `claude/packet-17-chat-cleanup` | `0bc9beb` | Inline agent loop replaced with `chatTurn()`-driven SSE; build green; Vibe cast cleanup partial (2/3 sites — needs follow-up post-13) |
 
@@ -158,7 +159,6 @@ All 5 packets (13, 14, 15, 16, 17) pushed clean, each green standalone. Integrat
 | 25 | Analytics instrumentation: PostHog server+client + LLM observability + own events writer | packets 02, 04 |
 | 26 | Inngest functions: birthday/anniversary nudges + scrape queue + retry policies | packets 02, 04 |
 | 27 | Social outbound: Ayrshare/Buffer adapter + generated reels job | packet 26 |
-| 28 | Stripe Tax + Adaptive Pricing finalize once registration is set up | one-line config flip in 15 |
 | 29 | Share-sheet brand-icon polish (replace inline SVGs once a brand-icon dep is added) | trivial |
 | 30 | Single-fire `turn_end` SSE event (currently fires per inner-loop iteration) | minor polish |
 
@@ -176,6 +176,22 @@ All 5 packets (13, 14, 15, 16, 17) pushed clean, each green standalone. Integrat
 - **Apply migration `0001_powerful_venom.sql` to Supabase `peek_v2`** via MCP after packet 13 integrates. Without this the runtime anon flow stays blocked even though the code compiles.
 - **Drop the third Vibe cast** at `app/build/[peekId]/page.tsx:68` (packet 17 couldn't reach it). Either fold into integration or schedule as packet 18 (small).
 - **Netlify**: switch `peek-gift-vnext` site's base dir to `atelier/`, sync env vars from production `peek-gift` site via MCP, set up branch-deploy for `atelier-integration`. Required before live SSE chat / Stripe live mode can be exercised.
+
+## Stripe Dashboard owner-tasks (cannot be done from this session — MCP doesn't expose Account/Tax)
+
+Packet 15 (commit `60b40ed`) now passes `automatic_tax: { enabled: true }` + `tax_id_collection: { enabled: true }` to `checkout.sessions.create`. Before going live (or even before any `PAY_MODE=live` test) the Stripe account needs:
+
+1. **Stripe Tax activated.** Dashboard → Tax → Settings → Activate. If inactive, Session creation will throw `automatic_tax requires Stripe Tax to be activated on your account`.
+2. **Business profile complete.** Dashboard → Settings → Business → Public details + Tax details:
+   - Legal entity type (sole prop / LLC / S-corp / etc.)
+   - Business tax ID (EIN or SSN-as-sole-prop)
+   - MCC: a digital-services code (suggest `5734` Computer Software Stores or `5817` Digital Goods — see Tax mapping in Dashboard for which one Tax treats correctly)
+3. **Default tax code on `prod_UZzXnuYuX4ud15`.** Dashboard → Products → peek.gift vNext — Standard → Tax → set a code. For a downloadable/online service: `txcd_10103001` (Digital services — general) is typical for the $12 publish gate. Alternatively make the price `tax_behavior: 'exclusive'` so $12 is the pre-tax amount (preferred for compliance; Adaptive Pricing handles currency).
+4. **Origin address registered.** Dashboard → Tax → Registrations → add the home/business state-of-origin (and any other states where you've hit the economic-nexus threshold). Without at least one registration, Tax computes $0 — won't error, but won't collect.
+
+If activating Tax in production is going to take longer than the chat flow is going to take to test end-to-end, flip back to `automatic_tax: { enabled: false }` temporarily — single-line revert on the packet-15 branch. `PAY_MODE=mock` bypasses everything Stripe-side so dev/test still works regardless.
+
+MCP-side limitation: the Stripe MCP in this remote-execution env whitelists only Customer / Invoice / Subscription / Refund / PaymentIntent / Dispute / Product / Price / Coupon / PaymentLink / PromotionCode / Balance — Account, Tax Settings, Tax Registrations, and Business Profile aren't exposed, so the orchestrator (or user) must do all four items above through the Dashboard.
 
 ## Container restart recovery
 
