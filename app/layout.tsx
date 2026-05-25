@@ -16,11 +16,13 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const pubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const body = <body className="min-h-dvh chrome-bg">{children}</body>;
+  // Only mount ClerkProvider when we have a publishable key — otherwise the
+  // provider tries to fetch Clerk's frontend API and throws.
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="min-h-dvh chrome-bg">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      {pubKey ? <ClerkProvider publishableKey={pubKey}>{body}</ClerkProvider> : body}
+    </html>
   );
 }

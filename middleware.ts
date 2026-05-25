@@ -10,23 +10,31 @@ const isPublic = createRouteMatcher([
   '/sign-up(.*)'
 ]);
 
-// Detect placeholder/unset Clerk secret so the marketing pages still render even
-// before Frank drops the real value.
 const hasRealClerkSecret = (() => {
   const k = process.env.CLERK_SECRET_KEY;
   if (!k) return false;
   if (k.includes('PLACEHOLDER')) return false;
-  // Real keys are `sk_(live|test)_<base64ish>`. Bail if format is suspect.
   return /^sk_(live|test)_[A-Za-z0-9+/=_-]{16,}/.test(k);
 })();
 
-const clerk = hasRealClerkSecret
-  ? clerkMiddleware(async (auth, req) => {
-      if (!isPublic(req)) await auth.protect();
-    })
-  : async (_req: NextRequest) => NextResponse.next();
+const protectedClerk = clerkMiddleware(async (auth, req) => {
+  if (!isPublic(req)) await auth.protect();
+});
 
-export default clerk;
+// Wrap in a try/catch so a Clerk-side error (invalid key, unauthorized origin,
+// API down) doesn't bring the whole site down — public pages still render.
+export default async function middleware(req: NextRequest) {
+  if (!hasRealClerkSecret) return NextResponse.next();
+  try {
+    return await (protectedClerk as any)(req);
+  } catch (e: any) {
+    console.error('[clerk-middleware]', e?.message || e);
+    // For public routes, just continue. For protected, redirect to sign-in.
+    if (isPublic(req)) return NextResponse.next();
+    const url = new URL('/sign-in', req.url);
+    return NextResponse.redirect(url);
+  }
+}
 
 export const config = {
   matcher: ['/((?!_next|.*\\..*).*)', '/api/(.*)']
