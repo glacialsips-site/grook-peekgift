@@ -1,17 +1,20 @@
-# Diagnostic build — prints state before npm run build so we can see what
-# Netlify's cache restore is putting in the source tree. Remove the echo block
-# once the deploy is succeeding.
+# Netlify persists /opt/build/repo across deploys. New uploads OVERLAY on the
+# previous tree instead of replacing it, so files I've deleted between deploys
+# (lib/supabase.ts, .env.local, etc.) keep haunting the build.
+#
+# We explicitly evict known-stale artifacts from prior deploys before running
+# next build. Add to this list if a deploy log ever again shows files dated
+# from a previous deploy that aren't in your current source.
 [build]
   command = """
-    echo '=== PRE-BUILD STATE ===' &&
-    pwd &&
-    echo '--- root ---' && ls -la &&
-    echo '--- lib/ ---' && ls -la lib/ 2>&1 &&
-    echo '--- .next exists? ---' && ls -la .next 2>&1 | head -10 &&
-    echo '--- find supabase ---' && find . -name 'supabase*' -not -path './node_modules/*' 2>&1 &&
-    echo '--- grep supabase-js refs ---' && grep -rln '@supabase/supabase-js' . --include='*.ts' --include='*.tsx' --include='*.json' --exclude-dir=node_modules --exclude-dir=.next 2>&1 &&
-    echo '=== CLEANING ===' && rm -rf .next node_modules/.cache &&
-    echo '=== BUILDING ===' &&
+    set -e
+    echo '=== EVICTING STALE FILES FROM PRIOR DEPLOYS ==='
+    rm -rf lib/supabase.ts .env.local .env tsconfig.tsbuildinfo deno.lock .next .netlify/functions-internal .netlify/.next .netlify/blobs-internal node_modules/.cache .turbo
+    echo '=== STATE AFTER PURGE ==='
+    ls lib/ | head -20
+    echo '--- find supabase remnant ---'
+    find . -name 'supabase.ts' -not -path './node_modules/*' 2>&1
+    echo '=== BUILD ==='
     npm run build
   """
   publish = ".next"
