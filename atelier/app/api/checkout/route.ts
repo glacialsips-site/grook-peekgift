@@ -112,6 +112,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       success_url: `${env.APP_URL}/build/${peekId}/publish?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${env.APP_URL}/build/${peekId}`,
       metadata: { peek_id: peekId, curator_id: userId },
+      automatic_tax: { enabled: true },
+      tax_id_collection: { enabled: true },
+      billing_address_collection: 'auto',
+      customer_creation: 'always',
     });
     if (!session.url) {
       return Response.json(
