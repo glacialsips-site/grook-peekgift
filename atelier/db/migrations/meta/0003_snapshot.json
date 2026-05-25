@@ -1,6 +1,6 @@
 {
-  "id": "ee4208ff-66be-4cf8-98b7-120a735f2182",
-  "prevId": "5f7cb534-c9dc-452f-87f4-bd8d4bca03e0",
+  "id": "d84343bf-0ec1-4f8e-8999-8344fa82e79e",
+  "prevId": "ee4208ff-66be-4cf8-98b7-120a735f2182",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1204,6 +1204,103 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "peek_v2.chat_messages": {
+      "name": "chat_messages",
+      "schema": "peek_v2",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "peek_id": {
+          "name": "peek_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tool_call_id": {
+          "name": "tool_call_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "chat_messages_peek_id_idx": {
+          "name": "chat_messages_peek_id_idx",
+          "columns": [
+            {
+              "expression": "peek_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "chat_messages_created_at_idx": {
+          "name": "chat_messages_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "chat_messages_peek_id_peeks_id_fk": {
+          "name": "chat_messages_peek_id_peeks_id_fk",
+          "tableFrom": "chat_messages",
+          "tableTo": "peeks",
+          "schemaTo": "peek_v2",
+          "columnsFrom": [
+            "peek_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

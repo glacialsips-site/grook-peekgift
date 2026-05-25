@@ -2,6 +2,8 @@ import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { BuildSurface } from '@/components/build/build-surface';
+import type { InitialChatMessage } from '@/components/build/chat-pane';
+import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
 import type {
   Card,
   Peek,
@@ -167,5 +169,20 @@ export default async function BuildPeekPage({
       .sort((a, b) => a.position - b.position),
   };
 
-  return <BuildSurface peekId={peekId} initialDraft={initialDraft} />;
+  let initialHistory: InitialChatMessage[] = [];
+  try {
+    const persisted = await loadChatHistory(peekId);
+    initialHistory = serializeHistory(persisted) as InitialChatMessage[];
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[build/page] loadChatHistory failed', { peekId, message });
+  }
+
+  return (
+    <BuildSurface
+      peekId={peekId}
+      initialDraft={initialDraft}
+      initialHistory={initialHistory}
+    />
+  );
 }
