@@ -6,13 +6,18 @@
  * Order does not matter for correctness, but keep it alphabetical for diffs.
  */
 
+import './add_card';
+import './add_variant_group';
+import './generate_hero_image';
+import './mark_ready_for_publish';
 import './ping';
-// Future product tools land below (alphabetical):
-// import './add-card';
-// import './generate-hero';
-// import './scrape-url';
-// import './set-recipient';
-// import './set-rules';
-// import './set-vibe';
+import './remove_card';
+import './reorder_cards';
+import './scrape_url';
+import './set_hero_image';
+import './set_note';
+import './set_recipient';
+import './set_vibe';
+import './update_vibe';
 
 export {};
