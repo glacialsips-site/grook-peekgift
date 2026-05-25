@@ -10,7 +10,9 @@
 
 We're building the new peek.gift app at `atelier/` inside this repo. This packet creates the bare working Next.js 15 foundation that all subsequent packets (DB, Anthropic, Supabase, UI, Clerk, etc.) will build on top of. The existing app at the repo root is unrelated scrap and must not be touched.
 
-The `package.json` you create must include **every dependency the full build will need**, even if this packet doesn't use them. Later packets are forbidden from modifying `package.json` to keep merges conflict-free. The full dep list is given below — use it verbatim.
+The `package.json` you create must include **every dependency the full build will need**, even if this packet doesn't use them. Later packets are forbidden from modifying `package.json` to keep merges conflict-free.
+
+**Versioning rule (per STATE.md build principles): always latest stable.** The dep list below names the libraries; **resolve every version to the current latest stable at install time**. Do not use the version numbers shown — they're stale placeholders. If two libs have peer-dep conflicts, bump both to latest, not `--legacy-peer-deps`.
 
 ## Inputs
 
@@ -96,7 +98,7 @@ Create the following files inside `atelier/`. All paths below are relative to `a
 }
 ```
 
-Note: Tailwind v3 not v4 — v4 is still maturing for Next 15 App Router stable. Revisit later.
+Note: use Tailwind v4 (latest). It needs the `@tailwindcss/postcss` plugin in `postcss.config.mjs` and `@import "tailwindcss";` at the top of `globals.css` instead of the v3 `@tailwind base/components/utilities` directives. Theme tokens move to `@theme` blocks in CSS rather than `tailwind.config.ts` — keep `tailwind.config.ts` minimal (just `content` paths if needed at all; v4 prefers CSS-first config).
 
 ### `tsconfig.json`
 
@@ -283,8 +285,8 @@ export default function Home() {
 - **TypeScript strict.** No `any`. No `@ts-ignore`.
 - **Do not touch any files outside `atelier/`.** The repo root has unrelated scrap.
 - **Use the exact `package.json` above verbatim** — later packets depend on this dep set being locked.
-- **Tailwind v3** (not v4). Revisit later when v4 is stable for Next 15.
-- **No additional dependencies** beyond what's in package.json above.
+- **Tailwind v4** (latest).
+- **No additional dependencies** beyond what's in the package.json dep set.
 - **No comments** unless explaining a non-obvious WHY.
 - Use `pnpm`-compatible or `npm`-compatible install. We're on `npm`.
 

@@ -87,7 +87,7 @@ export function PeekVibeProvider({ vibe, children }: { vibe: Vibe; children: Rea
 
 ### `atelier/components/ui/*`
 
-Generate the standard shadcn/ui versions of these primitives (use the official source from https://ui.shadcn.com/ — copy verbatim, do not invent variants):
+Generate the latest **Tailwind v4-compatible** shadcn/ui versions of these primitives (use the current official source from https://ui.shadcn.com/ — the v4 release uses CSS-variable `@theme` blocks and `data-slot` attributes, not the older `cva` + `bg-background` patterns). Copy verbatim, do not invent variants:
 
 - `button.tsx` — with `cva` variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`; sizes `default`, `sm`, `lg`, `icon`.
 - `input.tsx`
@@ -105,7 +105,7 @@ All components use `cn` from `@/lib/utils`. All forward refs. All use the theme 
 
 ## Constraints
 
-- Do not modify `package.json`, `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, or anything outside `atelier/components/`.
+- Do not modify `package.json`, `app/layout.tsx`, or anything outside `atelier/components/`. You may add a small `@theme` extension to `app/globals.css` if shadcn-v4 components require additional CSS tokens — keep it minimal and additive.
 - Use only Radix primitives that are already in `package.json` (avatar, dialog, dropdown-menu, label, scroll-area, separator, slot, toast, tooltip). No new deps.
 - TS strict. Components are `'use client'` where they use hooks or interactivity; pure presentational ones can be server.
 - Match shadcn/ui's API surface exactly so consumers can copy idiomatic shadcn examples without translation.

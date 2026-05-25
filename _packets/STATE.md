@@ -6,12 +6,19 @@ _Last updated: 2026-05-25 by orchestrator_
 
 `/atelier/` inside this repo. Existing app at root = scrap, untouched.
 
+## Build principles (read first, apply everywhere)
+
+- **Always latest stable.** Every dep ships at its current latest. No version pinning for "compatibility." No `--legacy-peer-deps`. No `.npmrc` workarounds. If two libs disagree on peer versions, **bump both to latest** — newer of the two almost always solves it. If genuinely stuck, file a follow-up packet rather than pinning back.
+- **Newest patterns over familiar ones.** Tailwind v4 over v3, React 19 server components default, Next 16 conventions, ES2024+ syntax. The point of this rebuild is to be ahead, not safe.
+- **No backwards-compat shims.** No `// removed for X` placeholders, no kept-around-just-in-case exports, no fallback paths for old runtimes.
+- **Failures fix forward.** If a worker hits a wall, the fix is to upgrade or rewrite, not to downgrade or hedge.
+
 ## Locked decisions
 
 | Decision | Choice | Rationale |
 |---|---|---|
 | Framework | Next.js 15 App Router + React 19 + TS strict | Stack the user asked for; matches `app/` convention |
-| Styling | Tailwind v4 + shadcn/ui + Radix + Framer Motion | Adaptive theming requirement |
+| Styling | Tailwind v4 (latest) + shadcn/ui v4-compatible + Radix + Framer Motion | Adaptive theming requirement |
 | Auth | Clerk | Production keys already wired at `accounts.peek.gift` |
 | DB | Supabase Postgres + Drizzle ORM + pgvector | Schema `peek_v2` already exists |
 | AI | Anthropic SDK — streaming + tool use + prompt caching + vision | Core product |
