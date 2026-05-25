@@ -6,6 +6,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/g/(.*)',              // recipient pages — public by design
   '/api/webhooks/(.*)',   // signed webhooks
+  '/api/stripe/(.*)',     // signed Stripe webhooks
+  '/api/pick(.*)',        // recipient picks (HMAC-signed cookie auth, not Clerk)
   '/api/og/(.*)',         // public OG images
 ]);
 
