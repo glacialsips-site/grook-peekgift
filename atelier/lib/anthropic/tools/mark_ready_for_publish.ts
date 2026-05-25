@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { db } from '@/db/client';
-import { events } from '@/db/schema';
+import { track } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
 const InputSchema = z.object({});
@@ -22,11 +21,11 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     InputSchema.parse(input);
-    await db.insert(events).values({
+    await track({
+      name: 'peek_marked_ready',
+      peekId: ctx.peekId,
       userId: ctx.userId,
       sessionId: ctx.sessionId,
-      peekId: ctx.peekId,
-      kind: 'mark_ready',
       payload: {},
     });
     return { ok: true, next_step: 'paywall' };

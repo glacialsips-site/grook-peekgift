@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { db } from '@/db/client';
-import { events } from '@/db/schema';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
 const InputSchema = z.object({
@@ -32,11 +31,11 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
-    await db.insert(events).values({
+    trackFireAndForget({
+      name: 'scrape_url_requested',
+      peekId: ctx.peekId,
       userId: ctx.userId,
       sessionId: ctx.sessionId,
-      peekId: ctx.peekId,
-      kind: 'scrape_url_requested',
       payload: {
         url: parsed.url,
         note: 'scrape endpoint pending implementation in future packet',

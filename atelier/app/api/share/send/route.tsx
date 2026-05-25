@@ -6,6 +6,7 @@ import { requireUserId } from '@/lib/auth/server';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { sendEmail } from '@/lib/email/send';
 import { PeekShareMessageEmail } from '@/lib/email/templates/peek-share-message';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,30 +39,31 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
-async function recordShareSend(args: {
+function recordShareSend(args: {
   peekId: string;
   userId: string;
   channel: 'sms' | 'email';
   destination: string;
   outcome: 'sent' | 'failed' | 'not_configured';
   error?: string;
-}): Promise<void> {
-  try {
-    const db = getSupabaseService();
-    await db.from('events').insert({
-      peek_id: args.peekId,
-      user_id: args.userId,
-      kind: 'share_send',
-      payload: {
-        channel: args.channel,
-        destination: args.destination,
-        outcome: args.outcome,
-        error: args.error ?? null,
-      },
-    });
-  } catch {
-    /* noop */
-  }
+}): void {
+  trackFireAndForget({
+    name: 'share_send',
+    peekId: args.peekId,
+    userId: args.userId,
+    payload: {
+      channel: args.channel,
+      destination: args.destination,
+      outcome: args.outcome,
+      error: args.error ?? null,
+    },
+  });
+  trackFireAndForget({
+    name: 'share_initiated',
+    peekId: args.peekId,
+    userId: args.userId,
+    payload: { channel: args.channel },
+  });
 }
 
 async function sendSms(args: {
@@ -142,7 +144,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const body = lines.join('\n').trim();
     const result = await sendSms({ to: input.destination, body });
     if (!result.ok) {
-      await recordShareSend({
+      recordShareSend({
         peekId: peek.id,
         userId,
         channel: 'sms',
@@ -155,7 +157,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         result.error === 'sms_not_configured' ? 503 : 502,
       );
     }
-    await recordShareSend({
+    recordShareSend({
       peekId: peek.id,
       userId,
       channel: 'sms',
@@ -181,7 +183,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     ),
   });
   if (!result.ok) {
-    await recordShareSend({
+    recordShareSend({
       peekId: peek.id,
       userId,
       channel: 'email',
@@ -194,7 +196,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       result.error === 'email_not_configured' ? 503 : 502,
     );
   }
-  await recordShareSend({
+  recordShareSend({
     peekId: peek.id,
     userId,
     channel: 'email',

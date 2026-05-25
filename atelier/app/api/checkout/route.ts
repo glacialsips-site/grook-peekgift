@@ -4,6 +4,7 @@ import { getStripe, PAY_MODE } from '@/lib/stripe/client';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { getUserId } from '@/lib/auth/server';
+import { track } from '@/lib/analytics/facade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -84,10 +85,10 @@ export async function POST(req: NextRequest): Promise<Response> {
         { status: 500 },
       );
     }
-    await sb.from('events').insert({
-      user_id: userId,
-      peek_id: peekId,
-      kind: 'publish',
+    await track({
+      name: 'publish',
+      peekId,
+      userId,
       payload: { mock: true },
     });
     return Response.json({

@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
 const CardTypeSchema = z.enum([
@@ -137,6 +138,18 @@ registerTool<Input, Output>({
       .update(peeks)
       .set({ updatedAt: new Date() })
       .where(eq(peeks.id, ctx.peekId));
+
+    trackFireAndForget({
+      name: 'card_added',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+      payload: {
+        card_id: row.id,
+        card_type: parsed.type,
+        is_variant: parsed.variant_group_id !== undefined,
+      },
+    });
 
     return { ok: true, card_id: row.id, position: row.position };
   },
