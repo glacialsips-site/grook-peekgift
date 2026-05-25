@@ -9,6 +9,10 @@ import {
   assertPeekAccess,
   recordEvent,
 } from '@/lib/chat/session';
+import {
+  appendChatMessage,
+  loadChatHistory,
+} from '@/lib/chat/persistence';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
 
 export const runtime = 'nodejs';
@@ -73,8 +77,28 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
   }
 
-  const initialHistory = history as Anthropic.MessageParam[];
+  let initialHistory = history as Anthropic.MessageParam[];
+  if (initialHistory.length === 0) {
+    try {
+      const persisted = await loadChatHistory(peekId);
+      initialHistory = persisted
+        .filter((row) => row.role === 'user' || row.role === 'assistant')
+        .map((row) => ({
+          role: row.role as 'user' | 'assistant',
+          content: row.content as Anthropic.MessageParam['content'],
+        }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[chat] loadChatHistory failed', { peekId, message });
+    }
+  }
+
   const userInput = userMessage as string | Anthropic.ContentBlockParam[];
+  const userContent: Anthropic.ContentBlockParam[] =
+    typeof userInput === 'string'
+      ? [{ type: 'text', text: userInput }]
+      : userInput;
+
   const chosenModel = model ?? DEFAULT_MODEL;
 
   const stream = new ReadableStream<Uint8Array>({
@@ -104,15 +128,71 @@ export async function POST(req: NextRequest): Promise<Response> {
       const pendingToolNames = new Map<string, string>();
 
       try {
-        for await (const event of chatTurn({
+        await appendChatMessage({
+          peekId,
+          role: 'user',
+          content: userContent,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[chat] persist user message failed', {
+          peekId,
+          message,
+        });
+      }
+
+      try {
+        const turn = chatTurn({
           ctx: { peekId, userId, sessionId },
           history: initialHistory,
-          userMessage: userInput,
+          userMessage: userContent,
           model: chosenModel,
-          onToolResult: (id, _name, output) => {
+          onToolResult: async (id, _name, output) => {
             safeEnqueue({ kind: 'tool_result', id, output });
+            try {
+              await appendChatMessage({
+                peekId,
+                role: 'tool_result',
+                content: output,
+                toolCallId: id,
+              });
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              console.error('[chat] persist tool_result failed', {
+                peekId,
+                id,
+                message,
+              });
+            }
           },
-        })) {
+        });
+
+        while (true) {
+          const next = await turn.next();
+          if (next.done) {
+            const finalHistory = next.value.history;
+            const newAssistantTurns = finalHistory
+              .slice(initialHistory.length + 1)
+              .filter((m) => m.role === 'assistant');
+            for (const msg of newAssistantTurns) {
+              try {
+                await appendChatMessage({
+                  peekId,
+                  role: 'assistant',
+                  content: msg.content,
+                });
+              } catch (err) {
+                const message =
+                  err instanceof Error ? err.message : String(err);
+                console.error('[chat] persist assistant turn failed', {
+                  peekId,
+                  message,
+                });
+              }
+            }
+            break;
+          }
+          const event = next.value;
           switch (event.type) {
             case 'text_delta': {
               safeEnqueue({ kind: 'text', delta: event.text });
