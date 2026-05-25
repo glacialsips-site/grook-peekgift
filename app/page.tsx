@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+
+export const dynamic = 'force-dynamic';
 
 export default function Landing() {
   return (
@@ -8,18 +9,9 @@ export default function Landing() {
         <div className="font-display text-2xl tracking-tight">
           peek<span className="text-[var(--peek-accent)]">.</span>gift
         </div>
-        <div className="flex items-center gap-3">
-          <SignedIn>
-            <Link href="/dashboard" className="text-sm text-[var(--chrome-mute)] hover:text-white">
-              my peeks
-            </Link>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
-          <SignedOut>
-            <SignInButton mode="modal" forceRedirectUrl="/build">
-              <button className="text-sm text-[var(--chrome-mute)] hover:text-white">sign in</button>
-            </SignInButton>
-          </SignedOut>
+        <div className="flex items-center gap-3 text-sm text-[var(--chrome-mute)]">
+          <Link href="/dashboard" className="hover:text-white">my peeks</Link>
+          <Link href="/sign-in" className="hover:text-white">sign in</Link>
         </div>
       </header>
 
@@ -35,26 +27,17 @@ export default function Landing() {
 
         <p className="mt-6 text-base sm:text-xl text-[var(--chrome-mute)] max-w-xl leading-relaxed">
           two minutes of texting builds a custom gift page for one person —
-          things you found, things you'll do together, jokes, the one item they'd
-          never let you buy. they pick. you ship the truth.
+          things you found, things you&apos;ll do together, jokes, the one item
+          they&apos;d never let you buy. they pick. you ship the truth.
         </p>
 
         <div className="mt-10 flex flex-wrap gap-3 items-center">
-          <SignedOut>
-            <SignInButton mode="modal" forceRedirectUrl="/build">
-              <button className="rounded-full bg-[var(--peek-accent)] text-black px-7 py-3.5 text-base font-medium hover:opacity-90 transition">
-                start a peek &rarr;
-              </button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <Link
-              href="/build"
-              className="rounded-full bg-[var(--peek-accent)] text-black px-7 py-3.5 text-base font-medium hover:opacity-90 transition"
-            >
-              start a peek &rarr;
-            </Link>
-          </SignedIn>
+          <Link
+            href="/build"
+            className="rounded-full bg-[var(--peek-accent)] text-black px-7 py-3.5 text-base font-medium hover:opacity-90 transition"
+          >
+            start a peek &rarr;
+          </Link>
           <span className="text-xs text-[var(--chrome-mute)]">$12 once. no subs. no ads.</span>
         </div>
 
