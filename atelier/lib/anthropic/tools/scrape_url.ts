@@ -1,7 +1,9 @@
 import { z } from 'zod';
-import { scrapePipeline } from '@/lib/scrape/pipeline';
+import { db } from '@/db/client';
+import { cards } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
 import { trackFireAndForget } from '@/lib/analytics/facade';
+import { inngest } from '@/lib/inngest/client';
 import { registerTool } from './index';
 
 const InputSchema = z.object({
@@ -10,23 +12,13 @@ const InputSchema = z.object({
 type Input = z.infer<typeof InputSchema>;
 
 type Output =
-  | {
-      ok: true;
-      title: string;
-      description?: string;
-      image_url?: string;
-      value_cents?: number;
-      source_retailer?: string;
-      source_url: string;
-      affiliate_url?: string;
-      affiliate_network?: 'skimlinks' | 'sovrn' | 'direct';
-    }
+  | { ok: true; card_id: string; pending: true; affiliate_url?: string; affiliate_network?: 'skimlinks' | 'sovrn' | 'direct' }
   | { ok: false; error: string };
 
 registerTool<Input, Output>({
   name: 'scrape_url',
   description:
-    "Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer. Returns fields you can pass directly into add_card (including source_url so we can affiliate-wrap on insert) plus an affiliate_url that's already commission-wrapped. Returns { ok: false, error } if the URL can't be fetched or no product can be extracted.",
+    'Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer. Inserts a placeholder card immediately (already affiliate-wrapped) and queues the scrape — the card hydrates in-place when the worker resolves. Returns the card_id so you can refer to it later.',
   input_schema: {
     type: 'object',
     properties: {
@@ -49,52 +41,55 @@ registerTool<Input, Output>({
       payload: { url: parsed.url },
     });
 
-    const outcome = await scrapePipeline(parsed.url);
-    if (!outcome.ok) {
+    const inserted = await db
+      .insert(cards)
+      .values({
+        peekId: ctx.peekId,
+        type: 'product',
+        title: 'Scraping…',
+        sourceUrl: parsed.url,
+        affiliateUrl: wrapped.wrappedUrl,
+        affiliateNetwork: wrapped.network,
+        commissionPct:
+          wrapped.commissionPctEstimate != null
+            ? wrapped.commissionPctEstimate.toString()
+            : null,
+        addedByUserId: ctx.userId,
+        metadata: { pending: true, scrapeUrl: parsed.url },
+      })
+      .returning({ id: cards.id });
+
+    const placeholder = inserted[0];
+    if (!placeholder) {
+      return { ok: false, error: 'card_insert_failed' };
+    }
+
+    try {
+      await inngest.send({
+        name: 'peek/scrape.requested',
+        data: {
+          peekId: ctx.peekId,
+          url: parsed.url,
+          placeholderCardId: placeholder.id,
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'unknown';
       trackFireAndForget({
         name: 'scrape_complete',
         peekId: ctx.peekId,
         userId: ctx.userId,
         sessionId: ctx.sessionId,
-        payload: { url: parsed.url, ok: false, error: outcome.error },
+        payload: { url: parsed.url, ok: false, error: `dispatch_failed: ${message}` },
       });
-      return { ok: false, error: outcome.error };
     }
 
-    trackFireAndForget({
-      name: 'scrape_complete',
-      peekId: ctx.peekId,
-      userId: ctx.userId,
-      sessionId: ctx.sessionId,
-      payload: {
-        url: parsed.url,
-        ok: true,
-        provider: outcome.provider,
-        product: outcome.product as unknown as Record<string, unknown>,
-        affiliate_url: wrapped.wrappedUrl,
-        affiliate_network: wrapped.network,
-      },
-    });
-
-    const result: Output = {
+    return {
       ok: true,
-      title: outcome.product.title,
-      source_url: parsed.url,
+      card_id: placeholder.id,
+      pending: true,
       affiliate_url: wrapped.wrappedUrl,
       affiliate_network: wrapped.network,
     };
-    if (outcome.product.description !== undefined) {
-      result.description = outcome.product.description;
-    }
-    if (outcome.product.imageUrl !== undefined) {
-      result.image_url = outcome.product.imageUrl;
-    }
-    if (outcome.product.valueCents !== undefined) {
-      result.value_cents = outcome.product.valueCents;
-    }
-    if (outcome.product.sourceRetailer !== undefined) {
-      result.source_retailer = outcome.product.sourceRetailer;
-    }
-    return result;
   },
 });

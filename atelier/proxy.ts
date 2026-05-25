@@ -10,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/pick(.*)',        // recipient picks (HMAC-signed cookie auth, not Clerk)
   '/api/og/(.*)',         // public OG images
   '/api/posthog/(.*)',    // PostHog reverse proxy
+  '/api/inngest(.*)',     // Inngest signs every invocation
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

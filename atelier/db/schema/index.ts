@@ -8,3 +8,4 @@ export * from './relationships';
 export * from './events';
 export * from './affiliate_revenue';
 export * from './chat_history';
+export * from './webhook_log';
