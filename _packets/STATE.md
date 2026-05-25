@@ -1,13 +1,35 @@
 # STATE — live build status
 
-_Last updated: 2026-05-25 by orchestrator (post batch-1 integration)_
+_Last updated: 2026-05-25 by cloud worker (post batch-2A dispatch)_
+
+## READ FIRST — Worker feedback from batch 2A (before drafting next batch)
+
+Batch 2A landed 07, 10, 11, 12 (08, 09, 13 explicitly deferred by user). All four branches pushed, each typecheck+build green standalone. Things the next-batch drafter NEEDS to know:
+
+### Schema-fix packet is now blocking three flows. Draft it next.
+
+Three independent gaps in `db/schema/peeks.ts` surfaced across packets 10, 11, 12:
+
+1. **`peeks.curator_id` is `NOT NULL`** → anonymous-curator flow can't write a draft Peek. Packet 12 redirects anon users to sign-in as a workaround. Packet 10 wrote the access-check code to handle null curator + `metadata.anonymous_session_id` but it fails closed until the schema lights up.
+2. **`peeks.metadata` jsonb column doesn't exist** → packet 10's anon access predicate (`metadata->>'anonymous_session_id' = sessionId`) and packet 12's anon draft creation both reference it. Add as `jsonb default '{}' not null`.
+3. **`peeks.vibe` is typed as `{ palette: string[], font_pairing: string }`** but packets 11 + 12 + 05's `<PeekVibeProvider>` all use the richer `{ palette: { bg, surface, ink, accent, accent2? }, font_pairing: { display, body }, tone, mood_words, motion }` shape. Packet 11 casts via `as unknown as Vibe` since jsonb is permissive. Relax the type to a proper schema match.
+
+All three fit one packet: a Drizzle migration + schema-file edit. Sequencing: must land before integration if you want any of 10/11/12's anon paths to function. Doesn't block sign-in flow.
+
+### Other notable signals
+
+- **`.gitignore` foot-gun.** `atelier/.gitignore` (from packet 01) has `build/` which globs and masks `app/build/` and `components/build/`. Packet 12 worked around with `!app/build/`, `!components/build/`, `!lib/peek/` negations. Cleaner long-term: change `atelier/.gitignore`'s `build/` → `/build/` (root-only). Schedule as a one-line cleanup or fold into the next foundation tweak.
+- **`chatTurn` helper doesn't expose tool outputs.** Packet 10 had to bypass `chatTurn` and re-implement the agent loop inline so the SSE stream could emit `tool_result` events to the client. Worth refactoring `chatTurn` (packet 03) to accept an `onToolResult` callback, then packet 10 can use it. Otherwise the inline loop and `chatTurn` will drift.
+- **`SseEvent` union is defined twice.** Once in `app/api/chat/schema.ts` (packet 10) and once in `lib/peek/types.ts` (packet 12) because packet 12's client can't import server-only schema. Move to a shared `lib/chat/sse-types.ts` (no `server-only` import) and both sides re-export. Small follow-up packet.
+- **fal.ai endpoint shape is assumed.** Packet 11's `generate_hero_image` calls `https://fal.run/fal-ai/flux/schnell` with `image_size: 'landscape_16_9' | …` and expects `{ images: [{ url, content_type }] }`. Worker hasn't verified against current fal docs. Packet 14 (image gen pipeline) should confirm + harden.
+- **Image upload, chat history persistence, mobile slide-up preview** were cut from packet 12 for scope. The file-picker is a stub; chat history is local state only (Peek doc is the durable surface); the preview is a binary chat/preview pill instead of a slide-up sheet. Worth a separate "12-followup" packet OR fold into 13/14.
+- **camelCase ↔ snake_case mapping** lives ad-hoc in `lib/peek/realtime.ts` and `app/build/[peekId]/page.tsx`. A central mapper (or just standardizing on one casing) would reduce drift.
 
 ## Where we are
 
-- **Trunk:** `atelier-integration` (this branch). Build green end-to-end as of `f403f22`.
-- **Packets 01-06 integrated**: foundation, schema, anthropic client, supabase clients, UI primitives, Clerk routes/webhook. Each ran clean on `npm run build`.
-- **Worker (cc-on-web) left a comprehensive handoff** in the previous version of this file — every item resolved or scheduled below. Excellent work; future workers should aim for the same NOTES discipline.
-- **Netlify** still points at the legacy site. Promotion of `atelier-integration` → deploy target = packet 09 (below).
+- **Trunk:** `atelier-integration` (this branch). Build green through batch 1 (`f403f22`); batch 2A branches pushed but NOT yet integrated.
+- **Packets 01-06 integrated.** Packets 07 / 10 / 11 / 12 pushed as separate branches awaiting integration.
+- **Netlify** still points at the legacy site. Promotion of `atelier-integration` → deploy target = packet 09 (orchestrator-owned per user).
 
 ## Build target
 
@@ -89,17 +111,25 @@ _Last updated: 2026-05-25 by orchestrator (post batch-1 integration)_
 | 05 | UI primitives | `claude/packet-05-ui` | `080f455` | shadcn v4 + `@theme inline`; classic `forwardRef` for copy-paste compatibility |
 | 06 | Clerk | `claude/packet-06-clerk` | `97f75db` | Inline stub replaced at integration with `@/lib/supabase/service` import |
 
-### Batch 2 — DRAFTING NEXT
+### Batch 2A — DONE (pushed, awaiting integration)
+
+| # | Title | Branch | Notes |
+|---|---|---|---|
+| 07 | Rename `middleware.ts` → `proxy.ts` (Next 16) | `claude/packet-07-proxy-rename` | Pure rename; build green, deprecation warning gone (route table shows `ƒ Proxy (Middleware)`) |
+| 10 | Chat API route (`/api/chat`): streaming Claude + tool-use loop | `claude/packet-10-chat-api` | Typecheck + build both green; SSE format `event: <kind>\ndata: <SseEvent JSON>\n\n`; inline tool loop (not `chatTurn`) so `tool_result` events emit; anon path blocked on schema-fix |
+| 11 | Tool implementations (13 verbs) | `claude/packet-11-tools` | All 13 verbs registered: `set_recipient`, `set_vibe`, `update_vibe`, `set_hero_image`, `generate_hero_image`, `set_note`, `add_variant_group`, `add_card`, `remove_card`, `reorder_cards`, `scrape_url`, `mark_ready_for_publish` (+ existing `ping`); typecheck + build green; vibe shape mismatch worked around via jsonb cast |
+| 12 | Chat UI shell + live preview pane (mobile-first) | `claude/packet-12-chat-ui` | All 7 files; manual SSE parser (EventSource can't POST); typecheck + build green; image upload + chat history persistence + slide-up sheet cut for scope (see worker feedback) |
+
+### Batch 2B — DEFERRED / DRAFTING
 
 | # | Title | Imports from siblings | Status |
 |---|---|---|---|
-| 07 | Rename `middleware.ts` → `proxy.ts` (Next 16) | none | TBD draft |
-| 08 | Sentry re-add: instrumentation + tunnel + Netlify env wiring | `@/lib/env` | TBD draft |
-| 09 | Netlify deploy plumbing: `netlify.toml`, base dir `atelier/`, env-var sync via MCP, `atelier-integration` → preview deploy | none | TBD draft (orchestrator may execute self) |
-| 10 | Chat API route (`/api/chat`): streaming Claude turn, tool dispatch via packet 03 registry, persists events | `@/lib/anthropic`, `@/lib/supabase/service`, `@/lib/auth/server`, `db/schema/events` | TBD draft |
-| 11 | Tool implementations (set_recipient / set_vibe / set_hero_image / generate_hero_image / set_note / add_card / scrape_url / add_variant_group / mark_ready) — **and `update_vibe` for progressive evolution** | packet 02 schema, packet 04 supabase, `@/lib/anthropic/tools` registry | TBD draft |
-| 12 | Chat UI shell + live preview pane (mobile-first split, slide-up on small) | `@/lib/anthropic`, `@/components/ui/*`, `@/components/peek-vibe-provider` | TBD draft |
-| 13 | Vibe engine: progressive re-evaluation on every new signal (turn / image / card / note); palette extraction from hero image; tone classifier | packet 11 tools, packet 12 UI | TBD draft |
+| 08 | Sentry re-add: instrumentation + tunnel + Netlify env wiring | `@/lib/env` | Deferred — wait until runtime traffic exists |
+| 09 | Netlify deploy plumbing | none | Orchestrator owns; via MCP after chat works end-to-end |
+| 12.5 | **Schema-fix** (NEW — recommended next): `peeks.curator_id` nullable, add `peeks.metadata` jsonb, relax `peeks.vibe` type | none (schema only) | **READY TO DRAFT** — unblocks anon flow + cleans up jsonb casts |
+| 12.6 | **chatTurn refactor** (NEW — optional): add `onToolResult` callback so packet 10 can use the helper instead of inline loop | `@/lib/anthropic/chat` | small follow-up |
+| 12.7 | **Shared `SseEvent` type** (NEW — optional): move to `lib/chat/sse-types.ts`, both API + UI re-export | none | trivial |
+| 13 | Vibe engine: progressive re-evaluation + palette extraction from hero | packet 11 tools, packet 12 UI | Deferred per user — `update_vibe` verb already wired; defer until chat flow runs end-to-end |
 | 14 | Image gen via fal.ai Flux + hero image upload pipeline | `@/lib/supabase/storage`, `@/lib/env` | TBD draft |
 | 15 | Recipient view `/g/[slug]` + cinematic reveal + picks API | packet 02 schema, packet 04 supabase, packet 05 UI, packet 13 vibe | TBD draft |
 | 16 | Stripe checkout: $12 publish gate + webhook → mark `peeks.status = published` | packet 02 schema, packet 04 supabase, `@/lib/env` | TBD draft |
@@ -120,8 +150,9 @@ _Last updated: 2026-05-25 by orchestrator (post batch-1 integration)_
 
 ## Things the orchestrator owes
 
-- Draft packets 07-10 next, dispatch.
-- Netlify: switch `peek-gift-vnext` site's base dir to `atelier/`, sync env vars from production `peek-gift` site via MCP, set up branch-deploy for `atelier-integration`.
+- **Integrate batch 2A** (07, 10, 11, 12) into `atelier-integration`. Recommended order: 07 (rename — no conflicts) → 11 (tools — registers handlers) → 10 (chat API — consumes registered handlers) → 12 (UI — consumes API). Run `cd atelier && npm install && npm run build` after each merge.
+- **Draft + dispatch packet 12.5 (schema-fix).** Three columns to fix in one migration (see Worker feedback section). Worker can execute.
+- **Netlify**: switch `peek-gift-vnext` site's base dir to `atelier/`, sync env vars from production `peek-gift` site via MCP, set up branch-deploy for `atelier-integration`.
 
 ## Container restart recovery
 
