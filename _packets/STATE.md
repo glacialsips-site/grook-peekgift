@@ -1,10 +1,83 @@
 # STATE — live build status
 
-_Last updated: 2026-05-25 by cloud worker (post batch-2B dispatch — all 5 branches pushed, awaiting integration)_
+_Last updated: 2026-05-25 by cloud worker (post packet 18 + Stripe live wiring)_
 
-## READ FIRST — Worker feedback from batch 2B (before drafting next batch)
+## READ FIRST — packet 18 done, site live, Stripe live, push-to-deploy wired
 
-All 5 packets (13, 14, 15, 16, 17) pushed clean, each green standalone. Integration order per orchestrator: **13 first** (schema unblocks anon flow + Vibe type), then 14/15/16/17 in any order.
+`https://peek-gift-vnext.netlify.app/` is serving the atelier app end-to-end. Branch `atelier-integration` head: `5830742` ish (whatever the latest is after the proxy.ts fix). All batch 2B is integrated. Packet 18 (deploy-fix) merged with three real fixes baked in:
+
+1. **`<ClerkProvider>` added to `app/layout.tsx`** — was missing; packet 06 had deferred it to an "integration packet" that never landed; signed-in routes throw `useSession can only be used within <ClerkProvider>` without it.
+2. **`peek_v2` PostgREST schema-exposure migration** (`atelier/db/migrations/0002_schema_exposure.sql`) — adds `peek_v2` to `pgrst.db_schemas` GUC + all role grants + default privileges. Idempotent. Already applied on the live DB via SQL during this session; future fresh DBs / branches will get it via `db:migrate`.
+3. **`proxy.ts` public-routes list** — added `/api/stripe/(.*)` and `/api/pick(.*)`. Stripe webhooks + recipient picks use signature/HMAC auth, not Clerk sessions; gating them via `clerkMiddleware` rewrites them to 404 for unauthenticated callers.
+
+### Stripe / Tax: now LIVE
+
+- `PAY_MODE=live` on Netlify (no longer mock).
+- New webhook endpoint `we_1Tb7PhCEKPUsVee1Jz6Kcxkb` → `https://peek-gift-vnext.netlify.app/api/stripe/webhook`, listening on `checkout.session.completed`. Signing secret in Netlify as `STRIPE_WEBHOOK_SECRET` (production + previews + dev + branch-deploy contexts, secret). Legacy webhook `we_1TRbB2CEKPUsVee1Qh084LCz` → `peek.gift/api/payment-webhook` left untouched.
+- Stripe Tax was **already active** on the account (default tax code `txcd_10000000`, head office in NJ). The `automatic_tax: { enabled: true }` flip from earlier session works at runtime — no separate activation needed. Stripe Adaptive Pricing also already on.
+- Stripe webhook endpoint, env var, and code-level `automatic_tax` are all wired via direct API calls (Stripe MCP doesn't expose webhook ops, but `api.stripe.com` is reachable with the live `STRIPE_SECRET_KEY`).
+
+### Supabase keys: now on modern format
+
+- `SUPABASE_SERVICE_ROLE_KEY` on Netlify is now a fresh `sb_secret_*` (not the legacy JWT). Created in Supabase Dashboard, set via Netlify API with per-context values (Netlify rejects `is_secret: true` + `context: all`; need explicit production/deploy-preview/branch-deploy/dev).
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` already on `sb_publishable_*` format.
+- Legacy JWT keys still active on the project because the **legacy `peek.gift` Vite site uses them**. Do NOT click "Disable JWT-based API keys" until the legacy site is decommissioned / cut over.
+
+### Netlify push-to-deploy: working via GitHub Actions + build hook
+
+- Netlify GitHub App is NOT installed (user's Netlify account only has Google OAuth, not GitHub OAuth — `installation_id: null` on the site). Repo is linked via deploy key only (`deploy_key_id: 6a14c8849db1b236675f107f`, public key added to GitHub repo as a deploy key).
+- Push-to-deploy wired through a workaround: `.github/workflows/netlify-deploy.yml` calls Netlify build hook `https://api.netlify.com/build_hooks/6a14cf135c167288ad60f6a9?trigger_branch=atelier-integration` on every push to `atelier-integration`. Verified end-to-end.
+- If the user wants the canonical Netlify GitHub App path later, they can install it at `https://github.com/apps/netlify/installations/new` and the Actions workflow becomes a no-op (build hook still works as a backup).
+
+### What's deployed (11 routes)
+
+`/`, `/api/chat`, `/api/checkout`, `/api/pick`, `/api/share/send`, `/api/stripe/webhook`, `/api/webhooks/clerk`, `/build`, `/build/[peekId]`, `/build/[peekId]/publish`, `/build/[peekId]/publish/share`, `/g/[slug]`, `/g/[slug]/opengraph-image`, `/sign-in/[[...rest]]`, `/sign-up/[[...rest]]`. `proxy.ts` (Next 16) deprecation-warning-free.
+
+### Smoke (all green)
+
+| Route | Status | Notes |
+|---|---|---|
+| `/` | 200 | atelier landing |
+| `/sign-up` | 200 | Clerk SignUp renders |
+| `/sign-in` | 200 | Clerk SignIn renders |
+| `/api/chat` POST unauth | 404 (via Clerk `auth.protect` rewrite) | redirects browsers to sign-in |
+| `/api/checkout` POST unauth | 404 (Clerk rewrite) | same |
+| `/g/[slug]` unknown slug | 404 (`notFound()`) | was 500 before schema-exposure fix |
+| `/api/webhooks/clerk` no sig | 400 "missing svix headers" | Svix sig validation working |
+| `/api/stripe/webhook` no sig | 400 "missing signature" | Stripe sig validation working |
+| `/api/stripe/webhook` bad sig | 400 "invalid signature: No signatures found matching..." | Stripe SDK validates against real secret |
+
+### Suggested follow-up packets (carryovers + new from this session)
+
+In priority order:
+
+1. **20 — image upload + chat history persistence + mobile slide-up preview** (originally cut from packet 12 for scope). This is what unblocks the actual user flow end-to-end. Highest priority for real product.
+2. **18-followup-A — `app/build/[peekId]/page.tsx:68` `as Vibe` cast removal** (packet 17 couldn't reach it). One-line code touch.
+3. **18-followup-B — `publish-cta.tsx` relocation** from `app/build/[peekId]/publish/` to `components/build/` (packet 15 colocation deviation).
+4. **21 — Vibe engine** progressive palette extraction from hero + tone classifier.
+5. **22 — fal.ai image gen pipeline harden** — verify endpoint shape, full flow including upload to Supabase Storage.
+6. **23 — Group co-curation** — collaborators API + invite-link flow + role-gated tools.
+7. **24 — Affiliate link layer** — Skimlinks/Sovrn outbound wrap + `affiliate_revenue` webhook.
+8. **25 — Analytics instrumentation** — PostHog server+client + LLM observability + own events writer.
+9. **26 — Inngest functions** — birthday/anniversary nudges + scrape queue + retry policies.
+10. **27 — Social outbound** — Ayrshare/Buffer adapter + generated reels job.
+11. **29 — Share-sheet brand-icon polish** — replace inline SVGs once a brand-icon dep is added.
+12. **30 — Single-fire `turn_end` SSE event** — currently fires per inner-loop iteration.
+13. **08 — Sentry re-add** — deferred until runtime traffic exists (live now, can land any time).
+
+### Stripe Dashboard nice-to-have (not required)
+
+Set product `prod_UZzXnuYuX4ud15` tax_code from default `txcd_10000000` ("General — Service") to `txcd_10103001` ("Digital services — general") for cleaner per-jurisdiction handling. Dashboard → Products. Optional.
+
+### peek.gift cutover plan (when ready)
+
+Three edits and you're cut over:
+
+1. Add `peek.gift` as a custom domain on this Netlify site (Dashboard → Domain management). Same site, no rebuild.
+2. Update existing Clerk webhook URL from `peek-gift-vnext.netlify.app/api/webhooks/clerk` to `peek.gift/api/webhooks/clerk` (single field; signing secret stays).
+3. Update Stripe webhook `we_1Tb7PhCEKPUsVee1Jz6Kcxkb` URL from `peek-gift-vnext.netlify.app/api/stripe/webhook` to `peek.gift/api/stripe/webhook` (single field; signing secret stays).
+4. Update `APP_URL` env var on Netlify from `https://peek-gift-vnext.netlify.app` to `https://peek.gift`.
+5. Once legacy peek-gift Vite site is fully decommissioned (no longer serving anyone), THEN you can click "Disable JWT-based API keys" in Supabase Dashboard to drop the legacy auth path.
 
 ### Integration gotchas to land cleanly
 
