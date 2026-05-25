@@ -51,6 +51,8 @@ const schema = z.object({
   INNGEST_SIGNING_KEY: z.string().optional(),
 
   SKIMLINKS_PUBLISHER_ID: z.string().optional(),
+  SKIMLINKS_WEBHOOK_SECRET: z.string().optional(),
+  SOVRN_API_KEY: z.string().optional(),
   TOLT_API_KEY: z.string().optional(),
 
   GUEST_CLAIM_TOKEN_SECRET: z.string().optional()

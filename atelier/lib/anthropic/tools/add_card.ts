@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
+import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
 import { registerTool } from './index';
 
 const CardTypeSchema = z.enum([
@@ -108,6 +109,10 @@ registerTool<Input, Output>({
       ? (parsed.unlock_rule as UnlockRule)
       : {};
 
+    const wrapped = parsed.source_url
+      ? wrapAffiliateLink(parsed.source_url, buildClickCustomId(ctx.peekId))
+      : null;
+
     const [row] = await db
       .insert(cards)
       .values({
@@ -120,6 +125,12 @@ registerTool<Input, Output>({
         imageUrl: parsed.image_url ?? null,
         sourceUrl: parsed.source_url ?? null,
         sourceRetailer: parsed.source_retailer ?? null,
+        affiliateUrl: wrapped?.wrappedUrl ?? null,
+        affiliateNetwork: wrapped?.network ?? null,
+        commissionPct:
+          wrapped?.commissionPctEstimate != null
+            ? wrapped.commissionPctEstimate.toString()
+            : null,
         valueCents: parsed.value_cents ?? null,
         revealValue: parsed.reveal_value ?? false,
         isTaunt: parsed.is_taunt ?? false,
@@ -132,6 +143,17 @@ registerTool<Input, Output>({
       })
       .returning({ id: cards.id, position: cards.position });
     if (!row) throw new Error('failed to insert card');
+
+    if (wrapped && parsed.source_url && row.id) {
+      const refinedCustomId = buildClickCustomId(ctx.peekId, row.id);
+      const refined = wrapAffiliateLink(parsed.source_url, refinedCustomId);
+      if (refined.wrappedUrl !== wrapped.wrappedUrl) {
+        await db
+          .update(cards)
+          .set({ affiliateUrl: refined.wrappedUrl })
+          .where(eq(cards.id, row.id));
+      }
+    }
 
     await db
       .update(peeks)

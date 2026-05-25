@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { db } from '@/db/client';
 import { events } from '@/db/schema';
 import { scrapePipeline } from '@/lib/scrape/pipeline';
+import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
 import { registerTool } from './index';
 
 const InputSchema = z.object({
@@ -18,13 +19,15 @@ type Output =
       value_cents?: number;
       source_retailer?: string;
       source_url: string;
+      affiliate_url?: string;
+      affiliate_network?: 'skimlinks' | 'sovrn' | 'direct';
     }
   | { ok: false; error: string };
 
 registerTool<Input, Output>({
   name: 'scrape_url',
   description:
-    "Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer. Returns fields you can pass directly into add_card (including source_url so we can affiliate-wrap on insert). Returns { ok: false, error } if the URL can't be fetched or no product can be extracted.",
+    "Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer. Returns fields you can pass directly into add_card (including source_url so we can affiliate-wrap on insert) plus an affiliate_url that's already commission-wrapped. Returns { ok: false, error } if the URL can't be fetched or no product can be extracted.",
   input_schema: {
     type: 'object',
     properties: {
@@ -34,6 +37,10 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+    const wrapped = wrapAffiliateLink(
+      parsed.url,
+      buildClickCustomId(ctx.peekId),
+    );
 
     await db.insert(events).values({
       userId: ctx.userId,
@@ -65,6 +72,8 @@ registerTool<Input, Output>({
         ok: true,
         provider: outcome.provider,
         product: outcome.product,
+        affiliate_url: wrapped.wrappedUrl,
+        affiliate_network: wrapped.network,
       },
     });
 
@@ -72,6 +81,8 @@ registerTool<Input, Output>({
       ok: true,
       title: outcome.product.title,
       source_url: parsed.url,
+      affiliate_url: wrapped.wrappedUrl,
+      affiliate_network: wrapped.network,
     };
     if (outcome.product.description !== undefined) {
       result.description = outcome.product.description;
