@@ -1,3 +1,15 @@
+# Build runs AFTER @netlify/plugin-nextjs restores .next/cache from the persistent
+# build cache. We nuke .next entirely so stale webpack / tsbuildinfo from previous
+# builds (when the source tree included files we've since deleted, e.g.
+# lib/supabase.ts) can't influence the typecheck. Costs us a clean rebuild every
+# deploy; the trade-off is determinism.
 [build]
-  command = "npm run build"
+  command = "rm -rf .next node_modules/.cache && npm run build"
   publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Belt-and-suspenders: tell Next.js's webpack to skip filesystem cache too.
+  NEXT_PRIVATE_STANDALONE = "false"
