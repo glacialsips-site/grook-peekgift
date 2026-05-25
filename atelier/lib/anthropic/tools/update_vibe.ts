@@ -80,7 +80,7 @@ registerTool<Input, Output>({
     await db
       .update(peeks)
       .set({
-        vibe: next as unknown as Vibe,
+        vibe: next,
         updatedAt: new Date(),
       })
       .where(eq(peeks.id, ctx.peekId));
