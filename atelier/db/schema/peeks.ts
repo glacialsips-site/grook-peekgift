@@ -10,18 +10,43 @@ export const peekStatus = peekV2.enum('peek_status', [
   'archived',
 ]);
 
-export type Vibe = {
+export type VibeSignalSource =
+  | 'curator'
+  | 'hero_palette'
+  | 'tone_classifier'
+  | 'card_mix';
+
+export type VibePalette = {
+  bg: string;
+  surface: string;
+  ink: string;
+  accent: string;
+  accent2?: string;
+};
+
+export type VibeMotion = 'still' | 'soft' | 'lively';
+
+export type VibePreset = 'playful' | 'romantic' | 'dry' | 'unhinged' | 'tender';
+
+export type VibeFontPairing = { display: string; body: string };
+
+export type VibeCore = {
+  preset?: VibePreset;
   tone?: string;
-  palette?: {
-    bg: string;
-    surface: string;
-    ink: string;
-    accent: string;
-    accent2?: string;
-  };
+  palette?: VibePalette;
   mood_words?: string[];
-  motion?: 'still' | 'soft' | 'lively';
-  font_pairing?: { display: string; body: string };
+  motion?: VibeMotion;
+  font_pairing?: VibeFontPairing;
+};
+
+export type VibeSignalSourceEntry = {
+  source: VibeSignalSource;
+  ts: string;
+  patch: Partial<VibeCore>;
+};
+
+export type Vibe = VibeCore & {
+  signal_source_history?: VibeSignalSourceEntry[];
 };
 
 export const peeks = peekV2.table(

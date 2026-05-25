@@ -1,20 +1,40 @@
 import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from '@/db/client';
-import { peeks, type Vibe } from '@/db/schema';
+import {
+  peeks,
+  type Vibe,
+  type VibeCore,
+  type VibeSignalSource,
+  type VibeSignalSourceEntry,
+} from '@/db/schema';
 import { registerTool } from './index';
-import { VibeInputSchema, type StoredVibe } from './set_vibe';
+import { VibeInputSchema } from './set_vibe';
 
-type Input = import('zod').infer<typeof VibeInputSchema>;
+const SignalSourceSchema = z.enum([
+  'curator',
+  'hero_palette',
+  'tone_classifier',
+  'card_mix',
+]);
+
+export const UpdateVibeInputSchema = VibeInputSchema.extend({
+  signal_source: SignalSourceSchema.optional(),
+});
+
+type Input = z.infer<typeof UpdateVibeInputSchema>;
 
 interface Output {
   ok: true;
-  vibe: StoredVibe;
+  vibe: Vibe;
 }
+
+const HISTORY_LIMIT = 10;
 
 registerTool<Input, Output>({
   name: 'update_vibe',
   description:
-    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Never re-sends fields you do not want to change.',
+    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Never re-sends fields you do not want to change. signal_source defaults to "curator" — pass another value only when relaying an upstream auto-classifier signal.',
   input_schema: {
     type: 'object',
     properties: {
@@ -50,11 +70,15 @@ registerTool<Input, Output>({
         },
         required: ['display', 'body'],
       },
+      signal_source: {
+        type: 'string',
+        enum: ['curator', 'hero_palette', 'tone_classifier', 'card_mix'],
+      },
     },
     required: [],
   },
   handler: async (input, ctx): Promise<Output> => {
-    const parsed = VibeInputSchema.parse(input);
+    const parsed = UpdateVibeInputSchema.parse(input);
     const [existing] = await db
       .select({ vibe: peeks.vibe })
       .from(peeks)
@@ -62,9 +86,8 @@ registerTool<Input, Output>({
       .limit(1);
     if (!existing) throw new Error(`peek ${ctx.peekId} not found`);
 
-    const current = (existing.vibe ?? {}) as unknown as StoredVibe;
-    const next: StoredVibe = {
-      ...current,
+    const current = (existing.vibe ?? {}) as Vibe;
+    const patch: Partial<VibeCore> = {
       ...(parsed.preset !== undefined ? { preset: parsed.preset } : {}),
       ...(parsed.tone !== undefined ? { tone: parsed.tone } : {}),
       ...(parsed.palette !== undefined ? { palette: parsed.palette } : {}),
@@ -75,6 +98,22 @@ registerTool<Input, Output>({
       ...(parsed.font_pairing !== undefined
         ? { font_pairing: parsed.font_pairing }
         : {}),
+    };
+
+    const source: VibeSignalSource = parsed.signal_source ?? 'curator';
+    const history = current.signal_source_history ?? [];
+    const nextHistory: VibeSignalSourceEntry[] =
+      Object.keys(patch).length > 0
+        ? [
+            ...history,
+            { source, ts: new Date().toISOString(), patch },
+          ].slice(-HISTORY_LIMIT)
+        : history;
+
+    const next: Vibe = {
+      ...current,
+      ...patch,
+      signal_source_history: nextHistory,
     };
 
     await db

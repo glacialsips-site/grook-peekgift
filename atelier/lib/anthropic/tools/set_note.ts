@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks } from '@/db/schema';
+import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
 const InputSchema = z.object({
@@ -39,6 +40,12 @@ registerTool<Input, Output>({
       .where(eq(peeks.id, ctx.peekId))
       .returning({ noteMd: peeks.noteMd });
     if (!row) throw new Error(`peek ${ctx.peekId} not found`);
+
+    scheduleEvolveVibe(ctx.peekId, {
+      kind: 'note',
+      text: parsed.note_md,
+    });
+
     return { ok: true, note_md: row.noteMd ?? parsed.note_md };
   },
 });

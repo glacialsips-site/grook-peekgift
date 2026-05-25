@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
+import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
 const CardTypeSchema = z.enum([
@@ -159,6 +160,17 @@ registerTool<Input, Output>({
       .update(peeks)
       .set({ updatedAt: new Date() })
       .where(eq(peeks.id, ctx.peekId));
+
+    const recent = await db
+      .select({ type: cards.type, isTaunt: cards.isTaunt })
+      .from(cards)
+      .where(eq(cards.peekId, ctx.peekId))
+      .orderBy(desc(cards.position))
+      .limit(20);
+    scheduleEvolveVibe(ctx.peekId, {
+      kind: 'cards',
+      cards: recent.map((c) => ({ type: c.type, is_taunt: c.isTaunt })),
+    });
 
     return { ok: true, card_id: row.id, position: row.position };
   },
