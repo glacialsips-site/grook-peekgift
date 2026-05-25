@@ -38,10 +38,10 @@ All 5 packets (13, 14, 15, 16, 17) pushed clean, each green standalone. Integrat
 
 ## Where we are
 
-- **Trunk:** `atelier-integration` (this branch). Build green end-to-end as of `e387927` (batch 2A merged + gitignore fix).
-- **Packets 01-12 + 07 integrated.** 7 routes compile: `/`, `/api/chat`, `/api/webhooks/clerk`, `/build`, `/build/[peekId]`, `/sign-in/[[...rest]]`, `/sign-up/[[...rest]]`. No deprecation warnings.
-- **Batch 2B DONE** (pushed, awaiting integration). 5/5 builds green standalone. See packet table below for branch SHAs.
-- **Netlify** still points at the legacy site. Promotion of `atelier-integration` → deploy target = orchestrator task, done after batch 2B lands.
+- **Trunk:** `atelier-integration`. Build green end-to-end as of `76ef5fb`. 15 routes compile: `/`, `/api/chat`, `/api/checkout`, `/api/pick`, `/api/share/send`, `/api/stripe/webhook`, `/api/webhooks/clerk`, `/build`, `/build/[peekId]`, `/build/[peekId]/publish`, `/build/[peekId]/publish/share`, `/g/[slug]`, `/g/-/opengraph-image`, `/sign-in/[[...rest]]`, `/sign-up/[[...rest]]`.
+- **Packets 01-17 integrated.** Batches 1, 2A, 2B all merged.
+- **Live `peek_v2` DB schema rebuilt** via Supabase MCP to match our Drizzle schema (`DROP SCHEMA peek_v2 CASCADE` on the previous disaster-attempt tables, then applied consolidated init = packet 02 + packet 13 changes combined). Production `public` schema (118 drafts / 60 gifts / 55 gift_items powering peek.gift) untouched.
+- **Netlify** still points at the legacy Vite site (public schema). Promotion of `atelier-integration` → deploy target = orchestrator task, after a smoke test pass.
 
 ## Build target
 
