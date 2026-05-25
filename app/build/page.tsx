@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { supabaseAdmin } from '@/lib/supabase';
+import { q, q1opt } from '@/lib/db';
 import ChatBuilder from './ChatBuilder';
 
 export const dynamic = 'force-dynamic';
@@ -10,26 +10,22 @@ export default async function BuildPage() {
   if (!userId) redirect('/sign-in');
 
   const user = await currentUser();
-  const db = supabaseAdmin();
 
-  // Ensure curator row (with email/name for later notifications)
-  await db
-    .from('curators')
-    .upsert({
-      clerk_user_id: userId,
-      email: user?.emailAddresses?.[0]?.emailAddress || null,
-      display_name: user?.firstName || user?.username || null
-    });
+  await q(
+    `INSERT INTO curators (clerk_user_id, email, display_name)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (clerk_user_id) DO UPDATE SET email = EXCLUDED.email, display_name = EXCLUDED.display_name`,
+    [
+      userId,
+      user?.emailAddresses?.[0]?.emailAddress || null,
+      user?.firstName || user?.username || null
+    ]
+  );
 
-  // Pick an existing in-progress peek, otherwise start fresh on first message
-  const { data: existing } = await db
-    .from('peeks')
-    .select('id')
-    .eq('curator_id', userId)
-    .eq('status', 'draft')
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const existing = await q1opt<{ id: string }>(
+    `SELECT id FROM peeks WHERE curator_id = $1 AND status = 'draft' ORDER BY updated_at DESC LIMIT 1`,
+    [userId]
+  );
 
   return <ChatBuilder initialPeekId={existing?.id || null} />;
 }

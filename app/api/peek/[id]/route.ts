@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { q, q1opt } from '@/lib/db';
 
 export const runtime = 'nodejs';
 
@@ -9,20 +9,17 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
   if (!userId) return new Response('unauthorized', { status: 401 });
 
   const { id } = await ctx.params;
-  const db = supabaseAdmin();
 
-  const { data: peek, error: peekErr } = await db
-    .from('peeks')
-    .select('*')
-    .eq('id', id)
-    .eq('curator_id', userId)
-    .maybeSingle();
-  if (peekErr || !peek) return new Response('not_found', { status: 404 });
+  const peek = await q1opt<any>(
+    `SELECT * FROM peeks WHERE id = $1 AND curator_id = $2`,
+    [id, userId]
+  );
+  if (!peek) return new Response('not_found', { status: 404 });
 
-  const [{ data: cards }, { data: vgs }] = await Promise.all([
-    db.from('cards').select('*').eq('peek_id', id).order('position', { ascending: true }),
-    db.from('variant_groups').select('*').eq('peek_id', id)
+  const [cards, vgs] = await Promise.all([
+    q<any>(`SELECT * FROM cards WHERE peek_id = $1 ORDER BY position ASC`, [id]),
+    q<any>(`SELECT * FROM variant_groups WHERE peek_id = $1`, [id])
   ]);
 
-  return Response.json({ peek, cards: cards || [], variant_groups: vgs || [] });
+  return Response.json({ peek, cards, variant_groups: vgs });
 }

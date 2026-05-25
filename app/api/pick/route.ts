@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { q, q1, q1opt } from '@/lib/db';
 import { sendEmail } from '@/lib/resend';
+import { track } from '@/lib/posthog';
 
 export const runtime = 'nodejs';
 
-// Recipient picks a card. Public endpoint (no auth) — picks are gated by knowing the slug.
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as {
     slug?: string;
@@ -17,58 +17,74 @@ export async function POST(req: NextRequest) {
     return Response.json({ ok: false, error: 'missing' }, { status: 400 });
   }
 
-  const db = supabaseAdmin();
-  const { data: peek, error: pErr } = await db
-    .from('peeks')
-    .select('id, status, curator_id, recipient_name, occasion')
-    .eq('slug', body.slug)
-    .maybeSingle();
-  if (pErr || !peek) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
+  const peek = await q1opt<{
+    id: string;
+    status: string;
+    curator_id: string;
+    recipient_name: string | null;
+    occasion: string | null;
+  }>(
+    `SELECT id, status, curator_id, recipient_name, occasion FROM peeks WHERE slug = $1`,
+    [body.slug]
+  );
+  if (!peek) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
   if (peek.status !== 'published' && peek.status !== 'claimed') {
     return Response.json({ ok: false, error: 'not_published' }, { status: 409 });
   }
 
-  const { data: card } = await db
-    .from('cards')
-    .select('id, title, is_taunt, is_locked, type, value_cents, source_url')
-    .eq('id', body.card_id)
-    .eq('peek_id', peek.id)
-    .maybeSingle();
+  const card = await q1opt<{
+    id: string;
+    title: string;
+    is_taunt: boolean;
+    is_locked: boolean;
+    type: string;
+    value_cents: number | null;
+    source_url: string | null;
+  }>(
+    `SELECT id, title, is_taunt, is_locked, type, value_cents, source_url
+     FROM cards WHERE id = $1 AND peek_id = $2`,
+    [body.card_id, peek.id]
+  );
   if (!card) return Response.json({ ok: false, error: 'card_not_found' }, { status: 404 });
   if (card.is_taunt) return Response.json({ ok: false, error: 'taunt_card' }, { status: 400 });
 
-  const { data: pick, error: pkErr } = await db
-    .from('picks')
-    .insert({
-      peek_id: peek.id,
-      card_id: card.id,
-      recipient_signature: body.recipient_signature || null,
-      recipient_note: body.recipient_note || null,
-      beg_message: body.beg_message || null
-    })
-    .select('id')
-    .single();
-  if (pkErr) return Response.json({ ok: false, error: pkErr.message }, { status: 500 });
+  const pick = await q1<{ id: string }>(
+    `INSERT INTO picks (peek_id, card_id, recipient_signature, recipient_note, beg_message)
+     VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+    [
+      peek.id, card.id,
+      body.recipient_signature || null,
+      body.recipient_note || null,
+      body.beg_message || null
+    ]
+  );
 
-  await db.from('events').insert({ peek_id: peek.id, kind: 'pick', payload: { card_id: card.id, pick_id: pick.id } });
-  await db.from('peeks').update({ status: 'claimed' }).eq('id', peek.id);
+  await q(`INSERT INTO events (peek_id, kind, payload) VALUES ($1,'pick',$2::jsonb)`, [
+    peek.id,
+    JSON.stringify({ card_id: card.id, pick_id: pick.id })
+  ]);
+  await q(`UPDATE peeks SET status = 'claimed' WHERE id = $1`, [peek.id]);
+  track('peek_pick', peek.curator_id, { peek_id: peek.id, card_id: card.id, card_type: card.type });
 
-  // Look up curator email via Clerk would be ideal, but for now use the curators table mirror.
-  const { data: curator } = await db
-    .from('curators')
-    .select('email, display_name')
-    .eq('clerk_user_id', peek.curator_id)
-    .maybeSingle();
+  const curator = await q1opt<{ email: string | null; display_name: string | null }>(
+    `SELECT email, display_name FROM curators WHERE clerk_user_id = $1`,
+    [peek.curator_id]
+  );
   if (curator?.email) {
     const html = `
-      <h2>${peek.recipient_name || 'Your recipient'} picked!</h2>
-      <p>From your peek for <strong>${peek.recipient_name || 'them'}</strong> (${peek.occasion || 'no occasion set'}).</p>
-      <p><strong>They picked:</strong> ${escapeHtml(card.title)}</p>
-      ${card.source_url ? `<p>Source: <a href="${card.source_url}">${card.source_url}</a></p>` : ''}
-      ${body.recipient_signature ? `<p>Signed: ${escapeHtml(body.recipient_signature)}</p>` : ''}
-      ${body.recipient_note ? `<p>Their note: <em>${escapeHtml(body.recipient_note)}</em></p>` : ''}
-      <hr>
-      <p>peek.gift — vNext</p>
+      <div style="font-family: Georgia, serif; max-width: 540px; margin: 0 auto; padding: 24px;">
+        <h2 style="margin: 0 0 12px;">${escapeHtml(peek.recipient_name || 'Your recipient')} picked.</h2>
+        <p style="color:#555;">From your peek for ${escapeHtml(peek.recipient_name || 'them')} (${escapeHtml(peek.occasion || 'no occasion set')}).</p>
+        <div style="background:#f7f6f3;border-radius:14px;padding:18px;margin:18px 0;">
+          <div style="text-transform:uppercase;font-size:11px;letter-spacing:2px;color:#888;">they picked</div>
+          <div style="font-size:22px;margin-top:6px;">${escapeHtml(card.title)}</div>
+          ${card.source_url ? `<div style="margin-top:10px;"><a href="${escapeHtml(card.source_url)}" style="color:#ff5a3c;">${escapeHtml(card.source_url)}</a></div>` : ''}
+        </div>
+        ${body.recipient_signature ? `<p>Signed: <strong>${escapeHtml(body.recipient_signature)}</strong></p>` : ''}
+        ${body.recipient_note ? `<p>Their note: <em>"${escapeHtml(body.recipient_note)}"</em></p>` : ''}
+        ${body.beg_message ? `<p>They begged: <em>"${escapeHtml(body.beg_message)}"</em></p>` : ''}
+        <p style="color:#aaa;margin-top:32px;font-size:12px;">peek.gift</p>
+      </div>
     `;
     await sendEmail({
       to: curator.email,

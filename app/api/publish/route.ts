@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { q, q1opt } from '@/lib/db';
 import { stripe, STRIPE_PRICE_ID, isMockPay } from '@/lib/stripe';
+import { track } from '@/lib/posthog';
+import { generateOgImage } from '@/lib/imagegen';
 
 export const runtime = 'nodejs';
 
-// Either creates a Stripe Checkout Session for $12 (live mode) OR
-// publishes the peek immediately for free (mock mode).
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return new Response('unauthorized', { status: 401 });
@@ -14,27 +14,26 @@ export async function POST(req: NextRequest) {
   const { peek_id } = (await req.json().catch(() => ({}))) as { peek_id?: string };
   if (!peek_id) return Response.json({ ok: false, error: 'missing_peek_id' }, { status: 400 });
 
-  const db = supabaseAdmin();
-  const { data: peek, error } = await db
-    .from('peeks')
-    .select('id, slug, curator_id, status')
-    .eq('id', peek_id)
-    .eq('curator_id', userId)
-    .maybeSingle();
-  if (error || !peek) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
+  const peek = await q1opt<{ id: string; slug: string; curator_id: string; status: string }>(
+    `SELECT id, slug, curator_id, status FROM peeks WHERE id = $1 AND curator_id = $2`,
+    [peek_id, userId]
+  );
+  if (!peek) return Response.json({ ok: false, error: 'not_found' }, { status: 404 });
 
   const base = process.env.APP_URL || 'http://localhost:3000';
 
+  // Pre-warm OG image so first share-preview lookup is cheap
+  generateOgImage(peek_id).catch(() => {});
+
   if (isMockPay()) {
-    // Dev mode: publish immediately, no charge
-    const { data: updated } = await db
-      .from('peeks')
-      .update({ status: 'published', published_at: new Date().toISOString(), share_url: `${base}/g/${peek.slug}` })
-      .eq('id', peek_id)
-      .select('slug, share_url')
-      .single();
-    await db.from('events').insert({ peek_id, kind: 'published_mock', payload: {} });
-    return Response.json({ ok: true, mode: 'mock', share_url: updated?.share_url, slug: updated?.slug });
+    const shareUrl = `${base}/g/${peek.slug}`;
+    await q(
+      `UPDATE peeks SET status = 'published', published_at = now(), share_url = $1 WHERE id = $2`,
+      [shareUrl, peek_id]
+    );
+    await q(`INSERT INTO events (peek_id, kind, payload) VALUES ($1,'published_mock','{}'::jsonb)`, [peek_id]);
+    track('peek_published', userId, { peek_id, slug: peek.slug, mode: 'mock' });
+    return Response.json({ ok: true, mode: 'mock', share_url: shareUrl, slug: peek.slug });
   }
 
   if (!STRIPE_PRICE_ID) return Response.json({ ok: false, error: 'no_price_id' }, { status: 500 });
@@ -48,6 +47,7 @@ export async function POST(req: NextRequest) {
     payment_intent_data: { metadata: { peek_id, product: 'peek.gift_vnext' } }
   });
 
-  await db.from('peeks').update({ stripe_checkout_session_id: session.id }).eq('id', peek_id);
+  await q(`UPDATE peeks SET stripe_checkout_session_id = $1 WHERE id = $2`, [session.id, peek_id]);
+  track('peek_checkout_started', userId, { peek_id, slug: peek.slug });
   return Response.json({ ok: true, mode: 'live', checkout_url: session.url });
 }

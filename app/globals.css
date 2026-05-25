@@ -21,7 +21,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Custom font: load Fraunces from Google for the display face. */
 @font-face {
   font-family: 'Fraunces';
   font-style: normal;
@@ -29,47 +28,61 @@ body {
   font-display: swap;
   src: url(https://fonts.gstatic.com/s/fraunces/v32/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk.woff2) format('woff2');
 }
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v32/6NUk8FyLNQOQZAnv9ZwPxjB4SOAyAJg.woff2) format('woff2');
+}
 
 .font-display { font-family: 'Fraunces', ui-serif, Georgia, serif; }
 
-/* The "chrome" — the chat side of the app (always dark) */
 .chrome-bg { background: var(--chrome-bg); color: var(--chrome-ink); }
 .chrome-line { border-color: var(--chrome-line); }
 
-/* The "stage" — recipient view + preview, uses the vibe CSS vars */
 .stage {
   background: var(--peek-bg);
   color: var(--peek-ink);
 }
-.stage .surface {
-  background: var(--peek-surface);
-}
+.stage .surface { background: var(--peek-surface); }
 .stage .accent { color: var(--peek-accent); }
 .stage .bg-accent { background: var(--peek-accent); }
 
-/* Pretty scrollbar for chat */
 .scroll-chat::-webkit-scrollbar { width: 6px; }
 .scroll-chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 
-/* Card grain for the preview cards */
 .card-grain {
   background-image: linear-gradient(180deg, rgba(255,255,255,0.04), transparent 40%);
 }
 
-/* Subtle gradient mesh that shifts on theme change */
 .vibe-mesh {
   background:
-    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--peek-accent) 18%, transparent), transparent 50%),
-    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--peek-accent-2) 18%, transparent), transparent 50%),
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--peek-accent) 22%, transparent), transparent 50%),
+    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--peek-accent-2) 22%, transparent), transparent 50%),
     var(--peek-bg);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .chat-msg-enter {
-    animation: chatIn 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
+  .chat-msg-enter { animation: chatIn 200ms cubic-bezier(0.2, 0.7, 0.2, 1); }
   @keyframes chatIn {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-rise {
+    animation: rise 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .animate-pulse {
+    animation: peekPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes peekPulse {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
   }
 }
