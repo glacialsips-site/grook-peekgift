@@ -1,8 +1,66 @@
 # STATE — live build status
 
-_Last updated: 2026-05-25 by cloud worker (post packet 18 + Stripe live wiring)_
+_Last updated: 2026-05-25 by cloud worker (post batch 3 dispatch — all 6 branches pushed, awaiting integration)_
 
-## READ FIRST — packet 18 done, site live, Stripe live, push-to-deploy wired
+## READ FIRST — batch 3 done (20, 21, 22, 24, 25, 26 pushed; integration carryover below)
+
+All 6 batch-3 packets pushed clean, each green on their own validation (build for those declaring it, typecheck for cross-import packets). Trunk `atelier-integration` head: latest after `f12783c` (`RUN-NEXT.md` + `ROADMAP.md`). Integration order recommended below.
+
+### Batch 3 — DONE (pushed, awaiting integration)
+
+| # | Title | Branch | Sha | Validation | Notes |
+|---|---|---|---|---|---|
+| 20 | Chat polish (image upload + history persistence + mobile slide-up + publish-cta wiring) | `claude/packet-20-chat-polish` | `ca1f017` | full build green | New `chat_messages` table + Drizzle migration `0003`; agent ALSO fixed a pre-existing snapshot-id collision between `0001_snapshot.json` and `0002_snapshot.json` (re-uuid'd 0002 to chain). Mobile sheet built from scratch with framer-motion (no `vaul` dep added, per "lock package.json"). `/api/upload` route added. `publish-cta.tsx` relocated to `components/build/` (per packet 18 follow-up B — done as part of 20). |
+| 21 | Progressive vibe engine (palette extraction + tone classifier + auto-evolve) | `claude/packet-21-vibe-progressive` | `4bb72a6` | typecheck + full build both green | Palette extractor is pure-JS (PNG decoder + JPEG byte-histogram fallback) because `@vercel/og` exposes no raster decoder and the packet bans `sharp`. `update_vibe` gained `signal_source` input; 10-entry `signal_source_history` persisted on `vibe`. `lib/peek/types.ts` Vibe NOT updated (out of scope) — now slightly diverges from schema Vibe; small follow-up. |
+| 22 | fal.ai image gen + Supabase Storage re-host + scrape pipeline | `claude/packet-22-image-gen` | `6f48161` | typecheck green | fal.ai queue API + status polling. Browserbase one-shot REST endpoint isn't publicly documented; implementation tries `POST /v1/sessions/{id}/page` and falls back to ZenRows on failure (ZenRows handles ~100% of real traffic). `evolveVibe` (packet 21) wired via dynamic-import string-join trick to defeat TS static resolution so build stays green before 21 lands. |
+| 24 | Outbound affiliate link layer (Skimlinks wrap + revenue webhook) | `claude/packet-24-affiliate` | `7948681` | typecheck green | `wrapAffiliateLink()` (Skimlinks → Sovrn → direct fallback) wired into `add_card.ts` (wrap pre-insert with peekId; re-wrap post-insert with peekId:cardId and UPDATE if changed) + `scrape_url.ts`. New `SKIMLINKS_WEBHOOK_SECRET` + `SOVRN_API_KEY` env vars. **Skimlinks webhook signature header name/encoding isn't publicly documented** — followed packet's `x-skimlinks-signature` / hex-HMAC spec verbatim. One-line tweak if Skimlinks' actual format differs (verify when first real webhook hits or when account is provisioned). |
+| 25 | Analytics + LLM observability + events writer | `claude/packet-25-analytics` | `e90397f` | typecheck green | Typed `track()` facade routes events to PostHog + owned `events` table. LLM observability inside `chatTurn` captures every stream iteration as both PostHog `$ai_generation` and our `events.kind = 'llm_call'`. Next 16 `instrumentation.ts` / `instrumentation-client.ts`. `/api/posthog/[...path]` reverse proxy (added to `proxy.ts` public routes). PostHog provider added to `components/providers.tsx`. Replaced inline `events` inserts in chat / pick / stripe webhook / checkout / share-send routes and `add_card` / `set_vibe` / `update_vibe` / `mark_ready_for_publish` / `scrape_url` tools. **Client-side share-sheet channels (copy / native / twitter / FB / iMessage / WhatsApp) still need follow-up to fire share events client-side** — only sms/email server-side currently fire. `recordEvent` in `lib/chat/session.ts` left in place (still referenced by `anonymousTurnCount`). |
+| 26 | Inngest jobs (relationship nudges + scrape queue + retries + webhook logger) | `claude/packet-26-inngest-jobs` | `2fbdc99` | typecheck green | **Inngest 4 API drifted from packet spec** — agent used actual v4 signatures (`createFunction({ ...triggers }, handler)`; `signingKey` on client, not on `serve()`). 3 typed event types. Daily cron 14-days-out nudge with year-keyed dedupe via `events`. Scrape-worker fetches `/api/scrape` over HTTP (will retry-to-fail until packet 22 merges). Webhook-logger writes to new `webhook_log` table — **drizzle-kit generate NOT run; SQL provided verbatim in packet 26 NOTES.md for orchestrator to apply as 0004**. `try/finally webhook.received` publish added to Clerk + Stripe webhook routes. Skimlinks webhook (packet 24) NOT touched (didn't exist on base). |
+
+### Integration order recommendation
+
+The packets touch overlapping tool files (`add_card`, `set_vibe`, `update_vibe`, `set_hero_image`, `scrape_url`) for orthogonal reasons. Suggested order:
+
+1. **20 first** — has the migration baseline fix (0001→0002 snapshot id) + adds 0003 chat_messages. Apply migration 0003 to live DB via Supabase MCP at merge time.
+2. **22 next** — `scrape_url` becomes real, `generate_hero_image` re-hosts to storage. Lights up the scrape worker in 26.
+3. **24** — `scrape_url` + `add_card` get affiliate wrapping. **At merge: take 22's `scrape_url` body + layer 24's affiliate wrapping on top** (both wrote against the stub on base; the merge needs hand-resolution but is mechanical — wrap any `source_url` returned from scrape via `wrapAffiliateLink()` before returning).
+4. **21** — `update_vibe` gets `signal_source`, `set_hero_image` schedules palette extract. **At merge with 25: 25 wraps these tools with event-facade calls; 21 adds `signal_source` param. Both compose cleanly — 25's tracking captures the new param via the existing payload spread.**
+5. **25** — analytics facade replaces inline `events` inserts. **At merge with 21 + 24: cumulative tool files (`add_card`, `set_vibe`, `update_vibe`, `set_hero_image`, `scrape_url`) need three-way merge — base + 24's affiliate wrap + 21's progressive vibe + 25's event tracking. Order of operations within each tool: validate input → wrap URL (24) → DB write → schedule evolve (21) → track event (25).**
+6. **26 last** — depends on 22's scrape, 24's webhook, 25's facade. After all those merge, 26 just plugs in.
+7. After ALL of batch 3 integrates: apply migrations 0003 (chat_messages) and 0004 (webhook_log) to live DB via Supabase MCP. Re-run `drizzle-kit generate` to capture 0004 properly (packet 26's agent left SQL verbatim in NOTES; orchestrator generates the migration file as a clean drizzle artifact).
+
+### New env vars to add (collected from batch 3 NOTES files)
+
+Add to Netlify when accounts are provisioned (atelier code handles `undefined` gracefully — no immediate action):
+
+| Var | Source | Where used |
+|---|---|---|
+| `SKIMLINKS_PUBLISHER_ID` | Skimlinks account (TBD) | `lib/affiliate/skimlinks.ts` |
+| `SKIMLINKS_WEBHOOK_SECRET` | Skimlinks dashboard webhook setup | `app/api/webhooks/skimlinks/route.ts` |
+| `SOVRN_API_KEY` | Sovrn fallback (TBD) | `lib/affiliate/sovrn.ts` |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project | `lib/analytics/*`, providers |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog (default `https://us.i.posthog.com`) | same |
+| `INNGEST_EVENT_KEY` | Inngest project | `lib/inngest/client.ts` |
+| `INNGEST_SIGNING_KEY` | Inngest project | `app/api/inngest/route.ts` |
+| `FAL_KEY` | fal.ai account | `lib/image-gen/fal.ts` |
+| `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID` | already cloned from legacy | `lib/scrape/*` |
+| `ZENROWS_API_KEY` | already cloned from legacy | `lib/scrape/*` |
+
+### Site smoke — still all green pre-batch-3 integration
+
+Site is still serving the post-packet-18 build. Batch 3 hasn't been integrated yet, so `peek-gift-vnext.netlify.app` is at trunk before these merges. Smoke against current live: `/`, `/sign-up`, `/api/stripe/webhook` (400 missing sig), `/api/webhooks/clerk` (400 missing svix headers) all expected.
+
+### Carryover items (still unresolved after batch 3)
+
+- **`lib/peek/types.ts` Vibe shape drift from schema Vibe** — packet 21 didn't touch UI types per scope. One-line follow-up to re-export the schema Vibe.
+- **Client-side share-sheet outbound tracking** — packet 25 only fires `share_initiated` server-side for sms/email. Add `track()` calls in `share-sheet.tsx` for copy / native / twitter / FB / iMessage / WhatsApp.
+- **Skimlinks webhook sig format** — verify when actual account is provisioned and first webhook hits.
+- **Migrations to apply** at integration: `0003_chat_messages` (from 20), `0004_webhook_log` (from 26, needs drizzle-kit generate).
+- **`recordEvent` in `lib/chat/session.ts`** — now unreferenced by routes (replaced by facade) but still used by `anonymousTurnCount`. Could be deleted in a polish pass.
+
+### What's still in the draft queue per ROADMAP
+
+23 group co-curation, 27 social outbound, 08 Sentry, 29 brand icons, 30 turn_end single-fire. Per orchestrator note, these benefit from seeing live build with real users first (23 + 27 + 08).
 
 `https://peek-gift-vnext.netlify.app/` is serving the atelier app end-to-end. Branch `atelier-integration` head: `5830742` ish (whatever the latest is after the proxy.ts fix). All batch 2B is integrated. Packet 18 (deploy-fix) merged with three real fixes baked in:
 
