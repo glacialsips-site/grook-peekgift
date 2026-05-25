@@ -11,6 +11,9 @@ coverage/
 out/
 build/
 dist/
+!app/build/
+!components/build/
+!lib/peek/
 
 # production
 *.tsbuildinfo
