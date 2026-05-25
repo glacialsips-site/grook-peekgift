@@ -65,7 +65,7 @@ function toPeek(row: RawPeekRow): Peek {
     recipientName: row.recipient_name,
     relationship: row.relationship,
     occasion: row.occasion,
-    vibe: (row.vibe ?? {}) as Vibe,
+    vibe: row.vibe ?? {},
     heroImageUrl: row.hero_image_url,
     heroImageSource: row.hero_image_source,
     heroPrompt: row.hero_prompt,
