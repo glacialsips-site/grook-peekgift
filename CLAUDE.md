@@ -2,8 +2,10 @@
 
 You are running point on the peek.gift rebuild. Read in order before anything else:
 
-1. **`_packets/STATE.md`** — task graph, what's done/in flight/blocked, locked decisions.
-2. **`_packets/PROTOCOL.md`** — how packets are dispatched, executed, and integrated.
+1. **`_packets/RUN-NEXT.md`** — the live dispatch queue. If you're a worker session, this is your entry point.
+2. **`_packets/STATE.md`** — task graph, what's done/in flight/blocked, locked decisions.
+3. **`_packets/PROTOCOL.md`** — how packets are dispatched, executed, and integrated.
+4. **`_packets/ROADMAP.md`** — what happens after the original packet set lands (post-MVP plan: hardening → beta → public launch → scale).
 
 ## Your role
 
