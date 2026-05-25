@@ -1,3 +1,12 @@
-// Placeholder for generated DB types — will be replaced when we run `supabase gen types typescript`.
-// For now, an empty type that lets `createClient<Database>(...)` compile.
-export type Database = Record<string, unknown>;
+type AnyRow = Record<string, unknown>;
+type AnyTable = { Row: AnyRow; Insert: AnyRow; Update: AnyRow; Relationships: [] };
+
+export type Database = {
+  peek_v2: {
+    Tables: { [tableName: string]: AnyTable };
+    Views: { [viewName: string]: AnyTable };
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};

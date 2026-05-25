@@ -1,22 +1,8 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { env } from '@/lib/env';
-
-// NOTE: this Supabase service client is inlined here to keep this packet's build
-// green standalone. Packet 04 will provide `@/lib/supabase/service`; once that
-// merges, swap the call below to `import { getSupabaseService } from '@/lib/supabase/service'`.
-function getSupabaseService() {
-  return createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL!,
-    env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: { persistSession: false, autoRefreshToken: false },
-      db: { schema: 'peek_v2' },
-    },
-  );
-}
+import { getSupabaseService } from '@/lib/supabase/service';
 
 export async function POST(req: Request) {
   const secret = env.CLERK_WEBHOOK_SIGNING_SECRET;
