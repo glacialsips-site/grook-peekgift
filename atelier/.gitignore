@@ -38,6 +38,7 @@ yarn-error.log*
 # deploy
 .netlify/
 .vercel/
+deno.lock
 
 # editor / ide
 .idea/
