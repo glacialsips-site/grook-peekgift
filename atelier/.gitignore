@@ -9,11 +9,8 @@ coverage/
 # next.js
 .next/
 out/
-build/
+/build/
 dist/
-!app/build/
-!components/build/
-!lib/peek/
 
 # production
 *.tsbuildinfo
