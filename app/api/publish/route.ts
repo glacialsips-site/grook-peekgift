@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { safeAuth as auth } from '@/lib/clerk-safe';
 import { q, q1opt } from '@/lib/db';
 import { stripe, STRIPE_PRICE_ID, isMockPay } from '@/lib/stripe';
 import { track } from '@/lib/posthog';

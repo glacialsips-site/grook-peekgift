@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { safeAuth as auth, safeCurrentUser as currentUser } from '@/lib/clerk-safe';
 import { anthropic, PEEK_MODEL, PEEK_SYSTEM_PROMPT } from '@/lib/anthropic';
 import { PEEK_TOOLS, runTool } from '@/lib/peek-tools';
 import { q, q1 } from '@/lib/db';

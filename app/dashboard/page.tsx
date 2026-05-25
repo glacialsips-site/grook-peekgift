@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { safeAuth as auth } from '@/lib/clerk-safe';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { q } from '@/lib/db';

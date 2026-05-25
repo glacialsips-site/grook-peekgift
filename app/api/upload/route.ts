@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { safeAuth as auth } from '@/lib/clerk-safe';
 import { putBytes, blobKey } from '@/lib/storage';
 
 export const runtime = 'nodejs';
