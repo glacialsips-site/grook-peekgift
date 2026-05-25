@@ -17,9 +17,4 @@ export interface TurnUsage {
   cache_creation_input_tokens?: number;
 }
 
-export type SseEvent =
-  | { kind: 'text'; delta: string }
-  | { kind: 'tool_call'; id: string; name: string; input?: unknown }
-  | { kind: 'tool_result'; id: string; output: unknown }
-  | { kind: 'turn_end'; usage: TurnUsage }
-  | { kind: 'error'; message: string };
+export { type SseEvent } from '@/lib/chat/sse-types';

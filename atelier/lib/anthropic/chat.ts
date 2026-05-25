@@ -37,6 +37,17 @@ export interface ChatTurnInput {
    * thinking deltas appear as `thinking_delta` stream events.
    */
   thinking?: Anthropic.ThinkingConfigParam;
+  /**
+   * Called after each successful or failed tool execution, before the
+   * tool_result block is appended back into the message stream. Lets callers
+   * surface tool outputs to the UI (e.g. as SSE events) without re-implementing
+   * the agent loop.
+   */
+  onToolResult?: (
+    id: string,
+    name: string,
+    output: unknown,
+  ) => void | Promise<void>;
 }
 
 /**
@@ -158,22 +169,24 @@ export async function* chatTurn(
     // tool_result blocks, per Anthropic's tool-use contract.
     const toolResults: Anthropic.ToolResultBlockParam[] = [];
     for (const call of pendingToolCalls) {
+      let output: unknown;
+      let isError = false;
       try {
-        const output = await runTool(call.name, call.input, input.ctx);
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: call.id,
-          content: JSON.stringify(output),
-        });
+        output = await runTool(call.name, call.input, input.ctx);
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: call.id,
-          content: JSON.stringify({ error: message }),
-          is_error: true,
-        });
+        isError = true;
+        output = { error: err instanceof Error ? err.message : String(err) };
       }
+
+      await input.onToolResult?.(call.id, call.name, output);
+
+      const resultBlock: Anthropic.ToolResultBlockParam = {
+        type: 'tool_result',
+        tool_use_id: call.id,
+        content: JSON.stringify(output),
+      };
+      if (isError) resultBlock.is_error = true;
+      toolResults.push(resultBlock);
     }
 
     messages.push({ role: 'user', content: toolResults });

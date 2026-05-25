@@ -1,13 +1,6 @@
 import type { NextRequest } from 'next/server';
 import type Anthropic from '@anthropic-ai/sdk';
-import {
-  anthropic,
-  DEFAULT_MODEL,
-  getSystemPrompt,
-  getToolSchemas,
-  runTool,
-  streamMessage,
-} from '@/lib/anthropic';
+import { chatTurn, DEFAULT_MODEL } from '@/lib/anthropic';
 import '@/lib/anthropic/tools/bootstrap';
 import { getUserId } from '@/lib/auth/server';
 import {
@@ -23,8 +16,6 @@ export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 const encoder = new TextEncoder();
-const MAX_TOOL_ITERATIONS = 10;
-const DEFAULT_MAX_TOKENS = 4096;
 
 function encodeSseEvent(event: SseEvent): Uint8Array {
   const payload = `event: ${event.kind}\ndata: ${JSON.stringify(event)}\n\n`;
@@ -85,10 +76,6 @@ export async function POST(req: NextRequest): Promise<Response> {
   const initialHistory = history as Anthropic.MessageParam[];
   const userInput = userMessage as string | Anthropic.ContentBlockParam[];
   const chosenModel = model ?? DEFAULT_MODEL;
-  const userContent: Anthropic.ContentBlockParam[] =
-    typeof userInput === 'string'
-      ? [{ type: 'text', text: userInput }]
-      : userInput;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -112,132 +99,64 @@ export async function POST(req: NextRequest): Promise<Response> {
         }
       };
 
-      const messages: Anthropic.MessageParam[] = [
-        ...initialHistory,
-        { role: 'user', content: userContent },
-      ];
-
       const turnUsages: TurnUsage[] = [];
       let toolCallTotal = 0;
+      const pendingToolNames = new Map<string, string>();
 
       try {
-        const tools = getToolSchemas();
-        const system = getSystemPrompt({});
-
-        for (let iter = 0; iter < MAX_TOOL_ITERATIONS; iter++) {
-          const params: Anthropic.MessageStreamParams = {
-            model: chosenModel,
-            max_tokens: DEFAULT_MAX_TOKENS,
-            system,
-            messages,
-            tools: tools.length > 0 ? tools : undefined,
-          };
-
-          const pendingToolNames = new Map<string, string>();
-          let finalMessage: Anthropic.Message | undefined;
-          let streamErrored = false;
-
-          for await (const event of streamMessage(anthropic, params)) {
-            switch (event.type) {
-              case 'text_delta': {
-                safeEnqueue({ kind: 'text', delta: event.text });
-                break;
-              }
-              case 'tool_use_start': {
-                pendingToolNames.set(event.id, event.name);
-                toolCallTotal += 1;
-                safeEnqueue({
-                  kind: 'tool_call',
-                  id: event.id,
-                  name: event.name,
-                });
-                break;
-              }
-              case 'tool_use_end': {
-                if (event.input !== undefined) {
-                  const name = pendingToolNames.get(event.id);
-                  if (name) {
-                    safeEnqueue({
-                      kind: 'tool_call',
-                      id: event.id,
-                      name,
-                      input: event.input,
-                    });
-                  }
-                }
-                break;
-              }
-              case 'message_end': {
-                finalMessage = event.message;
-                const usage = toTurnUsage(event.usage);
-                turnUsages.push(usage);
-                safeEnqueue({ kind: 'turn_end', usage });
-                break;
-              }
-              case 'error': {
-                safeEnqueue({ kind: 'error', message: event.error.message });
-                streamErrored = true;
-                break;
-              }
-              case 'thinking_delta':
-              case 'tool_use_delta': {
-                break;
-              }
+        for await (const event of chatTurn({
+          ctx: { peekId, userId, sessionId },
+          history: initialHistory,
+          userMessage: userInput,
+          model: chosenModel,
+          onToolResult: (id, _name, output) => {
+            safeEnqueue({ kind: 'tool_result', id, output });
+          },
+        })) {
+          switch (event.type) {
+            case 'text_delta': {
+              safeEnqueue({ kind: 'text', delta: event.text });
+              break;
             }
-          }
-
-          if (streamErrored || !finalMessage) {
-            break;
-          }
-
-          messages.push({ role: 'assistant', content: finalMessage.content });
-
-          if (finalMessage.stop_reason !== 'tool_use') {
-            break;
-          }
-
-          const toolUseBlocks: Anthropic.ToolUseBlock[] = [];
-          for (const block of finalMessage.content) {
-            if (block.type === 'tool_use') {
-              toolUseBlocks.push(block);
-            }
-          }
-
-          if (toolUseBlocks.length === 0) {
-            break;
-          }
-
-          const toolResults: Anthropic.ToolResultBlockParam[] = [];
-          for (const call of toolUseBlocks) {
-            let output: unknown;
-            let isError = false;
-            try {
-              output = await runTool(call.name, call.input, {
-                peekId,
-                userId,
-                sessionId,
+            case 'tool_use_start': {
+              pendingToolNames.set(event.id, event.name);
+              toolCallTotal += 1;
+              safeEnqueue({
+                kind: 'tool_call',
+                id: event.id,
+                name: event.name,
               });
-            } catch (err) {
-              isError = true;
-              output = {
-                error: err instanceof Error ? err.message : String(err),
-              };
+              break;
             }
-
-            safeEnqueue({ kind: 'tool_result', id: call.id, output });
-
-            const resultBlock: Anthropic.ToolResultBlockParam = {
-              type: 'tool_result',
-              tool_use_id: call.id,
-              content: JSON.stringify(output),
-            };
-            if (isError) {
-              resultBlock.is_error = true;
+            case 'tool_use_end': {
+              if (event.input !== undefined) {
+                const name = pendingToolNames.get(event.id);
+                if (name) {
+                  safeEnqueue({
+                    kind: 'tool_call',
+                    id: event.id,
+                    name,
+                    input: event.input,
+                  });
+                }
+              }
+              break;
             }
-            toolResults.push(resultBlock);
+            case 'message_end': {
+              const usage = toTurnUsage(event.usage);
+              turnUsages.push(usage);
+              safeEnqueue({ kind: 'turn_end', usage });
+              break;
+            }
+            case 'error': {
+              safeEnqueue({ kind: 'error', message: event.error.message });
+              break;
+            }
+            case 'thinking_delta':
+            case 'tool_use_delta': {
+              break;
+            }
           }
-
-          messages.push({ role: 'user', content: toolResults });
         }
 
         const aggregated = turnUsages.reduce<TurnUsage>(
