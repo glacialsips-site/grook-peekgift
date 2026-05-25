@@ -390,6 +390,8 @@ function labelForTool(name: string, input: any): string {
       return `setting the vibe`;
     case 'set_hero_image':
       return `placing the hero`;
+    case 'generate_hero_image':
+      return `painting the hero${input?.prompt ? ` — ${String(input.prompt).slice(0, 38)}…` : ''}`;
     case 'set_note':
       return `writing your note in`;
     case 'add_card':
@@ -398,6 +400,8 @@ function labelForTool(name: string, input: any): string {
       return `bundling variants`;
     case 'remove_card':
       return `removing a card`;
+    case 'reorder_cards':
+      return `reordering`;
     case 'scrape_url':
       return `peeking at that link`;
     case 'mark_ready_for_publish':

@@ -85,7 +85,20 @@ export async function POST(req: NextRequest) {
       const emit = (event: string, data: unknown) => controller.enqueue(encoder.encode(sse(event, data)));
       emit('hello', { session_id: sessionId, peek_id: peekId });
 
-      const client = anthropic();
+      let client: ReturnType<typeof anthropic>;
+      try {
+        client = anthropic();
+      } catch (e: any) {
+        emit('text', {
+          text:
+            "hey — i'm peek, but my brain isn't wired up yet on this deployment. " +
+            "ask your curator to drop ANTHROPIC_API_KEY in Netlify env and redeploy. " +
+            "i'll be here."
+        });
+        emit('done', { stop_reason: 'config_missing' });
+        controller.close();
+        return;
+      }
       const messages = [...history];
       try {
         for (let hop = 0; hop < 8; hop++) {

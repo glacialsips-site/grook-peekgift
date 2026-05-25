@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import type { Card, Peek, VariantGroup } from '@/lib/types';
 import { vibeToCssVars, DEFAULT_VIBE } from '@/lib/themes';
+import Confetti from './Confetti';
 
 interface Props {
   peek: Peek;
@@ -22,6 +23,7 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
   const [beg, setBeg] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [celebrating, setCelebrating] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
 
   const grouped = useMemo(() => {
@@ -75,6 +77,8 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
       }
       setPicked((s) => new Set([...s, openCard.id]));
       setOpenCard(null);
+      setCelebrating(true);
+      setTimeout(() => setCelebrating(false), 2500);
     });
   }
 
@@ -82,6 +86,8 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
 
   return (
     <main className="stage min-h-dvh vibe-mesh relative overflow-x-hidden" style={style}>
+      {celebrating && <Confetti color={(peek.vibe as any)?.palette?.accent || '#ff5a3c'} />}
+
       {/* PHASE 1: Door — tap to open */}
       {phase === 'door' && (
         <DoorPhase peek={peek} onOpen={() => setPhase(peek.note_md ? 'note' : 'cards')} />
