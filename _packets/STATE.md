@@ -27,9 +27,10 @@ All three fit one packet: a Drizzle migration + schema-file edit. Sequencing: mu
 
 ## Where we are
 
-- **Trunk:** `atelier-integration` (this branch). Build green through batch 1 (`f403f22`); batch 2A branches pushed but NOT yet integrated.
-- **Packets 01-06 integrated.** Packets 07 / 10 / 11 / 12 pushed as separate branches awaiting integration.
-- **Netlify** still points at the legacy site. Promotion of `atelier-integration` → deploy target = packet 09 (orchestrator-owned per user).
+- **Trunk:** `atelier-integration` (this branch). Build green end-to-end as of `e387927` (batch 2A merged + gitignore fix).
+- **Packets 01-12 + 07 integrated.** 7 routes compile: `/`, `/api/chat`, `/api/webhooks/clerk`, `/build`, `/build/[peekId]`, `/sign-in/[[...rest]]`, `/sign-up/[[...rest]]`. No deprecation warnings.
+- **Batch 2B drafted and dispatched**: 13 (schema fix — unblocks anon flow), 14 (recipient view + picks), 15 (Stripe checkout), 16 (share + OG + email), 17 (chat plumbing cleanup).
+- **Netlify** still points at the legacy site. Promotion of `atelier-integration` → deploy target = orchestrator task, done after batch 2B lands.
 
 ## Build target
 
