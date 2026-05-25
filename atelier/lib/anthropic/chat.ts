@@ -4,6 +4,7 @@ import { getSystemPrompt, type SystemPromptOptions } from './system-prompt';
 import { getToolSchemas, runTool, type ToolContext } from './tools/index';
 import './tools/bootstrap';
 import { streamMessage, type StreamEvent } from './streaming';
+import { makeStreamCaptureHandle } from './observability';
 
 const MAX_TOOL_ITERATIONS = 10;
 const DEFAULT_MAX_TOKENS = 4096;
@@ -119,6 +120,8 @@ export async function* chatTurn(
 
     let finalMessage: Anthropic.Message | undefined;
     const pendingToolCalls: PendingToolCall[] = [];
+    const capture = makeStreamCaptureHandle({ ctx: input.ctx, params });
+    const startedAt = Date.now();
 
     for await (const event of streamMessage(anthropic, params)) {
       yield event;
@@ -129,7 +132,9 @@ export async function* chatTurn(
           usage: event.usage,
           stop_reason: event.stop_reason,
         });
+        capture.recordFinal({ message: event.message, startedAt });
       } else if (event.type === 'error') {
+        capture.recordError({ error: event.error, startedAt });
         // Stream surfaced an error; propagate by stopping the loop. The
         // caller already saw the `error` event.
         return { history: messages, iterations };

@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -156,11 +157,17 @@ export async function POST(req: NextRequest): Promise<Response> {
         .eq('id', pickId);
       if (updateRes.error)
         return jsonResponse({ error: updateRes.error.message }, 500);
-      await sb.from('events').insert({
-        session_id: signature,
-        peek_id: peekId,
-        kind: 'pick',
-        payload: { card_id: cardId, action: 'update', pick_id: pickId },
+      trackFireAndForget({
+        name: 'pick',
+        peekId,
+        userId: null,
+        sessionId: signature,
+        payload: {
+          card_id: cardId,
+          action: 'update',
+          pick_id: pickId,
+          recipient_signature: signature,
+        },
       });
       return jsonResponse({ ok: true, pickId });
     }
@@ -177,11 +184,17 @@ export async function POST(req: NextRequest): Promise<Response> {
   });
   if (insertRes.error) return jsonResponse({ error: insertRes.error.message }, 500);
 
-  await sb.from('events').insert({
-    session_id: signature,
-    peek_id: peekId,
-    kind: 'pick',
-    payload: { card_id: cardId, action: 'insert', pick_id: pickId },
+  trackFireAndForget({
+    name: 'pick',
+    peekId,
+    userId: null,
+    sessionId: signature,
+    payload: {
+      card_id: cardId,
+      action: 'insert',
+      pick_id: pickId,
+      recipient_signature: signature,
+    },
   });
 
   return jsonResponse({ ok: true, pickId });
@@ -214,11 +227,16 @@ export async function DELETE(req: NextRequest): Promise<Response> {
     .select('id');
   if (delRes.error) return jsonResponse({ error: delRes.error.message }, 500);
 
-  await sb.from('events').insert({
-    session_id: signature,
-    peek_id: peekId,
-    kind: 'pick',
-    payload: { card_id: cardId, action: 'delete' },
+  trackFireAndForget({
+    name: 'pick',
+    peekId,
+    userId: null,
+    sessionId: signature,
+    payload: {
+      card_id: cardId,
+      action: 'delete',
+      recipient_signature: signature,
+    },
   });
 
   return jsonResponse({

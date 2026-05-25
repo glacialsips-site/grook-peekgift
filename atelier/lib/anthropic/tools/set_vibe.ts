@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks, type Vibe } from '@/db/schema';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
 const PaletteSchema = z.object({
@@ -196,6 +197,15 @@ registerTool<Input, Output>({
         updatedAt: new Date(),
       })
       .where(eq(peeks.id, ctx.peekId));
+
+    trackFireAndForget({
+      name: 'vibe_evolved',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+      payload: { source: 'set_vibe', patch: parsed as Record<string, unknown> },
+    });
+
     return { ok: true, vibe: next };
   },
 });

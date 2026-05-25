@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/stripe/(.*)',     // signed Stripe webhooks
   '/api/pick(.*)',        // recipient picks (HMAC-signed cookie auth, not Clerk)
   '/api/og/(.*)',         // public OG images
+  '/api/posthog/(.*)',    // PostHog reverse proxy
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

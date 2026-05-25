@@ -7,12 +7,12 @@ import {
   anonymousTurnCount,
   anonymousTurnExceeded,
   assertPeekAccess,
-  recordEvent,
 } from '@/lib/chat/session';
 import {
   appendChatMessage,
   loadChatHistory,
 } from '@/lib/chat/persistence';
+import { track } from '@/lib/analytics/facade';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
 
 export const runtime = 'nodejs';
@@ -126,6 +126,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       const turnUsages: TurnUsage[] = [];
       let toolCallTotal = 0;
       const pendingToolNames = new Map<string, string>();
+      const turnStartedAt = Date.now();
 
       try {
         await appendChatMessage({
@@ -253,11 +254,11 @@ export async function POST(req: NextRequest): Promise<Response> {
           { input_tokens: 0, output_tokens: 0 },
         );
 
-        await recordEvent({
+        await track({
+          name: 'chat_turn',
           peekId,
           userId,
           sessionId,
-          kind: 'chat_turn',
           payload: {
             tokens_in: aggregated.input_tokens,
             tokens_out: aggregated.output_tokens,
@@ -266,6 +267,7 @@ export async function POST(req: NextRequest): Promise<Response> {
               aggregated.cache_creation_input_tokens ?? 0,
             tool_calls: toolCallTotal,
             iterations: turnUsages.length,
+            latency_ms: Date.now() - turnStartedAt,
             model: chosenModel,
           },
         });

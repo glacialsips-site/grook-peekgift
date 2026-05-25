@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { db } from '@/db/client';
-import { events } from '@/db/schema';
 import { scrapePipeline } from '@/lib/scrape/pipeline';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
+import { trackFireAndForget } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
 const InputSchema = z.object({
@@ -42,31 +41,31 @@ registerTool<Input, Output>({
       buildClickCustomId(ctx.peekId),
     );
 
-    await db.insert(events).values({
+    trackFireAndForget({
+      name: 'scrape_url_requested',
+      peekId: ctx.peekId,
       userId: ctx.userId,
       sessionId: ctx.sessionId,
-      peekId: ctx.peekId,
-      kind: 'scrape_url_requested',
       payload: { url: parsed.url },
     });
 
     const outcome = await scrapePipeline(parsed.url);
     if (!outcome.ok) {
-      await db.insert(events).values({
+      trackFireAndForget({
+        name: 'scrape_complete',
+        peekId: ctx.peekId,
         userId: ctx.userId,
         sessionId: ctx.sessionId,
-        peekId: ctx.peekId,
-        kind: 'scrape_complete',
         payload: { url: parsed.url, ok: false, error: outcome.error },
       });
       return { ok: false, error: outcome.error };
     }
 
-    await db.insert(events).values({
+    trackFireAndForget({
+      name: 'scrape_complete',
+      peekId: ctx.peekId,
       userId: ctx.userId,
       sessionId: ctx.sessionId,
-      peekId: ctx.peekId,
-      kind: 'scrape_complete',
       payload: {
         url: parsed.url,
         ok: true,

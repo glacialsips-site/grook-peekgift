@@ -3,6 +3,7 @@ import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe/client';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { track } from '@/lib/analytics/facade';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -90,11 +91,12 @@ export async function POST(req: NextRequest): Promise<Response> {
     return new Response(`update failed: ${updErr.message}`, { status: 500 });
   }
 
-  await sb.from('events').insert({
-    user_id: curatorId,
-    peek_id: peekId,
-    kind: 'publish',
+  await track({
+    name: 'publish',
+    peekId,
+    userId: curatorId,
     payload: {
+      mock: false,
       stripe_checkout_session_id: session.id,
       stripe_payment_intent_id: paymentIntentId,
       amount_total: session.amount_total,
