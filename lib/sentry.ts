@@ -10,12 +10,11 @@ async function ensureInit() {
   const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
   if (!dsn) return null;
   try {
-    const mod = await import('@sentry/nextjs');
-    mod.init({
-      dsn,
-      tracesSampleRate: 0.1,
-      environment: process.env.NODE_ENV || 'production'
-    });
+    // Dynamic require so the package is only loaded if a DSN is configured.
+    // Package isn't in package.json by default to avoid build-time webpack-plugin weirdness;
+    // when you decide to wire Sentry, run `npm i @sentry/nextjs` and set SENTRY_DSN.
+    const mod = await (Function('return import("@sentry/nextjs")')() as Promise<any>);
+    mod.init({ dsn, tracesSampleRate: 0.1, environment: process.env.NODE_ENV || 'production' });
     _Sentry = mod;
     return _Sentry;
   } catch {

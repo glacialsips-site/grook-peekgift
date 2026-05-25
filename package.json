@@ -18,13 +18,10 @@
     "@netlify/blobs": "8.1.2",
     "stripe": "17.4.0",
     "pg": "8.13.1",
-    "@sentry/nextjs": "8.42.0",
     "posthog-node": "4.5.1",
-    "posthog-js": "1.196.1",
     "clsx": "2.1.1"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "5.15.11",
     "@types/node": "22.9.0",
     "@types/pg": "8.11.10",
     "@types/react": "19.2.0",
