@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { events, peeks } from '@/db/schema';
+import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
 const SourceSchema = z.enum([
@@ -58,12 +59,16 @@ registerTool<Input, Output>({
       userId: ctx.userId,
       sessionId: ctx.sessionId,
       peekId: ctx.peekId,
-      kind: 'todo_palette_extract',
+      kind: 'palette_extract_scheduled',
       payload: {
         image_url: parsed.image_url,
         source: parsed.source,
-        note: 'palette extraction pending implementation in future packet',
       },
+    });
+
+    scheduleEvolveVibe(ctx.peekId, {
+      kind: 'hero_image',
+      imageUrl: parsed.image_url,
     });
 
     return { ok: true, image_url: parsed.image_url, source: parsed.source };
