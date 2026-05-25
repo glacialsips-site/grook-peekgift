@@ -12,10 +12,16 @@ export const peekStatus = peekV2.enum('peek_status', [
 
 export type Vibe = {
   tone?: string;
-  palette?: string[];
+  palette?: {
+    bg: string;
+    surface: string;
+    ink: string;
+    accent: string;
+    accent2?: string;
+  };
   mood_words?: string[];
-  motion?: string;
-  font_pairing?: string;
+  motion?: 'still' | 'soft' | 'lively';
+  font_pairing?: { display: string; body: string };
 };
 
 export const peeks = peekV2.table(
@@ -23,9 +29,7 @@ export const peeks = peekV2.table(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     slug: text('slug').notNull().unique(),
-    curatorId: text('curator_id')
-      .notNull()
-      .references(() => users.clerkUserId),
+    curatorId: text('curator_id').references(() => users.clerkUserId),
     recipientName: text('recipient_name'),
     relationship: text('relationship'),
     occasion: text('occasion'),
@@ -41,6 +45,10 @@ export const peeks = peekV2.table(
     publishedAt: timestamp('published_at', { withTimezone: true }),
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     shareUrl: text('share_url'),
+    metadata: jsonb('metadata')
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .default(sql`now()`),
