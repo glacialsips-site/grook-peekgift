@@ -26,4 +26,5 @@ export function supabaseBrowser(): any {
   });
 }
 
-export const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'peek-v2-assets';
+// Read a *dedicated* env var so we don't collide with the legacy app's SUPABASE_STORAGE_BUCKET.
+export const STORAGE_BUCKET = process.env.PEEK_V2_STORAGE_BUCKET || 'peek-v2-assets';
