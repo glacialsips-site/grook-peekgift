@@ -178,7 +178,7 @@ A markdown doc the user reads ONCE to set up Clerk. Not loaded by the app, just 
 ## Validation
 
 ```bash
-cd atelier && npm run typecheck
+cd atelier && npm install && npm run build
 ```
 
 ## Reply format

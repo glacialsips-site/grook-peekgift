@@ -190,7 +190,7 @@ Barrel re-exporting `anthropic`, `chatTurn`, `streamMessage`, `getSystemPrompt`,
 ## Validation
 
 ```bash
-cd atelier && npm run typecheck
+cd atelier && npm install && npm run build
 ```
 
 ## Reply format

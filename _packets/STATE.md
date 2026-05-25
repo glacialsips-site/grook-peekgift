@@ -39,12 +39,12 @@ _Last updated: 2026-05-25 by orchestrator_
 
 | # | Title | Worker | Depends on | Status |
 |---|---|---|---|---|
-| 01 | Foundation — Next.js + TS + Tailwind + env loader | cc-on-web | none | **READY TO DISPATCH** |
-| 02 | DB — Drizzle schema + migrations for `peek_v2` | cc-on-web | 01 | drafted |
-| 03 | Anthropic — client wrapper + tool definitions skeleton | cc-on-web | 01 | drafted |
-| 04 | Supabase clients — server/browser/service-role + RLS helpers | cc-on-web | 01 | drafted |
-| 05 | UI primitives — shadcn/ui base + theme provider + adaptive Vibe renderer | cc-on-web | 01 | drafted |
-| 06 | Clerk integration — provider, middleware, sign-in/up routes, JWT template doc | cc-on-web | 01 | drafted |
+| 01 | Foundation — Next.js 16 + TS 6 + Tailwind v4 + env loader | cc-on-web | none | **DONE** (merged c68e645, build green) |
+| 02 | DB — Drizzle schema + migrations for `peek_v2` | cc-on-web | 01 | **READY TO DISPATCH** |
+| 03 | Anthropic — client wrapper + tool definitions skeleton | cc-on-web | 01 | **READY TO DISPATCH** |
+| 04 | Supabase clients — server/browser/service-role + RLS helpers | cc-on-web | 01 | **READY TO DISPATCH** |
+| 05 | UI primitives — shadcn/ui v4 base + theme provider + adaptive Vibe renderer | cc-on-web | 01 | **READY TO DISPATCH** |
+| 06 | Clerk integration — middleware, sign routes, webhook | cc-on-web | 01 | **READY TO DISPATCH** |
 
 After 02-06 land, next batch: 07 chat API + streaming, 08 chat UI + live preview, 09 pricing/checkout, 10 share/OG, 11 recipient view, 12 group co-curation, 13 affiliate link layer, 14 analytics instrumentation, 15 Inngest jobs, 16 social outbound.
 

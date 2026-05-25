@@ -154,7 +154,7 @@ Barrel re-exporting `createSupabaseServer`, `getSupabaseBrowser`, `getSupabaseSe
 ## Validation
 
 ```bash
-cd atelier && npm run typecheck
+cd atelier && npm install && npm run build
 ```
 
 ## Reply format

@@ -39,6 +39,18 @@ Then in body:
 
 Model after [packet 26 of the prior project](https://example) — single-file scope where possible, inline code stubs for fiddly logic, "be terse" instruction at the end.
 
+## Validation rule (every packet)
+
+Workers MUST run this before declaring done:
+
+```bash
+cd atelier && npm install && npm run build
+```
+
+`npm run build` generates `next-env.d.ts` (which is gitignored), runs TypeScript checking, and proves the app compiles end-to-end. **A bare `npm run typecheck` will falsely fail on fresh checkouts** because `next-env.d.ts` doesn't exist yet — use `build`.
+
+If build fails, do NOT push. Either fix in-packet (preferred) or surface in `NOTES.md` and push anyway with a clear "blocked" status so the orchestrator can write a fix-packet.
+
 ## Worker execution
 
 ### Claude Code on web worker

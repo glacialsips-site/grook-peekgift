@@ -113,7 +113,7 @@ All components use `cn` from `@/lib/utils`. All forward refs. All use the theme 
 ## Validation
 
 ```bash
-cd atelier && npm run typecheck && npm run build
+cd atelier && npm install && npm run build
 ```
 
 ## Reply format
