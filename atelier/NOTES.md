@@ -1,49 +1,62 @@
-# Packet 26 — Inngest jobs
+# Packet 30 — Type safety pass
 
-## Deferred wiring
+## Counts
 
-- **`@/lib/scrape/*` (packet 22)** does not exist on `atelier-integration` base. `lib/jobs/scrape-worker.ts` calls `${env.APP_URL}/api/scrape` over fetch (same indirection the packet body shows), so no direct import of `lib/scrape/*` is needed — the scrape implementation lands behind `/api/scrape` in packet 22. **No inline stub**. Worker function will runtime-error on `peek/scrape.requested` events until that route exists; Inngest's built-in 3-retry policy will exhaust and the placeholder card title stays at "Scraping…". `lib/anthropic/tools/scrape_url.ts` still inserts the placeholder and fires the event regardless — orchestrator should accept retries-to-fail until packet 22 merges, or temporarily disable the function in the Inngest dashboard.
-- **`@/lib/analytics/facade` (packet 25)** does not exist either. The packet 26 prompt imported `track(...)` in the nudge function but only inside a comment. I omitted the import entirely; nudge dedupe + result tracking is done via the existing `peek_v2.events` table. When packet 25 lands, the orchestrator can layer `track()` calls into `nudge-relationships.ts` alongside the existing `events` insert.
-- **`app/api/webhooks/skimlinks/route.ts`** (packet 24) does not exist. Not modified.
+- **`as unknown as` casts removed:** 3 of 4. One remains by design at `atelier/lib/anthropic/tools/index.ts:24` (registry generic-erasure); documented in `_packets/COMMENTS.md`.
+- **`: any` annotations killed:** 0 — base trunk was already clean (zero `: any`, zero `<any>`, zero `any[]`). The few `any` occurrences in source files were all inside English text (system prompt, tool descriptions, JSDoc strings).
+- **`@ts-ignore` / `@ts-expect-error` directives removed:** 0 — none existed on trunk.
+- **`Record<string, unknown>` placeholder Database types removed:** 1 (the `AnyTable`/`AnyRow` scaffold in `lib/supabase/types.ts`).
+- **Hand-rolled snake_case row types deleted:** ~12 (`RawPeekRow`, `RawCardRow`, `RawVariantGroupRow`, `RawPickRow`, `PeekRow`, `PeekMetaRow`, `PeekShareRow`, `PeekOgRow`, `CardRow`, `GroupRow`, `PeekSharePageRow`, etc.) — all rows now flow from the typed `DbRow<'table'>` helper.
+- **Zod schemas tightened with `.strict()`:** 14 (every tool input schema + `ChatRequestSchema` + `/api/checkout` + `/api/pick` POST + `/api/pick` DELETE + `/api/scrape` + `/api/share/send` + skimlinks webhook payload).
+- **`tsconfig` knobs added:** `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`. (`noUncheckedIndexedAccess` was already on.)
 
-## API choices vs packet body
+## Architecture: Drizzle-as-canonical Database type
 
-- **Inngest 4.x API drift.** The prompt body used Inngest 3-style `createFunction(opts, trigger, handler)` and a `signingKey` prop on `serve()`. v4 (`inngest@4.4.0`, installed) uses `createFunction({ ..., triggers: [...] }, handler)` and reads `signingKey` from the client constructor. Implementation follows v4. Triggers built via `eventType(name, { schema: staticSchema<T>() })` + `cron('...')` so the event-data is typed inside handlers (no `any` outside the SQL row cast).
-- **Cron trigger** declared via `cron('0 14 * * *')` inside the function options, replacing the `{ cron: '...' }` literal in the prompt.
-- **Inngest client `signingKey`** is wired at construction time, not in serve options. `env.INNGEST_SIGNING_KEY` was already declared in `lib/env.ts`.
+`atelier/lib/supabase/database.types.ts` (new) derives the Supabase JS client `Database` shape from every Drizzle table's `$inferSelect` / `$inferInsert`. Two layers:
 
-## Files written
+1. **`CamelToSnake<S>`** template-literal type — maps Drizzle's camelCase TS field names (`curatorId`) to the Postgres snake_case column names that `.from('peeks').select('curator_id')` actually queries.
+2. **`WireSelect<T>` / `WireInsert<T>`** — replace `Date` with `string` on Row (Supabase REST returns ISO strings, not `Date`); accept `Date | string` on Insert so callers can pass either. **Critical fix**: the `Date`-replacement conditional uses `V extends Date ? string : V` rather than `V extends Date | null ? string | null : V` to avoid TS's distributive-conditional eating null unions and silently widening `number | null` to `string | number | null`.
 
-- `atelier/lib/inngest/client.ts` — Inngest 4 client + three typed `eventType` exports (`scrapeRequestedEvent`, `nudgeDailyEvent`, `webhookReceivedEvent`). `signingKey` on client.
-- `atelier/db/schema/webhook_log.ts` — new table; re-exported from `db/schema/index.ts`.
-- `atelier/lib/jobs/nudge-relationships.ts` — daily cron (14:00 UTC); finds birthdays/anniversaries exactly 14 days out using `date_part('year', age(...))` to compute the next anniversary regardless of stored year; dedupes via `events` table by `(relationshipId, kind, year)` (year-of-`ts` window); sends via `sendEmail` with new template.
-- `atelier/lib/email/templates/relationship-nudge.tsx` — Resend-compatible inline-style React email; tone matches existing `peek-published.tsx`.
-- `atelier/lib/jobs/scrape-worker.ts` — listens for `peek/scrape.requested`; retries 3x; updates placeholder card.
-- `atelier/lib/jobs/webhook-logger.ts` — listens for `peek/webhook.received`; inserts into `webhook_log`.
-- `atelier/app/api/inngest/route.ts` — `serve(...)` exporting GET/POST/PUT.
-- `atelier/proxy.ts` — added `/api/inngest(.*)` to public-routes list.
-- `atelier/lib/anthropic/tools/scrape_url.ts` — now inserts placeholder card immediately, fires `peek/scrape.requested`, returns `{ ok: true, card_id, pending: true }`. Dispatch failures are logged to `events` so the placeholder isn't orphaned silently.
-- `atelier/app/api/stripe/webhook/route.ts` — wrapped in try/finally that fires `peek/webhook.received` (source `stripe`); inngest.send errors swallowed so they can't block the webhook response.
-- `atelier/app/api/webhooks/clerk/route.ts` — same try/finally pattern (source `clerk`).
+Exports a `DbRow<T>` / `DbInsert<T>` / `DbUpdate<T>` helper so call sites can write `DbRow<'peeks'>` instead of dereferencing the full path.
 
-## Migration
+## Vibe re-canonicalization
 
-`drizzle-kit generate` was **not** run by this worker — would require a `DATABASE_URL` to read the existing schema diff cleanly, and the migration metadata snapshots are tightly coupled to other packets' commits. The orchestrator should run `npx drizzle-kit generate` after merge so the journal/snapshot is consistent with the trunk's evolution.
+`atelier/lib/peek/types.ts` now re-exports `Vibe`, `VibeCore`, `VibePalette`, `VibeMotion`, `VibePreset`, `VibeFontPairing`, `VibeSignalSource`, `VibeSignalSourceEntry` directly from `@/db/schema/peeks`. The previous UI-side duplicate Vibe (missing `preset`, `signal_source_history`) is gone. `UnlockRule` is now `Partial<SchemaUnlockRule>` so the empty-default jsonb satisfies the UI type without a cast.
 
-The required SQL is straightforward:
+## Trust-boundary casts kept (NOT `as unknown as`)
 
-```sql
-CREATE TABLE "peek_v2"."webhook_log" (
-  "id" bigserial PRIMARY KEY NOT NULL,
-  "source" text NOT NULL,
-  "payload" jsonb NOT NULL,
-  "success" boolean NOT NULL,
-  "received_at" timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "webhook_log_source_idx" ON "peek_v2"."webhook_log" ("source");
-CREATE INDEX "webhook_log_received_at_idx" ON "peek_v2"."webhook_log" ("received_at");
-```
+A handful of `as Type` casts remain at deserialization boundaries where runtime validation is impractical or would duplicate Zod work:
+
+- `app/api/chat/route.ts` history/userMessage cast to `Anthropic.MessageParam[]` / `ContentBlockParam[]`. The Zod schema in `app/api/chat/schema.ts` was tightened to validate role/content shape but full Anthropic block-union validation would duplicate the SDK's runtime guard.
+- `lib/peek/realtime.ts` / `components/recipient/realtime.ts` — Supabase realtime payloads come typed as `Record<string, unknown>`; converters use property-by-property runtime guards (`asString`, `asNullableNumber`, etc.) + literal-union narrows (`isCardType`, `isPeekStatus`, `isVariantSelection`).
+- `lib/jobs/nudge-relationships.ts` — Drizzle `db.execute<NudgeRow>(sql\`...\`)` returns a result whose `rows` accessor isn't exposed in the public type. Replaced the `as unknown as` cast with a narrowed `toArray<T>(result)` runtime-guard helper.
+- `app/api/webhooks/skimlinks/route.ts` raw_payload — replaced `evt as unknown as Record<string, unknown>` with a tiny `toRawPayload(evt: SkimlinksEvent)` spread (`{ ...evt }`); also moved JSON validation onto a Zod schema with `.passthrough()`.
+
+## Behavior changes (intentional)
+
+- **`app/api/webhooks/clerk/route.ts`** — when a Clerk user has no primary email address, the upsert is skipped (returns `200 ok`) rather than passing `null` to a `notNull()` column and erroring with `upsert failed`. The Drizzle schema for `users.email` is `text().notNull()`; the route was previously type-cheating with `as` and would have hit a Postgres constraint violation at runtime. Now fails cleanly with a 200 "missing email" response and `success=true` on the webhook-log.
+- **`app/api/scrape/route.ts`** — `recordScrapeEvent` now uses `DbInsert<'events'>` instead of a `Record<string, unknown>`. Same wire format; just typed.
+
+## Files changed
+
+- New: `atelier/lib/supabase/database.types.ts`
+- Replaced: `atelier/lib/supabase/types.ts` (`AnyTable` scaffold → re-export of new Database)
+- Refactored: `atelier/lib/peek/types.ts` (Vibe re-canonicalization)
+- Refactored: every `/app/api/**/route.{ts,tsx}` that hits Supabase
+- Refactored: `/app/g/[slug]/{page,opengraph-image}.tsx`, `/app/build/**/page.tsx`, `/app/build/[peekId]/publish/publish-status.tsx`
+- Refactored: `lib/{analytics/facade,chat/{session,persistence},peek/realtime,jobs/nudge-relationships,vibe/{evolve,classify-tone}}.ts`
+- Refactored: `components/recipient/realtime.ts`
+- Tightened Zod (`.strict()` + URL/cents bounds + regex hex colors): every `lib/anthropic/tools/*.ts` + `app/api/chat/schema.ts` + share/send + pick + checkout + scrape routes
+- Trivial process.env index-access fixes for `noPropertyAccessFromIndexSignature`: `db/{client,migrate}.ts`, `drizzle.config.ts`, `instrumentation.ts`, `instrumentation-client.ts`, `components/providers.tsx`, `app/api/posthog/[...path]/route.ts`, `app/api/stripe/webhook/route.ts`, `lib/vibe/classify-tone.ts`
+- `tsconfig.json`: added `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`
 
 ## Validation
 
-`cd atelier && npm install && APP_URL=http://localhost:3000 npm run typecheck` — green.
+`cd atelier && APP_URL=http://localhost:3000 npm install && npm run typecheck` — green.
+`cd atelier && APP_URL=http://localhost:3000 npm run build` — green; all 21 routes compile (15 page routes + 6 internal). No new warnings beyond pre-existing edge-runtime + ANTHROPIC_API_KEY-not-set notices.
+
+## Deviations from prompt
+
+- **Did not run `supabase gen types`** — explicitly forbidden by the prompt's rewritten "Build the Database type from Drizzle" section. Implementation uses the Drizzle adapter as instructed.
+- **Did not delete `RawPeekRow` etc. from a single shared module** — they were already file-local in every page/route file. Deleted in place rather than centralizing.
+- **One `as unknown as` survives at `lib/anthropic/tools/index.ts:24`** — registry generic-erasure. Per packet 30's explicit instruction (`handler: handler(input as never, ctx)` discussion), this cast is correct and is logged in `_packets/COMMENTS.md`.

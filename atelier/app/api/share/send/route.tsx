@@ -11,21 +11,15 @@ import { trackFireAndForget } from '@/lib/analytics/facade';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const BodySchema = z.object({
-  peekId: z.string().uuid(),
-  channel: z.enum(['sms', 'email']),
-  destination: z.string().min(3),
-  message: z.string().max(2000).default(''),
-  senderName: z.string().max(120).optional(),
-});
-
-type PeekShareRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  recipient_name: string | null;
-  status: string;
-};
+const BodySchema = z
+  .object({
+    peekId: z.string().uuid(),
+    channel: z.enum(['sms', 'email']),
+    destination: z.string().min(3).max(320),
+    message: z.string().max(2000).default(''),
+    senderName: z.string().max(120).optional(),
+  })
+  .strict();
 
 function buildShareUrl(slug: string): string {
   const base = env.APP_URL.replace(/\/+$/, '');
@@ -116,7 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   const input = parsed.data;
 
   const db = getSupabaseService();
-  const { data: peekData, error: peekErr } = await db
+  const { data: peek, error: peekErr } = await db
     .from('peeks')
     .select('id, slug, curator_id, recipient_name, status')
     .eq('id', input.peekId)
@@ -124,7 +118,6 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (peekErr) {
     return jsonResponse({ error: 'lookup_failed' }, 500);
   }
-  const peek = peekData as PeekShareRow | null;
   if (!peek) {
     return jsonResponse({ error: 'peek_not_found' }, 404);
   }

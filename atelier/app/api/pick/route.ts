@@ -9,36 +9,23 @@ import { trackFireAndForget } from '@/lib/analytics/facade';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const PickBody = z.object({
-  peekId: z.string().uuid(),
-  cardId: z.string().uuid(),
-  recipientSessionId: z.string().min(1),
-  begMessage: z.string().max(2000).optional(),
-  recipientNote: z.string().max(2000).optional(),
-});
+const PickBody = z
+  .object({
+    peekId: z.string().uuid(),
+    cardId: z.string().uuid(),
+    recipientSessionId: z.string().min(1).max(200),
+    begMessage: z.string().max(2000).optional(),
+    recipientNote: z.string().max(2000).optional(),
+  })
+  .strict();
 
-const DeleteBody = z.object({
-  peekId: z.string().uuid(),
-  cardId: z.string().uuid(),
-  recipientSessionId: z.string().min(1),
-});
-
-type CardRow = {
-  id: string;
-  peek_id: string;
-  variant_group_id: string | null;
-  is_taunt: boolean;
-};
-
-type PeekRow = {
-  id: string;
-  status: string;
-};
-
-type GroupRow = {
-  id: string;
-  selection: 'pick_one' | 'pick_any' | 'pick_all';
-};
+const DeleteBody = z
+  .object({
+    peekId: z.string().uuid(),
+    cardId: z.string().uuid(),
+    recipientSessionId: z.string().min(1).max(200),
+  })
+  .strict();
 
 function signRecipient(sessionId: string): string {
   const secret = env.GUEST_CLAIM_TOKEN_SECRET;
@@ -83,8 +70,8 @@ export async function POST(req: NextRequest): Promise<Response> {
     .maybeSingle();
   if (cardRes.error) return jsonResponse({ error: cardRes.error.message }, 500);
   if (!cardRes.data) return jsonResponse({ error: 'card_not_found' }, 404);
+  const card = cardRes.data;
 
-  const card = cardRes.data as CardRow;
   if (card.peek_id !== peekId) {
     return jsonResponse({ error: 'card_peek_mismatch' }, 400);
   }
@@ -99,8 +86,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     .maybeSingle();
   if (peekRes.error) return jsonResponse({ error: peekRes.error.message }, 500);
   if (!peekRes.data) return jsonResponse({ error: 'peek_not_found' }, 404);
-  const peek = peekRes.data as PeekRow;
-  if (peek.status !== 'published') {
+  if (peekRes.data.status !== 'published') {
     return jsonResponse({ error: 'peek_not_published' }, 409);
   }
 
@@ -114,17 +100,14 @@ export async function POST(req: NextRequest): Promise<Response> {
       .maybeSingle();
     if (groupRes.error) return jsonResponse({ error: groupRes.error.message }, 500);
     if (groupRes.data) {
-      const group = groupRes.data as GroupRow;
-      groupSelection = group.selection;
+      groupSelection = groupRes.data.selection;
       const siblingsRes = await sb
         .from('cards')
         .select('id')
         .eq('variant_group_id', card.variant_group_id);
       if (siblingsRes.error)
         return jsonResponse({ error: siblingsRes.error.message }, 500);
-      siblingCardIds = ((siblingsRes.data as { id: string }[] | null) ?? []).map(
-        (r) => r.id,
-      );
+      siblingCardIds = (siblingsRes.data ?? []).map((r) => r.id);
     }
   }
 
@@ -147,7 +130,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (existingRes.error)
       return jsonResponse({ error: existingRes.error.message }, 500);
     if (existingRes.data) {
-      const pickId = (existingRes.data as { id: string }).id;
+      const pickId = existingRes.data.id;
       const updateRes = await sb
         .from('picks')
         .update({
@@ -241,6 +224,6 @@ export async function DELETE(req: NextRequest): Promise<Response> {
 
   return jsonResponse({
     ok: true,
-    deleted: ((delRes.data as { id: string }[] | null) ?? []).length,
+    deleted: (delRes.data ?? []).length,
   });
 }

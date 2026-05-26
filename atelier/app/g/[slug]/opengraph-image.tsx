@@ -11,7 +11,7 @@ type PeekOgRow = {
   recipient_name: string | null;
   occasion: string | null;
   hero_image_url: string | null;
-  vibe: Vibe | null;
+  vibe: Vibe;
 };
 
 const DEFAULT_PALETTE: Required<Pick<VibePalette, 'bg' | 'surface' | 'ink' | 'accent'>> & {
@@ -24,8 +24,8 @@ const DEFAULT_PALETTE: Required<Pick<VibePalette, 'bg' | 'surface' | 'ink' | 'ac
   accent2: '#ffd166',
 };
 
-function resolvePalette(vibe: Vibe | null) {
-  const palette = vibe?.palette;
+function resolvePalette(vibe: Vibe) {
+  const palette = vibe.palette;
   return {
     bg: palette?.bg ?? DEFAULT_PALETTE.bg,
     surface: palette?.surface ?? DEFAULT_PALETTE.surface,
@@ -90,7 +90,14 @@ export default async function Image({
       .select('recipient_name, occasion, hero_image_url, vibe')
       .eq('slug', slug)
       .maybeSingle();
-    peek = (data as PeekOgRow | null) ?? null;
+    if (data) {
+      peek = {
+        recipient_name: data.recipient_name,
+        occasion: data.occasion,
+        hero_image_url: data.hero_image_url,
+        vibe: data.vibe,
+      };
+    }
   } catch {
     peek = null;
   }

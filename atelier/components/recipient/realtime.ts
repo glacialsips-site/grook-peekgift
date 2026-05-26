@@ -8,8 +8,10 @@ import type {
   RealtimePostgresUpdatePayload,
 } from '@supabase/supabase-js';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
+import type { DbRow } from '@/lib/supabase/database.types';
 
-type AnyRow = Record<string, unknown>;
+type PickRow = DbRow<'picks'>;
+type RealtimeRow = Record<string, unknown>;
 
 export type RecipientPick = {
   pickId: string;
@@ -18,28 +20,17 @@ export type RecipientPick = {
   recipientNote: string | null;
 };
 
-type PickRow = {
-  id?: string | null;
-  card_id?: string | null;
-  beg_message?: string | null;
-  recipient_note?: string | null;
-};
-
-type FetchPickRow = {
-  id: string;
-  card_id: string;
-  beg_message: string | null;
-  recipient_note: string | null;
-};
-
-function rowToPick(row: AnyRow): RecipientPick | null {
-  const r = row as PickRow;
-  if (!r.id || !r.card_id) return null;
+function rowToPick(row: RealtimeRow): RecipientPick | null {
+  const id = row['id'];
+  const cardId = row['card_id'];
+  if (typeof id !== 'string' || typeof cardId !== 'string') return null;
+  const begMessage = row['beg_message'];
+  const recipientNote = row['recipient_note'];
   return {
-    pickId: String(r.id),
-    cardId: String(r.card_id),
-    begMessage: (r.beg_message as string | null) ?? null,
-    recipientNote: (r.recipient_note as string | null) ?? null,
+    pickId: id,
+    cardId,
+    begMessage: typeof begMessage === 'string' ? begMessage : null,
+    recipientNote: typeof recipientNote === 'string' ? recipientNote : null,
   };
 }
 
@@ -75,18 +66,18 @@ export function usePeekPicks(
       .select('id, card_id, beg_message, recipient_note')
       .eq('peek_id', peekId);
     if (error || !data) return;
-    const rows = data as unknown as FetchPickRow[];
+    const rows: Pick<
+      PickRow,
+      'id' | 'card_id' | 'beg_message' | 'recipient_note'
+    >[] = data;
     setPicks(
       rows
-        .map((r): RecipientPick | null => {
-          if (!r.id || !r.card_id) return null;
-          return {
-            pickId: r.id,
-            cardId: r.card_id,
-            begMessage: r.beg_message,
-            recipientNote: r.recipient_note,
-          };
-        })
+        .map((r): RecipientPick | null => ({
+          pickId: r.id,
+          cardId: r.card_id,
+          begMessage: r.beg_message,
+          recipientNote: r.recipient_note,
+        }))
         .filter((v): v is RecipientPick => v !== null),
     );
   }, [peekId]);
@@ -103,11 +94,11 @@ export function usePeekPicks(
           table: 'picks',
           filter: `peek_id=eq.${peekId}`,
         },
-        (payload: RealtimePostgresChangesPayload<AnyRow>) => {
+        (payload: RealtimePostgresChangesPayload<RealtimeRow>) => {
           setPicks((prev) => {
             if (payload.eventType === 'INSERT') {
               const next = rowToPick(
-                (payload as RealtimePostgresInsertPayload<AnyRow>).new,
+                (payload as RealtimePostgresInsertPayload<RealtimeRow>).new,
               );
               if (!next) return prev;
               const exists = prev.some((p) => p.pickId === next.pickId);
@@ -117,15 +108,16 @@ export function usePeekPicks(
             }
             if (payload.eventType === 'UPDATE') {
               const next = rowToPick(
-                (payload as RealtimePostgresUpdatePayload<AnyRow>).new,
+                (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
               );
               if (!next) return prev;
               return prev.map((p) => (p.pickId === next.pickId ? next : p));
             }
             if (payload.eventType === 'DELETE') {
-              const oldRow = (payload as RealtimePostgresDeletePayload<AnyRow>)
+              const oldRow = (payload as RealtimePostgresDeletePayload<RealtimeRow>)
                 .old;
-              const oldId = oldRow ? String(oldRow.id ?? '') : '';
+              const oldIdRaw = oldRow ? oldRow['id'] : null;
+              const oldId = typeof oldIdRaw === 'string' ? oldIdRaw : '';
               if (!oldId) return prev;
               return prev.filter((p) => p.pickId !== oldId);
             }

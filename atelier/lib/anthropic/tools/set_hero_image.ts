@@ -12,10 +12,12 @@ const SourceSchema = z.enum([
   'external',
 ]);
 
-const InputSchema = z.object({
-  image_url: z.string().url(),
-  source: SourceSchema,
-});
+const InputSchema = z
+  .object({
+    image_url: z.string().url(),
+    source: SourceSchema,
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

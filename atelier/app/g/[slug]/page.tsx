@@ -4,12 +4,14 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
+import type { DbRow } from '@/lib/supabase/database.types';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
 import type {
   Card,
   Peek,
   PeekDraft,
+  UnlockRule,
   VariantGroup,
   Vibe,
 } from '@/lib/peek/types';
@@ -19,65 +21,12 @@ export const dynamic = 'force-dynamic';
 const COOKIE_NAME = 'recipient_session';
 const COOKIE_TTL_DAYS = 365;
 
-type RawPeekRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  recipient_name: string | null;
-  relationship: string | null;
-  occasion: string | null;
-  vibe: Vibe | null;
-  hero_image_url: string | null;
-  hero_image_source: string | null;
-  hero_prompt: string | null;
-  note_md: string | null;
-  status: Peek['status'];
-  metadata: Record<string, unknown> | null;
-  updated_at: string;
-};
+type PeekRow = DbRow<'peeks'>;
+type CardRow = DbRow<'cards'>;
+type VariantGroupRow = DbRow<'variant_groups'>;
+type PickRow = DbRow<'picks'>;
 
-type RawCardRow = {
-  id: string;
-  peek_id: string;
-  variant_group_id: string | null;
-  position: number;
-  type: Card['type'];
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  value_cents: number | null;
-  reveal_value: boolean;
-  is_taunt: boolean;
-  taunt_text: string | null;
-  is_locked: boolean;
-  unlock_rule: Card['unlockRule'] | null;
-  proposed_date: string | null;
-  location_hint: string | null;
-  added_by_user_id: string | null;
-};
-
-type RawVariantGroupRow = {
-  id: string;
-  peek_id: string;
-  title: string;
-  selection: VariantGroup['selection'];
-  position: number;
-};
-
-type RawPickRow = {
-  id: string;
-  card_id: string;
-  recipient_signature: string;
-  beg_message: string | null;
-  recipient_note: string | null;
-};
-
-type PeekMetaRow = {
-  recipient_name: string | null;
-  occasion: string | null;
-};
-
-function toPeek(row: RawPeekRow): Peek {
+function toPeek(row: PeekRow): Peek {
   return {
     id: row.id,
     slug: row.slug,
@@ -85,7 +34,7 @@ function toPeek(row: RawPeekRow): Peek {
     recipientName: row.recipient_name,
     relationship: row.relationship,
     occasion: row.occasion,
-    vibe: (row.vibe ?? {}) as Vibe,
+    vibe: row.vibe,
     heroImageUrl: row.hero_image_url,
     heroImageSource: row.hero_image_source,
     heroPrompt: row.hero_prompt,
@@ -96,7 +45,8 @@ function toPeek(row: RawPeekRow): Peek {
   };
 }
 
-function toCard(row: RawCardRow): Card {
+function toCard(row: CardRow): Card {
+  const unlockRule: UnlockRule = row.unlock_rule;
   return {
     id: row.id,
     peekId: row.peek_id,
@@ -111,14 +61,14 @@ function toCard(row: RawCardRow): Card {
     isTaunt: row.is_taunt,
     tauntText: row.taunt_text,
     isLocked: row.is_locked,
-    unlockRule: (row.unlock_rule ?? {}) as Card['unlockRule'],
+    unlockRule,
     proposedDate: row.proposed_date,
     locationHint: row.location_hint,
     addedByUserId: row.added_by_user_id,
   };
 }
 
-function toVariantGroup(row: RawVariantGroupRow): VariantGroup {
+function toVariantGroup(row: VariantGroupRow): VariantGroup {
   return {
     id: row.id,
     peekId: row.peek_id,
@@ -159,14 +109,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  let peek: PeekMetaRow | null = null;
+  let peek: Pick<PeekRow, 'recipient_name' | 'occasion'> | null = null;
   try {
     const { data } = await getSupabaseService()
       .from('peeks')
       .select('recipient_name, occasion')
       .eq('slug', slug)
       .maybeSingle();
-    peek = (data as PeekMetaRow | null) ?? null;
+    peek = data;
   } catch {
     peek = null;
   }
@@ -214,8 +164,7 @@ export default async function RecipientPage({
     throw new Error(`Failed to load peek: ${peekRes.error.message}`);
   }
   if (!peekRes.data) notFound();
-  const peekRow = peekRes.data as RawPeekRow;
-  const peek = toPeek(peekRow);
+  const peek = toPeek(peekRes.data);
 
   const recipientSessionId = await ensureRecipientSession();
 
@@ -239,11 +188,16 @@ export default async function RecipientPage({
   if (groupsRes.error) {
     throw new Error(`Failed to load variant groups: ${groupsRes.error.message}`);
   }
+  if (picksRes.error) {
+    throw new Error(`Failed to load picks: ${picksRes.error.message}`);
+  }
 
-  const cards = ((cardsRes.data as RawCardRow[] | null) ?? []).map(toCard);
-  const variantGroups = (
-    (groupsRes.data as RawVariantGroupRow[] | null) ?? []
-  ).map(toVariantGroup);
+  const cards = (cardsRes.data ?? []).map(toCard);
+  const variantGroups = (groupsRes.data ?? []).map(toVariantGroup);
+  const pickRows: Pick<
+    PickRow,
+    'id' | 'card_id' | 'beg_message' | 'recipient_note'
+  >[] = picksRes.data ?? [];
 
   const draft: PeekDraft = {
     peek,
@@ -251,7 +205,7 @@ export default async function RecipientPage({
     variantGroups: variantGroups.sort((a, b) => a.position - b.position),
   };
 
-  const myPicks = ((picksRes.data as RawPickRow[] | null) ?? []).map((p) => ({
+  const myPicks = pickRows.map((p) => ({
     pickId: p.id,
     cardId: p.card_id,
     begMessage: p.beg_message,

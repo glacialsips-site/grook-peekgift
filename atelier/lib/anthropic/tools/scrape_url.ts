@@ -6,9 +6,11 @@ import { trackFireAndForget } from '@/lib/analytics/facade';
 import { inngest } from '@/lib/inngest/client';
 import { registerTool } from './index';
 
-const InputSchema = z.object({
-  url: z.string().url(),
-});
+const InputSchema = z
+  .object({
+    url: z.string().url(),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 type Output =

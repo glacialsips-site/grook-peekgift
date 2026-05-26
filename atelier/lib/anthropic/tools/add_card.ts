@@ -14,29 +14,33 @@ const CardTypeSchema = z.enum([
   'digital',
 ]);
 
-const UnlockRuleSchema = z.object({
-  kind: z.enum(['beg', 'date_after', 'event']),
-  beg_prompt: z.string().min(1).max(280).optional(),
-  unlock_after: z.string().min(1).max(64).optional(),
-});
+const UnlockRuleSchema = z
+  .object({
+    kind: z.enum(['beg', 'date_after', 'event']),
+    beg_prompt: z.string().min(1).max(280).optional(),
+    unlock_after: z.string().min(1).max(64).optional(),
+  })
+  .strict();
 
-const InputSchema = z.object({
-  type: CardTypeSchema,
-  title: z.string().min(1).max(200),
-  description: z.string().max(2000).optional(),
-  image_url: z.string().url().optional(),
-  source_url: z.string().url().optional(),
-  source_retailer: z.string().max(120).optional(),
-  value_cents: z.number().int().nonnegative().optional(),
-  reveal_value: z.boolean().optional(),
-  variant_group_id: z.string().uuid().optional(),
-  proposed_date: z.string().datetime().optional(),
-  location_hint: z.string().max(280).optional(),
-  is_taunt: z.boolean().optional(),
-  taunt_text: z.string().max(280).optional(),
-  is_locked: z.boolean().optional(),
-  unlock_rule: UnlockRuleSchema.optional(),
-});
+const InputSchema = z
+  .object({
+    type: CardTypeSchema,
+    title: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
+    image_url: z.string().url().optional(),
+    source_url: z.string().url().optional(),
+    source_retailer: z.string().max(120).optional(),
+    value_cents: z.number().int().nonnegative().max(10_000_000).optional(),
+    reveal_value: z.boolean().optional(),
+    variant_group_id: z.string().uuid().optional(),
+    proposed_date: z.string().datetime().optional(),
+    location_hint: z.string().max(280).optional(),
+    is_taunt: z.boolean().optional(),
+    taunt_text: z.string().max(280).optional(),
+    is_locked: z.boolean().optional(),
+    unlock_rule: UnlockRuleSchema.optional(),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {
@@ -107,9 +111,8 @@ registerTool<Input, Output>({
       .limit(1);
     const nextPosition = (lastCard?.position ?? -1) + 1;
 
-    const unlockRule: UnlockRule | Record<string, never> = parsed.unlock_rule
-      ? (parsed.unlock_rule as UnlockRule)
-      : {};
+    const unlockRule: UnlockRule | Record<string, never> =
+      parsed.unlock_rule ?? {};
 
     const wrapped = parsed.source_url
       ? wrapAffiliateLink(parsed.source_url, buildClickCustomId(ctx.peekId))

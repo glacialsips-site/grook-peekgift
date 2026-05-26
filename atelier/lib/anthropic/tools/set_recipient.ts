@@ -4,11 +4,13 @@ import { db } from '@/db/client';
 import { peeks } from '@/db/schema';
 import { registerTool } from './index';
 
-const InputSchema = z.object({
-  recipient_name: z.string().min(1).max(120),
-  relationship: z.string().min(1).max(120).optional(),
-  occasion: z.string().min(1).max(120).optional(),
-});
+const InputSchema = z
+  .object({
+    recipient_name: z.string().min(1).max(120),
+    relationship: z.string().min(1).max(120).optional(),
+    occasion: z.string().min(1).max(120).optional(),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

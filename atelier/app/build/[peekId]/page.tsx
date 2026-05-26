@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabaseService } from '@/lib/supabase/service';
+import type { DbRow } from '@/lib/supabase/database.types';
 import { BuildSurface } from '@/components/build/build-surface';
 import type { InitialChatMessage } from '@/components/build/chat-pane';
 import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
@@ -8,58 +9,18 @@ import type {
   Card,
   Peek,
   PeekDraft,
+  UnlockRule,
   VariantGroup,
   Vibe,
 } from '@/lib/peek/types';
 
 export const dynamic = 'force-dynamic';
 
-type RawPeekRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  recipient_name: string | null;
-  relationship: string | null;
-  occasion: string | null;
-  vibe: Vibe | null;
-  hero_image_url: string | null;
-  hero_image_source: string | null;
-  hero_prompt: string | null;
-  note_md: string | null;
-  status: Peek['status'];
-  metadata: Record<string, unknown> | null;
-  updated_at: string;
-};
+type PeekRow = DbRow<'peeks'>;
+type CardRow = DbRow<'cards'>;
+type VariantGroupRow = DbRow<'variant_groups'>;
 
-type RawCardRow = {
-  id: string;
-  peek_id: string;
-  variant_group_id: string | null;
-  position: number;
-  type: Card['type'];
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  value_cents: number | null;
-  reveal_value: boolean;
-  is_taunt: boolean;
-  taunt_text: string | null;
-  is_locked: boolean;
-  unlock_rule: Card['unlockRule'] | null;
-  proposed_date: string | null;
-  location_hint: string | null;
-  added_by_user_id: string | null;
-};
-
-type RawVariantGroupRow = {
-  id: string;
-  peek_id: string;
-  title: string;
-  selection: VariantGroup['selection'];
-  position: number;
-};
-
-function toPeek(row: RawPeekRow): Peek {
+function toPeek(row: PeekRow): Peek {
   return {
     id: row.id,
     slug: row.slug,
@@ -67,7 +28,7 @@ function toPeek(row: RawPeekRow): Peek {
     recipientName: row.recipient_name,
     relationship: row.relationship,
     occasion: row.occasion,
-    vibe: row.vibe ?? {},
+    vibe: row.vibe,
     heroImageUrl: row.hero_image_url,
     heroImageSource: row.hero_image_source,
     heroPrompt: row.hero_prompt,
@@ -78,7 +39,8 @@ function toPeek(row: RawPeekRow): Peek {
   };
 }
 
-function toCard(row: RawCardRow): Card {
+function toCard(row: CardRow): Card {
+  const unlockRule: UnlockRule = row.unlock_rule;
   return {
     id: row.id,
     peekId: row.peek_id,
@@ -93,14 +55,14 @@ function toCard(row: RawCardRow): Card {
     isTaunt: row.is_taunt,
     tauntText: row.taunt_text,
     isLocked: row.is_locked,
-    unlockRule: (row.unlock_rule ?? {}) as Card['unlockRule'],
+    unlockRule,
     proposedDate: row.proposed_date,
     locationHint: row.location_hint,
     addedByUserId: row.added_by_user_id,
   };
 }
 
-function toVariantGroup(row: RawVariantGroupRow): VariantGroup {
+function toVariantGroup(row: VariantGroupRow): VariantGroup {
   return {
     id: row.id,
     peekId: row.peek_id,
@@ -134,12 +96,11 @@ export default async function BuildPeekPage({
   }
   if (!peekRow) notFound();
 
-  const row = peekRow as RawPeekRow;
-  const anonSessionId =
-    (row.metadata as { anonymous_session_id?: string } | null)?.anonymous_session_id ??
-    null;
-  const ownedByUser = row.curator_id && row.curator_id === userId;
-  const ownedByAnon = !row.curator_id && Boolean(anonSessionId);
+  const metadata = peekRow.metadata ?? {};
+  const anonSessionRaw = metadata['anonymous_session_id'];
+  const anonSessionId = typeof anonSessionRaw === 'string' ? anonSessionRaw : null;
+  const ownedByUser = peekRow.curator_id && peekRow.curator_id === userId;
+  const ownedByAnon = !peekRow.curator_id && Boolean(anonSessionId);
   if (!ownedByUser && !ownedByAnon) {
     notFound();
   }
@@ -156,15 +117,12 @@ export default async function BuildPeekPage({
     throw new Error(`Failed to load variant groups: ${groupsRes.error.message}`);
   }
 
-  const cards = (cardsRes.data as RawCardRow[] | null) ?? [];
-  const groups = (groupsRes.data as RawVariantGroupRow[] | null) ?? [];
-
   const initialDraft: PeekDraft = {
-    peek: toPeek(row),
-    cards: cards
+    peek: toPeek(peekRow),
+    cards: (cardsRes.data ?? [])
       .map(toCard)
       .sort((a, b) => a.position - b.position),
-    variantGroups: groups
+    variantGroups: (groupsRes.data ?? [])
       .map(toVariantGroup)
       .sort((a, b) => a.position - b.position),
   };
@@ -172,7 +130,12 @@ export default async function BuildPeekPage({
   let initialHistory: InitialChatMessage[] = [];
   try {
     const persisted = await loadChatHistory(peekId);
-    initialHistory = serializeHistory(persisted) as InitialChatMessage[];
+    initialHistory = serializeHistory(persisted).map((entry) => ({
+      role: entry.role,
+      content: entry.content,
+      toolCallId: entry.toolCallId,
+      createdAt: entry.createdAt,
+    }));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[build/page] loadChatHistory failed', { peekId, message });

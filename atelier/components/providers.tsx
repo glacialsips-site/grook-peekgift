@@ -22,6 +22,6 @@ export function Providers({ children }: { children: ReactNode }) {
     </ThemeProvider>
   );
 
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return tree;
+  if (!process.env['NEXT_PUBLIC_POSTHOG_KEY']) return tree;
   return <PostHogProvider client={posthog}>{tree}</PostHogProvider>;
 }

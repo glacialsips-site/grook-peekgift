@@ -6,7 +6,7 @@ import { registerTool } from './index';
  * the model can call it, our dispatcher invokes the handler, the result
  * comes back as a `tool_result` block.
  */
-const PingInputSchema = z.object({});
+const PingInputSchema = z.object({}).strict();
 type PingInput = z.infer<typeof PingInputSchema>;
 
 interface PingOutput {

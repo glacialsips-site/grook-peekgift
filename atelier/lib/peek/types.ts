@@ -1,24 +1,24 @@
-export type VibePalette = {
-  bg: string;
-  surface: string;
-  ink: string;
-  accent: string;
-  accent2?: string;
-};
+import type {
+  Vibe,
+  VibeCore,
+  VibeFontPairing,
+  VibeMotion,
+  VibePalette,
+  VibePreset,
+  VibeSignalSource,
+  VibeSignalSourceEntry,
+} from '@/db/schema/peeks';
+import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
 
-export type VibeMotion = 'still' | 'soft' | 'lively';
-
-export type VibeFontPairing = {
-  display: string;
-  body: string;
-};
-
-export type Vibe = {
-  tone?: string;
-  palette?: VibePalette;
-  mood_words?: string[];
-  motion?: VibeMotion;
-  font_pairing?: VibeFontPairing;
+export type {
+  Vibe,
+  VibeCore,
+  VibeFontPairing,
+  VibeMotion,
+  VibePalette,
+  VibePreset,
+  VibeSignalSource,
+  VibeSignalSourceEntry,
 };
 
 export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
@@ -52,11 +52,7 @@ export type VariantGroup = {
 
 export type CardType = 'product' | 'activity' | 'aspirational' | 'digital';
 
-export type UnlockRule = {
-  kind?: 'beg' | 'date_after' | 'event';
-  beg_prompt?: string;
-  unlock_after?: string;
-};
+export type UnlockRule = Partial<SchemaUnlockRule>;
 
 export type Card = {
   id: string;

@@ -40,10 +40,12 @@ export interface ChatHistoryEntry {
 
 export function serializeHistory(rows: ChatMessage[]): ChatHistoryEntry[] {
   return rows.map((r) => ({
-    role: r.role as ChatRole,
+    role: r.role,
     content: r.content,
     toolCallId: r.toolCallId ?? null,
     createdAt:
-      r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+      r.createdAt instanceof Date
+        ? r.createdAt.toISOString()
+        : String(r.createdAt),
   }));
 }

@@ -33,6 +33,5 @@ export default async function BuildLandingPage() {
     throw new Error(`Failed to create draft peek: ${error?.message ?? 'unknown'}`);
   }
 
-  const newId = (data as { id: string }).id;
-  redirect(`/build/${newId}`);
+  redirect(`/build/${data.id}`);
 }

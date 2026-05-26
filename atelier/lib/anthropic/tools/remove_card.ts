@@ -4,9 +4,11 @@ import { db } from '@/db/client';
 import { cards, peeks } from '@/db/schema';
 import { registerTool } from './index';
 
-const InputSchema = z.object({
-  card_id: z.string().uuid(),
-});
+const InputSchema = z
+  .object({
+    card_id: z.string().uuid(),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

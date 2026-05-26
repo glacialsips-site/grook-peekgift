@@ -5,14 +5,6 @@ import { PublishStatus } from './publish-status';
 
 export const dynamic = 'force-dynamic';
 
-type PeekRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  status: 'draft' | 'published' | 'claimed' | 'archived';
-  share_url: string | null;
-};
-
 type SearchParams = {
   session_id?: string;
   mock?: string;
@@ -33,7 +25,7 @@ export default async function PublishPage({
   }
 
   const sb = getSupabaseService();
-  const { data: peekData, error: peekErr } = await sb
+  const { data: peek, error: peekErr } = await sb
     .from('peeks')
     .select('id, slug, curator_id, status, share_url')
     .eq('id', peekId)
@@ -42,9 +34,7 @@ export default async function PublishPage({
   if (peekErr) {
     throw new Error(`Failed to load peek: ${peekErr.message}`);
   }
-  if (!peekData) notFound();
-
-  const peek = peekData as PeekRow;
+  if (!peek) notFound();
   if (peek.curator_id !== userId) {
     notFound();
   }
