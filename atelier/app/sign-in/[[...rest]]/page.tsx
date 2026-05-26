@@ -1,9 +1,25 @@
-import { SignIn } from '@clerk/nextjs';
+import Link from 'next/link';
+import { AuthCard } from '@/components/auth/auth-card';
+import { CustomSignInForm } from '@/components/auth/custom-sign-in-form';
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
-      <SignIn />
-    </main>
+    <AuthCard
+      title="Welcome back"
+      subtitle="Sign in to keep making peeks."
+      footer={
+        <span>
+          New here?{' '}
+          <Link
+            href="/sign-up"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            Create an account
+          </Link>
+        </span>
+      }
+    >
+      <CustomSignInForm />
+    </AuthCard>
   );
 }
