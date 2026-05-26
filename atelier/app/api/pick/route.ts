@@ -14,6 +14,7 @@ import {
   rateLimitResponse,
 } from '@/lib/rate-limit/redis';
 import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
+import { notifyCuratorOfPicksFireAndForget } from '@/lib/email/notify-curator-picks';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -169,6 +170,10 @@ export async function POST(req: NextRequest): Promise<Response> {
           recipient_signature: signature,
         },
       });
+      notifyCuratorOfPicksFireAndForget({
+        peekId,
+        recipientSignature: signature,
+      });
       return jsonResponse({ ok: true, pickId });
     }
   }
@@ -195,6 +200,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       pick_id: pickId,
       recipient_signature: signature,
     },
+  });
+
+  notifyCuratorOfPicksFireAndForget({
+    peekId,
+    recipientSignature: signature,
   });
 
   return jsonResponse({ ok: true, pickId });
