@@ -4,24 +4,8 @@ import { db } from '@/db/client';
 import { events, peeks } from '@/db/schema';
 import { generateFalImage, type FalAspect } from '@/lib/image-gen/fal';
 import { rehostImage } from '@/lib/image-gen/rehost';
+import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
-
-type VibeSignal = { kind: 'hero_image'; imageUrl: string };
-type EvolveVibeFn = (peekId: string, signal: VibeSignal) => Promise<unknown>;
-
-async function tryEvolveVibe(peekId: string, imageUrl: string): Promise<void> {
-  try {
-    const modulePath = ['@', 'lib', 'vibe', 'evolve'].join('/');
-    const mod = (await import(modulePath).catch(() => null)) as
-      | { evolveVibe?: EvolveVibeFn }
-      | null;
-    if (mod?.evolveVibe) {
-      await mod.evolveVibe(peekId, { kind: 'hero_image', imageUrl });
-    }
-  } catch {
-    // intentionally swallowed: vibe evolution is best-effort
-  }
-}
 
 const AspectSchema = z.enum(['16:9', '4:3', '1:1', '9:16']);
 
@@ -115,7 +99,7 @@ registerTool<Input, Output>({
       },
     });
 
-    await tryEvolveVibe(ctx.peekId, rehosted.publicUrl);
+    scheduleEvolveVibe(ctx.peekId, { kind: 'hero_image', imageUrl: rehosted.publicUrl });
 
     return { ok: true, image_url: rehosted.publicUrl };
   },
