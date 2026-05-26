@@ -1,5 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { index, jsonb, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  index,
+  integer,
+  jsonb,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { peekV2 } from './_schema';
 import { users } from './users';
 
@@ -68,6 +75,14 @@ export type Vibe = VibeCore & {
   signal_source_history?: VibeSignalSourceEntry[];
 };
 
+export type RecipientProfile = {
+  favorite_things?: string[];
+  current_obsessions?: string[];
+  allergies_or_no_gos?: string[];
+  sizes?: Record<string, string>;
+  notes?: string;
+};
+
 export const peeks = peekV2.table(
   'peeks',
   {
@@ -77,6 +92,15 @@ export const peeks = peekV2.table(
     recipientName: text('recipient_name'),
     relationship: text('relationship'),
     occasion: text('occasion'),
+    giverNames: text('giver_names')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    budgetCents: integer('budget_cents'),
+    recipientProfile: jsonb('recipient_profile')
+      .$type<RecipientProfile>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     vibe: jsonb('vibe').$type<Vibe>().notNull().default(sql`'{}'::jsonb`),
     heroImageUrl: text('hero_image_url'),
     // 'user_upload' | 'unsplash' | 'ai_generated' | 'external'
