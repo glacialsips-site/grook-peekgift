@@ -24,8 +24,6 @@ const ALLOWED = new Set([
   'image/png',
   'image/webp',
   'image/gif',
-  'image/heic',
-  'image/heif',
 ]);
 
 const EXT_BY_TYPE: Record<string, string> = {
@@ -33,8 +31,6 @@ const EXT_BY_TYPE: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/gif': 'gif',
-  'image/heic': 'heic',
-  'image/heif': 'heif',
 };
 
 export async function POST(req: NextRequest): Promise<Response> {

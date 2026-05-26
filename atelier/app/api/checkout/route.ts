@@ -118,12 +118,13 @@ export async function POST(req: NextRequest): Promise<Response> {
       payment_method_types: ['card', 'link'],
       line_items: [{ price: env.STRIPE_PRICE_ID, quantity: 1 }],
       success_url: `${env.APP_URL}/build/${peekId}/publish?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.APP_URL}/build/${peekId}`,
+      cancel_url: `${env.APP_URL}/build/${peekId}?checkout=cancelled`,
       metadata: { peek_id: peekId, curator_id: userId },
       automatic_tax: { enabled: true },
       tax_id_collection: { enabled: true },
       billing_address_collection: 'auto',
       customer_creation: 'always',
+      adaptive_pricing: { enabled: true },
     });
     if (!session.url) {
       return Response.json(

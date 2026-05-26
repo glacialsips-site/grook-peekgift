@@ -167,7 +167,7 @@ export default async function RecipientPage({
 
   const recipientSessionId = await ensureRecipientSession();
 
-  if (peek.status !== 'published') {
+  if (peek.status !== 'published' && peek.status !== 'claimed') {
     return <AlmostReady peek={peek} />;
   }
 
