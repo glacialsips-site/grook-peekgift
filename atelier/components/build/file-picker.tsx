@@ -21,7 +21,7 @@ type Props = {
   buttonLabel?: string;
 };
 
-const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif';
+const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
 
 export function FilePicker({
   peekId,
