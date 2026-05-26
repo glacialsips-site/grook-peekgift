@@ -221,6 +221,7 @@ export default async function Image({
       .maybeSingle();
     if (data) {
       peek = {
+        updated_at: data.updated_at,
         recipient_name: data.recipient_name,
         occasion: data.occasion,
         hero_image_url: data.hero_image_url,

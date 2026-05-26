@@ -17,7 +17,7 @@ async function loadWrap(): Promise<typeof import('@/lib/affiliate/wrap')> {
 
 describe('wrapAffiliateLink', () => {
   it('wraps via Skimlinks when SKIMLINKS_PUBLISHER_ID is set', async () => {
-    process.env.SKIMLINKS_PUBLISHER_ID = 'pub-123';
+    process.env['SKIMLINKS_PUBLISHER_ID'] = 'pub-123';
     const { wrapAffiliateLink } = await loadWrap();
     const result = wrapAffiliateLink('https://amazon.com/dp/B0', 'peek-1');
     expect(result.network).toBe('skimlinks');
@@ -28,8 +28,8 @@ describe('wrapAffiliateLink', () => {
   });
 
   it('falls back to Sovrn when only SOVRN_API_KEY is set', async () => {
-    delete process.env.SKIMLINKS_PUBLISHER_ID;
-    process.env.SOVRN_API_KEY = 'sovrn-abc';
+    delete process.env['SKIMLINKS_PUBLISHER_ID'];
+    process.env['SOVRN_API_KEY'] = 'sovrn-abc';
     const { wrapAffiliateLink } = await loadWrap();
     const result = wrapAffiliateLink('https://etsy.com/listing/123', 'peek-2');
     expect(result.network).toBe('sovrn');
@@ -40,8 +40,8 @@ describe('wrapAffiliateLink', () => {
   });
 
   it('returns direct passthrough when no affiliate network is configured', async () => {
-    delete process.env.SKIMLINKS_PUBLISHER_ID;
-    delete process.env.SOVRN_API_KEY;
+    delete process.env['SKIMLINKS_PUBLISHER_ID'];
+    delete process.env['SOVRN_API_KEY'];
     const { wrapAffiliateLink } = await loadWrap();
     const original = 'https://example.com/product/42';
     const result = wrapAffiliateLink(original);
@@ -51,15 +51,15 @@ describe('wrapAffiliateLink', () => {
   });
 
   it('prefers Skimlinks over Sovrn when both are configured', async () => {
-    process.env.SKIMLINKS_PUBLISHER_ID = 'pub-1';
-    process.env.SOVRN_API_KEY = 'sovrn-1';
+    process.env['SKIMLINKS_PUBLISHER_ID'] = 'pub-1';
+    process.env['SOVRN_API_KEY'] = 'sovrn-1';
     const { wrapAffiliateLink } = await loadWrap();
     const result = wrapAffiliateLink('https://example.com/p');
     expect(result.network).toBe('skimlinks');
   });
 
   it('omits xs param when customId is undefined', async () => {
-    process.env.SKIMLINKS_PUBLISHER_ID = 'pub-1';
+    process.env['SKIMLINKS_PUBLISHER_ID'] = 'pub-1';
     const { wrapAffiliateLink } = await loadWrap();
     const result = wrapAffiliateLink('https://example.com/p');
     expect(result.wrappedUrl).not.toContain('xs=');

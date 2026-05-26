@@ -35,7 +35,7 @@ vi.mock('posthog-node', () => ({
 beforeEach(() => {
   inserts.length = 0;
   phCapture.mockReset();
-  delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  delete process.env['NEXT_PUBLIC_POSTHOG_KEY'];
   vi.resetModules();
 });
 
@@ -59,7 +59,7 @@ describe('track', () => {
   });
 
   it('uses anon distinct id when userId is null and PostHog is enabled', async () => {
-    process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_xxx';
+    process.env['NEXT_PUBLIC_POSTHOG_KEY'] = 'phc_xxx';
     const { track } = await import('@/lib/analytics/facade');
     await track({
       name: 'chat_turn',
@@ -81,7 +81,7 @@ describe('track', () => {
   });
 
   it('uses userId as distinct id when present', async () => {
-    process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_xxx';
+    process.env['NEXT_PUBLIC_POSTHOG_KEY'] = 'phc_xxx';
     const { track } = await import('@/lib/analytics/facade');
     await track({
       name: 'card_added',
@@ -99,7 +99,7 @@ describe('track', () => {
   });
 
   it('passes payload fields as properties when PostHog is enabled', async () => {
-    process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_xxx';
+    process.env['NEXT_PUBLIC_POSTHOG_KEY'] = 'phc_xxx';
     const { track } = await import('@/lib/analytics/facade');
     await track({
       name: 'pick',

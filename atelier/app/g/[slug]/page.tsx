@@ -88,7 +88,7 @@ async function ensureRecipientSession(): Promise<string> {
     value: fresh,
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env['NODE_ENV'] === 'production',
     path: '/',
     maxAge: COOKIE_TTL_DAYS * 24 * 60 * 60,
   });

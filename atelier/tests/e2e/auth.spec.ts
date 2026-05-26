@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Clerk auth flows (skipped until test mode is configured)', () => {
   test.skip(
-    !process.env.CLERK_TEST_MODE,
+    !process.env['CLERK_TEST_MODE'],
     'Set CLERK_TEST_MODE=1 once a Clerk test instance + test-mode env are configured in CI.',
   );
 
