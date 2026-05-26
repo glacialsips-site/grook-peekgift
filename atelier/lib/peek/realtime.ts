@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type {
   RealtimePostgresChangesPayload,
   RealtimePostgresInsertPayload,
@@ -146,12 +146,28 @@ function sortByPosition<T extends { position: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.position - b.position);
 }
 
-export function usePeekDraft(peekId: string, initial: PeekDraft): PeekDraft {
+export interface UsePeekDraftResult {
+  draft: PeekDraft;
+  applySnapshot: (snapshot: PeekDraft) => void;
+}
+
+export function usePeekDraft(
+  peekId: string,
+  initial: PeekDraft,
+): UsePeekDraftResult {
   const [draft, setDraft] = useState<PeekDraft>(initial);
 
   useEffect(() => {
     setDraft(initial);
   }, [initial]);
+
+  const applySnapshot = useCallback((snapshot: PeekDraft) => {
+    setDraft({
+      peek: snapshot.peek,
+      cards: sortByPosition(snapshot.cards),
+      variantGroups: sortByPosition(snapshot.variantGroups),
+    });
+  }, []);
 
   useEffect(() => {
     const sb = getSupabaseBrowser();
@@ -271,5 +287,5 @@ export function usePeekDraft(peekId: string, initial: PeekDraft): PeekDraft {
     };
   }, [peekId]);
 
-  return draft;
+  return { draft, applySnapshot };
 }

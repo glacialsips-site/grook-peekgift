@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type {
   ChatMessage,
+  PeekDraft,
   SseEvent,
   ToolCallEvent,
 } from '@/lib/peek/types';
@@ -37,6 +38,7 @@ type Props = {
   peekId: string;
   className?: string;
   initialHistory?: InitialChatMessage[];
+  onPeekSnapshot?: (snapshot: PeekDraft) => void;
 };
 
 type ImageAttachment = {
@@ -193,7 +195,12 @@ function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
   return out;
 }
 
-export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
+export function ChatPane({
+  peekId,
+  className,
+  initialHistory = [],
+  onPeekSnapshot,
+}: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     hydrateMessages(initialHistory),
@@ -205,6 +212,11 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const apiHistoryRef = useRef<ApiHistoryEntry[]>(toApiHistory(initialHistory));
+  const onPeekSnapshotRef = useRef<Props['onPeekSnapshot']>(onPeekSnapshot);
+
+  useEffect(() => {
+    onPeekSnapshotRef.current = onPeekSnapshot;
+  }, [onPeekSnapshot]);
 
   useEffect(() => {
     setSessionId(getOrCreateSessionId());
@@ -329,6 +341,11 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
             } else if (evt.kind === 'tool_call') {
               if (!assistantToolUses.find((t) => t.id === evt.id)) {
                 assistantToolUses.push({ id: evt.id, name: evt.name });
+              }
+            } else if (evt.kind === 'peek_update') {
+              const snap = evt.snapshot as unknown as PeekDraft | null;
+              if (snap && snap.peek) {
+                onPeekSnapshotRef.current?.(snap);
               }
             }
             dispatchEvent(evt, assistantMessage.id, peekId, setMessages);

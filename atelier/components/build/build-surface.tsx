@@ -52,7 +52,7 @@ function PreviewFallback({ reset }: { reset: () => void }) {
 }
 
 export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
-  const draft = usePeekDraft(peekId, initialDraft);
+  const { draft, applySnapshot } = usePeekDraft(peekId, initialDraft);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (
@@ -68,6 +68,7 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
         <ChatPane
           peekId={peekId}
           initialHistory={initialHistory ?? []}
+          onPeekSnapshot={applySnapshot}
           className={cn(
             'flex-1 md:w-2/5 md:flex-none md:border-r md:border-border',
           )}

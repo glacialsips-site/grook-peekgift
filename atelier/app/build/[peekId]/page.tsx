@@ -1,79 +1,16 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabaseService } from '@/lib/supabase/service';
-import type { DbRow } from '@/lib/supabase/database.types';
 import { BuildSurface } from '@/components/build/build-surface';
 import type { InitialChatMessage } from '@/components/build/chat-pane';
 import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
 import { logger } from '@/lib/logger';
+import { rowToCard, rowToPeek, rowToVariantGroup } from '@/lib/peek/from-rows';
+import type { PeekDraft } from '@/lib/peek/types';
 
 const log = logger.child({ component: 'build/page' });
-import type {
-  Card,
-  Peek,
-  PeekDraft,
-  UnlockRule,
-  VariantGroup,
-  Vibe,
-} from '@/lib/peek/types';
 
 export const dynamic = 'force-dynamic';
-
-type PeekRow = DbRow<'peeks'>;
-type CardRow = DbRow<'cards'>;
-type VariantGroupRow = DbRow<'variant_groups'>;
-
-function toPeek(row: PeekRow): Peek {
-  return {
-    id: row.id,
-    slug: row.slug,
-    curatorId: row.curator_id,
-    recipientName: row.recipient_name,
-    relationship: row.relationship,
-    occasion: row.occasion,
-    vibe: row.vibe,
-    heroImageUrl: row.hero_image_url,
-    heroImageSource: row.hero_image_source,
-    heroPrompt: row.hero_prompt,
-    noteMd: row.note_md,
-    status: row.status,
-    metadata: row.metadata ?? {},
-    updatedAt: row.updated_at,
-  };
-}
-
-function toCard(row: CardRow): Card {
-  const unlockRule: UnlockRule = row.unlock_rule;
-  return {
-    id: row.id,
-    peekId: row.peek_id,
-    variantGroupId: row.variant_group_id,
-    position: row.position,
-    type: row.type,
-    title: row.title,
-    description: row.description,
-    imageUrl: row.image_url,
-    valueCents: row.value_cents,
-    revealValue: row.reveal_value,
-    isTaunt: row.is_taunt,
-    tauntText: row.taunt_text,
-    isLocked: row.is_locked,
-    unlockRule,
-    proposedDate: row.proposed_date,
-    locationHint: row.location_hint,
-    addedByUserId: row.added_by_user_id,
-  };
-}
-
-function toVariantGroup(row: VariantGroupRow): VariantGroup {
-  return {
-    id: row.id,
-    peekId: row.peek_id,
-    title: row.title,
-    selection: row.selection,
-    position: row.position,
-  };
-}
 
 export default async function BuildPeekPage({
   params,
@@ -121,12 +58,12 @@ export default async function BuildPeekPage({
   }
 
   const initialDraft: PeekDraft = {
-    peek: toPeek(peekRow),
+    peek: rowToPeek(peekRow),
     cards: (cardsRes.data ?? [])
-      .map(toCard)
+      .map(rowToCard)
       .sort((a, b) => a.position - b.position),
     variantGroups: (groupsRes.data ?? [])
-      .map(toVariantGroup)
+      .map(rowToVariantGroup)
       .sort((a, b) => a.position - b.position),
   };
 
