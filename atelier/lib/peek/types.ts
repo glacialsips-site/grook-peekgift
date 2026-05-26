@@ -1,24 +1,36 @@
 import type {
   Vibe,
+  VibeBodyFont,
   VibeCore,
+  VibeDensity,
   VibeFontPairing,
+  VibeHeadingFont,
+  VibeMood,
   VibeMotion,
   VibePalette,
   VibePreset,
+  VibeShape,
   VibeSignalSource,
   VibeSignalSourceEntry,
+  VibeTypography,
 } from '@/db/schema/peeks';
 import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
 
 export type {
   Vibe,
+  VibeBodyFont,
   VibeCore,
+  VibeDensity,
   VibeFontPairing,
+  VibeHeadingFont,
+  VibeMood,
   VibeMotion,
   VibePalette,
   VibePreset,
+  VibeShape,
   VibeSignalSource,
   VibeSignalSourceEntry,
+  VibeTypography,
 };
 
 export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';

@@ -38,6 +38,10 @@ function toProviderVibe(vibe: Vibe | null | undefined): ProviderVibe {
     mood_words: vibe.mood_words,
     palette: vibe.palette ?? PROVIDER_DEFAULT.palette,
     font_pairing: vibe.font_pairing,
+    typography: vibe.typography,
+    density: vibe.density,
+    shape: vibe.shape,
+    mood: vibe.mood,
   };
 }
 
@@ -99,7 +103,14 @@ export function PreviewPane({ draft, className }: Props) {
         <div className="flex h-full min-h-0 flex-col overflow-y-auto">
           <Hero peek={draft.peek} />
 
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-5 py-8">
+          <div
+            className="mx-auto flex w-full max-w-2xl flex-col px-5"
+            style={{
+              gap: 'var(--peek-space-8)',
+              paddingTop: 'var(--peek-space-8)',
+              paddingBottom: 'var(--peek-space-8)',
+            }}
+          >
             <RecipientHeader peek={draft.peek} />
 
             {draft.peek.noteMd ? (
@@ -183,7 +194,10 @@ function RecipientHeader({ peek }: { peek: PeekDraft['peek'] }) {
   );
   return (
     <header className="flex flex-col gap-1">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h1
+        className="peek-heading text-3xl font-semibold tracking-tight sm:text-4xl"
+        style={{ fontFamily: 'var(--peek-font-heading)' }}
+      >
         {name}
       </h1>
       {subtitleParts.length > 0 ? (
@@ -225,7 +239,8 @@ function CardItem({ card, index }: { card: Card; index: number }) {
         delay: Math.min(index * 0.04, 0.3),
         ease: 'easeOut',
       }}
-      className="relative overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm"
+      className="relative overflow-hidden border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm"
+      style={{ borderRadius: 'var(--peek-radius-lg)' }}
     >
       {card.imageUrl ? (
         <div
@@ -322,7 +337,8 @@ function VariantGroupBlock({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="flex flex-col gap-3 rounded-2xl border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))]/60 p-4"
+      className="flex flex-col gap-3 border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))]/60 p-4"
+      style={{ borderRadius: 'var(--peek-radius-lg)' }}
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--peek-ink))]/70">
