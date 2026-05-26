@@ -190,12 +190,16 @@ function stripAttachmentGuidance(text: string): string {
   if (!text.startsWith('[system] The curator just attached')) return text;
   const lines = text.split('\n');
   let i = 0;
-  while (
-    i < lines.length &&
-    (lines[i].startsWith('[system]') ||
-      /^\d+\.\s+https?:\/\//.test(lines[i]) ||
-      lines[i].includes('Supabase Storage URLs'))
-  ) {
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line) break;
+    if (
+      !line.startsWith('[system]') &&
+      !/^\d+\.\s+https?:\/\//.test(line) &&
+      !line.includes('Supabase Storage URLs')
+    ) {
+      break;
+    }
     i += 1;
   }
   return lines.slice(i).join('\n').trim();
