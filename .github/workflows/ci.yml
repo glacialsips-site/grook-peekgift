@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [atelier-integration, main]
+  pull_request:
+    branches: [atelier-integration, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: typecheck + lint + test + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: atelier
+    env:
+      APP_URL: https://peek-gift-vnext.netlify.app
+      NODE_ENV: production
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_stub
+      SUPABASE_SERVICE_ROLE_KEY: sb_secret_ci_stub
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      GUEST_CLAIM_TOKEN_SECRET: ci_stub_secret_at_least_32_characters_long
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: atelier/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit + integration tests
+        run: npm run test
+      - name: Build
+        run: npm run build
