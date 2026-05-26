@@ -5,7 +5,12 @@ import { cards, peeks, type UnlockRule } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { trackFireAndForget } from '@/lib/analytics/facade';
+import { logger } from '@/lib/logger';
+import { scrapePipeline } from '@/lib/scrape/pipeline';
+import { normalizeImageUrl } from '@/lib/scrape/image';
 import { registerTool } from './index';
+
+const log = logger.child({ component: 'tool/add_card' });
 
 const CardTypeSchema = z.enum([
   'product',
@@ -118,6 +123,46 @@ registerTool<Input, Output>({
       ? wrapAffiliateLink(parsed.source_url, buildClickCustomId(ctx.peekId))
       : null;
 
+    let finalImageUrl: string | null = parsed.image_url ?? null;
+    let finalDescription: string | null = parsed.description ?? null;
+    let finalValueCents: number | null = parsed.value_cents ?? null;
+    let finalSourceRetailer: string | null = parsed.source_retailer ?? null;
+    let scrapeProvider: string | null = null;
+    let scrapeDegraded: boolean | null = null;
+
+    if (parsed.source_url && !parsed.image_url) {
+      try {
+        const outcome = await scrapePipeline(parsed.source_url, {
+          peekId: ctx.peekId,
+        });
+        if (outcome.ok) {
+          scrapeProvider = outcome.provider;
+          scrapeDegraded = outcome.degraded;
+          if (outcome.product.imageUrl) finalImageUrl = outcome.product.imageUrl;
+          if (!finalDescription && outcome.product.description) {
+            finalDescription = outcome.product.description;
+          }
+          if (finalValueCents == null && outcome.product.valueCents != null) {
+            finalValueCents = outcome.product.valueCents;
+          }
+          if (!finalSourceRetailer && outcome.product.sourceRetailer) {
+            finalSourceRetailer = outcome.product.sourceRetailer;
+          }
+        }
+      } catch (err) {
+        log.warn('inline_scrape_threw', {
+          url: parsed.source_url,
+          err: err instanceof Error ? err.message : String(err),
+        });
+      }
+    } else if (parsed.image_url) {
+      finalImageUrl = await normalizeImageUrl(parsed.image_url, ctx.peekId);
+    }
+
+    const metadata: Record<string, unknown> = {};
+    if (scrapeProvider) metadata['scrape_provider'] = scrapeProvider;
+    if (scrapeDegraded !== null) metadata['scrape_degraded'] = scrapeDegraded;
+
     const [row] = await db
       .insert(cards)
       .values({
@@ -126,17 +171,17 @@ registerTool<Input, Output>({
         position: nextPosition,
         type: parsed.type,
         title: parsed.title,
-        description: parsed.description ?? null,
-        imageUrl: parsed.image_url ?? null,
+        description: finalDescription,
+        imageUrl: finalImageUrl,
         sourceUrl: parsed.source_url ?? null,
-        sourceRetailer: parsed.source_retailer ?? null,
+        sourceRetailer: finalSourceRetailer,
         affiliateUrl: wrapped?.wrappedUrl ?? null,
         affiliateNetwork: wrapped?.network ?? null,
         commissionPct:
           wrapped?.commissionPctEstimate != null
             ? wrapped.commissionPctEstimate.toString()
             : null,
-        valueCents: parsed.value_cents ?? null,
+        valueCents: finalValueCents,
         revealValue: parsed.reveal_value ?? false,
         isTaunt: parsed.is_taunt ?? false,
         tauntText: parsed.taunt_text ?? null,
@@ -145,6 +190,7 @@ registerTool<Input, Output>({
         proposedDate: parsed.proposed_date ? new Date(parsed.proposed_date) : null,
         locationHint: parsed.location_hint ?? null,
         addedByUserId: ctx.userId,
+        ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
       })
       .returning({ id: cards.id, position: cards.position });
     if (!row) throw new Error('failed to insert card');

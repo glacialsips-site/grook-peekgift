@@ -1,10 +1,14 @@
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
 import { trackFireAndForget } from '@/lib/analytics/facade';
-import { inngest } from '@/lib/inngest/client';
+import { logger } from '@/lib/logger';
+import { scrapePipeline } from '@/lib/scrape/pipeline';
 import { registerTool } from './index';
+
+const log = logger.child({ component: 'tool/scrape_url' });
 
 const InputSchema = z
   .object({
@@ -14,13 +18,23 @@ const InputSchema = z
 type Input = z.infer<typeof InputSchema>;
 
 type Output =
-  | { ok: true; card_id: string; pending: true; affiliate_url?: string; affiliate_network?: 'skimlinks' | 'sovrn' | 'direct' }
+  | {
+      ok: true;
+      card_id: string;
+      title: string;
+      image_url: string | null;
+      description: string | null;
+      provider: string;
+      degraded: boolean;
+      affiliate_url?: string;
+      affiliate_network?: 'skimlinks' | 'sovrn' | 'direct';
+    }
   | { ok: false; error: string };
 
 registerTool<Input, Output>({
   name: 'scrape_url',
   description:
-    'Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer. Inserts a placeholder card immediately (already affiliate-wrapped) and queues the scrape — the card hydrates in-place when the worker resolves. Returns the card_id so you can refer to it later.',
+    "Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer — then add a card to the Peek with that data. The scrape runs synchronously through a cascade (Browserbase → ZenRows → Jina → Anthropic web_fetch) with graceful degrade so it ALWAYS returns a usable card, even if just the domain name. The card is affiliate-wrapped automatically. Returns card_id, title, image_url, and a `degraded` flag (true if all scrape tiers failed and we're showing a stub). After calling this, you can refer to the new card by its card_id.",
   input_schema: {
     type: 'object',
     properties: {
@@ -43,13 +57,25 @@ registerTool<Input, Output>({
       payload: { url: parsed.url },
     });
 
+    const outcome = await scrapePipeline(parsed.url, { peekId: ctx.peekId });
+    if (!outcome.ok) {
+      log.warn('pipeline_returned_not_ok', { url: parsed.url, error: outcome.error });
+      return { ok: false, error: outcome.error };
+    }
+
+    const product = outcome.product;
+
     const inserted = await db
       .insert(cards)
       .values({
         peekId: ctx.peekId,
         type: 'product',
-        title: 'Scraping…',
+        title: product.title,
+        description: product.description ?? null,
+        imageUrl: product.imageUrl ?? null,
         sourceUrl: parsed.url,
+        sourceRetailer: product.sourceRetailer ?? null,
+        valueCents: product.valueCents ?? null,
         affiliateUrl: wrapped.wrappedUrl,
         affiliateNetwork: wrapped.network,
         commissionPct:
@@ -57,7 +83,7 @@ registerTool<Input, Output>({
             ? wrapped.commissionPctEstimate.toString()
             : null,
         addedByUserId: ctx.userId,
-        metadata: { pending: true, scrapeUrl: parsed.url },
+        metadata: { scrape_provider: outcome.provider, scrape_degraded: outcome.degraded },
       })
       .returning({ id: cards.id });
 
@@ -66,30 +92,45 @@ registerTool<Input, Output>({
       return { ok: false, error: 'card_insert_failed' };
     }
 
-    try {
-      await inngest.send({
-        name: 'peek/scrape.requested',
-        data: {
-          peekId: ctx.peekId,
-          url: parsed.url,
-          placeholderCardId: placeholder.id,
-        },
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'unknown';
-      trackFireAndForget({
-        name: 'scrape_complete',
-        peekId: ctx.peekId,
-        userId: ctx.userId,
-        sessionId: ctx.sessionId,
-        payload: { url: parsed.url, ok: false, error: `dispatch_failed: ${message}` },
-      });
+    if (wrapped && placeholder.id) {
+      const refinedCustomId = buildClickCustomId(ctx.peekId, placeholder.id);
+      const refined = wrapAffiliateLink(parsed.url, refinedCustomId);
+      if (refined.wrappedUrl !== wrapped.wrappedUrl) {
+        await db
+          .update(cards)
+          .set({ affiliateUrl: refined.wrappedUrl })
+          .where(eq(cards.id, placeholder.id));
+      }
     }
+
+    trackFireAndForget({
+      name: 'scrape_complete',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+      payload: {
+        url: parsed.url,
+        ok: true,
+        provider: outcome.provider,
+        degraded: outcome.degraded,
+        product: {
+          title: product.title,
+          description: product.description ?? null,
+          imageUrl: product.imageUrl ?? null,
+          valueCents: product.valueCents ?? null,
+          sourceRetailer: product.sourceRetailer ?? null,
+        },
+      },
+    });
 
     return {
       ok: true,
       card_id: placeholder.id,
-      pending: true,
+      title: product.title,
+      image_url: product.imageUrl ?? null,
+      description: product.description ?? null,
+      provider: outcome.provider,
+      degraded: outcome.degraded,
       affiliate_url: wrapped.wrappedUrl,
       affiliate_network: wrapped.network,
     };

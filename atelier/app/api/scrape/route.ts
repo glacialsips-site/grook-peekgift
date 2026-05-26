@@ -141,7 +141,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     );
   }
 
-  const outcome = await scrapePipeline(url);
+  const outcome = await scrapePipeline(url, { peekId });
   if (!outcome.ok) {
     await recordScrapeEvent(sb, ctx, {
       url,
@@ -163,6 +163,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     url,
     ok: true,
     provider: outcome.provider,
+    degraded: outcome.degraded,
     product: outcome.product,
   });
 
@@ -170,6 +171,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     {
       ok: true,
       product: outcome.product,
+      degraded: outcome.degraded,
       source: { cached: false, provider: outcome.provider },
     },
     200,
