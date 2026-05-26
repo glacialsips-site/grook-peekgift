@@ -710,6 +710,19 @@ function MessageBubble({
           isUser ? 'items-end' : 'items-start',
         )}
       >
+        {isUser && message.role === 'user' && message.images && message.images.length > 0 ? (
+          <div className="flex flex-wrap justify-end gap-1.5">
+            {message.images.map((img) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={img.url}
+                src={img.url}
+                alt={img.alt ?? 'Attached image'}
+                className="max-h-48 w-auto rounded-lg border border-border object-cover"
+              />
+            ))}
+          </div>
+        ) : null}
         {message.content ||
         (!isUser && message.role === 'assistant' && message.streaming) ? (
           <div
