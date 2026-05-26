@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSignIn } from '@clerk/nextjs';
+import { useAuth, useSignIn } from '@clerk/nextjs';
 import type {
   OAuthStrategy,
   SignInFirstFactor,
@@ -41,9 +41,16 @@ function hasFirstFactor(
 
 export function CustomSignInForm() {
   const { signIn, fetchStatus } = useSignIn();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
   const redirectUrl = search.get('returnTo') ?? '/build';
+
+  useEffect(() => {
+    if (authLoaded && isSignedIn) {
+      router.replace(redirectUrl);
+    }
+  }, [authLoaded, isSignedIn, router, redirectUrl]);
 
   const [step, setStep] = useState<Step>({ kind: 'start' });
   const [email, setEmail] = useState('');
@@ -216,6 +223,10 @@ export function CustomSignInForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (authLoaded && isSignedIn) {
+    return null;
   }
 
   if (step.kind === 'start') {
