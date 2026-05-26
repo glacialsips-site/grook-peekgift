@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/posthog/(.*)',    // PostHog reverse proxy
   '/api/inngest(.*)',     // Inngest signs every invocation
   '/monitoring(.*)',      // Sentry tunnel route — bypass ad-blockers
+  '/styles-test(.*)',     // local-only verification harness for the styles engine
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
