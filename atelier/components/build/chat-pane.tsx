@@ -204,17 +204,41 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
   const [sessionId, setSessionId] = useState('');
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+  const nearBottomRef = useRef(true);
   const apiHistoryRef = useRef<ApiHistoryEntry[]>(toApiHistory(initialHistory));
+
+  const scrollSignal = useMemo(
+    () =>
+      messages.reduce(
+        (acc, m) =>
+          acc + (typeof m.content === 'string' ? m.content.length : 0),
+        messages.length,
+      ),
+    [messages],
+  );
 
   useEffect(() => {
     setSessionId(getOrCreateSessionId());
   }, []);
 
   useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) return;
-    node.scrollTop = node.scrollHeight;
-  }, [messages]);
+    const viewport = scrollRef.current?.parentElement;
+    if (!viewport) return;
+    const onScroll = () => {
+      const distance =
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      nearBottomRef.current = distance < 80;
+    };
+    onScroll();
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!nearBottomRef.current) return;
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [scrollSignal]);
 
   useEffect(() => {
     return () => {
@@ -432,6 +456,7 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
               <MessageBubble key={m.id} message={m} peekId={peekId} />
             ))}
           </AnimatePresence>
+          <div ref={endRef} aria-hidden="true" />
         </div>
       </ScrollArea>
 
