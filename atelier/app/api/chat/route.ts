@@ -84,7 +84,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       { status: 400 },
     );
   }
-  const { peekId, sessionId, history, userMessage, model } = parsed.data;
+  const { peekId, sessionId, history, userMessage, attachments, model } =
+    parsed.data;
 
   const access = await assertPeekAccess({ peekId, userId, sessionId });
   if (!access.ok) {
@@ -141,10 +142,35 @@ export async function POST(req: NextRequest): Promise<Response> {
     typeof userMessage === 'string'
       ? userMessage
       : (userMessage as Anthropic.ContentBlockParam[]);
-  const userContent: Anthropic.ContentBlockParam[] =
+  const baseUserContent: Anthropic.ContentBlockParam[] =
     typeof userInput === 'string'
-      ? [{ type: 'text', text: userInput }]
+      ? userInput.trim().length > 0
+        ? [{ type: 'text', text: userInput }]
+        : []
       : userInput;
+
+  const userContent: Anthropic.ContentBlockParam[] = [...baseUserContent];
+  if (attachments && attachments.length > 0) {
+    const bullets = attachments
+      .map((a, i) => {
+        const label = a.alt?.trim() ? ` — ${a.alt.trim()}` : '';
+        return `${i + 1}. ${a.url}${label}`;
+      })
+      .join('\n');
+    const guidance =
+      `[system] The curator just attached ${attachments.length} image${attachments.length === 1 ? '' : 's'}:\n` +
+      `${bullets}\n` +
+      `These are stable public Supabase Storage URLs. When you call set_hero_image, add_card, generate_hero_image, or any tool that takes an image_url, pass one of these exact URLs (use source: "user_upload" for set_hero_image). Do not invent or paraphrase URLs.`;
+    const imageBlocks: Anthropic.ContentBlockParam[] = attachments.map((a) => ({
+      type: 'image',
+      source: { type: 'url', url: a.url },
+    }));
+    userContent.unshift({ type: 'text', text: guidance }, ...imageBlocks);
+  }
+
+  if (userContent.length === 0) {
+    return Response.json({ error: 'empty_message' }, { status: 400 });
+  }
 
   const chosenModel = model ?? DEFAULT_MODEL;
 
