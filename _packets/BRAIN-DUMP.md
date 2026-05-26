@@ -1,6 +1,19 @@
-# PRODUCT-VISION
+# BRAIN-DUMP — Frank's words, partial
 
-_Source of truth on what peek.gift actually IS. Frank's own words, dropped raw on 2026-05-26. He flagged it as "dated, hackneyed, and incomplete" — so future chats: this is canonical but not exhaustive. When in doubt, ask Frank, don't fill in._
+## STATUS: INCOMPLETE. NOT CANONICAL. EDIT THIS DOC AS THINGS LAND.
+
+A dated brain dump from Frank, 2026-05-26. Frank himself flagged it as "hackneyed and incomplete." It captures the **Tier 1 product** (chat-driven build → recipient picks → sender fulfills, $12 with `THISISTHEONE` coupon dropping to $0.50 for tests) but EXPLICITLY MISSING:
+
+- **Merchant aspect** beyond Tier 1 email fulfillment (affiliate model, creator program, retailer relationships)
+- **Group co-curation / collab UX** (multiple senders contributing to one peek)
+- **Social media** integrations — both acquisition channels and product features
+- **Other dimensions Frank hasn't surfaced yet**
+
+For staged roadmap items (Tier 2 auto-fulfillment is packet 22/26, group co-curation is packet 23, social outbound is packet 27, creator-affiliate is Phase C) see `_packets/ROADMAP.md`. For current state see `_packets/STATE.md`. For known bugs see `_packets/BUGS.md`.
+
+**If you're making product calls based on this doc, double-check with Frank first or write a Q-NNN-<topic>.md in `_packets/_orch-desktop/`.**
+
+---
 
 ## The problem
 
