@@ -6,6 +6,9 @@ import { getSupabaseService } from '@/lib/supabase/service';
 import { track } from '@/lib/analytics/facade';
 import { inngest } from '@/lib/inngest/client';
 import { checkIdempotency } from '@/lib/security/idempotency';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'api/stripe/webhook' });
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,7 +19,12 @@ async function logWebhook(payload: Record<string, unknown>, success: boolean) {
       name: 'peek/webhook.received',
       data: { source: 'stripe', payload, success },
     });
-  } catch {}
+  } catch (err) {
+    log.warn('inngest_publish_failed', {
+      source: 'stripe',
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 export async function POST(req: NextRequest): Promise<Response> {

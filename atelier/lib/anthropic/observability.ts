@@ -2,6 +2,9 @@ import 'server-only';
 import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic } from './client';
 import { getPostHogServer, trackFireAndForget } from '@/lib/analytics/facade';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'anthropic/observability' });
 
 export interface LlmCallContext {
   peekId: string;
@@ -65,42 +68,6 @@ function aggregateToolCalls(rollups: IterationRollup[]): ToolCallSummary[] {
   return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
 }
 
-function captureError(args: {
-  ctx: LlmCallContext;
-  model: string;
-  latencyMs: number;
-  inputMessages: Anthropic.MessageParam[] | undefined;
-  error: unknown;
-  streaming: boolean;
-}): void {
-  const ph = getPostHogServer();
-  if (ph) {
-    try {
-      const distinctId = args.ctx.userId ?? `anon-${args.ctx.sessionId}`;
-      const message =
-        args.error instanceof Error ? args.error.message : String(args.error);
-      ph.capture({
-        distinctId,
-        event: '$ai_generation',
-        properties: {
-          $ai_provider: 'anthropic',
-          $ai_model: args.model,
-          $ai_latency: args.latencyMs,
-          $ai_input: args.inputMessages,
-          $ai_is_error: true,
-          $ai_error: message,
-          $ai_streaming: args.streaming,
-          peek_id: args.ctx.peekId,
-          session_id: args.ctx.sessionId,
-        },
-      });
-    } catch (err) {
-      const m = err instanceof Error ? err.message : String(err);
-      console.error('[llm-obs] posthog error-capture failed', { message: m });
-    }
-  }
-}
-
 function captureSingle(payload: CapturePayload): void {
   const ph = getPostHogServer();
   if (ph) {
@@ -131,7 +98,7 @@ function captureSingle(payload: CapturePayload): void {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('[llm-obs] posthog capture failed', { message });
+      log.error('posthog capture failed', { message });
     }
   }
 
@@ -154,6 +121,43 @@ function captureSingle(payload: CapturePayload): void {
       stop_reason: payload.stopReason,
     },
   });
+}
+
+function captureError(args: {
+  ctx: LlmCallContext;
+  model: string;
+  latencyMs: number;
+  inputMessages: Anthropic.MessageParam[] | undefined;
+  error: unknown;
+  streaming: boolean;
+}): void {
+  const ph = getPostHogServer();
+  if (ph) {
+    try {
+      const distinctId = args.ctx.userId ?? `anon-${args.ctx.sessionId}`;
+      const message = args.error instanceof Error
+        ? args.error.message
+        : String(args.error);
+      ph.capture({
+        distinctId,
+        event: '$ai_generation',
+        properties: {
+          $ai_provider: 'anthropic',
+          $ai_model: args.model,
+          $ai_latency: args.latencyMs,
+          $ai_input: args.inputMessages,
+          $ai_is_error: true,
+          $ai_error: message,
+          $ai_streaming: args.streaming,
+          peek_id: args.ctx.peekId,
+          session_id: args.ctx.sessionId,
+        },
+      });
+    } catch (err) {
+      const m = err instanceof Error ? err.message : String(err);
+      log.error('posthog error-capture failed', { message: m });
+    }
+  }
 }
 
 export async function tracedCreate(opts: {

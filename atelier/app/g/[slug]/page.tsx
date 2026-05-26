@@ -7,6 +7,9 @@ import type { DbRow } from '@/lib/supabase/database.types';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
 import { GuestSecretMissingError, signRecipient } from '@/lib/security/recipient';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'g/[slug]/page' });
 import type {
   Card,
   Peek,
@@ -109,7 +112,11 @@ export async function generateMetadata({
       .eq('slug', slug)
       .maybeSingle();
     peek = data;
-  } catch {
+  } catch (err) {
+    log.warn('generateMetadata lookup failed', {
+      slug,
+      err: err instanceof Error ? err.message : String(err),
+    });
     peek = null;
   }
 

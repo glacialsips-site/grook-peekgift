@@ -1,6 +1,9 @@
 import 'server-only';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { getRedis } from '@/lib/rate-limit/redis';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'chat/session' });
 
 export const ANON_TURN_CAP = 5;
 const ANON_TTL_SECONDS = 60 * 60 * 24;
@@ -24,7 +27,7 @@ export async function recordEvent(input: RecordEventInput): Promise<void> {
       payload: input.payload ?? {},
     });
     if (error) {
-      console.error('[chat/session] recordEvent failed', {
+      log.error('recordEvent failed', {
         kind: input.kind,
         peekId: input.peekId,
         error: error.message,
@@ -32,7 +35,7 @@ export async function recordEvent(input: RecordEventInput): Promise<void> {
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[chat/session] recordEvent threw', {
+    log.error('recordEvent threw', {
       kind: input.kind,
       peekId: input.peekId,
       error: message,
@@ -61,7 +64,7 @@ export async function assertPeekAccess(
     .maybeSingle();
 
   if (error) {
-    console.error('[chat/session] assertPeekAccess query failed', {
+    log.error('assertPeekAccess query failed', {
       peekId: opts.peekId,
       error: error.message,
     });
@@ -104,7 +107,7 @@ async function dbAnonCount(sessionId: string): Promise<number> {
     .eq('kind', 'chat_turn')
     .is('user_id', null);
   if (error) {
-    console.error('[chat/session] dbAnonCount failed', {
+    log.error('dbAnonCount failed', {
       sessionId,
       error: error.message,
     });
@@ -132,7 +135,7 @@ export async function anonymousTurnCount(
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        console.warn('[chat/session] redis anonCount read failed', {
+        log.warn('redis anonCount read failed', {
           sessionId,
           message,
         });
@@ -157,7 +160,7 @@ export async function incrementAnonymousTurn(
     return next;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.warn('[chat/session] redis incr failed, falling back to DB', {
+    log.warn('redis incr failed, falling back to DB', {
       sessionId,
       message,
     });

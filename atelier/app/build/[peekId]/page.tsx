@@ -5,6 +5,9 @@ import type { DbRow } from '@/lib/supabase/database.types';
 import { BuildSurface } from '@/components/build/build-surface';
 import type { InitialChatMessage } from '@/components/build/chat-pane';
 import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'build/page' });
 import type {
   Card,
   Peek,
@@ -138,7 +141,7 @@ export default async function BuildPeekPage({
     }));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[build/page] loadChatHistory failed', { peekId, message });
+    log.error('loadChatHistory failed', { peekId, message });
   }
 
   return (

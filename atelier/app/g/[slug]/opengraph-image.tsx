@@ -2,6 +2,9 @@ import { ImageResponse } from 'next/og';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { getPublicUrl, uploadAsset } from '@/lib/supabase/storage';
 import type { Vibe, VibePalette } from '@/lib/peek/types';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'g/[slug]/opengraph-image' });
 
 export const runtime = 'nodejs';
 export const revalidate = 3600;
@@ -228,7 +231,11 @@ export default async function Image({
         vibe: data.vibe,
       };
     }
-  } catch {
+  } catch (err) {
+    log.warn('og_image_lookup_failed', {
+      slug,
+      err: err instanceof Error ? err.message : String(err),
+    });
     peek = null;
   }
 

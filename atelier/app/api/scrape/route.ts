@@ -148,7 +148,15 @@ export async function POST(req: NextRequest): Promise<Response> {
       ok: false,
       error: outcome.error,
     });
-    return jsonResponse({ ok: false, error: outcome.error }, 502);
+    return jsonResponse(
+      {
+        ok: false,
+        error: outcome.error,
+        friendly_message:
+          "We couldn't pull this product. You can add the details by hand and keep going.",
+      },
+      502,
+    );
   }
 
   await recordScrapeEvent(sb, ctx, {

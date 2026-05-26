@@ -13,6 +13,10 @@ import {
   rateLimitResponse,
 } from '@/lib/rate-limit/redis';
 import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
+import { logger } from '@/lib/logger';
+import { withRetry } from '@/lib/retry';
+
+const log = logger.child({ component: 'api/share/send' });
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -79,14 +83,27 @@ async function sendSms(args: {
   }
   try {
     const client = twilio(env.TWILIO_ACCOUNT_SID, env.TWILIO_AUTH_TOKEN);
-    const msg = await client.messages.create({
-      from: env.TWILIO_FROM_NUMBER,
-      to: args.to,
-      body: args.body,
-    });
+    const msg = await withRetry(
+      () =>
+        client.messages.create({
+          from: env.TWILIO_FROM_NUMBER,
+          to: args.to,
+          body: args.body,
+        }),
+      {
+        label: 'twilio.send',
+        attempts: 3,
+        retryOn: (err) => {
+          const status = (err as { status?: number; code?: number }).status;
+          if (status && status >= 400 && status < 500) return false;
+          return true;
+        },
+      },
+    );
     return { ok: true, sid: msg.sid };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    log.warn('twilio_send_failed', { to: args.to, err: message });
     return { ok: false, error: message };
   }
 }

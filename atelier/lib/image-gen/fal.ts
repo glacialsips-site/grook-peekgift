@@ -1,5 +1,9 @@
 import 'server-only';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
+import { withRetry } from '@/lib/retry';
+
+const log = logger.child({ component: 'image-gen/fal' });
 
 export type FalAspect = '16:9' | '4:3' | '1:1' | '9:16';
 
@@ -105,23 +109,38 @@ export async function generateFalImage(
 
   let submit: Response;
   try {
-    submit = await fetch(`${QUEUE_BASE}/${model}`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        prompt: opts.prompt,
-        image_size: size,
-        num_images: 1,
-        enable_safety_checker: true,
-      }),
-    });
+    submit = await withRetry(
+      () =>
+        fetch(`${QUEUE_BASE}/${model}`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            prompt: opts.prompt,
+            image_size: size,
+            num_images: 1,
+            enable_safety_checker: true,
+          }),
+        }),
+      {
+        label: 'fal.submit',
+        attempts: 3,
+        retryOn: (err) =>
+          err instanceof Error &&
+          /network|fetch|timeout|ECONN|ETIMEDOUT/i.test(err.message),
+      },
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    log.warn('submit_network_failed', { err: message });
     return { ok: false, error: `fal_submit_network: ${message}` };
   }
 
   if (!submit.ok) {
     const detail = await submit.text().catch(() => '');
+    log.warn('submit_http_error', {
+      status: submit.status,
+      detail: detail.slice(0, 200),
+    });
     return {
       ok: false,
       error: `fal_submit_${submit.status}: ${detail.slice(0, 200)}`,
@@ -160,14 +179,26 @@ export async function generateFalImage(
 
   let final: Response;
   try {
-    final = await fetch(parsedSubmit.response_url, {
-      headers: { Authorization: `Key ${env.FAL_KEY}` },
-    });
+    final = await withRetry(
+      () =>
+        fetch(parsedSubmit.response_url, {
+          headers: { Authorization: `Key ${env.FAL_KEY}` },
+        }),
+      {
+        label: 'fal.response',
+        attempts: 3,
+        retryOn: (err) =>
+          err instanceof Error &&
+          /network|fetch|timeout|ECONN|ETIMEDOUT/i.test(err.message),
+      },
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    log.warn('response_network_failed', { err: message });
     return { ok: false, error: `fal_response_network: ${message}` };
   }
   if (!final.ok) {
+    log.warn('response_http_error', { status: final.status });
     return { ok: false, error: `fal_response_${final.status}` };
   }
   const finalJson = await final.json().catch(() => null);

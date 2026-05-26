@@ -35,7 +35,7 @@ type Input = z.infer<typeof InputSchema>;
 
 type Output =
   | { ok: true; image_url: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; suggestion?: string };
 
 registerTool<Input, Output>({
   name: 'generate_hero_image',
@@ -64,7 +64,12 @@ registerTool<Input, Output>({
       aspect,
     });
     if (!generation.ok || !generation.imageUrl) {
-      return { ok: false, error: generation.error ?? 'fal_unknown_error' };
+      return {
+        ok: false,
+        error: generation.error ?? 'image_gen_unavailable',
+        suggestion:
+          'Image gen is offline. Ask the user to describe the hero or pick a stock image instead.',
+      };
     }
 
     let rehosted;
@@ -75,7 +80,12 @@ registerTool<Input, Output>({
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      return { ok: false, error: `rehost_failed: ${message}` };
+      return {
+        ok: false,
+        error: `rehost_failed: ${message}`,
+        suggestion:
+          'Storage upload failed after image gen. Try again, or skip the hero image for now.',
+      };
     }
 
     const [row] = await db

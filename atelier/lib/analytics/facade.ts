@@ -2,6 +2,9 @@ import 'server-only';
 import { PostHog } from 'posthog-node';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'analytics' });
 
 let _client: PostHog | null = null;
 
@@ -221,10 +224,7 @@ export async function track(evt: AnalyticsEvent): Promise<void> {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('[analytics] posthog capture failed', {
-        event: evt.name,
-        message,
-      });
+      log.error('posthog capture failed', { event: evt.name, message });
     }
   }
 
@@ -238,24 +238,21 @@ export async function track(evt: AnalyticsEvent): Promise<void> {
       payload: getPayload(evt),
     });
     if (error) {
-      console.error('[analytics] events insert failed', {
+      log.error('events insert failed', {
         event: evt.name,
         message: error.message,
       });
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[analytics] events insert threw', {
-      event: evt.name,
-      message,
-    });
+    log.error('events insert threw', { event: evt.name, message });
   }
 }
 
 export function trackFireAndForget(evt: AnalyticsEvent): void {
   void track(evt).catch((err) => {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[analytics] track fire-and-forget rejected', {
+    log.error('track fire-and-forget rejected', {
       event: evt.name,
       message,
     });
@@ -266,7 +263,9 @@ export async function shutdownAnalytics(): Promise<void> {
   if (!_client) return;
   try {
     await _client.shutdown();
-  } catch {
-    /* noop */
+  } catch (err) {
+    log.warn('posthog shutdown failed', {
+      message: err instanceof Error ? err.message : String(err),
+    });
   }
 }

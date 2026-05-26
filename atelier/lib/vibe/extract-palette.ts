@@ -1,5 +1,8 @@
 import 'server-only';
 import { Vibrant } from 'node-vibrant/node';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'vibe/extract-palette' });
 
 export interface ExtractedPalette {
   bg: string;
@@ -50,9 +53,9 @@ export async function extractPalette(
         DEFAULT_PALETTE.accent2,
     };
   } catch (err) {
-    console.warn('[extract-palette] failed', {
+    log.warn('extractPalette failed', {
       imageUrl,
-      message: err instanceof Error ? err.message : String(err),
+      err: err instanceof Error ? err.message : String(err),
     });
     return DEFAULT_PALETTE;
   }
