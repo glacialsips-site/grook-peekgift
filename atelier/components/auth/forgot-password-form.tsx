@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSignIn } from '@clerk/nextjs/legacy';
+import { useSignIn } from '@clerk/nextjs';
+import type { SetActiveNavigate } from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,47 +15,52 @@ type Step =
   | { kind: 'reset'; email: string };
 
 export function ForgotPasswordForm() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn, fetchStatus } = useSignIn();
   const router = useRouter();
 
   const [step, setStep] = useState<Step>({ kind: 'request', email: '' });
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
+  const [codeVerified, setCodeVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoaded || !signIn) {
-    return (
-      <div className="py-8 text-center text-sm text-muted-foreground">
-        loading…
-      </div>
-    );
-  }
+  const busy = submitting || fetchStatus === 'fetching';
+
+  const navigateAfterSession: SetActiveNavigate = async ({ session, decorateUrl }) => {
+    if (session?.currentTask) return;
+    const url = decorateUrl('/build');
+    if (url.startsWith('http')) {
+      window.location.href = url;
+      return;
+    }
+    router.push(url);
+  };
 
   async function onSubmitRequest(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     if (step.kind !== 'request') return;
     setError(null);
     setSubmitting(true);
     try {
-      const attempt = await signIn.create({ identifier: step.email });
-      const factors = attempt.supportedFirstFactors ?? [];
-      const resetFactor = factors.find(
-        (f): f is Extract<typeof f, { strategy: 'reset_password_email_code' }> =>
-          f.strategy === 'reset_password_email_code',
+      const { error: createError } = await signIn.create({ identifier: step.email });
+      if (createError) {
+        setError(parseClerkError(createError));
+        return;
+      }
+      const supportsReset = signIn.supportedFirstFactors.some(
+        (f) => f.strategy === 'reset_password_email_code',
       );
-      if (!resetFactor) {
+      if (!supportsReset) {
         setError("We can't reset that account's password by email.");
         return;
       }
-      await signIn.prepareFirstFactor({
-        strategy: 'reset_password_email_code',
-        emailAddressId: resetFactor.emailAddressId,
-      });
+      const { error: sendError } = await signIn.resetPasswordEmailCode.sendCode();
+      if (sendError) {
+        setError(parseClerkError(sendError));
+        return;
+      }
       setStep({ kind: 'reset', email: step.email });
-    } catch (e) {
-      setError(parseClerkError(e));
     } finally {
       setSubmitting(false);
     }
@@ -62,27 +68,35 @@ export function ForgotPasswordForm() {
 
   async function onSubmitReset(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     setError(null);
     setSubmitting(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'reset_password_email_code',
-        code,
+      if (!codeVerified) {
+        const { error: verifyError } = await signIn.resetPasswordEmailCode.verifyCode({
+          code,
+        });
+        if (verifyError) {
+          setError(parseClerkError(verifyError));
+          return;
+        }
+        setCodeVerified(true);
+      }
+      const { error: submitError } = await signIn.resetPasswordEmailCode.submitPassword({
         password,
+        signOutOfOtherSessions: true,
       });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push('/build');
+      if (submitError) {
+        setError(parseClerkError(submitError));
         return;
       }
-      if (result.status === 'needs_new_password') {
-        setError('Set a new password to continue.');
+      if (signIn.status !== 'complete') {
+        setError("That didn't work. Try again.");
         return;
       }
-      setError("That didn't work. Try again.");
-    } catch (e) {
-      setError(parseClerkError(e));
+      const { error: finalizeError } = await signIn.finalize({
+        navigate: navigateAfterSession,
+      });
+      if (finalizeError) setError(parseClerkError(finalizeError));
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +123,7 @@ export function ForgotPasswordForm() {
         <Button
           type="submit"
           className="h-11 w-full"
-          disabled={submitting || !step.email}
+          disabled={busy || !step.email}
         >
           Send reset code
         </Button>
@@ -155,7 +169,7 @@ export function ForgotPasswordForm() {
       <Button
         type="submit"
         className="h-11 w-full"
-        disabled={submitting || code.length < 6 || !password}
+        disabled={busy || code.length < 6 || !password}
       >
         Reset password
       </Button>

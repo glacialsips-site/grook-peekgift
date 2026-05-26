@@ -4,6 +4,8 @@ type ClerkErrorShape = {
     message?: string;
     longMessage?: string;
   }>;
+  code?: string;
+  longMessage?: string;
   message?: string;
 };
 
@@ -38,11 +40,16 @@ export function parseClerkError(e: unknown): string {
   if (typeof e === 'string' && e.trim().length > 0) return e;
   if (!e || typeof e !== 'object') return 'Something went wrong. Try again.';
   const err = e as ClerkErrorShape;
+  if (err.code) {
+    const mapped = CODE_MESSAGES[err.code];
+    if (mapped) return mapped;
+  }
   const first = err.errors?.[0];
   if (first?.code) {
     const mapped = CODE_MESSAGES[first.code];
     if (mapped) return mapped;
   }
+  if (err.longMessage) return err.longMessage;
   if (first?.longMessage) return first.longMessage;
   if (first?.message) return first.message;
   if (err.message) return err.message;

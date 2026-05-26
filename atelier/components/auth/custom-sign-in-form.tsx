@@ -3,7 +3,13 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSignIn } from '@clerk/nextjs/legacy';
+import { useSignIn } from '@clerk/nextjs';
+import type {
+  OAuthStrategy,
+  SignInFirstFactor,
+  SignInSecondFactor,
+  SetActiveNavigate,
+} from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,17 +17,33 @@ import { OAuthButton } from './oauth-button';
 import { FormError } from './form-error';
 import { parseClerkError } from './clerk-error';
 
+type MfaStrategy = 'totp' | 'phone_code' | 'email_code';
+
 type Step =
   | { kind: 'start' }
   | { kind: 'password'; email: string }
-  | { kind: 'email_code_sent'; email: string; emailAddressId: string }
-  | { kind: 'needs_2fa'; strategy: 'totp' | 'phone_code' | 'email_code' };
+  | { kind: 'email_code_sent'; email: string }
+  | { kind: 'needs_2fa'; strategy: MfaStrategy };
+
+function pickMfaStrategy(factors: SignInSecondFactor[] | undefined): MfaStrategy {
+  const first = factors?.[0];
+  if (first?.strategy === 'phone_code') return 'phone_code';
+  if (first?.strategy === 'email_code') return 'email_code';
+  return 'totp';
+}
+
+function hasFirstFactor(
+  factors: SignInFirstFactor[],
+  strategy: SignInFirstFactor['strategy'],
+): boolean {
+  return factors.some((f) => f.strategy === strategy);
+}
 
 export function CustomSignInForm() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn, fetchStatus } = useSignIn();
   const router = useRouter();
   const search = useSearchParams();
-  const redirectUrl = search.get('redirect_url') ?? '/build';
+  const redirectUrl = search.get('returnTo') ?? '/build';
 
   const [step, setStep] = useState<Step>({ kind: 'start' });
   const [email, setEmail] = useState('');
@@ -30,60 +52,76 @@ export function CustomSignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoaded || !signIn) {
-    return (
-      <div className="py-8 text-center text-sm text-muted-foreground">
-        loading…
-      </div>
-    );
+  const busy = submitting || fetchStatus === 'fetching';
+
+  const navigateAfterSession: SetActiveNavigate = async ({ session, decorateUrl }) => {
+    if (session?.currentTask) return;
+    const url = decorateUrl(redirectUrl);
+    if (url.startsWith('http')) {
+      window.location.href = url;
+      return;
+    }
+    router.push(url);
+  };
+
+  async function completeIfReady(): Promise<boolean> {
+    if (signIn.status === 'complete') {
+      const { error: finalizeError } = await signIn.finalize({
+        navigate: navigateAfterSession,
+      });
+      if (finalizeError) {
+        setError(parseClerkError(finalizeError));
+        return false;
+      }
+      return true;
+    }
+    if (signIn.status === 'needs_second_factor') {
+      setStep({
+        kind: 'needs_2fa',
+        strategy: pickMfaStrategy(signIn.supportedSecondFactors),
+      });
+      return false;
+    }
+    return false;
   }
 
-  async function handleOAuth(strategy: 'oauth_google') {
-    if (!signIn) return;
+  async function handleOAuth(strategy: OAuthStrategy) {
     setError(null);
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: redirectUrl,
-      });
-    } catch (e) {
-      setError(parseClerkError(e));
-    }
+    const { error: ssoError } = await signIn.sso({
+      strategy,
+      redirectUrl,
+      redirectCallbackUrl: '/sso-callback',
+    });
+    if (ssoError) setError(parseClerkError(ssoError));
   }
 
   async function onSubmitEmail(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     setError(null);
     setSubmitting(true);
     try {
-      const attempt = await signIn.create({ identifier: email });
-      const factors = attempt.supportedFirstFactors ?? [];
-      const hasPassword = factors.some((f) => f.strategy === 'password');
-      if (hasPassword) {
-        setStep({ kind: 'password', email });
-      } else {
-        const emailFactor = factors.find(
-          (f): f is Extract<typeof f, { strategy: 'email_code' }> =>
-            f.strategy === 'email_code',
-        );
-        if (!emailFactor) {
-          setError("We can't sign you in with that email yet.");
-          return;
-        }
-        await signIn.prepareFirstFactor({
-          strategy: 'email_code',
-          emailAddressId: emailFactor.emailAddressId,
-        });
-        setStep({
-          kind: 'email_code_sent',
-          email,
-          emailAddressId: emailFactor.emailAddressId,
-        });
+      const { error: createError } = await signIn.create({ identifier: email });
+      if (createError) {
+        setError(parseClerkError(createError));
+        return;
       }
-    } catch (e) {
-      setError(parseClerkError(e));
+      const factors = signIn.supportedFirstFactors;
+      if (hasFirstFactor(factors, 'password')) {
+        setStep({ kind: 'password', email });
+        return;
+      }
+      if (!hasFirstFactor(factors, 'email_code')) {
+        setError("We can't sign you in with that email yet.");
+        return;
+      }
+      const { error: sendError } = await signIn.emailCode.sendCode({
+        emailAddress: email,
+      });
+      if (sendError) {
+        setError(parseClerkError(sendError));
+        return;
+      }
+      setStep({ kind: 'email_code_sent', email });
     } finally {
       setSubmitting(false);
     }
@@ -91,80 +129,52 @@ export function CustomSignInForm() {
 
   async function onSubmitPassword(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     setError(null);
     setSubmitting(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'password',
+      const { error: passwordError } = await signIn.password({
         password,
+        identifier: step.kind === 'password' ? step.email : email,
       });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl);
+      if (passwordError) {
+        setError(parseClerkError(passwordError));
         return;
       }
-      if (result.status === 'needs_second_factor') {
-        const factor = result.supportedSecondFactors?.[0];
-        const strategy: 'totp' | 'phone_code' | 'email_code' =
-          factor?.strategy === 'phone_code'
-            ? 'phone_code'
-            : factor?.strategy === 'email_code'
-              ? 'email_code'
-              : 'totp';
-        setStep({ kind: 'needs_2fa', strategy });
-        return;
-      }
-      setError('Sign-in needs another step. Try again.');
-    } catch (e) {
-      setError(parseClerkError(e));
+      await completeIfReady();
     } finally {
       setSubmitting(false);
     }
   }
 
   async function onSwitchToEmailCode() {
-    if (!signIn) return;
     setError(null);
     setSubmitting(true);
     try {
-      const factors = signIn.supportedFirstFactors ?? [];
-      const emailFactor = factors.find(
-        (f): f is Extract<typeof f, { strategy: 'email_code' }> =>
-          f.strategy === 'email_code',
-      );
-      if (!emailFactor) {
-        setError("We can't send a code to that email.");
+      const { error: sendError } = await signIn.emailCode.sendCode({
+        emailAddress: step.kind === 'password' ? step.email : email,
+      });
+      if (sendError) {
+        setError(parseClerkError(sendError));
         return;
       }
-      await signIn.prepareFirstFactor({
-        strategy: 'email_code',
-        emailAddressId: emailFactor.emailAddressId,
-      });
       setStep({
         kind: 'email_code_sent',
-        email,
-        emailAddressId: emailFactor.emailAddressId,
+        email: step.kind === 'password' ? step.email : email,
       });
       setCode('');
-    } catch (e) {
-      setError(parseClerkError(e));
     } finally {
       setSubmitting(false);
     }
   }
 
-  async function onResendEmailCode(emailAddressId: string) {
-    if (!signIn) return;
+  async function onResendEmailCode() {
     setError(null);
     setSubmitting(true);
     try {
-      await signIn.prepareFirstFactor({
-        strategy: 'email_code',
-        emailAddressId,
+      const { error: sendError } = await signIn.emailCode.sendCode({
+        emailAddress: step.kind === 'email_code_sent' ? step.email : email,
       });
-    } catch (e) {
-      setError(parseClerkError(e));
+      if (sendError) setError(parseClerkError(sendError));
     } finally {
       setSubmitting(false);
     }
@@ -172,33 +182,15 @@ export function CustomSignInForm() {
 
   async function onSubmitEmailCode(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     setError(null);
     setSubmitting(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'email_code',
-        code,
-      });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl);
+      const { error: verifyError } = await signIn.emailCode.verifyCode({ code });
+      if (verifyError) {
+        setError(parseClerkError(verifyError));
         return;
       }
-      if (result.status === 'needs_second_factor') {
-        const factor = result.supportedSecondFactors?.[0];
-        const strategy: 'totp' | 'phone_code' | 'email_code' =
-          factor?.strategy === 'phone_code'
-            ? 'phone_code'
-            : factor?.strategy === 'email_code'
-              ? 'email_code'
-              : 'totp';
-        setStep({ kind: 'needs_2fa', strategy });
-        return;
-      }
-      setError('Sign-in needs another step. Try again.');
-    } catch (e) {
-      setError(parseClerkError(e));
+      await completeIfReady();
     } finally {
       setSubmitting(false);
     }
@@ -206,29 +198,21 @@ export function CustomSignInForm() {
 
   async function onSubmit2fa(ev: FormEvent) {
     ev.preventDefault();
-    if (!signIn) return;
     if (step.kind !== 'needs_2fa') return;
     setError(null);
     setSubmitting(true);
     try {
-      const result =
+      const { error: verifyError } =
         step.strategy === 'totp'
-          ? await signIn.attemptSecondFactor({ strategy: 'totp', code })
+          ? await signIn.mfa.verifyTOTP({ code })
           : step.strategy === 'phone_code'
-            ? await signIn.attemptSecondFactor({
-                strategy: 'phone_code',
-                code,
-              })
-            : await signIn.attemptSecondFactor({
-                strategy: 'email_code',
-                code,
-              });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl);
+            ? await signIn.mfa.verifyPhoneCode({ code })
+            : await signIn.mfa.verifyEmailCode({ code });
+      if (verifyError) {
+        setError(parseClerkError(verifyError));
+        return;
       }
-    } catch (e) {
-      setError(parseClerkError(e));
+      await completeIfReady();
     } finally {
       setSubmitting(false);
     }
@@ -240,7 +224,7 @@ export function CustomSignInForm() {
         <OAuthButton
           provider="google"
           onClick={() => handleOAuth('oauth_google')}
-          disabled={submitting}
+          disabled={busy}
         />
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
@@ -266,7 +250,7 @@ export function CustomSignInForm() {
           <Button
             type="submit"
             className="h-11 w-full"
-            disabled={submitting || !email}
+            disabled={busy || !email}
           >
             Continue
           </Button>
@@ -313,7 +297,7 @@ export function CustomSignInForm() {
         <Button
           type="submit"
           className="h-11 w-full"
-          disabled={submitting || !password}
+          disabled={busy || !password}
         >
           Sign in
         </Button>
@@ -321,7 +305,7 @@ export function CustomSignInForm() {
           <button
             type="button"
             onClick={onSwitchToEmailCode}
-            disabled={submitting}
+            disabled={busy}
             className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
           >
             Send me a code instead
@@ -357,15 +341,15 @@ export function CustomSignInForm() {
         <Button
           type="submit"
           className="h-11 w-full"
-          disabled={submitting || code.length < 6}
+          disabled={busy || code.length < 6}
         >
           Verify
         </Button>
         <div className="text-center">
           <button
             type="button"
-            onClick={() => onResendEmailCode(step.emailAddressId)}
-            disabled={submitting}
+            onClick={onResendEmailCode}
+            disabled={busy}
             className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
           >
             Didn't get it? Resend.
@@ -404,7 +388,7 @@ export function CustomSignInForm() {
       <Button
         type="submit"
         className="h-11 w-full"
-        disabled={submitting || code.length < 6}
+        disabled={busy || code.length < 6}
       >
         Verify
       </Button>
