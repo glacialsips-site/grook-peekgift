@@ -60,15 +60,38 @@ const MessageSchema = z
   })
   .passthrough();
 
+export const AttachmentSchema = z
+  .object({
+    kind: z.literal('image'),
+    url: z.string().url(),
+    contentType: z.string().min(1).optional(),
+    alt: z.string().max(500).optional(),
+  })
+  .strict();
+
+export type Attachment = z.infer<typeof AttachmentSchema>;
+
 export const ChatRequestSchema = z
   .object({
     peekId: z.string().uuid(),
     sessionId: z.string().min(1).max(200),
     history: z.array(MessageSchema),
-    userMessage: z.union([z.string().min(1), z.array(ContentBlockSchema).min(1)]),
+    userMessage: z.union([z.string(), z.array(ContentBlockSchema).min(1)]),
+    attachments: z.array(AttachmentSchema).max(8).optional(),
     model: z.string().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (val) => {
+      const hasText =
+        typeof val.userMessage === 'string'
+          ? val.userMessage.trim().length > 0
+          : val.userMessage.length > 0;
+      const hasAttachments = (val.attachments?.length ?? 0) > 0;
+      return hasText || hasAttachments;
+    },
+    { message: 'userMessage or attachments required' },
+  );
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 

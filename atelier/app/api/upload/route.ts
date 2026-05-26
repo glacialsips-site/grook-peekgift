@@ -18,7 +18,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-const MAX_SIZE = 8 * 1024 * 1024;
+const MAX_SIZE = 10 * 1024 * 1024;
 const ALLOWED = new Set([
   'image/jpeg',
   'image/png',

@@ -163,15 +163,15 @@ function hydrateMessages(initial: InitialChatMessage[]): ChatMessage[] {
     const text = extractText(row.content);
     if (row.role === 'user') {
       const images = extractImages(row.content);
-      const parts: string[] = [];
-      if (images.length > 0) {
-        parts.push(...images.map(() => '[image]'));
-      }
-      if (text) parts.push(text);
+      const cleanedText = stripAttachmentGuidance(text);
       out.push({
         id: crypto.randomUUID(),
         role: 'user',
-        content: parts.join('\n') || (images.length > 0 ? '[image]' : ''),
+        content: cleanedText,
+        images:
+          images.length > 0
+            ? images.map((i) => ({ url: i.url, contentType: i.contentType }))
+            : undefined,
       });
       continue;
     }
@@ -184,6 +184,21 @@ function hydrateMessages(initial: InitialChatMessage[]): ChatMessage[] {
     });
   }
   return out;
+}
+
+function stripAttachmentGuidance(text: string): string {
+  if (!text.startsWith('[system] The curator just attached')) return text;
+  const lines = text.split('\n');
+  let i = 0;
+  while (
+    i < lines.length &&
+    (lines[i].startsWith('[system]') ||
+      /^\d+\.\s+https?:\/\//.test(lines[i]) ||
+      lines[i].includes('Supabase Storage URLs'))
+  ) {
+    i += 1;
+  }
+  return lines.slice(i).join('\n').trim();
 }
 
 function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
@@ -275,28 +290,20 @@ export function ChatPane({
       if (!trimmed && images.length === 0) return;
       if (sending) return;
 
-      const userContentBlocks: Array<
-        | { type: 'image'; source: { type: 'url'; url: string } }
-        | { type: 'text'; text: string }
-      > = [];
-      for (const img of images) {
-        userContentBlocks.push({
-          type: 'image',
-          source: { type: 'url', url: img.url },
-        });
-      }
-      if (trimmed) {
-        userContentBlocks.push({ type: 'text', text: trimmed });
-      }
-
-      const userDisplay =
-        trimmed ||
-        (images.length > 0 ? `[${images.length} image${images.length === 1 ? '' : 's'}]` : '');
+      const apiAttachments = images.map((img) => ({
+        kind: 'image' as const,
+        url: img.url,
+        contentType: img.contentType,
+      }));
 
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'user',
-        content: userDisplay,
+        content: trimmed,
+        images:
+          images.length > 0
+            ? images.map((i) => ({ url: i.url, contentType: i.contentType }))
+            : undefined,
       };
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -313,11 +320,7 @@ export function ChatPane({
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const onlyBlock = userContentBlocks[0];
-      const apiUserMessage =
-        userContentBlocks.length === 1 && onlyBlock && onlyBlock.type === 'text'
-          ? onlyBlock.text
-          : userContentBlocks;
+      const apiUserMessage = trimmed;
 
       try {
         const response = await fetch('/api/chat', {
@@ -328,6 +331,7 @@ export function ChatPane({
             sessionId,
             history: apiHistoryRef.current,
             userMessage: apiUserMessage,
+            attachments: apiAttachments.length > 0 ? apiAttachments : undefined,
           }),
           signal: controller.signal,
         });
@@ -376,9 +380,27 @@ export function ChatPane({
           }
         }
 
+        const persistedUserContent: Array<
+          | { type: 'image'; source: { type: 'url'; url: string } }
+          | { type: 'text'; text: string }
+        > = [];
+        for (const img of images) {
+          persistedUserContent.push({
+            type: 'image',
+            source: { type: 'url', url: img.url },
+          });
+        }
+        if (trimmed) {
+          persistedUserContent.push({ type: 'text', text: trimmed });
+        }
+        const historyUserContent: string | typeof persistedUserContent =
+          persistedUserContent.length === 1 &&
+          persistedUserContent[0]?.type === 'text'
+            ? trimmed
+            : persistedUserContent;
         apiHistoryRef.current = [
           ...apiHistoryRef.current,
-          { role: 'user', content: apiUserMessage },
+          { role: 'user', content: historyUserContent },
           {
             role: 'assistant',
             content: assistantTextAccum
@@ -688,6 +710,19 @@ function MessageBubble({
           isUser ? 'items-end' : 'items-start',
         )}
       >
+        {isUser && message.role === 'user' && message.images && message.images.length > 0 ? (
+          <div className="flex flex-wrap justify-end gap-1.5">
+            {message.images.map((img) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={img.url}
+                src={img.url}
+                alt={img.alt ?? 'Attached image'}
+                className="max-h-48 w-auto rounded-lg border border-border object-cover"
+              />
+            ))}
+          </div>
+        ) : null}
         {message.content ||
         (!isUser && message.role === 'assistant' && message.streaming) ? (
           <div
