@@ -40,6 +40,10 @@ function toProviderVibe(vibe: Vibe | null | undefined): ProviderVibe {
     mood_words: vibe.mood_words,
     palette: vibe.palette ?? PROVIDER_DEFAULT.palette,
     font_pairing: vibe.font_pairing,
+    typography: vibe.typography,
+    density: vibe.density,
+    shape: vibe.shape,
+    mood: vibe.mood,
   };
 }
 
