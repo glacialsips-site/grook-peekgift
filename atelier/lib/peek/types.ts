@@ -14,6 +14,14 @@ import type {
   VibeSignalSource,
   VibeSignalSourceEntry,
   VibeTypography,
+  VibeVoice,
+  VoiceEmoji,
+  VoiceFormality,
+  VoiceHumor,
+  VoiceLength,
+  VoicePace,
+  VoiceVocabulary,
+  VoiceWarmth,
 } from '@/db/schema/peeks';
 import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
 
@@ -33,6 +41,14 @@ export type {
   VibeSignalSource,
   VibeSignalSourceEntry,
   VibeTypography,
+  VibeVoice,
+  VoiceEmoji,
+  VoiceFormality,
+  VoiceHumor,
+  VoiceLength,
+  VoicePace,
+  VoiceVocabulary,
+  VoiceWarmth,
 };
 
 export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';

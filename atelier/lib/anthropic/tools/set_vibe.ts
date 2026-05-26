@@ -51,6 +51,25 @@ const DensitySchema = z.enum(['compact', 'cozy', 'breathable']);
 const ShapeSchema = z.enum(['sharp', 'soft', 'pillowy']);
 const MoodSchema = z.enum(['minimal', 'rich', 'whimsical', 'editorial']);
 
+const VoiceWarmthSchema = z.enum(['restrained', 'measured', 'warm', 'effusive']);
+const VoiceHumorSchema = z.enum(['none', 'gentle', 'dry', 'sharp']);
+const VoicePaceSchema = z.enum(['considered', 'natural', 'quick']);
+const VoiceFormalitySchema = z.enum(['casual', 'neutral', 'formal']);
+const VoiceEmojiSchema = z.enum(['none', 'rare', 'occasional', 'playful']);
+const VoiceVocabularySchema = z.enum(['slangy', 'neutral', 'elevated']);
+const VoiceLengthSchema = z.enum(['punchy', 'natural', 'fuller']);
+const VoiceSchema = z
+  .object({
+    warmth: VoiceWarmthSchema.optional(),
+    humor: VoiceHumorSchema.optional(),
+    pace: VoicePaceSchema.optional(),
+    formality: VoiceFormalitySchema.optional(),
+    emoji: VoiceEmojiSchema.optional(),
+    vocabulary: VoiceVocabularySchema.optional(),
+    length: VoiceLengthSchema.optional(),
+  })
+  .strict();
+
 export const VibeInputSchema = z
   .object({
     preset: PresetSchema.optional(),
@@ -63,6 +82,7 @@ export const VibeInputSchema = z
     density: DensitySchema.optional(),
     shape: ShapeSchema.optional(),
     mood: MoodSchema.optional(),
+    voice: VoiceSchema.optional(),
   })
   .strict();
 type Input = z.infer<typeof VibeInputSchema>;
@@ -70,6 +90,7 @@ type Input = z.infer<typeof VibeInputSchema>;
 export type StoredPalette = z.infer<typeof PaletteSchema>;
 export type StoredFontPairing = z.infer<typeof FontPairingSchema>;
 export type StoredTypography = z.infer<typeof TypographySchema>;
+export type StoredVoice = z.infer<typeof VoiceSchema>;
 export type StoredVibe = {
   preset?: z.infer<typeof PresetSchema>;
   tone?: string;
@@ -81,6 +102,7 @@ export type StoredVibe = {
   density?: z.infer<typeof DensitySchema>;
   shape?: z.infer<typeof ShapeSchema>;
   mood?: z.infer<typeof MoodSchema>;
+  voice?: StoredVoice;
 };
 
 export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
@@ -184,7 +206,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_vibe',
   description:
-    'REPLACE the entire visual + tonal vibe of the Peek. Use this once at the start when you have a clear read on what the page should feel like. After this, use update_vibe to merge new signals (hero palette extraction, card drift, etc). Pass a preset and/or override individual fields — provided fields win over the preset; absent fields fall back to the preset. The style-engine fields (typography, density, shape, mood) shape the whole feel of the page — choose them deliberately for the recipient and occasion.',
+    "REPLACE the entire visual + tonal vibe of the Peek. Use this once at the start when you have a clear read on what the page should feel like. After this, use update_vibe to merge new signals (hero palette extraction, card drift, etc). Pass a preset and/or override individual fields — provided fields win over the preset; absent fields fall back to the preset. The style-engine fields (typography, density, shape, mood) shape the page's LOOK. The voice sub-object shapes how YOU talk to the curator — match register to the curator's writing style and the occasion's gravity.",
   input_schema: {
     type: 'object',
     properties: {
@@ -260,6 +282,55 @@ registerTool<Input, Output>({
         description:
           'High-level visual register. minimal = restrained. rich = saturated, layered. whimsical = playful. editorial = magazine-like.',
       },
+      voice: {
+        type: 'object',
+        description:
+          "How YOU (Peek) talk to the curator. Set this on turn 1 or 2 by reading: curator's own writing style (mirror them), recipient age + relationship, occasion gravity. Bachelorette pulls humor=sharp + emoji=playful + pace=quick. Memorial pulls humor=none + warmth=measured + length=fuller + emoji=none. 6yo birthday pulls humor=gentle + emoji=occasional + pace=quick. Corporate farewell pulls humor=dry + emoji=rare + length=natural. Reserved 40-something professional pulls warmth=measured + vocabulary=neutral + emoji=none. All sub-fields optional.",
+        properties: {
+          warmth: {
+            type: 'string',
+            enum: ['restrained', 'measured', 'warm', 'effusive'],
+            description:
+              'Emotional temperature. restrained for memorial/professional, warm default, effusive for close-friend birthday.',
+          },
+          humor: {
+            type: 'string',
+            enum: ['none', 'gentle', 'dry', 'sharp'],
+            description:
+              'none for memorial/grief, gentle for kids and tender moments, dry for grown-up sentimentality, sharp for bachelorette/chops-busting between close friends.',
+          },
+          pace: {
+            type: 'string',
+            enum: ['considered', 'natural', 'quick'],
+            description:
+              'considered = slower, weighted (memorials, milestones). natural = default. quick = quippy, fast back-and-forth.',
+          },
+          formality: {
+            type: 'string',
+            enum: ['casual', 'neutral', 'formal'],
+            description:
+              'casual = texting-a-friend. neutral = default. formal = writing-a-card (rare; usually only for professional or formal-occasion contexts).',
+          },
+          emoji: {
+            type: 'string',
+            enum: ['none', 'rare', 'occasional', 'playful'],
+            description:
+              'Default rare-or-none. none for memorial/grief or reserved-professional curators. occasional for warm peer-to-peer. playful only when the curator themselves uses emoji liberally.',
+          },
+          vocabulary: {
+            type: 'string',
+            enum: ['slangy', 'neutral', 'elevated'],
+            description:
+              'slangy = current/gen-z/text-speak (bachelorette, college-age). neutral = default. elevated = literary/considered (memorial, milestone reflections).',
+          },
+          length: {
+            type: 'string',
+            enum: ['punchy', 'natural', 'fuller'],
+            description:
+              'punchy = one-liners, snappy. natural = default 1-3 sentences. fuller = paragraph when the moment calls for it (memorial reflections, milestone toasts).',
+          },
+        },
+      },
     },
     required: [],
   },
@@ -284,6 +355,7 @@ registerTool<Input, Output>({
       ...(parsed.density !== undefined ? { density: parsed.density } : {}),
       ...(parsed.shape !== undefined ? { shape: parsed.shape } : {}),
       ...(parsed.mood !== undefined ? { mood: parsed.mood } : {}),
+      ...(parsed.voice !== undefined ? { voice: parsed.voice } : {}),
     };
     await db
       .update(peeks)
