@@ -1,5 +1,8 @@
 import 'server-only';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'chat/session' });
 
 export const ANON_TURN_CAP = 5;
 
@@ -22,7 +25,7 @@ export async function recordEvent(input: RecordEventInput): Promise<void> {
       payload: input.payload ?? {},
     });
     if (error) {
-      console.error('[chat/session] recordEvent failed', {
+      log.error('recordEvent failed', {
         kind: input.kind,
         peekId: input.peekId,
         error: error.message,
@@ -30,7 +33,7 @@ export async function recordEvent(input: RecordEventInput): Promise<void> {
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[chat/session] recordEvent threw', {
+    log.error('recordEvent threw', {
       kind: input.kind,
       peekId: input.peekId,
       error: message,
@@ -64,7 +67,7 @@ export async function assertPeekAccess(
     .maybeSingle();
 
   if (error) {
-    console.error('[chat/session] assertPeekAccess query failed', {
+    log.error('assertPeekAccess query failed', {
       peekId: opts.peekId,
       error: error.message,
     });
@@ -109,7 +112,7 @@ export async function anonymousTurnCount(sessionId: string): Promise<number> {
     .eq('kind', 'chat_turn')
     .is('user_id', null);
   if (error) {
-    console.error('[chat/session] anonymousTurnCount failed', {
+    log.error('anonymousTurnCount failed', {
       sessionId,
       error: error.message,
     });

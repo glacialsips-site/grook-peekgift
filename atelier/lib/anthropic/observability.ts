@@ -2,6 +2,9 @@ import 'server-only';
 import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic } from './client';
 import { getPostHogServer, trackFireAndForget } from '@/lib/analytics/facade';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'anthropic/observability' });
 
 export interface LlmCallContext {
   peekId: string;
@@ -61,7 +64,7 @@ function capture(payload: CapturePayload): void {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('[llm-obs] posthog capture failed', { message });
+      log.error('posthog capture failed', { message });
     }
   }
 
@@ -118,7 +121,7 @@ function captureError(args: {
       });
     } catch (err) {
       const m = err instanceof Error ? err.message : String(err);
-      console.error('[llm-obs] posthog error-capture failed', { message: m });
+      log.error('posthog error-capture failed', { message: m });
     }
   }
 }

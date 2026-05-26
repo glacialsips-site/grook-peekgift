@@ -13,7 +13,20 @@ import {
   loadChatHistory,
 } from '@/lib/chat/persistence';
 import { track } from '@/lib/analytics/facade';
+import { logger } from '@/lib/logger';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
+
+const log = logger.child({ component: 'api/chat' });
+
+const FRIENDLY_UPSTREAM_MSG =
+  "We're having trouble connecting to the AI. Give it a moment and try again.";
+
+function isUpstream5xx(err: unknown): boolean {
+  const status =
+    (err as { status?: number }).status ??
+    (err as { statusCode?: number }).statusCode;
+  return typeof status === 'number' && status >= 500 && status < 600;
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -89,7 +102,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         }));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('[chat] loadChatHistory failed', { peekId, message });
+      log.error('loadChatHistory failed', { peekId, message });
     }
   }
 
@@ -110,7 +123,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           controller.enqueue(encodeSseEvent(event));
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          console.error('[chat] enqueue failed', { message });
+          log.error('enqueue failed', { message });
         }
       };
       const safeClose = (): void => {
@@ -136,10 +149,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        console.error('[chat] persist user message failed', {
-          peekId,
-          message,
-        });
+        log.error('persist user message failed', { peekId, message });
       }
 
       try {
@@ -159,7 +169,7 @@ export async function POST(req: NextRequest): Promise<Response> {
               });
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);
-              console.error('[chat] persist tool_result failed', {
+              log.error('persist tool_result failed', {
                 peekId,
                 id,
                 message,
@@ -185,10 +195,7 @@ export async function POST(req: NextRequest): Promise<Response> {
               } catch (err) {
                 const message =
                   err instanceof Error ? err.message : String(err);
-                console.error('[chat] persist assistant turn failed', {
-                  peekId,
-                  message,
-                });
+                log.error('persist assistant turn failed', { peekId, message });
               }
             }
             break;
@@ -230,7 +237,16 @@ export async function POST(req: NextRequest): Promise<Response> {
               break;
             }
             case 'error': {
-              safeEnqueue({ kind: 'error', message: event.error.message });
+              const upstream = isUpstream5xx(event.error);
+              log.warn('stream_error', {
+                peekId,
+                message: event.error.message,
+                upstream_5xx: upstream,
+              });
+              safeEnqueue({
+                kind: 'error',
+                message: upstream ? FRIENDLY_UPSTREAM_MSG : event.error.message,
+              });
               break;
             }
             case 'thinking_delta':
@@ -273,8 +289,17 @@ export async function POST(req: NextRequest): Promise<Response> {
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        console.error('[chat] turn failed', { peekId, sessionId, message });
-        safeEnqueue({ kind: 'error', message });
+        const upstream5xx = isUpstream5xx(err);
+        log.error('turn failed', {
+          peekId,
+          sessionId,
+          message,
+          upstream_5xx: upstream5xx,
+        });
+        safeEnqueue({
+          kind: 'error',
+          message: upstream5xx ? FRIENDLY_UPSTREAM_MSG : message,
+        });
       } finally {
         safeClose();
       }

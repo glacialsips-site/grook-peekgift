@@ -1,5 +1,7 @@
 import 'server-only';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
+import { withRetry } from '@/lib/retry';
 
 export interface ScrapedPage {
   html: string;
@@ -8,9 +10,19 @@ export interface ScrapedPage {
 
 const SESSION_BASE = 'https://api.browserbase.com/v1';
 const REQUEST_TIMEOUT_MS = 20_000;
+const log = logger.child({ component: 'scrape/browserbase' });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+class HttpError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.name = 'HttpError';
+  }
 }
 
 async function timedFetch(
@@ -27,6 +39,18 @@ async function timedFetch(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function timedFetchOk(
+  url: string,
+  init: RequestInit & { timeoutMs?: number },
+  label: string,
+): Promise<Response> {
+  const res = await timedFetch(url, init);
+  if (!res.ok) {
+    throw new HttpError(res.status, `${label}_${res.status}`);
+  }
+  return res;
 }
 
 interface BrowserbaseSession {
@@ -56,15 +80,26 @@ export async function browserbaseScrape(
 
   let sessionRes: Response;
   try {
-    sessionRes = await timedFetch(`${SESSION_BASE}/sessions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ projectId: env.BROWSERBASE_PROJECT_ID }),
+    sessionRes = await withRetry(
+      () =>
+        timedFetchOk(
+          `${SESSION_BASE}/sessions`,
+          {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ projectId: env.BROWSERBASE_PROJECT_ID }),
+          },
+          'browserbase_session_create',
+        ),
+      { label: 'browserbase.session.create', attempts: 3 },
+    );
+  } catch (err) {
+    log.warn('session_create_failed', {
+      url,
+      err: err instanceof Error ? err.message : String(err),
     });
-  } catch {
     return null;
   }
-  if (!sessionRes.ok) return null;
 
   const sessionJson = await sessionRes.json().catch(() => null);
   const session = parseSession(sessionJson);
@@ -74,18 +109,26 @@ export async function browserbaseScrape(
     const sessionId = session.id;
     let pageRes: Response;
     try {
-      pageRes = await timedFetch(
-        `${SESSION_BASE}/sessions/${sessionId}/page`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ url, waitUntil: 'networkidle' }),
-        },
+      pageRes = await withRetry(
+        () =>
+          timedFetchOk(
+            `${SESSION_BASE}/sessions/${sessionId}/page`,
+            {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ url, waitUntil: 'networkidle' }),
+            },
+            'browserbase_page',
+          ),
+        { label: 'browserbase.page', attempts: 3 },
       );
-    } catch {
+    } catch (err) {
+      log.warn('page_fetch_failed', {
+        url,
+        err: err instanceof Error ? err.message : String(err),
+      });
       return null;
     }
-    if (!pageRes.ok) return null;
     const pageJson = await pageRes.json().catch(() => null);
     if (!isRecord(pageJson)) return null;
     const html = pageJson['html'];
@@ -104,8 +147,13 @@ export async function browserbaseScrape(
         headers,
         timeoutMs: 5_000,
       });
-    } catch {
-      // session cleanup failures are non-fatal
+    } catch (err) {
+      // session cleanup is fire-and-forget; logging the failure here is enough
+      // to debug a leaking session without retrying (cost > benefit for cleanup).
+      log.debug('session_cleanup_failed', {
+        session_id: session.id,
+        err: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 }

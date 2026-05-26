@@ -6,6 +6,9 @@ import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'g/[slug]/page' });
 import type {
   Card,
   Peek,
@@ -167,7 +170,11 @@ export async function generateMetadata({
       .eq('slug', slug)
       .maybeSingle();
     peek = (data as PeekMetaRow | null) ?? null;
-  } catch {
+  } catch (err) {
+    log.warn('generateMetadata lookup failed', {
+      slug,
+      err: err instanceof Error ? err.message : String(err),
+    });
     peek = null;
   }
 

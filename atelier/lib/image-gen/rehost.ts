@@ -1,5 +1,6 @@
 import 'server-only';
 import { randomUUID } from 'node:crypto';
+import { withRetry } from '@/lib/retry';
 import { uploadAsset } from '@/lib/supabase/storage';
 
 export interface RehostInput {
@@ -32,10 +33,16 @@ function extFromContentType(contentType: string): string {
 }
 
 export async function rehostImage(opts: RehostInput): Promise<RehostResult> {
-  const res = await fetch(opts.sourceUrl);
-  if (!res.ok) {
-    throw new Error(`rehost_fetch_failed_${res.status}`);
-  }
+  const res = await withRetry(
+    async () => {
+      const r = await fetch(opts.sourceUrl);
+      if (!r.ok) {
+        throw new Error(`rehost_fetch_failed_${r.status}`);
+      }
+      return r;
+    },
+    { label: 'rehost.download', attempts: 3 },
+  );
   const contentType = res.headers.get('content-type') ?? 'image/png';
   const buf = Buffer.from(await res.arrayBuffer());
   const ext = extFromContentType(contentType);

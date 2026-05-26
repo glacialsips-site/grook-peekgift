@@ -11,6 +11,9 @@ import {
 import { classifyCards, type CardSignal } from './classify-cards';
 import { classifyTone } from './classify-tone';
 import { extractPalette } from './extract-palette';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'vibe/evolve' });
 
 export type VibeSignal =
   | { kind: 'hero_image'; imageUrl: string }
@@ -53,8 +56,12 @@ export async function evolveVibe(
       .update(peeks)
       .set({ vibe: next, updatedAt: new Date() })
       .where(eq(peeks.id, peekId));
-  } catch {
-    return;
+  } catch (err) {
+    log.warn('evolveVibe failed', {
+      peekId,
+      signal_kind: signal.kind,
+      err: err instanceof Error ? err.message : String(err),
+    });
   }
 }
 

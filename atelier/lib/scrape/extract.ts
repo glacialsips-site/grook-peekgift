@@ -1,5 +1,6 @@
 import 'server-only';
 import { anthropic, assertAnthropicConfigured, FAST_MODEL } from '@/lib/anthropic/client';
+import { withRetry } from '@/lib/retry';
 
 export interface ScrapedProduct {
   title: string;
@@ -107,17 +108,21 @@ export async function extractProduct(
   assertAnthropicConfigured();
   const trimmed = trimHtml(opts.html);
 
-  const res = await anthropic.messages.create({
-    model: FAST_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: `URL: ${opts.sourceUrl}\n\nHTML:\n${trimmed}`,
-      },
-    ],
-  });
+  const res = await withRetry(
+    () =>
+      anthropic.messages.create({
+        model: FAST_MODEL,
+        max_tokens: MAX_TOKENS,
+        system: SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: `URL: ${opts.sourceUrl}\n\nHTML:\n${trimmed}`,
+          },
+        ],
+      }),
+    { label: 'anthropic.scrape.extract', attempts: 3 },
+  );
 
   const textBlock = res.content.find((block) => block.type === 'text');
   if (!textBlock || textBlock.type !== 'text') return null;

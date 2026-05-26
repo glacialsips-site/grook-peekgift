@@ -4,6 +4,9 @@ import type { WebhookEvent } from '@clerk/nextjs/server';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { inngest } from '@/lib/inngest/client';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'api/webhooks/clerk' });
 
 async function logWebhook(payload: Record<string, unknown>, success: boolean) {
   try {
@@ -11,7 +14,12 @@ async function logWebhook(payload: Record<string, unknown>, success: boolean) {
       name: 'peek/webhook.received',
       data: { source: 'clerk', payload, success },
     });
-  } catch {}
+  } catch (err) {
+    log.warn('inngest_publish_failed', {
+      source: 'clerk',
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 export async function POST(req: Request) {

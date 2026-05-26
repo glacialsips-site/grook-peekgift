@@ -1,49 +1,108 @@
-# Packet 26 — Inngest jobs
+# Packet 33 — Reliability (boundaries + logger + retry)
 
-## Deferred wiring
+## Tally
 
-- **`@/lib/scrape/*` (packet 22)** does not exist on `atelier-integration` base. `lib/jobs/scrape-worker.ts` calls `${env.APP_URL}/api/scrape` over fetch (same indirection the packet body shows), so no direct import of `lib/scrape/*` is needed — the scrape implementation lands behind `/api/scrape` in packet 22. **No inline stub**. Worker function will runtime-error on `peek/scrape.requested` events until that route exists; Inngest's built-in 3-retry policy will exhaust and the placeholder card title stays at "Scraping…". `lib/anthropic/tools/scrape_url.ts` still inserts the placeholder and fires the event regardless — orchestrator should accept retries-to-fail until packet 22 merges, or temporarily disable the function in the Inngest dashboard.
-- **`@/lib/analytics/facade` (packet 25)** does not exist either. The packet 26 prompt imported `track(...)` in the nudge function but only inside a comment. I omitted the import entirely; nudge dedupe + result tracking is done via the existing `peek_v2.events` table. When packet 25 lands, the orchestrator can layer `track()` calls into `nudge-relationships.ts` alongside the existing `events` insert.
-- **`app/api/webhooks/skimlinks/route.ts`** (packet 24) does not exist. Not modified.
+- **`console.error` calls migrated to `logger.error`**: 11 sites across 6 files
+  (chat route ×6, build/page ×1, chat/session ×4, analytics/facade ×4, anthropic/observability ×2, upload route ×1).
+  `console.warn` in `anthropic/client.ts` and `console.error` in `env.ts` left as-is — both are module-load warnings that run before the logger is reliably ready (logger imports `env` transitively).
+- **External calls wrapped in `withRetry`**: 10 sites — `browserbase.session.create`, `browserbase.page`,
+  `zenrows.scrape`, `anthropic.scrape.extract`, `fal.submit`, `fal.response`, `rehost.download`,
+  `resend.send` (5 attempts), `twilio.send` (3 attempts, no 4xx retry),
+  `supabase.storage.upload` + `supabase.storage.remove` (4 attempts each).
+  Anthropic SDK retry count set via `new Anthropic({ maxRetries: 3 })` for streaming + non-streaming paths.
+- **Empty catches re-justified**: 19 catches audited.
+  - 4 logged: `stripe.webhook.logWebhook`, `clerk.webhook.logWebhook` (Inngest publish best-effort),
+    `g/[slug]/page.generateMetadata` (lookup graceful), `g/[slug]/opengraph-image` (lookup graceful),
+    plus `vibe/evolve` and `vibe/extract-palette` swallows now log at warn with context.
+  - 8 left silent because the catch IS the action: request `req.json()` / `req.formData()` failures
+    return 400 immediately (5 routes), `controller.close()` on closed stream, user-cancelled
+    `navigator.share`, JSON parser fallthroughs to alternative parsing (3 in `scrape/extract`,
+    1 in `vibe/classify-tone`, 1 in `chat-pane` SSE), clipboard fallback toast.
+  - 4 documented in `_packets/COMMENTS.md`: browserbase session cleanup, anthropic/env module-load
+    console warnings (kept by packet design), supabase/server cookie-set in SSR context, `generate_hero_image`
+    `tryEvolveVibe` (already existed).
+  - 3 silent fal-poll status fetches (continue to next attempt; the retry loop is the poll itself).
 
-## API choices vs packet body
+## Files created
 
-- **Inngest 4.x API drift.** The prompt body used Inngest 3-style `createFunction(opts, trigger, handler)` and a `signingKey` prop on `serve()`. v4 (`inngest@4.4.0`, installed) uses `createFunction({ ..., triggers: [...] }, handler)` and reads `signingKey` from the client constructor. Implementation follows v4. Triggers built via `eventType(name, { schema: staticSchema<T>() })` + `cron('...')` so the event-data is typed inside handlers (no `any` outside the SQL row cast).
-- **Cron trigger** declared via `cron('0 14 * * *')` inside the function options, replacing the `{ cron: '...' }` literal in the prompt.
-- **Inngest client `signingKey`** is wired at construction time, not in serve options. `env.INNGEST_SIGNING_KEY` was already declared in `lib/env.ts`.
+- `atelier/lib/logger/index.ts` — JSON structured logger, level via `LOG_LEVEL` env, default `info` in prod.
+  `logger.child({ component: '...' })` for scoped context. No deps.
+- `atelier/lib/retry/withRetry.ts` — exponential backoff + jitter wrapper.
+  Honors `Retry-After` header on 429 / 503. Defaults: 3 attempts, 250ms base, 5s cap.
+  Tunable `attempts` per call: scrape/image-gen 3, storage 4, email 5.
+- `atelier/lib/retry/index.ts` — barrel export.
+- `atelier/app/global-error.tsx` — root error boundary (wraps `<html>`); inline styles only so it renders
+  even when global CSS is broken. Logs `global_error` with `digest` ref.
+- `atelier/app/error.tsx` — segment-level boundary; shows stack in dev, hides in prod.
+- `atelier/app/g/[slug]/error.tsx` — recipient page boundary; tailored "couldn't open Peek" copy.
+- `atelier/app/build/error.tsx` — build surface boundary; "session hiccup, draft saved" copy.
+- `atelier/components/error-boundary.tsx` — generic class component for inline islands (used to wrap
+  `<ChatPane>` and `<PreviewPane>` inside `BuildSurface` — chat stays alive if preview crashes
+  and vice versa).
 
-## Files written
+## Files modified
 
-- `atelier/lib/inngest/client.ts` — Inngest 4 client + three typed `eventType` exports (`scrapeRequestedEvent`, `nudgeDailyEvent`, `webhookReceivedEvent`). `signingKey` on client.
-- `atelier/db/schema/webhook_log.ts` — new table; re-exported from `db/schema/index.ts`.
-- `atelier/lib/jobs/nudge-relationships.ts` — daily cron (14:00 UTC); finds birthdays/anniversaries exactly 14 days out using `date_part('year', age(...))` to compute the next anniversary regardless of stored year; dedupes via `events` table by `(relationshipId, kind, year)` (year-of-`ts` window); sends via `sendEmail` with new template.
-- `atelier/lib/email/templates/relationship-nudge.tsx` — Resend-compatible inline-style React email; tone matches existing `peek-published.tsx`.
-- `atelier/lib/jobs/scrape-worker.ts` — listens for `peek/scrape.requested`; retries 3x; updates placeholder card.
-- `atelier/lib/jobs/webhook-logger.ts` — listens for `peek/webhook.received`; inserts into `webhook_log`.
-- `atelier/app/api/inngest/route.ts` — `serve(...)` exporting GET/POST/PUT.
-- `atelier/proxy.ts` — added `/api/inngest(.*)` to public-routes list.
-- `atelier/lib/anthropic/tools/scrape_url.ts` — now inserts placeholder card immediately, fires `peek/scrape.requested`, returns `{ ok: true, card_id, pending: true }`. Dispatch failures are logged to `events` so the placeholder isn't orphaned silently.
-- `atelier/app/api/stripe/webhook/route.ts` — wrapped in try/finally that fires `peek/webhook.received` (source `stripe`); inngest.send errors swallowed so they can't block the webhook response.
-- `atelier/app/api/webhooks/clerk/route.ts` — same try/finally pattern (source `clerk`).
+### Retry wrappers + logging
+- `lib/scrape/browserbase.ts` — `timedFetchOk` throws `HttpError` with `status`; both session-create
+  and page-fetch wrapped. Cleanup-DELETE swallow now logs at debug.
+- `lib/scrape/zenrows.ts` — fetch wrapped; HttpError on non-ok.
+- `lib/scrape/extract.ts` — Anthropic call wrapped.
+- `lib/image-gen/fal.ts` — submit + final fetches wrapped (poll loop already retries naturally).
+  Custom `retryOn` so 4xx errors don't retry. Warn-logs all upstream failures.
+- `lib/image-gen/rehost.ts` — download fetch wrapped.
+- `lib/supabase/storage.ts` — upload + remove wrapped.
+- `lib/email/send.ts` — Resend call wrapped (5 attempts; surfaces error from response wrapped in
+  thrown Error so `defaultRetryOn` can read `.status`).
+- `lib/anthropic/client.ts` — added `maxRetries: 3` to constructor.
+- `app/api/share/send/route.tsx` — Twilio `messages.create` wrapped with retryOn that skips 4xx.
 
-## Migration
+### Logger migrations
+- `app/api/chat/route.ts` — 6 `console.error` → `log.error`. Added classification of upstream 5xx
+  vs other failures; on 5xx the SSE `error` event message is the friendly text
+  ("We're having trouble connecting to the AI. Give it a moment and try again.") instead of the
+  raw SDK message. The `stream_event.error` branch now does the same.
+- `app/api/upload/route.ts` — 1 `console.error` → `log.error`.
+- `app/build/[peekId]/page.tsx` — 1 `console.error` → `log.error`.
+- `lib/chat/session.ts` — 4 `console.error` → `log.error`.
+- `lib/analytics/facade.ts` — 4 `console.error` → `log.error`; `shutdownAnalytics` swallow now warns
+  instead of pure `/* noop */`.
+- `lib/anthropic/observability.ts` — 2 `console.error` → `log.error`.
 
-`drizzle-kit generate` was **not** run by this worker — would require a `DATABASE_URL` to read the existing schema diff cleanly, and the migration metadata snapshots are tightly coupled to other packets' commits. The orchestrator should run `npx drizzle-kit generate` after merge so the journal/snapshot is consistent with the trunk's evolution.
+### Webhook + page resilience
+- `app/api/stripe/webhook/route.ts` — `inngest.send` failure now warn-logged (was `catch {}`).
+- `app/api/webhooks/clerk/route.ts` — same.
+- `app/g/[slug]/page.tsx` — `generateMetadata` lookup failure warn-logged.
+- `app/g/[slug]/opengraph-image.tsx` — lookup failure warn-logged.
 
-The required SQL is straightforward:
+### Error boundaries integration
+- `components/build/build-surface.tsx` — wraps `<ChatPane>` and `<PreviewPane>` / `<PreviewSheet>` in
+  inline `<ErrorBoundary>` so a chat island crash doesn't kill the preview (and vice versa).
 
-```sql
-CREATE TABLE "peek_v2"."webhook_log" (
-  "id" bigserial PRIMARY KEY NOT NULL,
-  "source" text NOT NULL,
-  "payload" jsonb NOT NULL,
-  "success" boolean NOT NULL,
-  "received_at" timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "webhook_log_source_idx" ON "peek_v2"."webhook_log" ("source");
-CREATE INDEX "webhook_log_received_at_idx" ON "peek_v2"."webhook_log" ("received_at");
-```
+### Graceful fallbacks
+- `lib/anthropic/tools/generate_hero_image.ts` — failure path now returns `{ ok: false, error,
+  suggestion }` so the curator model has copy guidance ("Ask the user to describe the hero or pick a
+  stock image instead") instead of just an opaque error.
+- `app/api/scrape/route.ts` — 502 response now includes `friendly_message` so the UI can surface
+  "couldn't pull this product, you can add details manually".
+- `app/api/chat/route.ts` — Anthropic 5xx → friendly SSE error message (above).
 
-## Validation
+## Constraints honored
 
-`cd atelier && npm install && APP_URL=http://localhost:3000 npm run typecheck` — green.
+- TS strict — `npm run build` green (validates type-checking).
+- No new package.json deps.
+- `withRetry` happy path overhead is a single `await` and an integer comparison, well under 200ms.
+- Logger has zero runtime config besides `LOG_LEVEL`.
+
+## Open / deferred
+
+- `Retry-After: 30` header on chat SSE: Per packet, the chat route should set this header on
+  upstream-5xx response. SSE responses send headers before the stream starts, so we can't
+  conditionally add it after the failure. Instead we send the SSE `error` event with the friendly
+  message in-stream. A separate non-streaming endpoint (or pre-flight check) would let us return
+  a real 503+Retry-After; out of scope for this packet.
+- Realtime reconnect: Supabase Realtime client retries by default. Did not add custom backoff —
+  `publish-status.tsx` already polls every 2.5s for 60s as a UI-level fallback.
+- Inngest SDK already retries 3x per function definition; no extra wrapping needed (verified in
+  packet 26 NOTES).
+- Edge runtime + logger: the logger module has no `'server-only'` directive and only uses
+  `console.*`, so it works in edge routes (`opengraph-image.tsx`). Verified by build.

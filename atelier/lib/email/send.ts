@@ -2,6 +2,7 @@ import 'server-only';
 import type { ReactElement } from 'react';
 import { Resend } from 'resend';
 import { env } from '@/lib/env';
+import { withRetry } from '@/lib/retry';
 
 export type SendEmailInput = {
   to: string | string[];
@@ -34,20 +35,29 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     return { ok: false, error: 'email_from_not_configured' };
   }
   try {
-    const { data, error } = await client.emails.send({
-      from,
-      to: input.to,
-      subject: input.subject,
-      react: input.react,
-      replyTo: input.replyTo,
-    });
-    if (error) {
-      return { ok: false, error: error.message };
-    }
-    if (!data?.id) {
-      return { ok: false, error: 'no_id_returned' };
-    }
-    return { ok: true, id: data.id };
+    const id = await withRetry(
+      async () => {
+        const { data, error } = await client.emails.send({
+          from,
+          to: input.to,
+          subject: input.subject,
+          react: input.react,
+          replyTo: input.replyTo,
+        });
+        if (error) {
+          const wrapped = new Error(error.message);
+          (wrapped as { status?: number }).status =
+            (error as { statusCode?: number }).statusCode ?? 500;
+          throw wrapped;
+        }
+        if (!data?.id) {
+          throw new Error('no_id_returned');
+        }
+        return data.id;
+      },
+      { label: 'resend.send', attempts: 5 },
+    );
+    return { ok: true, id };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { ok: false, error: message };

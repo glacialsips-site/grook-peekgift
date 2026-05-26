@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { getUserId } from '@/lib/auth/server';
 import { assertPeekAccess, recordEvent } from '@/lib/chat/session';
 import { uploadAsset } from '@/lib/supabase/storage';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'api/upload' });
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     result = await uploadAsset({ path, data: buf, contentType: file.type });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[upload] uploadAsset failed', { peekId, error: message });
+    log.error('uploadAsset failed', { peekId, error: message });
     return Response.json({ error: 'upload_failed', message }, { status: 500 });
   }
 

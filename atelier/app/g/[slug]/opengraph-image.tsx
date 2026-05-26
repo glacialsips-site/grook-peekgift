@@ -1,6 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { getSupabaseService } from '@/lib/supabase/service';
 import type { Vibe, VibePalette } from '@/lib/peek/types';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'g/[slug]/opengraph-image' });
 
 export const runtime = 'edge';
 export const size = { width: 1200, height: 630 };
@@ -91,7 +94,11 @@ export default async function Image({
       .eq('slug', slug)
       .maybeSingle();
     peek = (data as PeekOgRow | null) ?? null;
-  } catch {
+  } catch (err) {
+    log.warn('og_image_lookup_failed', {
+      slug,
+      err: err instanceof Error ? err.message : String(err),
+    });
     peek = null;
   }
 

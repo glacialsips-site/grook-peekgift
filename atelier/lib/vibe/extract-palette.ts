@@ -1,5 +1,8 @@
 import 'server-only';
 import { inflateSync } from 'node:zlib';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'vibe/extract-palette' });
 
 export interface ExtractedPalette {
   bg: string;
@@ -36,7 +39,11 @@ export async function extractPalette(
     if (pixels.length === 0) return DEFAULT_PALETTE;
     const clusters = kmeans(pixels, KMEANS_K);
     return paletteFromClusters(clusters);
-  } catch {
+  } catch (err) {
+    log.warn('extractPalette failed', {
+      imageUrl,
+      err: err instanceof Error ? err.message : String(err),
+    });
     return DEFAULT_PALETTE;
   }
 }
