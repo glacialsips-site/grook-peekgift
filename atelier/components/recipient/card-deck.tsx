@@ -230,7 +230,7 @@ function VariantGroupBlock({
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="inline-flex items-center text-sm font-semibold uppercase tracking-wider text-[hsl(var(--peek-ink))]/70">
-          <Sparkle className="mr-1.5 h-3.5 w-3.5" />
+          <Sparkle className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
           {group.title}
         </h2>
         <span className="rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">

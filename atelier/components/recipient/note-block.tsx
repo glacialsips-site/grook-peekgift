@@ -59,7 +59,10 @@ export function NoteBlock({ peek, revealed }: Props) {
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{typed}</ReactMarkdown>
       {shouldType && typed.length < note.length ? (
-        <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-[hsl(var(--peek-ink))]/70 align-middle" />
+        <span
+          aria-hidden="true"
+          className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-[hsl(var(--peek-ink))]/70 align-middle"
+        />
       ) : null}
     </motion.section>
   );

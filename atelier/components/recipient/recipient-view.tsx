@@ -145,6 +145,7 @@ export function RecipientView({
   return (
     <PeekVibeProvider vibe={providerVibe}>
       <main
+        id="main"
         className="relative min-h-[100dvh] bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]"
         aria-label={`A peek for ${peek.recipientName ?? 'you'}`}
       >

@@ -54,7 +54,11 @@ export function BegSheet({
             Tell them why you want this. They'll decide whether to unlock it.
           </DialogDescription>
         </DialogHeader>
+        <label htmlFor="beg-message" className="sr-only">
+          Your case
+        </label>
         <Textarea
+          id="beg-message"
           autoFocus
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -63,13 +67,21 @@ export function BegSheet({
           maxLength={1800}
         />
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={onClose} disabled={isPending}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            disabled={isPending}
+            className="min-h-11"
+          >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={submit}
             disabled={isPending || text.trim().length === 0}
+            className="min-h-11"
+            aria-busy={isPending}
           >
             Send
           </Button>

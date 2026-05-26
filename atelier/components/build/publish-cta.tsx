@@ -83,22 +83,31 @@ export function PublishCta({
         size="lg"
         onClick={handleClick}
         disabled={disabled || loading || isPending}
-        className="w-full"
+        className="min-h-11 w-full"
+        aria-busy={loading || isPending}
+        aria-describedby={error ? 'publish-cta-error' : undefined}
       >
         {loading || isPending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             Opening checkout…
           </>
         ) : (
           <>
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
             {label}
           </>
         )}
       </Button>
       {error ? (
-        <p className="mt-2 text-center text-xs text-destructive">{error}</p>
+        <p
+          id="publish-cta-error"
+          role="alert"
+          aria-live="assertive"
+          className="mt-2 text-center text-xs text-destructive"
+        >
+          {error}
+        </p>
       ) : null}
     </motion.div>
   );

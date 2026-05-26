@@ -154,16 +154,21 @@ function Hero({ peek }: { peek: PeekDraft['peek'] }) {
   if (peek.heroImageUrl) {
     return (
       <div
+        role="img"
+        aria-label="Hero preview"
         className="relative h-48 w-full bg-cover bg-center sm:h-64 md:h-80"
         style={{ backgroundImage: `url(${peek.heroImageUrl})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--peek-bg))]/80 to-transparent" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--peek-bg))]/80 to-transparent"
+        />
       </div>
     );
   }
   return (
     <motion.div
-      aria-hidden
+      aria-hidden="true"
       className="h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 via-[hsl(var(--peek-accent2))]/30 to-[hsl(var(--peek-surface))] sm:h-48"
       animate={{ opacity: [0.7, 1, 0.7] }}
       transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
@@ -224,6 +229,8 @@ function CardItem({ card, index }: { card: Card; index: number }) {
     >
       {card.imageUrl ? (
         <div
+          role="img"
+          aria-label={card.title}
           className="relative h-44 w-full bg-cover bg-center sm:h-56"
           style={{ backgroundImage: `url(${card.imageUrl})` }}
         >
@@ -233,7 +240,10 @@ function CardItem({ card, index }: { card: Card; index: number }) {
           ) : null}
         </div>
       ) : (
-        <div className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20">
+        <div
+          aria-hidden="true"
+          className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20"
+        >
           {card.isLocked ? <LockOverlay card={card} /> : null}
           {card.isTaunt && card.tauntText ? (
             <TauntOverlay text={card.tauntText} />
@@ -257,7 +267,7 @@ function CardItem({ card, index }: { card: Card; index: number }) {
         ) : null}
         {card.locationHint ? (
           <p className="mt-1 inline-flex items-center gap-1 text-xs text-[hsl(var(--peek-ink))]/50">
-            <MapPin className="h-3 w-3" />
+            <MapPin className="h-3 w-3" aria-hidden="true" />
             {card.locationHint}
           </p>
         ) : null}
@@ -270,7 +280,10 @@ function LockOverlay({ card }: { card: Card }) {
   const prompt = card.unlockRule?.beg_prompt ?? 'ask first';
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--peek-bg))]/80 text-center backdrop-blur-sm">
-      <Lock className="h-5 w-5 text-[hsl(var(--peek-ink))]/60" />
+      <Lock
+        className="h-5 w-5 text-[hsl(var(--peek-ink))]/60"
+        aria-hidden="true"
+      />
       <p className="px-4 text-sm font-medium text-[hsl(var(--peek-ink))]/80">
         {prompt}
       </p>
@@ -313,7 +326,7 @@ function VariantGroupBlock({
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--peek-ink))]/70">
-          <Sparkle className="mr-1 inline h-3.5 w-3.5" />
+          <Sparkle className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
           {group.title}
         </h2>
         <span className="rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs text-[hsl(var(--peek-accent))]">

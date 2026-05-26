@@ -19,7 +19,11 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (
-    <div className="flex h-[100dvh] min-h-0 flex-col bg-background md:flex-row">
+    <main
+      id="main"
+      className="flex h-[100dvh] min-h-0 flex-col bg-background md:flex-row"
+      aria-label="Build your Peek"
+    >
       <ChatPane
         peekId={peekId}
         initialHistory={initialHistory ?? []}
@@ -35,6 +39,6 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
       ) : (
         <PreviewSheet draft={draft} />
       )}
-    </div>
+    </main>
   );
 }

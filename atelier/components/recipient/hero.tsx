@@ -15,15 +15,23 @@ export function Hero({ peek }: Props) {
   return (
     <header className="relative w-full overflow-hidden">
       {peek.heroImageUrl ? (
-        <div className="relative h-[55vh] min-h-[320px] w-full sm:h-[65vh]">
+        <div
+          role="img"
+          aria-label={`Hero image for ${name}`}
+          className="relative h-[55dvh] min-h-[320px] w-full sm:h-[65dvh]"
+        >
           <motion.div
+            aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${peek.heroImageUrl})` }}
             initial={{ scale: 1.04, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.1, ease: 'easeOut' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(var(--peek-bg))]/0 to-[hsl(var(--peek-bg))]" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(var(--peek-bg))]/0 to-[hsl(var(--peek-bg))]"
+          />
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 px-6 pb-8 text-[hsl(var(--peek-ink))]">
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
@@ -47,7 +55,7 @@ export function Hero({ peek }: Props) {
           </div>
         </div>
       ) : (
-        <div className="relative flex h-[40vh] min-h-[240px] w-full flex-col items-center justify-center bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 via-[hsl(var(--peek-accent2))]/30 to-[hsl(var(--peek-surface))] px-6 text-center">
+        <div className="relative flex h-[40dvh] min-h-[240px] w-full flex-col items-center justify-center bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 via-[hsl(var(--peek-accent2))]/30 to-[hsl(var(--peek-surface))] px-6 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}

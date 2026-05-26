@@ -49,12 +49,17 @@ export function AspirationalCard({
       >
         {card.imageUrl ? (
           <div
+            role="img"
+            aria-label={card.title}
             className="relative h-56 w-full bg-cover bg-center sm:h-72"
             style={{ backgroundImage: `url(${card.imageUrl})` }}
           >
             {card.isLocked ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--peek-bg))]/55 backdrop-blur-sm">
-                <Lock className="h-6 w-6 text-[hsl(var(--peek-ink))]/70" />
+                <Lock
+                  className="h-6 w-6 text-[hsl(var(--peek-ink))]/70"
+                  aria-hidden="true"
+                />
                 <p className="px-6 text-center text-sm font-medium text-[hsl(var(--peek-ink))]/85">
                   {card.unlockRule?.beg_prompt ?? 'Locked — make your case'}
                 </p>
@@ -62,7 +67,10 @@ export function AspirationalCard({
             ) : null}
           </div>
         ) : (
-          <div className="relative flex h-44 w-full items-center justify-center bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 to-[hsl(var(--peek-accent2))]/40">
+          <div
+            aria-hidden="true"
+            className="relative flex h-44 w-full items-center justify-center bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 to-[hsl(var(--peek-accent2))]/40"
+          >
             <Sparkles className="h-8 w-8 text-[hsl(var(--peek-ink))]/60" />
           </div>
         )}
@@ -71,7 +79,7 @@ export function AspirationalCard({
             <h3 className="text-lg font-semibold leading-tight">{card.title}</h3>
             {card.isLocked ? (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
-                <Lock className="h-3 w-3" />
+                <Lock className="h-3 w-3" aria-hidden="true" />
                 locked
               </span>
             ) : null}
@@ -91,9 +99,10 @@ export function AspirationalCard({
               type="button"
               onClick={() => setBegOpen(true)}
               disabled={isPending}
-              className="w-full bg-[hsl(var(--peek-accent))] text-white hover:bg-[hsl(var(--peek-accent))]/90"
+              className="min-h-11 w-full bg-[hsl(var(--peek-accent))] text-white hover:bg-[hsl(var(--peek-accent))]/90"
+              aria-label={`Make your case for ${card.title}`}
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
               Make your case
             </Button>
           ) : (

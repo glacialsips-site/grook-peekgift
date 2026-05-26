@@ -7,6 +7,7 @@ export default function Page() {
     <AuthCard
       title="Make it real"
       subtitle="Create an account to start your first peek."
+      ariaLabel="Sign up"
       footer={
         <span>
           Already have an account?{' '}

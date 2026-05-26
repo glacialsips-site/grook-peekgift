@@ -11,10 +11,12 @@ export function GagCard({ card }: Props) {
       layout
       whileHover={{ rotate: -1 }}
       className="relative overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))]/70 shadow-sm"
-      aria-label="Decorative card"
+      role="figure"
+      aria-label={`Gag card: ${card.tauntText ?? card.title}`}
     >
       {card.imageUrl ? (
         <div
+          aria-hidden="true"
           className="relative h-44 w-full bg-cover bg-center sm:h-56"
           style={{ backgroundImage: `url(${card.imageUrl})` }}
         >

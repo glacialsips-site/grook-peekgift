@@ -7,6 +7,7 @@ export default function Page() {
     <AuthCard
       title="Welcome back"
       subtitle="Sign in to keep making peeks."
+      ariaLabel="Sign in"
       footer={
         <span>
           New here?{' '}

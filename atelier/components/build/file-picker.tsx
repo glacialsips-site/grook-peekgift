@@ -84,6 +84,7 @@ export function FilePicker({
     [onError, onUpload, peekId],
   );
 
+  const errorId = 'file-picker-error';
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <Button
@@ -92,12 +93,15 @@ export function FilePicker({
         size="sm"
         onClick={openPicker}
         disabled={disabled || uploading}
-        className="text-muted-foreground"
+        className="min-h-11 text-muted-foreground"
+        aria-label={uploading ? 'Uploading image' : buttonLabel}
+        aria-busy={uploading}
+        aria-describedby={error ? errorId : undefined}
       >
         {uploading ? (
-          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
         ) : (
-          <ImagePlus className="mr-1.5 h-4 w-4" />
+          <ImagePlus className="mr-1.5 h-4 w-4" aria-hidden="true" />
         )}
         {uploading ? 'Uploading…' : buttonLabel}
       </Button>
@@ -107,9 +111,18 @@ export function FilePicker({
         accept={ACCEPT}
         className="hidden"
         onChange={handleChange}
+        aria-hidden="true"
+        tabIndex={-1}
       />
       {error ? (
-        <p className="text-xs text-destructive">{error}</p>
+        <p
+          id={errorId}
+          role="alert"
+          aria-live="assertive"
+          className="text-xs text-destructive"
+        >
+          {error}
+        </p>
       ) : null}
     </div>
   );

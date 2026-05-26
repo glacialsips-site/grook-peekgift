@@ -40,6 +40,7 @@ function FacebookIcon({ className }: { className?: string }) {
 }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -254,7 +255,10 @@ export function ShareSheet({
         </p>
       </header>
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-card">
+      <section
+        className="overflow-hidden rounded-2xl border border-border bg-card"
+        aria-label="Share link"
+      >
         <div className="relative aspect-[1200/630] w-full bg-muted">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -265,43 +269,57 @@ export function ShareSheet({
         </div>
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
-            <Link2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="flex-1 truncate text-sm">{shareUrl}</span>
+            <Link2
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="flex-1 truncate text-sm" aria-label="Share URL">
+              {shareUrl}
+            </span>
             <Button
               type="button"
               size="sm"
               variant="ghost"
               onClick={handleCopy}
-              aria-label="Copy link"
+              aria-label={copied ? 'Link copied to clipboard' : 'Copy share link'}
+              className="min-h-11 min-w-11"
             >
               {copied ? (
-                <Check className="h-4 w-4" />
+                <Check className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4" aria-hidden="true" />
               )}
             </Button>
           </div>
           {hasNativeShare ? (
-            <Button type="button" onClick={handleNativeShare} className="w-full">
-              <Share2 className="mr-2 h-4 w-4" />
+            <Button
+              type="button"
+              onClick={handleNativeShare}
+              className="min-h-11 w-full"
+              aria-label="Open native share menu"
+            >
+              <Share2 className="mr-2 h-4 w-4" aria-hidden="true" />
               Share via...
             </Button>
           ) : null}
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+      <section className="flex flex-col gap-3" aria-labelledby="quick-share-heading">
+        <h2
+          id="quick-share-heading"
+          className="text-sm font-medium uppercase tracking-widest text-muted-foreground"
+        >
           Quick share
         </h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
           <a
             href={links.sms}
             onClick={() => trackShare(peekId, 'imessage')}
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Share via iMessage"
           >
-            <MessageCircle className="h-5 w-5" />
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
             iMessage
           </a>
           <a
@@ -309,10 +327,10 @@ export function ShareSheet({
             onClick={() => trackShare(peekId, 'whatsapp')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Share via WhatsApp"
           >
-            <MessageCircle className="h-5 w-5" />
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
             WhatsApp
           </a>
           <a
@@ -320,17 +338,18 @@ export function ShareSheet({
             onClick={() => trackShare(peekId, 'twitter')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Share on X"
           >
-            <XIcon className="h-5 w-5" />X
+            <XIcon className="h-5 w-5" />
+            <span aria-hidden="true">X</span>
           </a>
           <a
             href={links.facebook}
             onClick={() => trackShare(peekId, 'facebook')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Share on Facebook"
           >
             <FacebookIcon className="h-5 w-5" />
@@ -339,67 +358,96 @@ export function ShareSheet({
           <a
             href={links.email}
             onClick={() => trackShare(peekId, 'email')}
-            className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Share via email"
           >
-            <Mail className="h-5 w-5" />
+            <Mail className="h-5 w-5" aria-hidden="true" />
             Email
           </a>
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+      <section className="flex flex-col gap-3" aria-labelledby="send-heading">
+        <h2
+          id="send-heading"
+          className="text-sm font-medium uppercase tracking-widest text-muted-foreground"
+        >
           Send it for me
         </h2>
-        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-          <div className="inline-flex w-full rounded-full border border-border bg-muted/30 p-1">
+        <form
+          className="flex flex-col gap-3"
+          onSubmit={handleSubmit}
+          aria-labelledby="send-heading"
+        >
+          <div
+            role="radiogroup"
+            aria-label="Send via"
+            className="inline-flex w-full rounded-full border border-border bg-muted/30 p-1"
+          >
             <button
               type="button"
+              role="radio"
               onClick={() => setChannel('sms')}
-              className={`flex-1 rounded-full px-3 py-1 text-sm transition-colors ${
+              className={`min-h-11 flex-1 rounded-full px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 channel === 'sms'
                   ? 'bg-background shadow'
                   : 'text-muted-foreground'
               }`}
-              aria-pressed={channel === 'sms'}
+              aria-checked={channel === 'sms'}
             >
               Text
             </button>
             <button
               type="button"
+              role="radio"
               onClick={() => setChannel('email')}
-              className={`flex-1 rounded-full px-3 py-1 text-sm transition-colors ${
+              className={`min-h-11 flex-1 rounded-full px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 channel === 'email'
                   ? 'bg-background shadow'
                   : 'text-muted-foreground'
               }`}
-              aria-pressed={channel === 'email'}
+              aria-checked={channel === 'email'}
             >
               Email
             </button>
           </div>
-          <Input
-            type={channel === 'sms' ? 'tel' : 'email'}
-            inputMode={channel === 'sms' ? 'tel' : 'email'}
-            placeholder={
-              channel === 'sms' ? '+1 555 123 4567' : 'them@example.com'
-            }
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            autoComplete="off"
-          />
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            placeholder="A short note to go with the link..."
-          />
-          <Button type="submit" disabled={submitting}>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="share-destination">
+              {channel === 'sms' ? 'Phone number' : 'Email address'}
+            </Label>
+            <Input
+              id="share-destination"
+              type={channel === 'sms' ? 'tel' : 'email'}
+              inputMode={channel === 'sms' ? 'tel' : 'email'}
+              placeholder={
+                channel === 'sms' ? '+1 555 123 4567' : 'them@example.com'
+              }
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              autoComplete="off"
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="share-message">Personal note</Label>
+            <Textarea
+              id="share-message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              placeholder="A short note to go with the link..."
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="min-h-11"
+            aria-busy={submitting}
+          >
             {submitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Send className="mr-2 h-4 w-4" />
+              <Send className="mr-2 h-4 w-4" aria-hidden="true" />
             )}
             Send {channel === 'sms' ? 'text' : 'email'}
           </Button>

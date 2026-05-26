@@ -5,14 +5,20 @@ export function AuthCard({
   subtitle,
   children,
   footer,
+  ariaLabel,
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;
+  ariaLabel?: string;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
+    <main
+      id="main"
+      aria-label={ariaLabel}
+      className="flex min-h-[100dvh] items-center justify-center bg-background px-6 py-12"
+    >
       <div className="w-full max-w-[360px]">
         <header className="mb-8 text-center">
           <p className="text-2xl font-semibold tracking-tight">peek.gift</p>
