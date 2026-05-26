@@ -9,16 +9,20 @@
 
 ## Context
 
-Eight security issues to close:
+Eight security issues to close. **Orchestrator note (pre-dispatch):** issue #0 — RLS was off on all 11 `peek_v2` tables — was fixed via migration `0005_enable_rls_default_deny.sql` applied to live DB before this packet dispatched. RLS is now ON + FORCED on every table; service-role bypasses RLS so server routes keep working; anon/authenticated direct REST writes are blocked (no policies = default deny). See `_packets/ORCHESTRATOR-NOTES.md` finding 1.
+
+This packet still needs to add per-table policies for whichever client-side reads are intended (Supabase Realtime channels, anon recipient view, etc.). Audit what currently uses the publishable-key client (`lib/supabase/browser.ts` callers) and write the minimum policies that preserve those flows; everything else stays locked down.
 
 1. **HMAC fallback fails open.** `app/g/[slug]/page.tsx` + `app/api/pick/route.ts` sign recipient sessions as `unsigned:<sessionId>` when `GUEST_CLAIM_TOKEN_SECRET` is missing. Should require the secret and refuse to serve without it. Make `GUEST_CLAIM_TOKEN_SECRET` REQUIRED in `lib/env.ts` (not `.optional()`).
 2. **No rate limiting.** Upstash Redis SDKs are in `package.json` from packet 01 but never wired. Anyone could DoS `/api/chat` and burn through Anthropic credit. Wire `@upstash/ratelimit`.
 3. **Anon turn metering is bypassable.** `/api/chat` counts `events` rows by `sessionId`. Client controls `sessionId`. Tighten to IP + sessionId combo OR move to Redis-backed counter that's authoritative.
 4. **No CSP headers.** Add Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
 5. **No webhook idempotency keys.** Stripe, Clerk, Skimlinks each have their own retry semantics; we need an idempotency table OR Redis set keyed on the provider's event id to no-op repeat events within a TTL.
-6. **Service-role over-privilege.** Some routes use service-role where the user's Clerk-JWT scoped client would do (and respect RLS). Audit + downscope where safe.
+6. **Service-role over-privilege.** Some routes use service-role where the user's Clerk-JWT scoped client would do (and respect RLS). Audit + downscope where safe. With RLS now on, this is more important — RLS only matters if some routes stop using service-role.
 7. **CORS / origin allowlist.** Custom API routes that aren't webhooks should reject cross-origin POSTs from non-allowed domains.
 8. **Webhook secret existence is silently warned** in some places, errors-500 in others — standardize: all webhook handlers refuse to start (500) if their signing key is missing.
+9. **RLS policies for client-side reads.** Audit `lib/supabase/browser.ts` callers (Realtime channels especially). Add minimal `CREATE POLICY` statements as a new migration `0006_rls_policies.sql` (Drizzle migration) for the rows that legitimately need anon/authenticated visibility. Anything not explicitly policied stays default-denied — that's correct.
+10. **Schema-exposure grants are overscoped.** Migration `0002_schema_exposure.sql` granted `SELECT, INSERT, UPDATE, DELETE` on all peek_v2 tables to `anon, authenticated`. RLS gates the actual data, but defense-in-depth says revoke writes to anon and only grant the verbs each role actually needs. Include in `0006_rls_policies.sql` migration.
 
 ## Deliver
 

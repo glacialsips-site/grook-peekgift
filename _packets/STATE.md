@@ -1,6 +1,38 @@
 # STATE — live build status
 
-_Last updated: 2026-05-25 by cloud worker (post batch 3 dispatch — all 6 branches pushed, awaiting integration)_
+_Last updated: 2026-05-26 by cc-on-web orchestrator session — batch 4 prep landed; about to dispatch all 8._
+
+## READ FIRST — batch 4 prep (pre-dispatch fixes)
+
+Before firing batch 4 (packets 28-35), the cc-on-web orchestrator (`claude-opus-4-7[1m]`, 1M ctx, full MCP) found three blockers the drafting desktop session hadn't accounted for. All resolved on `atelier-integration` before dispatch:
+
+1. **RLS was OFF on every `peek_v2` table.** Supabase advisor flagged critical. Anyone with the publishable key could hit `/rest/v1/peek_v2/*` directly. Root cause: `peek_v2_enable_rls_default_deny` migration (20260525040957) was wiped by the subsequent `drop_legacy_peek_v2_schema` + `peek_v2_init_from_drizzle` reinit. **Fix:** migration `0005_enable_rls_default_deny.sql` (in `atelier/db/migrations/`) — `ENABLE` + `FORCE` RLS on all 11 tables. Service-role bypasses RLS (role has `BYPASSRLS = true`), so server routes keep working. Anon/authenticated direct REST traffic is now default-denied. Per-table policies for legitimate client reads are folded into packet 31's scope.
+
+2. **Packet 30 couldn't generate `peek_v2` types in worker.** Supabase MCP `generate_typescript_types` only emits `public` schema (legacy peek.gift Vite app). CLI `supabase gen types --schema peek_v2` needs `SUPABASE_ACCESS_TOKEN` workers don't have. **Fix:** packet 30 prompt rewritten to declare Drizzle (`atelier/db/schema/*.ts`) as the canonical source — worker builds a `lib/supabase/database.types.ts` adapter that derives `Database['peek_v2']['Tables']` from each Drizzle table's `$inferSelect` / `$inferInsert`. No CLI gen needed.
+
+3. **Packets 32 + 35 referenced uninstalled deps.** Packet 32 assumed `vitest` was in devDeps (it wasn't). Packet 35 hinted at `colorthief` (also missing). **Fix:** orchestrator added devDeps directly: `vitest@^4.1.7`, `@vitest/coverage-v8@^4.1.7`, `eslint@^10.4.0`, `@next/eslint-plugin-next@^16.2.6`, `typescript-eslint@^8.60.0`, `node-vibrant@^4.0.4` (chose Vibrant over ColorThief for server-native JPEG/PNG decode). Packet 35 prompt updated to use `node-vibrant`.
+
+See `_packets/ORCHESTRATOR-NOTES.md` for the full critical assessment.
+
+## Batch 4 — DISPATCHED (8 packets in parallel)
+
+Packets 28, 29, 30, 31, 32, 33, 34, 35 spawned as parallel cc-on-web sub-agents in isolated worktrees, each on `claude/packet-NN-<slug>`. Awaiting branch returns + integration.
+
+Integration order recommendation when returns land:
+1. **29 (audit)** first — read-only, sets context for human review.
+2. **30 (types)** next — refactor lands clean call-sites for the rest to merge into.
+3. **28 (custom auth)** — isolated to `app/sign-{in,up}/**` + `components/auth/**`.
+4. **31 (security)** — touches env, routes, middleware. Apply migration `0006_rls_policies.sql` to live DB at merge.
+5. **33 (reliability)** — logger sweep + retry wrappers + error boundaries.
+6. **34 (observability)** — Sentry config (env vars to add via MCP); OG cache; per-turn LLM aggregation.
+7. **35 (quality)** — a11y + SEO + mobile + palette via node-vibrant.
+8. **32 (tests + CI)** — last, after the code is stable.
+
+Cross-packet file overlap risks (orchestrator will three-way merge at integration time): `app/api/chat/route.ts`, `lib/anthropic/observability.ts`, `components/build/share-sheet.tsx`, `proxy.ts`, `lib/env.ts`, `instrumentation-client.ts`.
+
+---
+
+
 
 ## READ FIRST — batch 3 done (20, 21, 22, 24, 25, 26 pushed; integration carryover below)
 

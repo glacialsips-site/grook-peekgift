@@ -96,25 +96,30 @@ Structured data (JSON-LD) for the landing page: `Organization` type with name pe
 
 `atelier/lib/vibe/extract-palette.ts` (REPLACE):
 
-The current JPEG-byte-histogram approach is fundamentally wrong (it counts byte values, not pixel colors). Real options without adding deps:
+The current JPEG-byte-histogram approach is fundamentally wrong (it counts byte values, not pixel colors). Hero images are almost always JPEG, so the current implementation returns near-random colors.
 
-Best in-runtime option for Node 22: `Image` constructor via `node:` built-ins, or use `@vercel/og`'s `resvg-js` internals.
+**Orchestrator pre-added `node-vibrant` to devDeps** (already in `package.json` at dispatch time). Use it — server-friendly, decodes JPEG/PNG without native deps, ~25KB, sophisticated palette extraction with hue + saturation + luminance scoring.
 
-Pragmatic path: call **fal.ai** (already keyed) with a small `palette-extract` model OR use the **Replicate API** with a free palette extraction model. OR use a tiny pure-JS approach: download image, run through `canvas` via `node-canvas` (requires native build — avoid) — no good native-free option.
+```ts
+import { Vibrant } from 'node-vibrant/node';
 
-Simpler: **add a small dep** that does this right. Worker should propose ONE of:
-- `colorthief` (pure JS, works on PNG/JPEG via `jpeg-js` + `pngjs` — both already pulled transitively probably)
-- `node-vibrant` (more sophisticated palettes)
+export async function extractPalette(imageUrl: string): Promise<Palette> {
+  const swatches = await Vibrant.from(imageUrl).getPalette();
+  // Vibrant returns named slots: Vibrant, Muted, DarkVibrant, DarkMuted, LightVibrant, LightMuted
+  // Map them to our slots:
+  return {
+    bg: swatches.LightMuted?.hex ?? swatches.LightVibrant?.hex ?? '#f9f7f4',
+    surface: swatches.Muted?.hex ?? '#ffffff',
+    ink: swatches.DarkMuted?.hex ?? swatches.DarkVibrant?.hex ?? '#1a1a1a',
+    accent: swatches.Vibrant?.hex ?? '#8b5cf6',
+    accent2: swatches.LightVibrant?.hex ?? swatches.Vibrant?.hex ?? '#ec4899',
+  };
+}
+```
 
-If a dep needs adding: surface in NOTES.md, orchestrator approves in a small deps-bump packet.
+Where `Palette` is the type already defined in this module. Adjust the fallback hex defaults to match the current theme so a no-image case looks intentional, not broken.
 
-Alternative if no dep is wanted: pipe through `@vercel/og`'s `ImageResponse` with a callback... no, that's overkill.
-
-**Recommendation: pure-JS via `colorthief` package (~5KB). Install + replace `extractPalette` with a 30-line implementation that fetches the image, decodes (via the lib's bundled jpeg/png decoders), runs k-means, picks colors by saturation + luminance per `bg/surface/ink/accent/accent2` slots, returns hex strings.**
-
-Surface "needs `colorthief` dep" in NOTES.md if you take that path; orchestrator runs a small deps-bump.
-
-If you find a built-in way (Node 22 image decoding) that didn't exist when packet 21 was written, take it — but verify the output is real colors, not byte histograms.
+Handle the error case: if Vibrant throws (image too large, unreachable, decode failure), log via `lib/logger` (if packet 33 has landed — else `console.warn`) and return the default palette so callers don't crash.
 
 ### Touch + typography sweep
 

@@ -36,6 +36,13 @@
       "when": 1779753028213,
       "tag": "0004_webhook_log",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779840000000,
+      "tag": "0005_enable_rls_default_deny",
+      "breakpoints": true
     }
   ]
 }

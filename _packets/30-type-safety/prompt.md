@@ -15,14 +15,59 @@ This packet fixes all of it.
 
 ## Deliver
 
-### Generate real Supabase types
+### Build the `Database` type from Drizzle schemas (Drizzle is canonical)
 
-1. From `atelier/`, run: `npx supabase gen types typescript --project-id ewqpujqerdnrkjqlpobo --schema peek_v2 > lib/supabase/database.types.ts` (or via the Supabase CLI's `supabase login` + `link` if needed — the orchestrator can also do this if MCP `generate_typescript_types` is more reliable; surface in NOTES if you can't run the command).
-2. Replace `lib/supabase/types.ts` contents with:
+**DO NOT** run `supabase gen types` — the Supabase CLI MCP tool only emits the `public` schema (legacy peek.gift Vite app), and `supabase gen types --schema peek_v2` requires a `SUPABASE_ACCESS_TOKEN` that the worker doesn't have. Orchestrator already attempted both paths and confirmed they don't work for our schema (`peek_v2`). See `_packets/ORCHESTRATOR-NOTES.md` finding 2.
+
+Drizzle is the locked source of truth for the DB schema (STATE.md). The Supabase JS client's `Database` type must derive from Drizzle, not the other way around.
+
+1. Create `atelier/lib/supabase/database.types.ts`:
+
+   ```ts
+   import type {
+     users, peeks, cards, variantGroups, picks,
+     peekCollaborators, relationships, events,
+     affiliateRevenue, chatMessages, webhookLog,
+   } from '@/db/schema';
+
+   type TableType<T extends { $inferSelect: unknown; $inferInsert: unknown }> = {
+     Row: T['$inferSelect'];
+     Insert: T['$inferInsert'];
+     Update: Partial<T['$inferInsert']>;
+     Relationships: [];
+   };
+
+   export type Database = {
+     peek_v2: {
+       Tables: {
+         users: TableType<typeof users>;
+         peeks: TableType<typeof peeks>;
+         cards: TableType<typeof cards>;
+         variant_groups: TableType<typeof variantGroups>;
+         picks: TableType<typeof picks>;
+         peek_collaborators: TableType<typeof peekCollaborators>;
+         relationships: TableType<typeof relationships>;
+         events: TableType<typeof events>;
+         affiliate_revenue: TableType<typeof affiliateRevenue>;
+         chat_messages: TableType<typeof chatMessages>;
+         webhook_log: TableType<typeof webhookLog>;
+       };
+       Views: Record<string, never>;
+       Functions: Record<string, never>;
+       Enums: Record<string, never>;
+       CompositeTypes: Record<string, never>;
+     };
+   };
+   ```
+
+   The Supabase-table-name keys (snake_case) must match `.from('peeks')` call sites. The Drizzle export names (`peeks`, `variantGroups`, etc.) are imports — they don't have to match. Confirm each Drizzle table's `.tableName` matches the key on this object; fix any drift.
+
+2. Replace `atelier/lib/supabase/types.ts` contents:
    ```ts
    export type { Database } from './database.types';
    ```
-3. Re-export `Database` from `lib/supabase/index.ts` (already does).
+3. Verify `lib/supabase/index.ts` re-exports `Database` (already does).
+4. The Drizzle `$inferInsert` may include columns that the DB defaults (e.g. `created_at`, `id` with `defaultRandom()`). If TS complains that Insert requires those, narrow with `Partial<>` on the optional-by-default columns, or audit each table's Drizzle definition to verify the inferred Insert matches reality. Where it doesn't, the FIX is on the Drizzle schema (mark `.default(...)` / `.defaultNow()`), not on the TableType wrapper.
 
 ### Verify all clients pick up the typed Database
 
