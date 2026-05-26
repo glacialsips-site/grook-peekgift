@@ -55,7 +55,10 @@ const schema = z.object({
   SOVRN_API_KEY: z.string().optional(),
   TOLT_API_KEY: z.string().optional(),
 
-  GUEST_CLAIM_TOKEN_SECRET: z.string().optional()
+  GUEST_CLAIM_TOKEN_SECRET: z
+    .string()
+    .min(32, 'GUEST_CLAIM_TOKEN_SECRET must be >=32 chars')
+    .optional()
 });
 
 const parsed = schema.safeParse(process.env);

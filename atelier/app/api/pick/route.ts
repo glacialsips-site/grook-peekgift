@@ -1,10 +1,19 @@
 import 'server-only';
-import { createHmac, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { trackFireAndForget } from '@/lib/analytics/facade';
+import {
+  GuestSecretMissingError,
+  signRecipient,
+} from '@/lib/security/recipient';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,14 +49,6 @@ type GroupRow = {
   selection: 'pick_one' | 'pick_any' | 'pick_all';
 };
 
-function signRecipient(sessionId: string): string {
-  const secret = env.GUEST_CLAIM_TOKEN_SECRET;
-  if (!secret) {
-    return `unsigned:${sessionId}`;
-  }
-  return createHmac('sha256', secret).update(sessionId).digest('hex');
-}
-
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -56,6 +57,10 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   let raw: unknown;
   try {
     raw = await req.json();
@@ -73,8 +78,20 @@ export async function POST(req: NextRequest): Promise<Response> {
   const { peekId, cardId, recipientSessionId, begMessage, recipientNote } =
     parsed.data;
 
+  let signature: string;
+  try {
+    signature = signRecipient(recipientSessionId);
+  } catch (err) {
+    if (err instanceof GuestSecretMissingError) {
+      return jsonResponse({ error: 'service_unavailable' }, 503);
+    }
+    throw err;
+  }
+
+  const verdict = await enforceRateLimit(limiters.picksPerSession(), signature);
+  if (!verdict.ok) return rateLimitResponse(verdict);
+
   const sb = getSupabaseService();
-  const signature = signRecipient(recipientSessionId);
 
   const cardRes = await sb
     .from('cards')
@@ -201,6 +218,10 @@ export async function POST(req: NextRequest): Promise<Response> {
 }
 
 export async function DELETE(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   let raw: unknown;
   try {
     raw = await req.json();
@@ -215,8 +236,20 @@ export async function DELETE(req: NextRequest): Promise<Response> {
     );
   }
   const { peekId, cardId, recipientSessionId } = parsed.data;
+  let signature: string;
+  try {
+    signature = signRecipient(recipientSessionId);
+  } catch (err) {
+    if (err instanceof GuestSecretMissingError) {
+      return jsonResponse({ error: 'service_unavailable' }, 503);
+    }
+    throw err;
+  }
+
+  const verdict = await enforceRateLimit(limiters.picksPerSession(), signature);
+  if (!verdict.ok) return rateLimitResponse(verdict);
+
   const sb = getSupabaseService();
-  const signature = signRecipient(recipientSessionId);
 
   const delRes = await sb
     .from('picks')

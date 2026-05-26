@@ -1,7 +1,9 @@
 import 'server-only';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { getRedis } from '@/lib/rate-limit/redis';
 
 export const ANON_TURN_CAP = 5;
+const ANON_TTL_SECONDS = 60 * 60 * 24;
 
 export interface RecordEventInput {
   peekId: string;
@@ -100,7 +102,7 @@ export async function assertPeekAccess(
   return { ok: false, reason: 'forbidden' };
 }
 
-export async function anonymousTurnCount(sessionId: string): Promise<number> {
+async function dbAnonCount(sessionId: string): Promise<number> {
   const db = getSupabaseService();
   const { count, error } = await db
     .from('events')
@@ -109,13 +111,65 @@ export async function anonymousTurnCount(sessionId: string): Promise<number> {
     .eq('kind', 'chat_turn')
     .is('user_id', null);
   if (error) {
-    console.error('[chat/session] anonymousTurnCount failed', {
+    console.error('[chat/session] dbAnonCount failed', {
       sessionId,
       error: error.message,
     });
     return 0;
   }
   return count ?? 0;
+}
+
+function anonKey(ip: string, sessionId: string): string {
+  return `anon:turn:${ip}:${sessionId}`;
+}
+
+export async function anonymousTurnCount(
+  sessionId: string,
+  ip?: string,
+): Promise<number> {
+  if (ip) {
+    const redis = getRedis();
+    if (redis) {
+      try {
+        const raw = await redis.get<number | string>(anonKey(ip, sessionId));
+        if (raw != null) {
+          const n = typeof raw === 'number' ? raw : Number.parseInt(String(raw), 10);
+          if (Number.isFinite(n)) return n;
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn('[chat/session] redis anonCount read failed', {
+          sessionId,
+          message,
+        });
+      }
+    }
+  }
+  return dbAnonCount(sessionId);
+}
+
+export async function incrementAnonymousTurn(
+  sessionId: string,
+  ip: string,
+): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return dbAnonCount(sessionId);
+  try {
+    const key = anonKey(ip, sessionId);
+    const next = await redis.incr(key);
+    if (next === 1) {
+      await redis.expire(key, ANON_TTL_SECONDS);
+    }
+    return next;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn('[chat/session] redis incr failed, falling back to DB', {
+      sessionId,
+      message,
+    });
+    return dbAnonCount(sessionId);
+  }
 }
 
 export function anonymousTurnExceeded(count: number): boolean {

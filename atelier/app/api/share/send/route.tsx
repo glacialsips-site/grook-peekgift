@@ -7,6 +7,12 @@ import { getSupabaseService } from '@/lib/supabase/service';
 import { sendEmail } from '@/lib/email/send';
 import { PeekShareMessageEmail } from '@/lib/email/templates/peek-share-message';
 import { trackFireAndForget } from '@/lib/analytics/facade';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -92,12 +98,19 @@ async function sendSms(args: {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   let userId: string;
   try {
     userId = await requireUserId();
   } catch {
     return jsonResponse({ error: 'unauthorized' }, 401);
   }
+
+  const verdict = await enforceRateLimit(limiters.shareSendPerUser(), userId);
+  if (!verdict.ok) return rateLimitResponse(verdict);
 
   let payload: unknown;
   try {

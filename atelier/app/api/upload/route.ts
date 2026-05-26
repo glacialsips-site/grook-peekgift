@@ -3,6 +3,13 @@ import { randomUUID } from 'node:crypto';
 import { getUserId } from '@/lib/auth/server';
 import { assertPeekAccess, recordEvent } from '@/lib/chat/session';
 import { uploadAsset } from '@/lib/supabase/storage';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { getClientIp } from '@/lib/security/client-ip';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -28,6 +35,10 @@ const EXT_BY_TYPE: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   const peekId = req.nextUrl.searchParams.get('peekId');
   if (!peekId) {
     return Response.json({ error: 'peekId required' }, { status: 400 });
@@ -43,6 +54,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       { status: access.reason === 'forbidden' ? 403 : 404 },
     );
   }
+
+  const ip = getClientIp(req);
+  const limitKey = userId ?? `ip:${ip}:${sessionId || 'anon'}`;
+  const verdict = await enforceRateLimit(limiters.uploadPerUser(), limitKey);
+  if (!verdict.ok) return rateLimitResponse(verdict);
 
   let form: FormData;
   try {

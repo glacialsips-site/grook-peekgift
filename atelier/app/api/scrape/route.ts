@@ -4,6 +4,12 @@ import { getUserId } from '@/lib/auth/server';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { scrapePipeline } from '@/lib/scrape/pipeline';
 import type { ScrapedProduct } from '@/lib/scrape/extract';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -90,10 +96,17 @@ async function recordScrapeEvent(
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   const userId = await getUserId();
   if (!userId) {
     return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
   }
+
+  const verdict = await enforceRateLimit(limiters.scrapePerUser(), userId);
+  if (!verdict.ok) return rateLimitResponse(verdict);
 
   let json: unknown;
   try {

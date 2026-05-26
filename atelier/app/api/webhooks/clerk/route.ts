@@ -4,6 +4,7 @@ import type { WebhookEvent } from '@clerk/nextjs/server';
 import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { inngest } from '@/lib/inngest/client';
+import { checkIdempotency } from '@/lib/security/idempotency';
 
 async function logWebhook(payload: Record<string, unknown>, success: boolean) {
   try {
@@ -37,6 +38,12 @@ export async function POST(req: Request) {
   } catch {
     await logWebhook({ error: 'invalid_signature' }, false);
     return new Response('invalid signature', { status: 401 });
+  }
+
+  const idemp = await checkIdempotency({ source: 'clerk', eventId: svix_id });
+  if (!idemp.firstSeen) {
+    void logWebhook({ svix_id, type: evt.type, idempotent: true }, true);
+    return new Response('ok', { status: 200 });
   }
 
   let success = false;

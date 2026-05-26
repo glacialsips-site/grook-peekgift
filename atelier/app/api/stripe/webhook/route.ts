@@ -5,6 +5,7 @@ import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { track } from '@/lib/analytics/facade';
 import { inngest } from '@/lib/inngest/client';
+import { checkIdempotency } from '@/lib/security/idempotency';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,15 @@ export async function POST(req: NextRequest): Promise<Response> {
     const message = err instanceof Error ? err.message : 'unknown';
     await logWebhook({ error: 'invalid_signature', message }, false);
     return new Response(`invalid signature: ${message}`, { status: 400 });
+  }
+
+  const idemp = await checkIdempotency({ source: 'stripe', eventId: event.id });
+  if (!idemp.firstSeen) {
+    void logWebhook(
+      { id: event.id, type: event.type, idempotent: true },
+      true,
+    );
+    return new Response('ok', { status: 200 });
   }
 
   let success = false;
