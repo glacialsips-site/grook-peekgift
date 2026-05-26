@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import posthog from 'posthog-js';
 import {
   Check,
   Copy,
@@ -54,9 +55,34 @@ type Props = {
 
 type Channel = 'sms' | 'email';
 
+type ShareChannel =
+  | 'copy'
+  | 'native'
+  | 'twitter'
+  | 'facebook'
+  | 'whatsapp'
+  | 'imessage'
+  | 'email';
+
 type SendResponse =
   | { ok: true; id?: string; sid?: string }
   | { error: string };
+
+function trackShare(peekId: string, channel: ShareChannel): void {
+  try {
+    posthog.capture('share_initiated', { peek_id: peekId, channel });
+  } catch {
+    /* posthog not initialized */
+  }
+}
+
+function trackShareFormSubmit(peekId: string, channel: Channel): void {
+  try {
+    posthog.capture('share_form_submitted', { peek_id: peekId, channel });
+  } catch {
+    /* posthog not initialized */
+  }
+}
 
 function shareText(recipientName: string | null, occasion: string | null): string {
   if (recipientName && occasion) {
@@ -115,6 +141,7 @@ export function ShareSheet({
   );
 
   async function handleCopy() {
+    trackShare(peekId, 'copy');
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -130,6 +157,7 @@ export function ShareSheet({
   }
 
   async function handleNativeShare() {
+    trackShare(peekId, 'native');
     try {
       await navigator.share({
         title: recipientName
@@ -155,6 +183,7 @@ export function ShareSheet({
       return;
     }
     setSubmitting(true);
+    trackShareFormSubmit(peekId, channel);
     try {
       const res = await fetch('/api/share/send', {
         method: 'POST',
@@ -268,6 +297,7 @@ export function ShareSheet({
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
           <a
             href={links.sms}
+            onClick={() => trackShare(peekId, 'imessage')}
             className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
             aria-label="Share via iMessage"
           >
@@ -276,6 +306,7 @@ export function ShareSheet({
           </a>
           <a
             href={links.whatsapp}
+            onClick={() => trackShare(peekId, 'whatsapp')}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
@@ -286,6 +317,7 @@ export function ShareSheet({
           </a>
           <a
             href={links.twitter}
+            onClick={() => trackShare(peekId, 'twitter')}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
@@ -295,6 +327,7 @@ export function ShareSheet({
           </a>
           <a
             href={links.facebook}
+            onClick={() => trackShare(peekId, 'facebook')}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
@@ -305,6 +338,7 @@ export function ShareSheet({
           </a>
           <a
             href={links.email}
+            onClick={() => trackShare(peekId, 'email')}
             className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent"
             aria-label="Share via email"
           >
