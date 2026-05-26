@@ -420,6 +420,11 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
         <div
           ref={scrollRef}
           className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6 pb-32 md:pb-6"
+          role="log"
+          aria-live="polite"
+          aria-atomic="false"
+          aria-relevant="additions text"
+          aria-label="Conversation with Peek"
         >
           {messages.length === 0 ? <EmptyChatHint /> : null}
           <AnimatePresence initial={false}>
@@ -433,10 +438,14 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
       <form
         onSubmit={onSubmit}
         className="border-t border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        aria-label="Send a message"
       >
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 px-4 py-3">
           {pendingImages.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div
+              className="flex flex-wrap gap-2"
+              aria-label="Attached images"
+            >
               {pendingImages.map((img) => (
                 <ImageChip
                   key={img.id}
@@ -446,24 +455,34 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
               ))}
             </div>
           ) : null}
+          <label htmlFor="chat-input" className="sr-only">
+            Message
+          </label>
           <Textarea
+            id="chat-input"
             value={draft}
             onChange={onTextareaChange}
             onKeyDown={onKeyDown}
             placeholder="Tell Peek who this is for and what they love…"
             disabled={sending}
             rows={1}
-            className="min-h-[44px] resize-none overflow-hidden"
-            aria-label="Chat input"
+            className="min-h-11 resize-none overflow-hidden text-base"
+            aria-label="Message to Peek"
           />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <FilePicker
               peekId={peekId}
               onUpload={addImage}
               disabled={sending}
             />
-            <Button type="submit" size="sm" disabled={!canSend}>
-              <Send className="mr-1.5 h-4 w-4" />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!canSend}
+              className="min-h-11 min-w-11"
+              aria-label={sending ? 'Sending message' : 'Send message'}
+            >
+              <Send className="mr-1.5 h-4 w-4" aria-hidden="true" />
               {sending ? 'Thinking…' : 'Send'}
             </Button>
           </div>
@@ -556,14 +575,18 @@ function ImageChip({ src, onRemove }: { src: string; onRemove: () => void }) {
   return (
     <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="Attached" className="h-full w-full object-cover" />
+      <img
+        src={src}
+        alt="Attached image preview"
+        className="h-full w-full object-cover"
+      />
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-0.5 top-0.5 rounded-full bg-background/80 p-0.5 text-foreground/80 backdrop-blur hover:text-foreground"
-        aria-label="Remove image"
+        className="absolute right-0.5 top-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-background/90 p-0.5 text-foreground/80 backdrop-blur hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Remove attached image"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
     </div>
   );
@@ -577,8 +600,8 @@ function EmptyChatHint() {
       transition={{ duration: 0.2 }}
       className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center"
     >
-      <Sparkles className="h-6 w-6 text-muted-foreground" />
-      <p className="text-sm text-muted-foreground">
+      <Sparkles className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+      <p className="text-base text-muted-foreground">
         Start with who this Peek is for. Their name, the occasion, a thing they
         love. Peek takes it from there.
       </p>
@@ -605,12 +628,14 @@ function MessageBubble({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
+      role="article"
+      aria-label={isUser ? 'You said' : 'Peek replied'}
       className={cn(
         'flex w-full gap-3',
         isUser ? 'flex-row-reverse' : 'flex-row',
       )}
     >
-      <Avatar className="h-8 w-8 shrink-0">
+      <Avatar className="h-8 w-8 shrink-0" aria-hidden="true">
         <AvatarFallback className="text-xs">
           {isUser ? 'You' : 'P'}
         </AvatarFallback>

@@ -120,7 +120,11 @@ export default async function PublishSharePage({
   const ogImageUrl = `${env.APP_URL.replace(/\/+$/, '')}/g/${peek.slug}/opengraph-image`;
 
   return (
-    <main className="min-h-[100dvh] bg-background">
+    <main
+      id="main"
+      className="min-h-[100dvh] bg-background"
+      aria-label="Share your published Peek"
+    >
       <ShareSheet
         peekId={peek.id}
         slug={peek.slug}

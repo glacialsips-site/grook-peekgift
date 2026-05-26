@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +28,9 @@ export function PreviewSheet({ draft, className }: Props) {
   const reduce = useReducedMotion();
   const [snap, setSnap] = useState<Snap>('half');
   const [viewportH, setViewportH] = useState<number>(0);
+  const [dragging, setDragging] = useState(false);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -29,6 +39,18 @@ export function PreviewSheet({ draft, className }: Props) {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (snap === 'full') {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return;
+  }, [snap]);
 
   const heights = useMemo(() => {
     if (viewportH === 0) {
@@ -49,11 +71,18 @@ export function PreviewSheet({ draft, className }: Props) {
     );
   }, []);
 
+  const close = useCallback(() => {
+    setSnap('closed');
+    toggleRef.current?.focus();
+  }, []);
+
+  const onDragStart = useCallback(() => setDragging(true), []);
   const onDragEnd = useCallback(
     (
       _: unknown,
       info: { offset: { y: number }; velocity: { y: number } },
     ) => {
+      setDragging(false);
       const drag = info.offset.y;
       const fling = info.velocity.y;
       const downward = drag + fling * 0.2 > 60;
@@ -73,11 +102,24 @@ export function PreviewSheet({ draft, className }: Props) {
     [],
   );
 
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      if (e.key === 'Escape' && snap === 'full') {
+        e.preventDefault();
+        close();
+      }
+    },
+    [snap, close],
+  );
+
+  const sheetLabelId = 'preview-sheet-label';
+
   return (
     <motion.aside
       role="dialog"
-      aria-label="Peek preview"
-      aria-modal={false}
+      aria-modal={snap === 'full' ? true : undefined}
+      aria-labelledby={sheetLabelId}
+      onKeyDown={onKeyDown}
       className={cn(
         'fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl border-t border-border bg-background shadow-2xl',
         'overflow-hidden md:hidden',
@@ -93,21 +135,31 @@ export function PreviewSheet({ draft, className }: Props) {
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
+      onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      style={{ touchAction: 'none' }}
+      style={{
+        height: `min(${targetHeight}px, 100dvh)`,
+        touchAction: dragging ? 'none' : 'pan-y',
+      }}
     >
       <button
+        ref={toggleRef}
         type="button"
         onClick={cycle}
-        className="flex w-full items-center justify-between gap-2 border-b border-border/50 bg-background/95 px-4 py-2 text-left backdrop-blur"
+        className="flex min-h-11 w-full items-center justify-between gap-2 border-b border-border/50 bg-background/95 px-4 py-2 text-left backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         aria-expanded={snap !== 'closed'}
+        aria-controls="preview-sheet-content"
+        id={sheetLabelId}
       >
         <span className="flex items-center gap-2">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <GripHorizontal
+            className="h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <span className="text-sm font-medium">Live preview</span>
           <SnapLabel snap={snap} />
         </span>
-        <span aria-hidden className="text-muted-foreground">
+        <span aria-hidden="true" className="text-muted-foreground">
           {snap === 'full' ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
@@ -115,7 +167,11 @@ export function PreviewSheet({ draft, className }: Props) {
           )}
         </span>
       </button>
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div
+        ref={contentRef}
+        id="preview-sheet-content"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         <PreviewPane draft={draft} className="h-full" />
       </div>
     </motion.aside>
@@ -149,9 +205,9 @@ export function PreviewToggleHandle({
           variant="outline"
           size="sm"
           onClick={onOpen}
-          className="rounded-full shadow-md"
+          className="min-h-11 rounded-full shadow-md"
         >
-          <ChevronUp className="mr-1.5 h-4 w-4" />
+          <ChevronUp className="mr-1.5 h-4 w-4" aria-hidden="true" />
           Show preview
         </Button>
       </motion.div>

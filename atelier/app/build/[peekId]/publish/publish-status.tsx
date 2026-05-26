@@ -115,15 +115,26 @@ export function PublishStatus({
 
   if (!isPublished) {
     return (
-      <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
+      <main
+        id="main"
+        className="flex min-h-[100dvh] items-center justify-center bg-background px-6"
+        aria-busy="true"
+        aria-label="Finalizing your Peek"
+      >
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex max-w-md flex-col items-center gap-4 text-center"
         >
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2
+            className="h-8 w-8 animate-spin text-primary"
+            aria-hidden="true"
+          />
           <h1 className="text-xl font-semibold">Wrapping it up…</h1>
-          <p className="text-sm text-muted-foreground">
+          <p
+            className="text-base text-muted-foreground"
+            aria-live="polite"
+          >
             {mock
               ? 'Finalizing your Peek.'
               : 'Confirming your payment with Stripe. This usually takes a few seconds.'}
@@ -134,7 +145,7 @@ export function PublishStatus({
             </p>
           ) : null}
           {timedOut ? (
-            <p className="text-xs text-amber-600">
+            <p role="alert" className="text-xs text-amber-700 dark:text-amber-400">
               Still waiting on confirmation. You can safely refresh this page.
             </p>
           ) : null}
@@ -144,47 +155,67 @@ export function PublishStatus({
   }
 
   return (
-    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-6">
+    <main
+      id="main"
+      className="flex min-h-[100dvh] items-center justify-center bg-background px-6"
+      aria-label="Peek published"
+    >
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex w-full max-w-md flex-col items-center gap-6 text-center"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+        <div
+          aria-hidden="true"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600"
+        >
           <Check className="h-7 w-7" />
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight">
             Your Peek is live.
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Share the link with your person — they&apos;ll see it just for them.
           </p>
         </div>
         <div className="flex w-full flex-col gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-left">
-            <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <ExternalLink
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+              aria-hidden="true"
+            />
             <span className="truncate text-sm" title={finalShareUrl}>
               {finalShareUrl}
             </span>
           </div>
           <div className="flex gap-2">
-            <Button onClick={copyLink} className="flex-1" type="button">
+            <Button
+              onClick={copyLink}
+              className="min-h-11 flex-1"
+              type="button"
+              aria-label={copied ? 'Link copied' : 'Copy share link'}
+            >
               {copied ? (
                 <>
-                  <Check className="mr-1.5 h-4 w-4" />
+                  <Check className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   Copied
                 </>
               ) : (
                 <>
-                  <Copy className="mr-1.5 h-4 w-4" />
+                  <Copy className="mr-1.5 h-4 w-4" aria-hidden="true" />
                   Copy link
                 </>
               )}
             </Button>
-            <Button asChild variant="outline" type="button">
-              <Link href="./share">
-                <Share2 className="mr-1.5 h-4 w-4" />
+            <Button
+              asChild
+              variant="outline"
+              type="button"
+              className="min-h-11"
+            >
+              <Link href="./share" aria-label="Open share options">
+                <Share2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Share
               </Link>
             </Button>

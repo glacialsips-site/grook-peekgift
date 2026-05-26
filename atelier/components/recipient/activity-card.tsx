@@ -73,6 +73,8 @@ export function ActivityCard({
       >
         {card.imageUrl ? (
           <div
+            role="img"
+            aria-label={card.title}
             className="relative h-48 w-full bg-cover bg-center sm:h-56"
             style={{ backgroundImage: `url(${card.imageUrl})` }}
           />
@@ -87,18 +89,18 @@ export function ActivityCard({
           <div className="flex flex-wrap items-center gap-3 text-xs text-[hsl(var(--peek-ink))]/60">
             {date ? (
               <span className="inline-flex items-center gap-1">
-                <CalendarDays className="h-3 w-3" />
+                <CalendarDays className="h-3 w-3" aria-hidden="true" />
                 {date}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 italic">
-                <CalendarDays className="h-3 w-3" />
+                <CalendarDays className="h-3 w-3" aria-hidden="true" />
                 you propose a time
               </span>
             )}
             {card.locationHint ? (
               <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3" aria-hidden="true" />
                 {card.locationHint}
               </span>
             ) : null}
@@ -121,12 +123,13 @@ export function ActivityCard({
             <Button
               type="button"
               variant="outline"
-              className="border-[hsl(var(--peek-ink))]/15 bg-transparent text-[hsl(var(--peek-ink))]"
+              className="min-h-11 border-[hsl(var(--peek-ink))]/15 bg-transparent text-[hsl(var(--peek-ink))]"
               onClick={() => {
                 setCounterText(pick?.recipientNote ?? '');
                 setCounterOpen(true);
               }}
               disabled={isPending}
+              aria-label={`Counter-propose for ${card.title}`}
             >
               Counter-propose
             </Button>
@@ -141,18 +144,24 @@ export function ActivityCard({
               Send a quick note back to the giver. They'll get pinged.
             </DialogDescription>
           </DialogHeader>
+          <label htmlFor="activity-counter-text" className="sr-only">
+            Your counter-proposal
+          </label>
           <Textarea
+            id="activity-counter-text"
             value={counterText}
             onChange={(e) => setCounterText(e.target.value)}
             placeholder="What works better for you?"
             rows={4}
             maxLength={1800}
+            autoFocus
           />
           <DialogFooter>
             <Button
               type="button"
               variant="ghost"
               onClick={() => setCounterOpen(false)}
+              className="min-h-11"
             >
               Cancel
             </Button>
@@ -160,6 +169,7 @@ export function ActivityCard({
               type="button"
               onClick={submitCounter}
               disabled={isPending || counterText.trim().length === 0}
+              className="min-h-11"
             >
               Send
             </Button>

@@ -48,11 +48,16 @@ export function ProductCard({
     >
       {card.imageUrl ? (
         <div
+          role="img"
+          aria-label={card.title}
           className="relative h-56 w-full bg-cover bg-center sm:h-64"
           style={{ backgroundImage: `url(${card.imageUrl})` }}
         />
       ) : (
-        <div className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20" />
+        <div
+          aria-hidden="true"
+          className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20"
+        />
       )}
       <div className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">

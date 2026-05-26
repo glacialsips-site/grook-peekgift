@@ -47,30 +47,36 @@ export function PickButton({
       disabled={isPending}
       variant={isPicked ? 'secondary' : 'default'}
       className={cn(
-        'group relative w-full overflow-hidden transition-colors',
+        'group relative min-h-11 w-full overflow-hidden transition-colors',
         isPicked
           ? 'bg-[hsl(var(--peek-accent))]/15 text-[hsl(var(--peek-accent))] hover:bg-[hsl(var(--peek-accent))]/25'
           : 'bg-[hsl(var(--peek-accent))] text-white hover:bg-[hsl(var(--peek-accent))]/90',
         className,
       )}
       aria-pressed={isPicked}
+      aria-busy={isPending}
+      aria-label={isPicked ? `${pickedLabel} — tap to remove pick` : pickLabel}
     >
       {isPending ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
       ) : isPicked ? (
         <>
-          <Check className="h-4 w-4" />
+          <Check className="h-4 w-4" aria-hidden="true" />
           <span>{pickedLabel}</span>
-          <X className="ml-2 h-3 w-3 opacity-50 transition-opacity group-hover:opacity-100" />
+          <X
+            className="ml-2 h-3 w-3 opacity-50 transition-opacity group-hover:opacity-100"
+            aria-hidden="true"
+          />
         </>
       ) : (
         <>
-          <Heart className="h-4 w-4" />
+          <Heart className="h-4 w-4" aria-hidden="true" />
           <span>{pickLabel}</span>
         </>
       )}
       {justConfirmed ? (
         <motion.span
+          aria-hidden="true"
           initial={{ scale: 0, opacity: 0.6 }}
           animate={{ scale: 4, opacity: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { Peek, VibeMotion } from '@/lib/peek/types';
 
 type Props = {
@@ -27,6 +27,7 @@ export function CinematicReveal({
   onDone,
   onSkip,
 }: Props) {
+  const reduce = useReducedMotion();
   const scale = MOTION_SCALE[vibeMotion];
   const heroMs = Math.round(900 * scale);
   const nameDelayMs = Math.round(700 * scale);
@@ -44,6 +45,11 @@ export function CinematicReveal({
 
   useEffect(() => {
     if (revealed) return;
+    if (reduce) {
+      setPhase('done');
+      onDone();
+      return;
+    }
     const t1 = setTimeout(() => setPhase('name'), heroMs);
     const t2 = setTimeout(() => setPhase('note'), nameDelayMs);
     const t3 = setTimeout(() => setPhase('cards'), cardsDelayMs);
@@ -59,6 +65,7 @@ export function CinematicReveal({
     };
   }, [
     revealed,
+    reduce,
     heroMs,
     nameDelayMs,
     cardsDelayMs,
@@ -68,6 +75,8 @@ export function CinematicReveal({
 
   const display = peek.vibe?.font_pairing?.display;
   const name = peek.recipientName ?? 'you';
+
+  if (reduce) return null;
 
   return (
     <AnimatePresence>
@@ -81,9 +90,12 @@ export function CinematicReveal({
           onClick={onSkip}
           role="button"
           tabIndex={0}
-          aria-label="Tap to skip the reveal"
+          aria-label="Skip the reveal animation"
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') onSkip();
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              e.preventDefault();
+              onSkip();
+            }
           }}
         >
           <motion.div
@@ -101,6 +113,7 @@ export function CinematicReveal({
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
+            aria-hidden="true"
           />
           <div className="relative flex h-full w-full flex-col items-center justify-center px-6 text-center">
             <AnimatePresence>
