@@ -1,25 +1,25 @@
 import Link from 'next/link';
 import { AuthCard } from '@/components/auth/auth-card';
-import { CustomSignUpForm } from '@/components/auth/custom-sign-up-form';
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form';
 
 export default function Page() {
   return (
     <AuthCard
-      title="Make it real"
-      subtitle="Create an account to start your first peek."
+      title="Reset your password"
+      subtitle="We'll email you a 6-digit code."
       footer={
         <span>
-          Already have an account?{' '}
+          Remembered it?{' '}
           <Link
             href="/sign-in"
             className="text-foreground underline-offset-4 hover:underline"
           >
-            Sign in
+            Back to sign in
           </Link>
         </span>
       }
     >
-      <CustomSignUpForm />
+      <ForgotPasswordForm />
     </AuthCard>
   );
 }

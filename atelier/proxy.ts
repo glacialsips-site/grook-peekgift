@@ -4,6 +4,8 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/forgot-password(.*)',
+  '/sso-callback(.*)',
   '/g/(.*)',              // recipient pages — public by design
   '/api/webhooks/(.*)',   // signed webhooks
   '/api/stripe/(.*)',     // signed Stripe webhooks
