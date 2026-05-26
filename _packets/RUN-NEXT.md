@@ -25,7 +25,19 @@ You (cc-on-web worker) are the single point of contact for the user. Each "go" o
 
 ---
 
-## Ready batch — 8 packets, dispatch in parallel
+## Ready batch — none currently queued
+
+_All of batch 4 (packets 28-35) integrated on `atelier-integration` as of 2026-05-26. Trunk at `2c53076`. Migrations `0005_enable_rls_default_deny` and `0006_rls_policies` applied to live DB. See `_packets/STATE.md` top section for integration notes._
+
+**User-side actions still pending before live deploy is fully functional:**
+1. Clerk Dashboard: confirm `peek-gift-vnext.netlify.app` is an authorized origin (packet 28's custom auth UI needs it to actually authenticate).
+2. Netlify env vars to add via MCP or dashboard:
+   - `GUEST_CLAIM_TOKEN_SECRET` (≥32 chars) — recipient HMAC now fail-closed (packet 31).
+   - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — rate-limiting + webhook idempotency (packet 31).
+   - `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — error visibility (packet 34).
+3. Verify live deploy at `peek-gift-vnext.netlify.app` after Netlify's auto-deploy (build hook fires on push to `atelier-integration`).
+
+## Ready batch — previously (preserved for ref) — 8 packets, dispatched + integrated
 
 | Packet | Path | What it kills | Branch on completion |
 |---|---|---|---|
