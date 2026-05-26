@@ -15,11 +15,15 @@ You (the cc-on-web worker session) are the single point of contact for the user.
 
 ---
 
-## Ready batch — nothing currently queued
+## Ready batch — dispatch immediately
 
-_All of batches 1, 2A, 2B, 3 (packets 01-26 minus the deferred 08, 19, 23, 27-30) are integrated on `atelier-integration`. Build green; site live at peek-gift-vnext after the auto-deploy fires._
+| Packet | Path | Status | Branch on completion |
+|---|---|---|---|
+| 28 | `_packets/28-custom-auth-ui/prompt.md` | READY | `claude/packet-28-custom-auth-ui` |
 
-The orchestrator is drafting the next batch from `_packets/ROADMAP.md` Phase A (hardening) once you confirm the live build smoke-tests clean. Expect a fresh ready batch in the next orchestrator cycle.
+**Pre-dispatch check:** confirm with the user that the Clerk Dashboard now lists `peek-gift-vnext.netlify.app` as an authorized origin / satellite domain. Without that, even the custom forms won't work because Clerk's SDK rejects the origin upstream of which UI renders it.
+
+After dispatch: branch will land on `claude/packet-28-custom-auth-ui`. Orchestrator integrates onto `atelier-integration`. Auto-deploy fires. Smoke test = `/sign-in` and `/sign-up` render our forms (no Clerk branding visible), and a real signup creates a Clerk user + a row in `peek_v2.users`.
 
 ## Blocked
 
