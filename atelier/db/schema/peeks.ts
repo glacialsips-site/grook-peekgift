@@ -30,6 +30,21 @@ export type VibePreset = 'playful' | 'romantic' | 'dry' | 'unhinged' | 'tender';
 
 export type VibeFontPairing = { display: string; body: string };
 
+export type VibeHeadingFont =
+  | 'serif'
+  | 'display'
+  | 'sans'
+  | 'mono'
+  | 'script';
+export type VibeBodyFont = 'sans' | 'serif' | 'mono';
+export type VibeTypography = {
+  heading: VibeHeadingFont;
+  body: VibeBodyFont;
+};
+export type VibeDensity = 'compact' | 'cozy' | 'breathable';
+export type VibeShape = 'sharp' | 'soft' | 'pillowy';
+export type VibeMood = 'minimal' | 'rich' | 'whimsical' | 'editorial';
+
 export type VibeCore = {
   preset?: VibePreset;
   tone?: string;
@@ -37,6 +52,10 @@ export type VibeCore = {
   mood_words?: string[];
   motion?: VibeMotion;
   font_pairing?: VibeFontPairing;
+  typography?: VibeTypography;
+  density?: VibeDensity;
+  shape?: VibeShape;
+  mood?: VibeMood;
 };
 
 export type VibeSignalSourceEntry = {

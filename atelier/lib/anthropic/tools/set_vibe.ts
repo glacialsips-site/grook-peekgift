@@ -33,6 +33,24 @@ const PresetSchema = z.enum([
   'tender',
 ]);
 
+const HeadingFontSchema = z.enum([
+  'serif',
+  'display',
+  'sans',
+  'mono',
+  'script',
+]);
+const BodyFontSchema = z.enum(['sans', 'serif', 'mono']);
+const TypographySchema = z
+  .object({
+    heading: HeadingFontSchema,
+    body: BodyFontSchema,
+  })
+  .strict();
+const DensitySchema = z.enum(['compact', 'cozy', 'breathable']);
+const ShapeSchema = z.enum(['sharp', 'soft', 'pillowy']);
+const MoodSchema = z.enum(['minimal', 'rich', 'whimsical', 'editorial']);
+
 export const VibeInputSchema = z
   .object({
     preset: PresetSchema.optional(),
@@ -41,12 +59,17 @@ export const VibeInputSchema = z
     mood_words: z.array(z.string().min(1).max(60)).max(20).optional(),
     motion: MotionSchema.optional(),
     font_pairing: FontPairingSchema.optional(),
+    typography: TypographySchema.optional(),
+    density: DensitySchema.optional(),
+    shape: ShapeSchema.optional(),
+    mood: MoodSchema.optional(),
   })
   .strict();
 type Input = z.infer<typeof VibeInputSchema>;
 
 export type StoredPalette = z.infer<typeof PaletteSchema>;
 export type StoredFontPairing = z.infer<typeof FontPairingSchema>;
+export type StoredTypography = z.infer<typeof TypographySchema>;
 export type StoredVibe = {
   preset?: z.infer<typeof PresetSchema>;
   tone?: string;
@@ -54,6 +77,10 @@ export type StoredVibe = {
   mood_words?: string[];
   motion?: z.infer<typeof MotionSchema>;
   font_pairing?: StoredFontPairing;
+  typography?: StoredTypography;
+  density?: z.infer<typeof DensitySchema>;
+  shape?: z.infer<typeof ShapeSchema>;
+  mood?: z.infer<typeof MoodSchema>;
 };
 
 export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
@@ -70,6 +97,10 @@ export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
     mood_words: ['breezy', 'mischievous', 'sun-warmed'],
     motion: 'lively',
     font_pairing: { display: 'Fraunces', body: 'Inter' },
+    typography: { heading: 'script', body: 'sans' },
+    density: 'breathable',
+    shape: 'pillowy',
+    mood: 'whimsical',
   },
   romantic: {
     preset: 'romantic',
@@ -84,6 +115,10 @@ export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
     mood_words: ['tender', 'slow', 'lamplit'],
     motion: 'soft',
     font_pairing: { display: 'Cormorant Garamond', body: 'Inter' },
+    typography: { heading: 'serif', body: 'serif' },
+    density: 'cozy',
+    shape: 'soft',
+    mood: 'editorial',
   },
   dry: {
     preset: 'dry',
@@ -98,6 +133,10 @@ export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
     mood_words: ['deadpan', 'tweedy', 'measured'],
     motion: 'still',
     font_pairing: { display: 'Times Now', body: 'IBM Plex Sans' },
+    typography: { heading: 'serif', body: 'sans' },
+    density: 'compact',
+    shape: 'sharp',
+    mood: 'minimal',
   },
   unhinged: {
     preset: 'unhinged',
@@ -112,6 +151,10 @@ export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
     mood_words: ['feral', 'neon', 'unserious'],
     motion: 'lively',
     font_pairing: { display: 'Space Grotesk', body: 'Space Mono' },
+    typography: { heading: 'mono', body: 'mono' },
+    density: 'compact',
+    shape: 'sharp',
+    mood: 'rich',
   },
   tender: {
     preset: 'tender',
@@ -126,6 +169,10 @@ export const VIBE_PRESETS: Record<z.infer<typeof PresetSchema>, StoredVibe> = {
     mood_words: ['soft', 'honest', 'steady'],
     motion: 'soft',
     font_pairing: { display: 'Newsreader', body: 'Inter' },
+    typography: { heading: 'serif', body: 'sans' },
+    density: 'cozy',
+    shape: 'soft',
+    mood: 'minimal',
   },
 };
 
@@ -137,7 +184,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_vibe',
   description:
-    'REPLACE the entire visual + tonal vibe of the Peek. Use this once at the start when you have a clear read on what the page should feel like. After this, use update_vibe to merge new signals (hero palette extraction, card drift, etc). Pass a preset and/or override individual fields — provided fields win over the preset; absent fields fall back to the preset.',
+    'REPLACE the entire visual + tonal vibe of the Peek. Use this once at the start when you have a clear read on what the page should feel like. After this, use update_vibe to merge new signals (hero palette extraction, card drift, etc). Pass a preset and/or override individual fields — provided fields win over the preset; absent fields fall back to the preset. The style-engine fields (typography, density, shape, mood) shape the whole feel of the page — choose them deliberately for the recipient and occasion.',
   input_schema: {
     type: 'object',
     properties: {
@@ -179,6 +226,40 @@ registerTool<Input, Output>({
         },
         required: ['display', 'body'],
       },
+      typography: {
+        type: 'object',
+        description:
+          'Curated heading + body font family. heading: serif (Playfair Display — elegant, traditional), display (Fraunces — characterful), sans (Inter — clean, neutral), mono (DM Mono — technical), script (Caveat — playful, handwritten). body: sans (Inter) / serif (Cormorant — refined) / mono. Match to recipient + occasion.',
+        properties: {
+          heading: {
+            type: 'string',
+            enum: ['serif', 'display', 'sans', 'mono', 'script'],
+          },
+          body: {
+            type: 'string',
+            enum: ['sans', 'serif', 'mono'],
+          },
+        },
+        required: ['heading', 'body'],
+      },
+      density: {
+        type: 'string',
+        enum: ['compact', 'cozy', 'breathable'],
+        description:
+          'Spacing scale. compact = tight, info-dense. cozy = default. breathable = generous, airy.',
+      },
+      shape: {
+        type: 'string',
+        enum: ['sharp', 'soft', 'pillowy'],
+        description:
+          'Border radius. sharp = 4px (editorial). soft = 12px (default). pillowy = 24px (whimsical).',
+      },
+      mood: {
+        type: 'string',
+        enum: ['minimal', 'rich', 'whimsical', 'editorial'],
+        description:
+          'High-level visual register. minimal = restrained. rich = saturated, layered. whimsical = playful. editorial = magazine-like.',
+      },
     },
     required: [],
   },
@@ -197,6 +278,12 @@ registerTool<Input, Output>({
       ...(parsed.font_pairing !== undefined
         ? { font_pairing: parsed.font_pairing }
         : {}),
+      ...(parsed.typography !== undefined
+        ? { typography: parsed.typography }
+        : {}),
+      ...(parsed.density !== undefined ? { density: parsed.density } : {}),
+      ...(parsed.shape !== undefined ? { shape: parsed.shape } : {}),
+      ...(parsed.mood !== undefined ? { mood: parsed.mood } : {}),
     };
     await db
       .update(peeks)
