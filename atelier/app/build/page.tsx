@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
+import { ensureCuratorRow } from '@/lib/auth/server';
 import { getSupabaseService } from '@/lib/supabase/service';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,8 @@ export default async function BuildLandingPage() {
   if (!userId) {
     redirect('/sign-in?returnTo=/build');
   }
+
+  await ensureCuratorRow(userId);
 
   const sb = getSupabaseService();
   const slug = makeSlug();
