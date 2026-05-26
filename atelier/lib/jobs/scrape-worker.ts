@@ -3,15 +3,7 @@ import { eq } from 'drizzle-orm';
 import { inngest, scrapeRequestedEvent } from '@/lib/inngest/client';
 import { db } from '@/db/client';
 import { cards } from '@/db/schema';
-import { env } from '@/lib/env';
-
-type ScrapeResponse = {
-  title?: string;
-  description?: string;
-  imageUrl?: string;
-  valueCents?: number;
-  sourceRetailer?: string;
-};
+import { scrapePipeline } from '@/lib/scrape/pipeline';
 
 export const scrapeWorkerFn = inngest.createFunction(
   {
@@ -23,16 +15,12 @@ export const scrapeWorkerFn = inngest.createFunction(
   async ({ event, step }) => {
     const { url, placeholderCardId } = event.data;
 
-    const product = await step.run('scrape', async (): Promise<ScrapeResponse> => {
-      const res = await fetch(`${env.APP_URL}/api/scrape`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url }),
-      });
-      if (!res.ok) {
-        throw new Error(`scrape failed ${res.status}`);
+    const product = await step.run('scrape', async () => {
+      const outcome = await scrapePipeline(url);
+      if (!outcome.ok) {
+        throw new Error(outcome.error);
       }
-      return (await res.json()) as ScrapeResponse;
+      return outcome.product;
     });
 
     await step.run('update-card', async () => {

@@ -6,17 +6,18 @@ import { getSupabaseService } from './service';
 const BUCKET = env.SUPABASE_STORAGE_BUCKET ?? 'peek-v2-assets';
 
 export async function uploadAsset(opts: {
-  path?: string; // optional explicit path; else auto-uuid
+  path?: string;
   data: Buffer | Uint8Array | Blob;
   contentType: string;
   cacheControl?: string;
+  upsert?: boolean;
 }): Promise<{ path: string; publicUrl: string }> {
   const path = opts.path ?? `${new Date().toISOString().slice(0, 10)}/${randomUUID()}`;
   const client = getSupabaseService();
   const { error } = await client.storage.from(BUCKET).upload(path, opts.data, {
     contentType: opts.contentType,
     cacheControl: opts.cacheControl ?? '604800',
-    upsert: false,
+    upsert: opts.upsert ?? false,
   });
   if (error) throw error;
   const { data } = client.storage.from(BUCKET).getPublicUrl(path);
