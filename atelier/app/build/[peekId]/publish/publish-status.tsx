@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
-
-type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
+import type { DbRow } from '@/lib/supabase/database.types';
+import type { PeekStatus } from '@/lib/peek/types';
 
 type Props = {
   peekId: string;
@@ -18,11 +18,14 @@ type Props = {
   mock: boolean;
 };
 
-type PeekRow = {
-  status: PeekStatus;
-  share_url: string | null;
-  slug: string;
-};
+const PEEK_STATUSES = ['draft', 'published', 'claimed', 'archived'] as const;
+
+function isPeekStatus(value: unknown): value is PeekStatus {
+  return (
+    typeof value === 'string' &&
+    (PEEK_STATUSES as readonly string[]).includes(value)
+  );
+}
 
 const POLL_INTERVAL_MS = 2500;
 const POLL_TIMEOUT_MS = 60_000;
@@ -56,10 +59,10 @@ export function PublishStatus({
           table: 'peeks',
           filter: `id=eq.${peekId}`,
         },
-        (payload: { new: Record<string, unknown> }) => {
+        (payload: { new: Partial<DbRow<'peeks'>> }) => {
           if (cancelled) return;
-          const row = payload.new as Partial<PeekRow>;
-          if (row.status) setStatus(row.status as PeekStatus);
+          const row = payload.new;
+          if (isPeekStatus(row.status)) setStatus(row.status);
           if (typeof row.share_url === 'string') setShareUrl(row.share_url);
           if (typeof row.slug === 'string') setSlug(row.slug);
         },
@@ -76,11 +79,10 @@ export function PublishStatus({
         .maybeSingle();
       if (cancelled) return;
       if (data) {
-        const row = data as PeekRow;
-        setStatus(row.status);
-        if (row.share_url) setShareUrl(row.share_url);
-        if (row.slug) setSlug(row.slug);
-        if (row.status === 'published' || row.status === 'claimed') return;
+        setStatus(data.status);
+        if (data.share_url) setShareUrl(data.share_url);
+        if (data.slug) setSlug(data.slug);
+        if (data.status === 'published' || data.status === 'claimed') return;
       }
       if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
         setTimedOut(true);

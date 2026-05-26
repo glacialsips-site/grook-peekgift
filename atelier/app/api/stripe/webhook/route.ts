@@ -10,12 +10,6 @@ import { checkIdempotency } from '@/lib/security/idempotency';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type PeekRow = {
-  id: string;
-  slug: string;
-  status: 'draft' | 'published' | 'claimed' | 'archived';
-};
-
 async function logWebhook(payload: Record<string, unknown>, success: boolean) {
   try {
     await inngest.send({
@@ -66,16 +60,16 @@ export async function POST(req: NextRequest): Promise<Response> {
       return new Response('ok', { status: 200 });
     }
 
-    const session = event.data.object as Stripe.Checkout.Session;
-    const peekId = session.metadata?.peek_id;
-    const curatorId = session.metadata?.curator_id ?? null;
+    const session = event.data.object;
+    const peekId = session.metadata?.['peek_id'];
+    const curatorId = session.metadata?.['curator_id'] ?? null;
     if (!peekId) {
       success = true;
       return new Response('missing peek_id metadata', { status: 200 });
     }
 
     const sb = getSupabaseService();
-    const { data: peekData, error: peekErr } = await sb
+    const { data: peek, error: peekErr } = await sb
       .from('peeks')
       .select('id, slug, status')
       .eq('id', peekId)
@@ -84,11 +78,10 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (peekErr) {
       return new Response(`lookup failed: ${peekErr.message}`, { status: 500 });
     }
-    if (!peekData) {
+    if (!peek) {
       success = true;
       return new Response('peek not found', { status: 200 });
     }
-    const peek = peekData as PeekRow;
     if (peek.status === 'published' || peek.status === 'claimed') {
       success = true;
       return new Response('already published', { status: 200 });

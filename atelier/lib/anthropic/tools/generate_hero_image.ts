@@ -25,10 +25,12 @@ async function tryEvolveVibe(peekId: string, imageUrl: string): Promise<void> {
 
 const AspectSchema = z.enum(['16:9', '4:3', '1:1', '9:16']);
 
-const InputSchema = z.object({
-  prompt: z.string().min(3).max(2000),
-  aspect: AspectSchema.optional(),
-});
+const InputSchema = z
+  .object({
+    prompt: z.string().min(3).max(2000),
+    aspect: AspectSchema.optional(),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 type Output =

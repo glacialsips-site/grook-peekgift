@@ -50,11 +50,6 @@ export interface PeekAccessInput {
   sessionId: string;
 }
 
-interface PeekRow {
-  curator_id: string | null;
-  metadata: Record<string, unknown> | null;
-}
-
 export async function assertPeekAccess(
   opts: PeekAccessInput,
 ): Promise<PeekAccessResult> {
@@ -77,20 +72,18 @@ export async function assertPeekAccess(
     return { ok: false, reason: 'not_found' };
   }
 
-  const row = data as PeekRow;
-
   if (opts.userId) {
-    if (row.curator_id && row.curator_id === opts.userId) {
+    if (data.curator_id && data.curator_id === opts.userId) {
       return { ok: true };
     }
     return { ok: false, reason: 'forbidden' };
   }
 
-  if (row.curator_id) {
+  if (data.curator_id) {
     return { ok: false, reason: 'forbidden' };
   }
 
-  const metadata = row.metadata ?? {};
+  const metadata = data.metadata ?? {};
   const anonymousSessionId = metadata['anonymous_session_id'];
   if (
     typeof anonymousSessionId === 'string' &&

@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getUserId } from '@/lib/auth/server';
 import { getSupabaseService } from '@/lib/supabase/service';
+import type { DbInsert } from '@/lib/supabase/database.types';
 import { scrapePipeline } from '@/lib/scrape/pipeline';
 import type { ScrapedProduct } from '@/lib/scrape/extract';
 import {
@@ -15,11 +16,13 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
-const BodySchema = z.object({
-  url: z.string().url(),
-  peekId: z.string().uuid().optional(),
-  sessionId: z.string().min(1).max(200).optional(),
-});
+const BodySchema = z
+  .object({
+    url: z.string().url(),
+    peekId: z.string().uuid().optional(),
+    sessionId: z.string().min(1).max(200).optional(),
+  })
+  .strict();
 
 const CACHE_KIND = 'scrape_complete';
 
@@ -41,18 +44,14 @@ function parseCachedProduct(payload: unknown): ScrapedProduct | null {
   const title = product['title'];
   if (typeof title !== 'string' || title.length === 0) return null;
   const out: ScrapedProduct = { title };
-  if (typeof product['description'] === 'string') {
-    out.description = product['description'] as string;
-  }
-  if (typeof product['imageUrl'] === 'string') {
-    out.imageUrl = product['imageUrl'] as string;
-  }
-  if (typeof product['valueCents'] === 'number') {
-    out.valueCents = product['valueCents'] as number;
-  }
-  if (typeof product['sourceRetailer'] === 'string') {
-    out.sourceRetailer = product['sourceRetailer'] as string;
-  }
+  const description = product['description'];
+  if (typeof description === 'string') out.description = description;
+  const imageUrl = product['imageUrl'];
+  if (typeof imageUrl === 'string') out.imageUrl = imageUrl;
+  const valueCents = product['valueCents'];
+  if (typeof valueCents === 'number') out.valueCents = valueCents;
+  const sourceRetailer = product['sourceRetailer'];
+  if (typeof sourceRetailer === 'string') out.sourceRetailer = sourceRetailer;
   return out;
 }
 
@@ -70,8 +69,7 @@ async function lookupCachedProduct(
     .maybeSingle();
   if (error) return null;
   if (!data) return null;
-  const row = data as { payload: unknown };
-  return parseCachedProduct(row.payload);
+  return parseCachedProduct(data.payload);
 }
 
 interface ScrapeRequestContext {
@@ -85,13 +83,13 @@ async function recordScrapeEvent(
   ctx: ScrapeRequestContext,
   payload: Record<string, unknown>,
 ): Promise<void> {
-  const row: Record<string, unknown> = {
+  const row: DbInsert<'events'> = {
     user_id: ctx.userId,
     kind: CACHE_KIND,
     payload,
   };
-  if (ctx.peekId) row['peek_id'] = ctx.peekId;
-  if (ctx.sessionId) row['session_id'] = ctx.sessionId;
+  if (ctx.peekId) row.peek_id = ctx.peekId;
+  if (ctx.sessionId) row.session_id = ctx.sessionId;
   await sb.from('events').insert(row);
 }
 

@@ -30,7 +30,7 @@ export async function evolveVibe(
       .where(eq(peeks.id, peekId))
       .limit(1);
     if (!row) return;
-    const current: Vibe = (row.vibe ?? {}) as Vibe;
+    const current: Vibe = row.vibe ?? {};
 
     const result = await derivePatch(signal);
     if (!result || isEmptyPatch(result.patch)) return;

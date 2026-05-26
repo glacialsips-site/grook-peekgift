@@ -55,20 +55,22 @@ export async function POST(req: Request) {
       const email =
         u.email_addresses.find((e) => e.id === u.primary_email_address_id)
           ?.email_address ?? null;
+      if (!email) {
+        success = true;
+        return new Response('missing email', { status: 200 });
+      }
       const displayName =
         [u.first_name, u.last_name].filter(Boolean).join(' ') || null;
-      const { error } = await db
-        .from('users')
-        .upsert(
-          {
-            clerk_user_id: u.id,
-            email,
-            display_name: displayName,
-            avatar_url: u.image_url ?? null,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'clerk_user_id' },
-        );
+      const { error } = await db.from('users').upsert(
+        {
+          clerk_user_id: u.id,
+          email,
+          display_name: displayName,
+          avatar_url: u.image_url ?? null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'clerk_user_id' },
+      );
       if (error) {
         return new Response(`upsert failed: ${error.message}`, { status: 500 });
       }

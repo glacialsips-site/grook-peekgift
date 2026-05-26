@@ -14,7 +14,7 @@ type PeekOgRow = {
   recipient_name: string | null;
   occasion: string | null;
   hero_image_url: string | null;
-  vibe: Vibe | null;
+  vibe: Vibe;
 };
 
 const DEFAULT_PALETTE: Required<Pick<VibePalette, 'bg' | 'surface' | 'ink' | 'accent'>> & {
@@ -219,7 +219,14 @@ export default async function Image({
       .select('updated_at, recipient_name, occasion, hero_image_url, vibe')
       .eq('slug', slug)
       .maybeSingle();
-    peek = (data as PeekOgRow | null) ?? null;
+    if (data) {
+      peek = {
+        recipient_name: data.recipient_name,
+        occasion: data.occasion,
+        hero_image_url: data.hero_image_url,
+        vibe: data.vibe,
+      };
+    }
   } catch {
     peek = null;
   }

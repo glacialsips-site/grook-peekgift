@@ -6,10 +6,12 @@ import { registerTool } from './index';
 
 const SelectionSchema = z.enum(['pick_one', 'pick_any', 'pick_all']);
 
-const InputSchema = z.object({
-  title: z.string().min(1).max(120),
-  selection: SelectionSchema,
-});
+const InputSchema = z
+  .object({
+    title: z.string().min(1).max(120),
+    selection: SelectionSchema,
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

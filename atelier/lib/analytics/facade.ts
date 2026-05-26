@@ -186,9 +186,23 @@ export type AnalyticsEvent =
       };
     };
 
+function getSessionId(evt: AnalyticsEvent): string | null {
+  if ('sessionId' in evt && typeof evt.sessionId === 'string') {
+    return evt.sessionId;
+  }
+  return null;
+}
+
+function getPayload(evt: AnalyticsEvent): Record<string, unknown> {
+  if ('payload' in evt && evt.payload !== undefined) {
+    return evt.payload as Record<string, unknown>;
+  }
+  return {};
+}
+
 function distinctIdFor(evt: AnalyticsEvent): string {
   if (evt.userId) return evt.userId;
-  const sessionId = (evt as { sessionId?: string }).sessionId;
+  const sessionId = getSessionId(evt);
   return sessionId ? `anon-${sessionId}` : `anon-${evt.peekId}`;
 }
 
@@ -198,7 +212,7 @@ export async function track(evt: AnalyticsEvent): Promise<void> {
     try {
       const properties: Record<string, unknown> = {
         peek_id: evt.peekId,
-        ...((evt as { payload?: Record<string, unknown> }).payload ?? {}),
+        ...getPayload(evt),
       };
       ph.capture({
         distinctId: distinctIdFor(evt),
@@ -216,15 +230,12 @@ export async function track(evt: AnalyticsEvent): Promise<void> {
 
   try {
     const sb = getSupabaseService();
-    const sessionId = (evt as { sessionId?: string }).sessionId ?? null;
-    const payload =
-      (evt as { payload?: Record<string, unknown> }).payload ?? {};
     const { error } = await sb.from('events').insert({
       user_id: evt.userId,
-      session_id: sessionId,
+      session_id: getSessionId(evt),
       peek_id: evt.peekId,
       kind: evt.name,
-      payload,
+      payload: getPayload(evt),
     });
     if (error) {
       console.error('[analytics] events insert failed', {

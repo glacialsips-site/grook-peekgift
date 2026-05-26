@@ -5,18 +5,24 @@ import { peeks, type Vibe } from '@/db/schema';
 import { trackFireAndForget } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
-const PaletteSchema = z.object({
-  bg: z.string().min(1),
-  surface: z.string().min(1),
-  ink: z.string().min(1),
-  accent: z.string().min(1),
-  accent2: z.string().min(1).optional(),
-});
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
 
-const FontPairingSchema = z.object({
-  display: z.string().min(1),
-  body: z.string().min(1),
-});
+const PaletteSchema = z
+  .object({
+    bg: z.string().regex(HEX_COLOR_RE),
+    surface: z.string().regex(HEX_COLOR_RE),
+    ink: z.string().regex(HEX_COLOR_RE),
+    accent: z.string().regex(HEX_COLOR_RE),
+    accent2: z.string().regex(HEX_COLOR_RE).optional(),
+  })
+  .strict();
+
+const FontPairingSchema = z
+  .object({
+    display: z.string().min(1).max(80),
+    body: z.string().min(1).max(80),
+  })
+  .strict();
 
 const MotionSchema = z.enum(['still', 'soft', 'lively']);
 const PresetSchema = z.enum([
@@ -27,14 +33,16 @@ const PresetSchema = z.enum([
   'tender',
 ]);
 
-export const VibeInputSchema = z.object({
-  preset: PresetSchema.optional(),
-  tone: z.string().min(1).max(280).optional(),
-  palette: PaletteSchema.optional(),
-  mood_words: z.array(z.string().min(1).max(60)).max(20).optional(),
-  motion: MotionSchema.optional(),
-  font_pairing: FontPairingSchema.optional(),
-});
+export const VibeInputSchema = z
+  .object({
+    preset: PresetSchema.optional(),
+    tone: z.string().min(1).max(280).optional(),
+    palette: PaletteSchema.optional(),
+    mood_words: z.array(z.string().min(1).max(60)).max(20).optional(),
+    motion: MotionSchema.optional(),
+    font_pairing: FontPairingSchema.optional(),
+  })
+  .strict();
 type Input = z.infer<typeof VibeInputSchema>;
 
 export type StoredPalette = z.infer<typeof PaletteSchema>;
@@ -203,7 +211,7 @@ registerTool<Input, Output>({
       peekId: ctx.peekId,
       userId: ctx.userId,
       sessionId: ctx.sessionId,
-      payload: { source: 'set_vibe', patch: parsed as Record<string, unknown> },
+      payload: { source: 'set_vibe', patch: { ...parsed } },
     });
 
     return { ok: true, vibe: next };

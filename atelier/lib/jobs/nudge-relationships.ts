@@ -17,6 +17,19 @@ type NudgeRow = {
   last_peek_id: string | null;
 };
 
+function toArray<T>(result: unknown): T[] {
+  if (Array.isArray(result)) return result as T[];
+  if (
+    result !== null &&
+    typeof result === 'object' &&
+    'rows' in result &&
+    Array.isArray((result as { rows: unknown }).rows)
+  ) {
+    return (result as { rows: T[] }).rows;
+  }
+  return [];
+}
+
 export const dailyNudgeFn = inngest.createFunction(
   {
     id: 'daily-nudge',
@@ -59,9 +72,7 @@ export const dailyNudgeFn = inngest.createFunction(
                 = date_trunc('day', (now() + interval '14 days') AT TIME ZONE 'UTC')
           )
       `);
-      const raw = rows as unknown as { rows?: NudgeRow[] } | NudgeRow[];
-      if (Array.isArray(raw)) return raw;
-      return raw.rows ?? [];
+      return toArray<NudgeRow>(rows);
     });
 
     for (const r of candidates) {

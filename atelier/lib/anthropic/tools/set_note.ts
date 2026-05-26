@@ -5,9 +5,11 @@ import { peeks } from '@/db/schema';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
-const InputSchema = z.object({
-  note_md: z.string().min(1).max(5000),
-});
+const InputSchema = z
+  .object({
+    note_md: z.string().min(1).max(5000),
+  })
+  .strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

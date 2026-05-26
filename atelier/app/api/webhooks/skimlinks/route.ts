@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import crypto from 'node:crypto';
+import { z } from 'zod';
 import { env } from '@/lib/env';
 import { parseClickCustomId } from '@/lib/affiliate/wrap';
 import { getSupabaseService } from '@/lib/supabase/service';
@@ -7,16 +8,20 @@ import { checkIdempotency } from '@/lib/security/idempotency';
 
 export const runtime = 'nodejs';
 
-interface SkimlinksEvent {
-  transaction_id: string;
-  click_id?: string;
-  sale_amount: number;
-  commission_amount: number;
-  currency?: string;
-  status?: 'pending' | 'confirmed' | 'reversed';
-  merchant_name?: string;
-  timestamp?: string;
-}
+const SkimlinksEventSchema = z
+  .object({
+    transaction_id: z.string().min(1),
+    click_id: z.string().optional(),
+    sale_amount: z.number(),
+    commission_amount: z.number(),
+    currency: z.string().optional(),
+    status: z.enum(['pending', 'confirmed', 'reversed']).optional(),
+    merchant_name: z.string().optional(),
+    timestamp: z.string().optional(),
+  })
+  .passthrough();
+
+type SkimlinksEvent = z.infer<typeof SkimlinksEventSchema>;
 
 function toCents(amount: unknown): number | null {
   if (typeof amount !== 'number' || !Number.isFinite(amount)) return null;
@@ -28,6 +33,10 @@ function safeEqual(a: string, b: string): boolean {
   const bb = Buffer.from(b, 'utf8');
   if (ab.length !== bb.length) return false;
   return crypto.timingSafeEqual(ab, bb);
+}
+
+function toRawPayload(evt: SkimlinksEvent): Record<string, unknown> {
+  return { ...evt };
 }
 
 export async function POST(req: NextRequest) {
@@ -48,15 +57,17 @@ export async function POST(req: NextRequest) {
     return new Response('invalid signature', { status: 401 });
   }
 
-  let evt: SkimlinksEvent;
+  let parsed: unknown;
   try {
-    evt = JSON.parse(body) as SkimlinksEvent;
+    parsed = JSON.parse(body);
   } catch {
     return new Response('invalid json', { status: 400 });
   }
-  if (!evt.transaction_id) {
-    return new Response('missing transaction_id', { status: 400 });
+  const evtResult = SkimlinksEventSchema.safeParse(parsed);
+  if (!evtResult.success) {
+    return new Response('invalid_payload', { status: 400 });
   }
+  const evt = evtResult.data;
 
   const idemp = await checkIdempotency({
     source: 'skimlinks',
@@ -78,28 +89,29 @@ export async function POST(req: NextRequest) {
       .order('picked_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (pickRow && typeof pickRow.id === 'string') {
+    if (pickRow) {
       pickId = pickRow.id;
     }
   }
 
-  const row = {
-    network: 'skimlinks',
-    external_txn_id: evt.transaction_id,
-    card_id: parsedClick?.cardId ?? null,
-    pick_id: pickId,
-    peek_id: parsedClick?.peekId ?? null,
-    reported_at: evt.timestamp ?? new Date().toISOString(),
-    amount_cents: toCents(evt.sale_amount),
-    commission_cents: toCents(evt.commission_amount),
-    currency: evt.currency ?? 'USD',
-    status: evt.status ?? 'pending',
-    raw_payload: evt as unknown as Record<string, unknown>,
-  };
-
   const { error } = await sb
     .from('affiliate_revenue')
-    .upsert(row, { onConflict: 'external_txn_id' });
+    .upsert(
+      {
+        network: 'skimlinks',
+        external_txn_id: evt.transaction_id,
+        card_id: parsedClick?.cardId ?? null,
+        pick_id: pickId,
+        peek_id: parsedClick?.peekId ?? null,
+        reported_at: evt.timestamp ?? new Date().toISOString(),
+        amount_cents: toCents(evt.sale_amount),
+        commission_cents: toCents(evt.commission_amount),
+        currency: evt.currency ?? 'USD',
+        status: evt.status ?? 'pending',
+        raw_payload: toRawPayload(evt),
+      },
+      { onConflict: 'external_txn_id' },
+    );
   if (error) {
     return new Response(`upsert failed: ${error.message}`, { status: 500 });
   }

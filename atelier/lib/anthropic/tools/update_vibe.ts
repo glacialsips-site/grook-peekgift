@@ -21,7 +21,7 @@ const SignalSourceSchema = z.enum([
 
 export const UpdateVibeInputSchema = VibeInputSchema.extend({
   signal_source: SignalSourceSchema.optional(),
-});
+}).strict();
 
 type Input = z.infer<typeof UpdateVibeInputSchema>;
 
@@ -87,7 +87,7 @@ registerTool<Input, Output>({
       .limit(1);
     if (!existing) throw new Error(`peek ${ctx.peekId} not found`);
 
-    const current = (existing.vibe ?? {}) as Vibe;
+    const current: Vibe = existing.vibe ?? {};
     const patch: Partial<VibeCore> = {
       ...(parsed.preset !== undefined ? { preset: parsed.preset } : {}),
       ...(parsed.tone !== undefined ? { tone: parsed.tone } : {}),
@@ -132,7 +132,7 @@ registerTool<Input, Output>({
       sessionId: ctx.sessionId,
       payload: {
         source: 'update_vibe',
-        patch: parsed as Record<string, unknown>,
+        patch: { ...parsed },
       },
     });
 

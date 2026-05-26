@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { track } from '@/lib/analytics/facade';
 import { registerTool } from './index';
 
-const InputSchema = z.object({});
+const InputSchema = z.object({}).strict();
 type Input = z.infer<typeof InputSchema>;
 
 interface Output {

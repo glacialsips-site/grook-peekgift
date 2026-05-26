@@ -8,16 +8,6 @@ import { ShareSheet } from '@/components/build/share-sheet';
 
 export const dynamic = 'force-dynamic';
 
-type PeekSharePageRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  recipient_name: string | null;
-  occasion: string | null;
-  status: 'draft' | 'published' | 'claimed' | 'archived';
-  share_url: string | null;
-};
-
 function buildShareUrl(slug: string): string {
   const base = env.APP_URL.replace(/\/+$/, '');
   return `${base}/g/${slug}`;
@@ -81,7 +71,7 @@ export default async function PublishSharePage({
   }
 
   const sb = getSupabaseService();
-  const { data, error } = await sb
+  const { data: peek, error } = await sb
     .from('peeks')
     .select('id, slug, curator_id, recipient_name, occasion, status, share_url')
     .eq('id', peekId)
@@ -89,7 +79,6 @@ export default async function PublishSharePage({
   if (error) {
     throw new Error(`Failed to load peek: ${error.message}`);
   }
-  const peek = data as PeekSharePageRow | null;
   if (!peek) notFound();
   if (peek.curator_id !== userId) notFound();
   if (peek.status !== 'published') {

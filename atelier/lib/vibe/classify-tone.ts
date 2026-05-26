@@ -49,10 +49,11 @@ function parseClassification(raw: string): ToneClassification | null {
   }
   if (!parsed || typeof parsed !== 'object') return null;
   const obj = parsed as Record<string, unknown>;
-  const tone = isTone(obj.tone) ? obj.tone : null;
-  const motion = isMotion(obj.motion) ? obj.motion : null;
-  const moodWords = Array.isArray(obj.mood_words)
-    ? obj.mood_words.filter(
+  const tone = isTone(obj['tone']) ? obj['tone'] : null;
+  const motion = isMotion(obj['motion']) ? obj['motion'] : null;
+  const rawMoodWords = obj['mood_words'];
+  const moodWords = Array.isArray(rawMoodWords)
+    ? rawMoodWords.filter(
         (w): w is string => typeof w === 'string' && w.trim().length > 0,
       )
     : [];

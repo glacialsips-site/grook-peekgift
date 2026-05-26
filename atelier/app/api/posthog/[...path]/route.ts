@@ -4,7 +4,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const PH_HOST =
-  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
+  process.env['NEXT_PUBLIC_POSTHOG_HOST'] ?? 'https://us.i.posthog.com';
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
@@ -19,9 +19,10 @@ async function proxy(req: NextRequest, ctx: RouteContext): Promise<Response> {
     headers: {
       'content-type':
         req.headers.get('content-type') ?? 'application/json',
-      ...(req.headers.get('user-agent')
-        ? { 'user-agent': req.headers.get('user-agent') as string }
-        : {}),
+      ...((): { 'user-agent'?: string } => {
+        const ua = req.headers.get('user-agent');
+        return ua ? { 'user-agent': ua } : {};
+      })(),
     },
   };
 

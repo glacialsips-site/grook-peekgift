@@ -104,14 +104,17 @@ export async function POST(req: NextRequest): Promise<Response> {
     await incrementAnonymousTurn(sessionId, ip);
   }
 
-  let initialHistory = history as Anthropic.MessageParam[];
+  let initialHistory: Anthropic.MessageParam[] = history as Anthropic.MessageParam[];
   if (initialHistory.length === 0) {
     try {
       const persisted = await loadChatHistory(peekId);
       initialHistory = persisted
-        .filter((row) => row.role === 'user' || row.role === 'assistant')
+        .filter(
+          (row): row is typeof row & { role: 'user' | 'assistant' } =>
+            row.role === 'user' || row.role === 'assistant',
+        )
         .map((row) => ({
-          role: row.role as 'user' | 'assistant',
+          role: row.role,
           content: row.content as Anthropic.MessageParam['content'],
         }));
     } catch (err) {
@@ -120,7 +123,10 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
   }
 
-  const userInput = userMessage as string | Anthropic.ContentBlockParam[];
+  const userInput: string | Anthropic.ContentBlockParam[] =
+    typeof userMessage === 'string'
+      ? userMessage
+      : (userMessage as Anthropic.ContentBlockParam[]);
   const userContent: Anthropic.ContentBlockParam[] =
     typeof userInput === 'string'
       ? [{ type: 'text', text: userInput }]

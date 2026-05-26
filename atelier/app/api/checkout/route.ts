@@ -15,16 +15,11 @@ import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin'
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const RequestSchema = z.object({
-  peekId: z.string().uuid(),
-});
-
-type PeekRow = {
-  id: string;
-  slug: string;
-  curator_id: string | null;
-  status: 'draft' | 'published' | 'claimed' | 'archived';
-};
+const RequestSchema = z
+  .object({
+    peekId: z.string().uuid(),
+  })
+  .strict();
 
 export async function POST(req: NextRequest): Promise<Response> {
   if (!isOriginAllowed(req)) {
@@ -56,7 +51,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   const { peekId } = parsed.data;
 
   const sb = getSupabaseService();
-  const { data: peekData, error: peekErr } = await sb
+  const { data: peek, error: peekErr } = await sb
     .from('peeks')
     .select('id, slug, curator_id, status')
     .eq('id', peekId)
@@ -68,11 +63,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       { status: 500 },
     );
   }
-  if (!peekData) {
+  if (!peek) {
     return Response.json({ error: 'not_found' }, { status: 404 });
   }
 
-  const peek = peekData as PeekRow;
   if (peek.curator_id !== userId) {
     return Response.json({ error: 'forbidden' }, { status: 403 });
   }
