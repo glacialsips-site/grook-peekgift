@@ -97,8 +97,19 @@ export const DEFAULT_VIBE: Vibe = {
   motion: 'soft',
 };
 
+export type ChatMessageImage = {
+  url: string;
+  contentType?: string;
+  alt?: string;
+};
+
 export type ChatMessage =
-  | { id: string; role: 'user'; content: string }
+  | {
+      id: string;
+      role: 'user';
+      content: string;
+      images?: ChatMessageImage[];
+    }
   | {
       id: string;
       role: 'assistant';
