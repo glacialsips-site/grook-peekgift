@@ -45,6 +45,24 @@ export type VibeDensity = 'compact' | 'cozy' | 'breathable';
 export type VibeShape = 'sharp' | 'soft' | 'pillowy';
 export type VibeMood = 'minimal' | 'rich' | 'whimsical' | 'editorial';
 
+export type VoiceWarmth = 'restrained' | 'measured' | 'warm' | 'effusive';
+export type VoiceHumor = 'none' | 'gentle' | 'dry' | 'sharp';
+export type VoicePace = 'considered' | 'natural' | 'quick';
+export type VoiceFormality = 'casual' | 'neutral' | 'formal';
+export type VoiceEmoji = 'none' | 'rare' | 'occasional' | 'playful';
+export type VoiceVocabulary = 'slangy' | 'neutral' | 'elevated';
+export type VoiceLength = 'punchy' | 'natural' | 'fuller';
+
+export type VibeVoice = {
+  warmth?: VoiceWarmth;
+  humor?: VoiceHumor;
+  pace?: VoicePace;
+  formality?: VoiceFormality;
+  emoji?: VoiceEmoji;
+  vocabulary?: VoiceVocabulary;
+  length?: VoiceLength;
+};
+
 export type VibeCore = {
   preset?: VibePreset;
   tone?: string;
@@ -56,6 +74,7 @@ export type VibeCore = {
   density?: VibeDensity;
   shape?: VibeShape;
   mood?: VibeMood;
+  voice?: VibeVoice;
 };
 
 export type VibeSignalSourceEntry = {

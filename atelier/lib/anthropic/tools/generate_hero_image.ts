@@ -24,7 +24,7 @@ type Output =
 registerTool<Input, Output>({
   name: 'generate_hero_image',
   description:
-    "Generate a hero image with fal.ai (Flux). Pass a short, evocative prompt — what the page should look like at a glance — and optionally an aspect ratio (default 16:9). The image is re-hosted to our storage and set as the hero. Returns { ok: true, image_url } on success or { ok: false, error } if image gen is not configured.",
+    "Generate an image with fal.ai (Flux). Pass a short, evocative prompt — what the image should look like at a glance — and optionally an aspect ratio (default 16:9). The result is auto-stored and set as the page's cover photo. Use this freely whenever a generated image is the right move. On the rare occasion image gen is offline, returns { ok: false } gracefully so you can ask the user for a description or upload instead — there's no reason to avoid calling it.",
   input_schema: {
     type: 'object',
     properties: {

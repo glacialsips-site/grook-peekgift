@@ -35,7 +35,7 @@ const HISTORY_LIMIT = 10;
 registerTool<Input, Output>({
   name: 'update_vibe',
   description:
-    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Style-engine fields (typography, density, shape, mood) can also be refined here as the page identity sharpens. Never re-sends fields you do not want to change. signal_source defaults to "curator" — pass another value only when relaying an upstream auto-classifier signal.',
+    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Style-engine fields (typography, density, shape, mood) can also be refined here as the page identity sharpens. The voice sub-object refines how YOU talk to the curator — sharpen it on turn 1-2 when you have first signals, and again whenever new info changes the register (curator turns out to be reserved, occasion turns out to be heavier than first stated, etc). Never re-sends fields you do not want to change. signal_source defaults to "curator" — pass another value only when relaying an upstream auto-classifier signal.',
   input_schema: {
     type: 'object',
     properties: {
@@ -97,6 +97,41 @@ registerTool<Input, Output>({
         type: 'string',
         enum: ['minimal', 'rich', 'whimsical', 'editorial'],
       },
+      voice: {
+        type: 'object',
+        description:
+          "How YOU (Peek) talk to the curator. Refine when new signals arrive — curator mirrors back in slangy register, occasion turns out to be a memorial not a birthday, recipient is a kid, etc. All sub-fields optional.",
+        properties: {
+          warmth: {
+            type: 'string',
+            enum: ['restrained', 'measured', 'warm', 'effusive'],
+          },
+          humor: {
+            type: 'string',
+            enum: ['none', 'gentle', 'dry', 'sharp'],
+          },
+          pace: {
+            type: 'string',
+            enum: ['considered', 'natural', 'quick'],
+          },
+          formality: {
+            type: 'string',
+            enum: ['casual', 'neutral', 'formal'],
+          },
+          emoji: {
+            type: 'string',
+            enum: ['none', 'rare', 'occasional', 'playful'],
+          },
+          vocabulary: {
+            type: 'string',
+            enum: ['slangy', 'neutral', 'elevated'],
+          },
+          length: {
+            type: 'string',
+            enum: ['punchy', 'natural', 'fuller'],
+          },
+        },
+      },
       signal_source: {
         type: 'string',
         enum: ['curator', 'hero_palette', 'tone_classifier', 'card_mix'],
@@ -131,6 +166,9 @@ registerTool<Input, Output>({
       ...(parsed.density !== undefined ? { density: parsed.density } : {}),
       ...(parsed.shape !== undefined ? { shape: parsed.shape } : {}),
       ...(parsed.mood !== undefined ? { mood: parsed.mood } : {}),
+      ...(parsed.voice !== undefined
+        ? { voice: { ...(current.voice ?? {}), ...parsed.voice } }
+        : {}),
     };
 
     const source: VibeSignalSource = parsed.signal_source ?? 'curator';
