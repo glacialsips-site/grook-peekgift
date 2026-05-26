@@ -14,6 +14,7 @@ import type {
   Peek,
   PeekDraft,
   PeekStatus,
+  RecipientProfile,
   UnlockRule,
   VariantGroup,
   VariantSelection,
@@ -86,9 +87,15 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string');
+}
+
 function rowToPeek(row: RealtimeRow): Peek {
   const status = row['status'];
   const vibe = asRecord(row['vibe']) as Vibe;
+  const profile = asRecord(row['recipient_profile']) as RecipientProfile;
   return {
     id: asString(row['id']),
     slug: asString(row['slug']),
@@ -96,6 +103,9 @@ function rowToPeek(row: RealtimeRow): Peek {
     recipientName: asNullableString(row['recipient_name']),
     relationship: asNullableString(row['relationship']),
     occasion: asNullableString(row['occasion']),
+    giverNames: asStringArray(row['giver_names']),
+    budgetCents: asNullableNumber(row['budget_cents']),
+    recipientProfile: profile,
     vibe,
     heroImageUrl: asNullableString(row['hero_image_url']),
     heroImageSource: asNullableString(row['hero_image_source']),

@@ -67,10 +67,10 @@ registerTool<Input, Output>({
       updatedAt: new Date(),
     };
     if (parsed.giver_names !== undefined) {
-      update.giverNames = parsed.giver_names;
+      update['giverNames'] = parsed.giver_names;
     }
     if (parsed.budget_cents !== undefined) {
-      update.budgetCents = parsed.budget_cents;
+      update['budgetCents'] = parsed.budget_cents;
     }
     const [row] = await db
       .update(peeks)

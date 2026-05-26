@@ -90,56 +90,56 @@ registerTool<Input, Output>({
 
     const update: Record<string, unknown> = {};
 
-    if (parsed.type !== undefined) update.type = parsed.type;
-    if (parsed.title !== undefined) update.title = parsed.title;
-    if (parsed.description !== undefined) update.description = parsed.description;
+    if (parsed.type !== undefined) update['type'] = parsed.type;
+    if (parsed.title !== undefined) update['title'] = parsed.title;
+    if (parsed.description !== undefined) update['description'] = parsed.description;
     if (parsed.source_retailer !== undefined) {
-      update.sourceRetailer = parsed.source_retailer;
+      update['sourceRetailer'] = parsed.source_retailer;
     }
-    if (parsed.value_cents !== undefined) update.valueCents = parsed.value_cents;
-    if (parsed.reveal_value !== undefined) update.revealValue = parsed.reveal_value;
+    if (parsed.value_cents !== undefined) update['valueCents'] = parsed.value_cents;
+    if (parsed.reveal_value !== undefined) update['revealValue'] = parsed.reveal_value;
     if (parsed.variant_group_id !== undefined) {
-      update.variantGroupId = parsed.variant_group_id;
+      update['variantGroupId'] = parsed.variant_group_id;
     }
     if (parsed.proposed_date !== undefined) {
-      update.proposedDate = parsed.proposed_date
+      update['proposedDate'] = parsed.proposed_date
         ? new Date(parsed.proposed_date)
         : null;
     }
     if (parsed.location_hint !== undefined) {
-      update.locationHint = parsed.location_hint;
+      update['locationHint'] = parsed.location_hint;
     }
-    if (parsed.is_taunt !== undefined) update.isTaunt = parsed.is_taunt;
-    if (parsed.taunt_text !== undefined) update.tauntText = parsed.taunt_text;
-    if (parsed.is_locked !== undefined) update.isLocked = parsed.is_locked;
+    if (parsed.is_taunt !== undefined) update['isTaunt'] = parsed.is_taunt;
+    if (parsed.taunt_text !== undefined) update['tauntText'] = parsed.taunt_text;
+    if (parsed.is_locked !== undefined) update['isLocked'] = parsed.is_locked;
     if (parsed.unlock_rule !== undefined) {
       const rule: UnlockRule | Record<string, never> = parsed.unlock_rule ?? {};
-      update.unlockRule = rule;
+      update['unlockRule'] = rule;
     }
 
     if (parsed.image_url !== undefined) {
-      update.imageUrl = parsed.image_url
+      update['imageUrl'] = parsed.image_url
         ? await normalizeImageUrl(parsed.image_url, ctx.peekId)
         : null;
     }
 
     if (parsed.source_url !== undefined) {
-      update.sourceUrl = parsed.source_url;
+      update['sourceUrl'] = parsed.source_url;
       if (parsed.source_url) {
         const wrapped = wrapAffiliateLink(
           parsed.source_url,
           buildClickCustomId(ctx.peekId, parsed.card_id),
         );
-        update.affiliateUrl = wrapped.wrappedUrl ?? null;
-        update.affiliateNetwork = wrapped.network ?? null;
-        update.commissionPct =
+        update['affiliateUrl'] = wrapped.wrappedUrl ?? null;
+        update['affiliateNetwork'] = wrapped.network ?? null;
+        update['commissionPct'] =
           wrapped.commissionPctEstimate != null
             ? wrapped.commissionPctEstimate.toString()
             : null;
       } else {
-        update.affiliateUrl = null;
-        update.affiliateNetwork = null;
-        update.commissionPct = null;
+        update['affiliateUrl'] = null;
+        update['affiliateNetwork'] = null;
+        update['commissionPct'] = null;
       }
     }
 
