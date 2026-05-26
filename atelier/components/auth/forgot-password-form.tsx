@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSignIn } from '@clerk/nextjs';
+import { useAuth, useSignIn } from '@clerk/nextjs';
 import type { SetActiveNavigate } from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,14 @@ type Step =
 
 export function ForgotPasswordForm() {
   const { signIn, fetchStatus } = useSignIn();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (authLoaded && isSignedIn) {
+      router.replace('/build');
+    }
+  }, [authLoaded, isSignedIn, router]);
 
   const [step, setStep] = useState<Step>({ kind: 'request', email: '' });
   const [code, setCode] = useState('');
@@ -100,6 +107,10 @@ export function ForgotPasswordForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (authLoaded && isSignedIn) {
+    return null;
   }
 
   if (step.kind === 'request') {

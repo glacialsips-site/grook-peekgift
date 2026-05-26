@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSignUp } from '@clerk/nextjs';
+import { useAuth, useSignUp } from '@clerk/nextjs';
 import type { OAuthStrategy, SetActiveNavigate } from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,9 +15,16 @@ type Step = { kind: 'start' } | { kind: 'verify_email'; email: string };
 
 export function CustomSignUpForm() {
   const { signUp, fetchStatus } = useSignUp();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
   const redirectUrl = search.get('returnTo') ?? '/build';
+
+  useEffect(() => {
+    if (authLoaded && isSignedIn) {
+      router.replace(redirectUrl);
+    }
+  }, [authLoaded, isSignedIn, router, redirectUrl]);
 
   const [step, setStep] = useState<Step>({ kind: 'start' });
   const [email, setEmail] = useState('');
@@ -110,6 +117,10 @@ export function CustomSignUpForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (authLoaded && isSignedIn) {
+    return null;
   }
 
   if (step.kind === 'start') {
