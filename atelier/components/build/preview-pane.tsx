@@ -189,9 +189,8 @@ function Hero({ peek }: { peek: PeekDraft['peek'] }) {
 
 function RecipientHeader({ peek }: { peek: PeekDraft['peek'] }) {
   const name = peek.recipientName ?? 'your person';
-  const subtitleParts = [peek.relationship, peek.occasion].filter(
-    (v): v is string => Boolean(v),
-  );
+  const givers = peek.giverNames ?? [];
+  const hasGivers = givers.length > 0;
   return (
     <header className="flex flex-col gap-1">
       <h1
@@ -200,15 +199,26 @@ function RecipientHeader({ peek }: { peek: PeekDraft['peek'] }) {
       >
         {name}
       </h1>
-      {subtitleParts.length > 0 ? (
-        <p className="text-sm text-[hsl(var(--peek-ink))]/60">
-          {subtitleParts.join(' · ')}
+      {peek.occasion ? (
+        <p className="text-base text-[hsl(var(--peek-ink))]/70">
+          {peek.occasion}
         </p>
-      ) : (
+      ) : null}
+      {hasGivers ? (
+        <p className="text-xs uppercase tracking-wider text-[hsl(var(--peek-ink))]/50">
+          from {givers.join(', ')}
+        </p>
+      ) : null}
+      {!peek.occasion && !hasGivers && !peek.relationship ? (
         <p className="text-sm text-[hsl(var(--peek-ink))]/40">
           Who is this for?
         </p>
-      )}
+      ) : null}
+      {peek.relationship && !hasGivers ? (
+        <p className="text-xs uppercase tracking-wider text-[hsl(var(--peek-ink))]/50">
+          {peek.relationship}
+        </p>
+      ) : null}
     </header>
   );
 }
