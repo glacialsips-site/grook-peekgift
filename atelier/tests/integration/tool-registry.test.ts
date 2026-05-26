@@ -79,6 +79,7 @@ describe('tool registry', () => {
     const expected = [
       'ping',
       'set_recipient',
+      'set_recipient_profile',
       'set_vibe',
       'update_vibe',
       'set_hero_image',
@@ -86,6 +87,7 @@ describe('tool registry', () => {
       'set_note',
       'add_variant_group',
       'add_card',
+      'update_card',
       'remove_card',
       'reorder_cards',
       'scrape_url',

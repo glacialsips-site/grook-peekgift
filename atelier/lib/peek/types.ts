@@ -1,4 +1,5 @@
 import type {
+  RecipientProfile,
   Vibe,
   VibeBodyFont,
   VibeCore,
@@ -17,6 +18,7 @@ import type {
 import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
 
 export type {
+  RecipientProfile,
   Vibe,
   VibeBodyFont,
   VibeCore,
@@ -42,6 +44,9 @@ export type Peek = {
   recipientName: string | null;
   relationship: string | null;
   occasion: string | null;
+  giverNames: string[];
+  budgetCents: number | null;
+  recipientProfile: RecipientProfile;
   vibe: Vibe;
   heroImageUrl: string | null;
   heroImageSource: string | null;
