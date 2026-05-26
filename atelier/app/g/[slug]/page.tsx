@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { createHmac, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
+import { GuestSecretMissingError, signRecipient } from '@/lib/security/recipient';
 import type {
   Card,
   Peek,
@@ -128,14 +128,6 @@ function toVariantGroup(row: RawVariantGroupRow): VariantGroup {
   };
 }
 
-function signRecipient(sessionId: string): string {
-  const secret = env.GUEST_CLAIM_TOKEN_SECRET;
-  if (!secret) {
-    return `unsigned:${sessionId}`;
-  }
-  return createHmac('sha256', secret).update(sessionId).digest('hex');
-}
-
 async function ensureRecipientSession(): Promise<string> {
   const jar = await cookies();
   const existing = jar.get(COOKIE_NAME)?.value;
@@ -223,6 +215,16 @@ export default async function RecipientPage({
     return <AlmostReady peek={peek} />;
   }
 
+  let recipientSignature: string;
+  try {
+    recipientSignature = signRecipient(recipientSessionId);
+  } catch (err) {
+    if (err instanceof GuestSecretMissingError) {
+      throw new Error('service_unavailable: GUEST_CLAIM_TOKEN_SECRET missing');
+    }
+    throw err;
+  }
+
   const [cardsRes, groupsRes, picksRes] = await Promise.all([
     sb.from('cards').select('*').eq('peek_id', peek.id),
     sb.from('variant_groups').select('*').eq('peek_id', peek.id),
@@ -230,7 +232,7 @@ export default async function RecipientPage({
       .from('picks')
       .select('id, card_id, recipient_signature, beg_message, recipient_note')
       .eq('peek_id', peek.id)
-      .eq('recipient_signature', signRecipient(recipientSessionId)),
+      .eq('recipient_signature', recipientSignature),
   ]);
 
   if (cardsRes.error) {

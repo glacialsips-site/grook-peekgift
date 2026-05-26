@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { env } from '@/lib/env';
 import { parseClickCustomId } from '@/lib/affiliate/wrap';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { checkIdempotency } from '@/lib/security/idempotency';
 
 export const runtime = 'nodejs';
 
@@ -55,6 +56,14 @@ export async function POST(req: NextRequest) {
   }
   if (!evt.transaction_id) {
     return new Response('missing transaction_id', { status: 400 });
+  }
+
+  const idemp = await checkIdempotency({
+    source: 'skimlinks',
+    eventId: evt.transaction_id,
+  });
+  if (!idemp.firstSeen) {
+    return new Response('ok', { status: 200 });
   }
 
   const sb = getSupabaseService();

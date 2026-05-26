@@ -5,6 +5,12 @@ import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { getUserId } from '@/lib/auth/server';
 import { track } from '@/lib/analytics/facade';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,10 +27,17 @@ type PeekRow = {
 };
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   const userId = await getUserId();
   if (!userId) {
     return Response.json({ error: 'unauthorized' }, { status: 401 });
   }
+
+  const verdict = await enforceRateLimit(limiters.checkoutPerUser(), userId);
+  if (!verdict.ok) return rateLimitResponse(verdict);
 
   let json: unknown;
   try {

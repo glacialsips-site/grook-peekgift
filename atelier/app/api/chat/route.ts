@@ -7,6 +7,7 @@ import {
   anonymousTurnCount,
   anonymousTurnExceeded,
   assertPeekAccess,
+  incrementAnonymousTurn,
 } from '@/lib/chat/session';
 import {
   appendChatMessage,
@@ -14,6 +15,13 @@ import {
 } from '@/lib/chat/persistence';
 import { track } from '@/lib/analytics/facade';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
+import {
+  enforceRateLimit,
+  limiters,
+  rateLimitResponse,
+} from '@/lib/rate-limit/redis';
+import { getClientIp } from '@/lib/security/client-ip';
+import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -41,7 +49,12 @@ function toTurnUsage(usage: Anthropic.Usage): TurnUsage {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!isOriginAllowed(req)) {
+    return originRejectionResponse();
+  }
+
   const userId = await getUserId();
+  const ip = getClientIp(req);
 
   let json: unknown;
   try {
@@ -67,14 +80,28 @@ export async function POST(req: NextRequest): Promise<Response> {
     );
   }
 
-  if (!userId) {
-    const count = await anonymousTurnCount(sessionId);
+  const ipVerdict = await enforceRateLimit(limiters.chatPerIp(), ip);
+  if (!ipVerdict.ok) return rateLimitResponse(ipVerdict);
+
+  if (userId) {
+    const userVerdict = await enforceRateLimit(
+      limiters.chatPerUser(),
+      userId,
+    );
+    if (!userVerdict.ok) return rateLimitResponse(userVerdict);
+  } else {
+    const anonRlKey = `${ip}:${sessionId}`;
+    const anonVerdict = await enforceRateLimit(limiters.chatAnon(), anonRlKey);
+    if (!anonVerdict.ok) return rateLimitResponse(anonVerdict);
+
+    const count = await anonymousTurnCount(sessionId, ip);
     if (anonymousTurnExceeded(count)) {
       return Response.json(
         { error: 'signup_required', anonymous_turns_used: count },
         { status: 401 },
       );
     }
+    await incrementAnonymousTurn(sessionId, ip);
   }
 
   let initialHistory = history as Anthropic.MessageParam[];
