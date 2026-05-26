@@ -23,6 +23,7 @@ import {
 } from '@/lib/rate-limit/redis';
 import { getClientIp } from '@/lib/security/client-ip';
 import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
+import { loadPeekSnapshot } from '@/lib/peek/snapshot';
 
 const log = logger.child({ component: 'api/chat' });
 
@@ -203,6 +204,26 @@ export async function POST(req: NextRequest): Promise<Response> {
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);
               log.error('persist tool_result failed', {
+                peekId,
+                id,
+                message,
+              });
+            }
+            try {
+              const snapshot = await loadPeekSnapshot(peekId);
+              if (snapshot) {
+                safeEnqueue({
+                  kind: 'peek_update',
+                  snapshot: {
+                    peek: snapshot.peek,
+                    cards: snapshot.cards,
+                    variantGroups: snapshot.variantGroups,
+                  },
+                });
+              }
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              log.error('peek_update snapshot failed', {
                 peekId,
                 id,
                 message,
