@@ -1,0 +1,156 @@
+# peek/occasion-templates/holiday
+
+## When this skill applies
+
+Calendar holidays where gifting is expected. This single skill covers the pattern across: **Christmas**, **Hanukkah**, **Mother's Day**, **Father's Day**, **Valentine's Day**. (Easter, Halloween, Thanksgiving are gift-light and rarely trigger peeks; not covered here.)
+
+Signals: "Christmas gift," "for Hanukkah," "Mother's Day for my mom," "Father's Day," "V-day for my girlfriend." Loads when classifier tags `occasion=holiday` AND identifies sub-occasion. Each sub-occasion has its own register tweaks; the structure is shared.
+
+The defining tension: holiday gifting is HIGH-FREQUENCY (every adult does multiple holiday gifts/year) and LOW-DIFFERENTIATION (everyone is doing the same gifting moment). Peek's job is to make the recipient feel SEEN inside a season where everyone's getting "presents." A peek for Christmas should feel like the curator stepped OFF the assembly line.
+
+## Vibe defaults
+
+Per sub-occasion:
+
+**Christmas:**
+- Palette: deep forest green + cream + brass OR oxblood + cream + warm wood. AVOID the red+green Coca-Cola Christmas palette — that's the Hallmark store. The peek-coded Christmas is "Nancy Meyers movie" — warm, lit by table lamps, woodsy.
+- Typography: serif (Caslon, Cormorant). One handwritten accent permissible.
+- Mood: warm + nostalgic + a little playful for younger family members, more reverent for older.
+
+**Hanukkah:**
+- Palette: deep blue + cream + brass + warm gold. (Not Christmas's blue-and-silver — that's the Target Hanukkah aisle. The peek-coded Hanukkah is "candlelit kitchen at sundown" — warm tones with blue accent.)
+- Typography: serif, slightly more formal than Christmas. Optional Hebrew accent character if curator is comfortable.
+- Mood: warm + intentional + threaded with family-ritual specificity.
+
+**Mother's Day:**
+- Palette: dusty rose + cream + sage OR muted lavender + cream + warm gold. Avoid hot pink (greeting-card-coded).
+- Typography: serif always (Cormorant). Body in matching serif or warm sans.
+- Mood: tender. Mother's Day is the highest-tenderness sub-occasion.
+
+**Father's Day:**
+- Palette: oxblood + bone + brass OR navy + cream + warm wood OR olive + cream + warm wood. The "dad's study" palette.
+- Typography: serif but with industrial-feeling weight (Recoleta, Caslon Old Face). Body in clean sans (GT America).
+- Mood: warm + a little playful in the chops-busting direction. Father's Day is the most roast-friendly holiday.
+
+**Valentine's Day:**
+- Palette: oxblood + bone + warm gold OR dusty rose + cream + brass. AVOID hot pink (drugstore aisle) and AVOID the cinnamon-heart red. The peek-coded V-day is wine-and-candlelight, not heart-shaped-box.
+- Typography: serif always (Apoc, Canela). Handwritten accent welcome.
+- Mood: tender for established relationships, playful + flirty for newer ones. Voice mode shifts accordingly.
+
+Across all sub-occasions: density airy, motion slow, voice mode warm.
+
+## Typical card mix
+
+For a typical 4-5 card holiday peek (slightly lighter than birthday — holidays are recurring, the curator doesn't need to maximize every time):
+
+**Christmas / Hanukkah:**
+- 1-2 product cards: a single really-good thing OR a small set (a cashmere sweater, a leather wallet, a Vitruvi diffuser, a coffee table book, a curated set of three Boy Smells or Diptyque candles, a Filson Original Briefcase, a piece of jewelry). For kids/younger recipients, lean into things-they'll-actually-use (AirPods, a kindle, a real coat) over toys.
+- 1 activity card: a tradition card. "The day after Christmas, you and me at the diner like we used to." "Latke night at my place, December 18th." "The annual ice-skating thing." Holidays are about RITUAL; activity cards anchor that.
+- 1 aspirational card: optional but lands well at year-end. "The trip we said we'd take this spring." "The class you've been wanting to sign up for." Beg-lock works HERE if it's playful — "tell me three things you want for next year, the trip unlocks."
+- 1 digital card: voice/video note. A Spotify playlist of holiday songs that AREN'T Mariah Carey (the curator picks niche/personal). For Hanukkah specifically: a memory card with the curator describing a specific Hanukkah from years past.
+- 0-1 joke card: family-coded. For Christmas with siblings: "the [specific weird thing the family does every year]: still mandatory, no picks." For Hanukkah: "Aunt [Name]'s brisket: still claiming it's better than mom's. Disputed."
+
+**Mother's Day:**
+- 1 product card: ONE thing, well-chosen. A piece of jewelry (Catbird, Mejuri, Mateo), a really good candle (Diptyque, Cire Trudon), a book (a specific one — not a curated stack), a robe (Parachute, Ettitude), a piece of art (Tappan).
+- 1-2 activity cards: THE Mother's Day move. Brunch at her favorite place. A day trip. A "no one talks to mom for 24 hours" card (the "leave me alone" card lands hard with overworked moms). Spa day. The activity is the gift more than the product.
+- 0-1 aspirational: rare. If included, NOT beg-locked. Mother's Day intimacy doesn't tolerate the mechanic.
+- 1 digital card: REQUIRED. Voice/video note from the curator. Mother's Day peeks WITHOUT a voice note land at 60% of what they could. If curator resists, push: "even 30 seconds of you talking to her — recorded, embedded — does more than three product cards. Worth it."
+- 0 joke cards typically. Mother's Day is too tender for the chops-busting tier.
+
+**Father's Day:**
+- 1-2 product cards: dad's-stuff. A really good shaving kit (Aesop, Le Labo, Frédéric Malle for him), a Filson briefcase or duffel, a watch (real or one of his fantasy ones), a record (his all-time favorite, the actual vinyl), a cigar box, a bottle of single-barrel bourbon, a piece of clothing he won't buy himself (Tom Ford, Drake's tie).
+- 1 activity card: dad-coded. Steak dinner at his place or yours. A baseball game (Ticketmaster affiliate). The annual fishing trip. A whiskey tasting. The "you and dad, doing the thing you always say you're going to do" card.
+- 0-1 aspirational: optional. The car he always points at on the road. The trip to wherever-his-bucket-list-says. Beg-lock works here if it's funny: "tell me one piece of advice you wish you'd given me at 25, and the watch unlocks."
+- 1 digital card: voice/video note. For Father's Day specifically — consider a montage card with the grandkids talking to grandpa, if applicable.
+- 1 joke card: Father's Day is the most ROAST-friendly holiday. Dad jokes ABOUT dad. "Your dad jokes: continued, no opt-out, this is our reality." "The fact that you've worn the same New Balance 990s for 20 years: NO PICKS, also we got you another pair anyway." Specific bust-the-chops moments land.
+
+**Valentine's Day:**
+- 1-2 product cards: depends on relationship phase. New relationship: 1 thoughtful thing (a candle, a book, a single piece of jewelry). Established: a meaningful upgrade (the watch she's been eyeing, the bag, the cashmere). Married 10+: a single piece that's actually about HER hobby/taste, not "V-day jewelry."
+- 1 activity card: REQUIRED. Dinner reservation (OpenTable affiliate), a private experience, a weekend somewhere. V-day without an activity card is just buying-stuff. The activity is the gift.
+- 0-1 aspirational: usually not. V-day intimacy + restraint > V-day excess. If included: a trip somewhere, the "promise to do this in [month]" card.
+- 1 digital card: voice/video note + a curated Spotify playlist. V-day playlists land HARD if specific. ("Songs from the year we met" hits harder than "love songs.")
+- 0 joke cards. V-day is the second-most-tender sub-occasion. Inside jokes work in the NOTE; standalone joke cards don't fit.
+
+## Default rules pattern
+
+- Most holiday cards are STANDALONE FREE — the recipient gets everything. Holidays are about generosity, not picking.
+- EXCEPTION: when there are 2 product cards in a similar category (two candles, two pieces of jewelry), `pick_one` is fine.
+- Aspirational with beg-lock: works for Christmas/Hanukkah/Father's Day (playful holidays). Avoid on Mother's Day and Valentine's Day (tender holidays).
+- Joke cards: `is_taunt: true` always.
+- Collab opportunities: HIGH for Christmas (family group gifts), Mother's Day (siblings co-gifting to mom), Father's Day (siblings co-gifting to dad). LOW for Valentine's Day, Hanukkah (more personal/private).
+
+## Copy register
+
+Voice modulates by sub-occasion. Across all: brevity. Holiday peeks are part of a SEASON for the curator — they're doing multiple. Don't make them wade through Peek prose.
+
+**Christmas/Hanukkah:**
+
+- Curator: "Christmas gift for my brother."
+  Peek: "Brother for Christmas. What's the running joke between you two — what would he laugh at? Drives the joke card."
+
+- Curator: "He always claims his bourbon is better than mine."
+  Peek: *(adds joke card: "Your bourbon: confirmed worse than mine. NO PICKS, just letting you know.")* "Locked. Now — what's actually meaningful between you. The note's going to anchor on that, not the joke."
+
+**Mother's Day:**
+
+- Curator: "Mother's Day for my mom."
+  Peek: "OK. Tell me one thing she does that she'd never call work but that you watch her work."
+
+- Curator: "She still makes me lunch when I visit, like I'm 14. I'm 32."
+  Peek: *(extended thinking, drafts note)* "That's the gift. Note: 'Mom — I'm 32 and you still make me lunch when I come over. I always say you don't have to. You always do. Thank you. For all 32 years of lunches.' Edit."
+
+**Father's Day:**
+
+- Curator: "Father's Day. Want to bust his chops AND tell him I love him without it being weird."
+  Peek: "That's the brief. Joke card runs sharper, note runs short. What's the thing he does that everyone teases him about?"
+
+- Curator: "He wears the same New Balance 990s every day. Has for 20 years."
+  Peek: *(adds joke card)* "Card: 'The 990s — still here, still loved, still need replacing. Pair #5 incoming.' Now — what hasn't been said?"
+
+**Valentine's Day:**
+
+- Curator: "V-day for my girlfriend, we've been together a year."
+  Peek: "One year V-day. Restraint over excess — go thoughtful and specific, not 'every romance trope.' Tell me one thing you've noticed about her that she might not know you noticed."
+
+- Curator: "She always pretends she doesn't want dessert, then eats half of mine. I don't mind. I think she does."
+  Peek: *(adds an activity card to her favorite dessert spot, an inside-joke note draft about the dessert thing, a product card for a really good cookbook on patisserie)* "Page is building. The dessert thing is the through-line. Want me to make the joke softer or leave the wink in?"
+
+## Hero image direction
+
+Per sub-occasion:
+
+**Christmas:** "Empty living room with Christmas tree lit, table lamps glowing, no figures, painterly, Nancy Meyers movie aesthetic, warm tones." Avoid: Santa imagery, candy canes, anything Coca-Cola red.
+
+**Hanukkah:** "Menorah on a windowsill at sundown, candles lit, warm light, no figures, intimate, painterly." Avoid: dreidel imagery (too commercial), explicit Star of David (use sparingly, depends on family religiosity).
+
+**Mother's Day:** "A handwritten note on a kitchen table next to a cup of tea, soft morning light, no figures, painterly" OR "A garden in full bloom at golden hour, no people, dusty rose tones, atmospheric." Avoid: mom-and-baby stock imagery, "World's Best Mom" mug aesthetics.
+
+**Father's Day:** "An empty leather armchair in a study, fireplace lit, books, no figures, warm wood tones, painterly" OR "Tools laid out on a workbench, golden hour light, no people, atmospheric." Avoid: tie-and-grill imagery (greeting-card-aisle), the actual word "DAD" on anything.
+
+**Valentine's Day:** "Two wine glasses on a table at golden hour, no figures, candlelit, painterly, warm tones" OR "A bouquet of garden roses (not heart-shaped) in a vase by a window, golden hour, no people, lived-in." Avoid: hearts, cupids, heart-shaped chocolate boxes.
+
+If curator uploads a real photo of the recipient (especially Mother's Day / Father's Day), USE IT. Holiday peeks for parents benefit hugely from a real face.
+
+## Share-pack defaults
+
+- Email + SMS for most holiday sub-occasions.
+- WhatsApp for international families (especially Christmas/Hanukkah — diaspora gifting).
+- IG Story share: surface but don't pre-fill, EXCEPT Valentine's Day where younger couples often want to post (still default off, let them opt in).
+- For Christmas/Hanukkah: scheduled-send is HIGH-VALUE. Curator builds the peek December 18th, schedules to land Christmas morning. Surface this.
+- Reveal animation SLOW for tender sub-occasions (Mother's Day, V-day, anniversary-coded Christmas), STANDARD for playful ones (Father's Day, sibling-Christmas).
+
+## Common pitfalls (what to avoid)
+
+1. Never default to the Hallmark/CVS holiday aesthetic. Red-and-green Christmas, heart-shaped V-day, "World's Best Mom" Mother's Day — these are the LOW-RESOLUTION version of the holiday that peek.gift exists to step OFF of. Push every visual decision toward the elevated/specific.
+2. Never assume the recipient celebrates the holiday in a normative way. Some Christmas-recipients hate Christmas; some Mother's Day recipients are estranged; some Valentine's Day couples skip it. Ask the curator: "How does she actually feel about [holiday]? Drives the tone."
+3. Never repeat last year's peek pattern for the same curator+recipient pair. Holiday peeks are RECURRING — Peek should pull from `curator_memory` to check what worked last time, then propose VARIATION. "Last year you did the watch and the dinner; this year want to shake it or keep the dinner-card pattern as a tradition?"
+4. Never include a joke card on Mother's Day or Valentine's Day unless the curator explicitly asks and the recipient relationship explicitly supports it. The default is no-joke-card on tender holidays.
+5. Never let Christmas peeks bloat. The temptation with Christmas is to make the page big — lots of stuff. Push back: "What's the ONE thing you want her to feel when she opens this on Christmas morning? We build to that, not around it."
+
+## Cross-references
+
+- Vibe direction: see `vibe-direction.md` — holiday is the "palette-by-sub-occasion" pattern. Each holiday has its own swatch.
+- Image direction: see `image-direction.md` — holidays especially benefit from the "elevated alternative to the greeting-card aesthetic" direction.
+- Rules patterns: see `rules-engine-patterns.md` — holiday is mostly standalone-free, with selective `pick_one` and selective beg-locks.
+- Affiliate strategy: see `affiliate-strategy.md` — holiday is the highest-VOLUME occasion in the calendar. Lean into recurring brands that wrap well: Le Creuset, Filson, Catbird, Mejuri, Diptyque, Boy Smells, Cire Trudon, Tappan, Drake's, Tom Ford, Brunello Cucinelli, Knock, Patagonia.
+- Curator memory: see `curator-protocol.md` — holiday peeks should ALWAYS pull from `curator_memory` to vary year-over-year.
