@@ -114,25 +114,28 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
+      ui_mode: 'embedded_page',
       mode: 'payment',
-      payment_method_types: ['card', 'link'],
       line_items: [{ price: env.STRIPE_PRICE_ID, quantity: 1 }],
-      success_url: `${env.APP_URL}/build/${peekId}/publish?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.APP_URL}/build/${peekId}?checkout=cancelled`,
+      return_url: `${env.APP_URL}/build/${peekId}/publish?session_id={CHECKOUT_SESSION_ID}`,
       metadata: { peek_id: peekId, curator_id: userId },
       automatic_tax: { enabled: true },
       tax_id_collection: { enabled: true },
       billing_address_collection: 'auto',
       customer_creation: 'always',
       adaptive_pricing: { enabled: true },
+      allow_promotion_codes: true,
     });
-    if (!session.url) {
+    if (!session.client_secret) {
       return Response.json(
-        { error: 'session_url_missing' },
+        { error: 'session_client_secret_missing' },
         { status: 500 },
       );
     }
-    return Response.json({ url: session.url });
+    return Response.json({
+      client_secret: session.client_secret,
+      session_id: session.id,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown_error';
     return Response.json(
