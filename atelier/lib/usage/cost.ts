@@ -20,9 +20,10 @@ interface AnthropicRate {
 }
 
 const ANTHROPIC_RATES: Record<string, AnthropicRate> = {
+  'claude-sonnet-4-6': { input: 3, output: 15 },
   'claude-sonnet-4-5': { input: 3, output: 15 },
-  'claude-haiku-4-5': { input: 0.8, output: 4 },
-  'claude-opus-4-7': { input: 15, output: 75 },
+  'claude-haiku-4-5': { input: 1, output: 5 },
+  'claude-opus-4-7': { input: 5, output: 25 },
 };
 
 const ANTHROPIC_FALLBACK: AnthropicRate = { input: 3, output: 15 };
