@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks } from '@/db/schema';
+import { moderateInput } from '@/lib/anthropic/moderation';
 import { registerTool } from './index';
 
 const InputSchema = z
@@ -15,14 +16,20 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-interface Output {
-  ok: true;
-  recipient_name: string;
-  relationship: string | null;
-  occasion: string | null;
-  giver_names: string[];
-  budget_cents: number | null;
-}
+type Output =
+  | {
+      ok: true;
+      recipient_name: string;
+      relationship: string | null;
+      occasion: string | null;
+      giver_names: string[];
+      budget_cents: number | null;
+    }
+  | {
+      ok: false;
+      error: 'moderation_block';
+      user_message: string;
+    };
 
 registerTool<Input, Output>({
   name: 'set_recipient',
@@ -60,6 +67,30 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+
+    const moderationText = [
+      parsed.recipient_name,
+      parsed.relationship ?? '',
+      parsed.occasion ?? '',
+      ...(parsed.giver_names ?? []),
+    ]
+      .filter((s) => s.trim().length > 0)
+      .join(' | ');
+    const verdict = await moderateInput({
+      text: moderationText,
+      field: 'recipient_field',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+    });
+    if (!verdict.allow) {
+      return {
+        ok: false,
+        error: 'moderation_block',
+        user_message: verdict.user_message,
+      };
+    }
+
     const update: Record<string, unknown> = {
       recipientName: parsed.recipient_name,
       relationship: parsed.relationship ?? null,

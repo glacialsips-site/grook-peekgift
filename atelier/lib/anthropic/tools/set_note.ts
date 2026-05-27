@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks } from '@/db/schema';
+import { moderateInput } from '@/lib/anthropic/moderation';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
@@ -12,10 +13,9 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-interface Output {
-  ok: true;
-  note_md: string;
-}
+type Output =
+  | { ok: true; note_md: string }
+  | { ok: false; error: 'moderation_block'; user_message: string };
 
 registerTool<Input, Output>({
   name: 'set_note',
@@ -33,6 +33,22 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+
+    const verdict = await moderateInput({
+      text: parsed.note_md,
+      field: 'note',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+    });
+    if (!verdict.allow) {
+      return {
+        ok: false,
+        error: 'moderation_block',
+        user_message: verdict.user_message,
+      };
+    }
+
     const [row] = await db
       .update(peeks)
       .set({

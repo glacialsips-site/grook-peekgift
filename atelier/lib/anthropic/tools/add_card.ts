@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
+import { moderateInput } from '@/lib/anthropic/moderation';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { trackFireAndForget } from '@/lib/analytics/facade';
 import { logger } from '@/lib/logger';
@@ -75,11 +76,9 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-interface Output {
-  ok: true;
-  card_id: string;
-  position: number;
-}
+type Output =
+  | { ok: true; card_id: string; position: number }
+  | { ok: false; error: 'moderation_block'; user_message: string };
 
 registerTool<Input, Output>({
   name: 'add_card',
@@ -144,6 +143,30 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+
+    const moderationText = [
+      parsed.title,
+      parsed.description ?? '',
+      parsed.taunt_text ?? '',
+    ]
+      .filter((s) => s.trim().length > 0)
+      .join('\n');
+    if (moderationText.trim().length > 0) {
+      const verdict = await moderateInput({
+        text: moderationText,
+        field: 'card_text',
+        peekId: ctx.peekId,
+        userId: ctx.userId,
+        sessionId: ctx.sessionId,
+      });
+      if (!verdict.allow) {
+        return {
+          ok: false,
+          error: 'moderation_block',
+          user_message: verdict.user_message,
+        };
+      }
+    }
 
     const [lastCard] = await db
       .select({ position: cards.position })

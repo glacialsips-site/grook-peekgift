@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
 import { buildClickCustomId, wrapAffiliateLink } from '@/lib/affiliate/wrap';
+import { moderateInput } from '@/lib/anthropic/moderation';
 import { normalizeImageUrl } from '@/lib/scrape/image';
 import { registerTool } from './index';
 
@@ -70,10 +71,9 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-interface Output {
-  ok: true;
-  card_id: string;
-}
+type Output =
+  | { ok: true; card_id: string }
+  | { ok: false; error: 'moderation_block'; user_message: string };
 
 registerTool<Input, Output>({
   name: 'update_card',
@@ -123,6 +123,34 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+
+    const moderationParts: string[] = [];
+    if (parsed.title !== undefined) moderationParts.push(parsed.title);
+    if (parsed.description !== undefined && parsed.description !== null) {
+      moderationParts.push(parsed.description);
+    }
+    if (parsed.taunt_text !== undefined && parsed.taunt_text !== null) {
+      moderationParts.push(parsed.taunt_text);
+    }
+    const moderationText = moderationParts
+      .filter((s) => s.trim().length > 0)
+      .join('\n');
+    if (moderationText.trim().length > 0) {
+      const verdict = await moderateInput({
+        text: moderationText,
+        field: 'card_text',
+        peekId: ctx.peekId,
+        userId: ctx.userId,
+        sessionId: ctx.sessionId,
+      });
+      if (!verdict.allow) {
+        return {
+          ok: false,
+          error: 'moderation_block',
+          user_message: verdict.user_message,
+        };
+      }
+    }
 
     const update: Record<string, unknown> = {};
 
