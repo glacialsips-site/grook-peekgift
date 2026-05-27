@@ -715,6 +715,11 @@ function dispatchEvent(
     return;
   }
   if (evt.kind === 'error') {
+    const isModerationBlock = evt.error_kind === 'moderation_block';
+    const moderationReply =
+      isModerationBlock && typeof evt.user_message === 'string'
+        ? evt.user_message
+        : null;
     setMessages((prev) =>
       prev.map((m) =>
         m.id === assistantId && m.role === 'assistant'
@@ -724,7 +729,9 @@ function dispatchEvent(
               toolCalls: m.toolCalls.map((c) =>
                 c.status === 'pending' ? { ...c, status: 'error' } : c,
               ),
-              content: m.content || `Error: ${evt.message}`,
+              content:
+                m.content ||
+                (moderationReply ? moderationReply : `Error: ${evt.message}`),
             }
           : m,
       ),

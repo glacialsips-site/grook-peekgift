@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import type Anthropic from '@anthropic-ai/sdk';
 import { chatTurn, DEFAULT_MODEL } from '@/lib/anthropic';
 import '@/lib/anthropic/tools/bootstrap';
+import { moderateInput, type ModerationResult } from '@/lib/anthropic/moderation';
 import { getUserId } from '@/lib/auth/server';
 import {
   anonymousTurnCount,
@@ -185,12 +186,48 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const chosenModel = model ?? DEFAULT_MODEL;
 
-  const throttle = await checkAllowed({
-    userId,
-    sessionId,
-    vendor: 'anthropic',
-    kind: chosenModel,
-  });
+  const moderationText = baseUserContent
+    .filter((b): b is Anthropic.TextBlockParam => b.type === 'text')
+    .map((b) => b.text)
+    .join('\n')
+    .trim();
+
+  const [throttle, moderation] = await Promise.all([
+    checkAllowed({
+      userId,
+      sessionId,
+      vendor: 'anthropic',
+      kind: chosenModel,
+    }),
+    moderationText.length > 0
+      ? moderateInput({
+          text: moderationText,
+          field: 'chat_message',
+          peekId,
+          userId,
+          sessionId,
+        })
+      : Promise.resolve<ModerationResult>({ allow: true }),
+  ]);
+
+  if (!moderation.allow) {
+    log.info('moderation_block_chat', {
+      peekId,
+      sessionId,
+      reason: moderation.reason,
+    });
+    const blockSse =
+      `event: error\ndata: ${JSON.stringify({ kind: 'error', message: moderation.user_message, error_kind: 'moderation_block', user_message: moderation.user_message })}\n\n`;
+    return new Response(blockSse, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
+  }
   if (!throttle.allow) {
     log.warn('tier_limit_reached', {
       tier: throttle.tier,
@@ -217,6 +254,13 @@ export async function POST(req: NextRequest): Promise<Response> {
     userContent.unshift({
       type: 'text',
       text: `[system] The curator is at ${Math.round((throttle.used_cents / Math.max(throttle.limit_cents, 1)) * 100)}% of their daily compute budget (tier: ${throttle.tier}). Nudge them gently toward publishing this peek — once it's published, their limit jumps. Keep responses tighter; avoid speculative scrape/image generation unless they ask.`,
+    });
+  }
+
+  if (moderation.allow && moderation.warnings && moderation.warnings.length > 0) {
+    userContent.unshift({
+      type: 'text',
+      text: `[system] moderation_warning: ${moderation.warnings.join(', ')}. peek.gift is a gift-curation product and is not the right venue for legal, medical, or financial advice. Acknowledge briefly if relevant, then steer back to the gift.`,
     });
   }
 
