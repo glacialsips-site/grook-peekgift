@@ -120,7 +120,6 @@ export function BuildSurface({ peekId, initialDraft, initialHistory, anonSession
             <PreviewPane
               draft={draft}
               className="h-full"
-              // @ts-expect-error pending parallel merge of preview-pane viewAs prop
               viewAs={viewAs}
             />
           </div>
