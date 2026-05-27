@@ -8,6 +8,7 @@ const log = logger.child({ component: 'usage/record' });
 export interface RecordUsageInput {
   userId?: string | null;
   sessionId?: string | null;
+  peekId?: string | null;
   vendor: Vendor;
   kind: string;
   payload?: Record<string, unknown>;
@@ -26,6 +27,7 @@ export async function recordUsage(input: RecordUsageInput): Promise<void> {
     const { error } = await sb.from('usage_ledger').insert({
       user_id: input.userId ?? null,
       session_id: input.sessionId ?? null,
+      peek_id: input.peekId ?? null,
       vendor: input.vendor,
       kind: input.kind,
       cost_cents: costCents,

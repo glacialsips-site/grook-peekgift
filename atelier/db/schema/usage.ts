@@ -6,8 +6,10 @@ import {
   jsonb,
   text,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { peekV2 } from './_schema';
+import { peeks } from './peeks';
 import { users } from './users';
 
 export const usageLedger = peekV2.table(
@@ -18,6 +20,9 @@ export const usageLedger = peekV2.table(
       onDelete: 'set null',
     }),
     sessionId: text('session_id'),
+    peekId: uuid('peek_id').references(() => peeks.id, {
+      onDelete: 'set null',
+    }),
     vendor: text('vendor').notNull(),
     kind: text('kind').notNull(),
     costCents: integer('cost_cents').notNull().default(0),
@@ -33,6 +38,8 @@ export const usageLedger = peekV2.table(
     index('usage_ledger_user_id_ts_idx').on(t.userId, t.ts),
     index('usage_ledger_session_id_ts_idx').on(t.sessionId, t.ts),
     index('usage_ledger_vendor_ts_idx').on(t.vendor, t.ts),
+    index('usage_ledger_peek_id_idx').on(t.peekId),
+    index('usage_ledger_peek_id_ts_idx').on(t.peekId, t.ts),
   ],
 );
 

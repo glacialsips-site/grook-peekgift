@@ -126,6 +126,7 @@ function captureSingle(payload: CapturePayload): void {
   recordUsageFireAndForget({
     userId: payload.ctx.userId,
     sessionId: payload.ctx.sessionId,
+    peekId: payload.ctx.peekId,
     vendor: 'anthropic',
     kind: payload.model,
     payload: {
@@ -357,6 +358,7 @@ export function beginTurnCapture(ctx: LlmCallContext): TurnCapture {
         recordUsageFireAndForget({
           userId: ctx.userId,
           sessionId: ctx.sessionId,
+          peekId: ctx.peekId,
           vendor: 'anthropic',
           kind: r.model,
           payload: {
