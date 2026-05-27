@@ -6,9 +6,10 @@ let _client: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
 export function getSupabaseBrowser() {
   if (_client) return _client;
-  _client = createBrowserClient<Database>(
+  _client = createBrowserClient<Database, 'peek_v2'>(
     envClient.NEXT_PUBLIC_SUPABASE_URL!,
     envClient.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    { db: { schema: 'peek_v2' } },
   );
   return _client;
 }
