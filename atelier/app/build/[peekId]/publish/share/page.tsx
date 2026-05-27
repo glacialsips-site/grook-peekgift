@@ -82,7 +82,7 @@ export default async function PublishSharePage({
   if (!peek) notFound();
   if (peek.curator_id !== userId) notFound();
   if (peek.status !== 'published') {
-    redirect(`/build/${peekId}/publish/checkout`);
+    redirect(`/build/${peekId}/publish`);
   }
 
   const shareUrl = peek.share_url ?? buildShareUrl(peek.slug);
