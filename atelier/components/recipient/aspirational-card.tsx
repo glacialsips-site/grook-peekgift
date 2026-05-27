@@ -6,6 +6,7 @@ import { Lock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Card, VariantSelection } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 import { PickButton } from './pick-button';
 import { BegSheet } from './beg-sheet';
 import type { RecipientPick } from './realtime';
@@ -52,7 +53,7 @@ export function AspirationalCard({
             role="img"
             aria-label={card.title}
             className="relative h-56 w-full bg-cover bg-center sm:h-72"
-            style={{ backgroundImage: `url(${card.imageUrl})` }}
+            style={{ backgroundImage: cssUrl(card.imageUrl) }}
           >
             {card.isLocked ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--peek-bg))]/55 backdrop-blur-sm">

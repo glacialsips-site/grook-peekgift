@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { Peek } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 
 type Props = { peek: Peek };
 
@@ -23,7 +24,7 @@ export function Hero({ peek }: Props) {
           <motion.div
             aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${peek.heroImageUrl})` }}
+            style={{ backgroundImage: cssUrl(peek.heroImageUrl) }}
             initial={{ scale: 1.04, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.1, ease: 'easeOut' }}

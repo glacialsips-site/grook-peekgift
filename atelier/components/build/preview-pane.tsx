@@ -19,6 +19,7 @@ import {
 } from '@/components/peek-vibe-provider';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { cssUrl } from '@/lib/security/css-url';
 import type {
   Card,
   CardType,
@@ -303,7 +304,7 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
           <motion.div
             aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${peek.heroImageUrl})` }}
+            style={{ backgroundImage: cssUrl(peek.heroImageUrl) }}
             initial={{ scale: 1.05, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.0, ease: 'easeOut' }}
@@ -476,7 +477,7 @@ function CardItem({
             'relative w-full bg-cover bg-center',
             compact ? 'h-36 sm:h-40' : 'h-44 sm:h-56',
           )}
-          style={{ backgroundImage: `url(${card.imageUrl})` }}
+          style={{ backgroundImage: cssUrl(card.imageUrl) }}
         >
           {card.isLocked ? <LockOverlay card={card} /> : null}
           {card.isTaunt && card.tauntText ? (

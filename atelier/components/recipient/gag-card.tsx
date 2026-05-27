@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { Card } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 
 type Props = { card: Card };
 
@@ -18,7 +19,7 @@ export function GagCard({ card }: Props) {
         <div
           aria-hidden="true"
           className="relative h-44 w-full bg-cover bg-center sm:h-56"
-          style={{ backgroundImage: `url(${card.imageUrl})` }}
+          style={{ backgroundImage: cssUrl(card.imageUrl) }}
         >
           <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--peek-ink))]/15 p-4 text-center">
             <p className="font-serif text-2xl italic text-[hsl(var(--peek-ink))] drop-shadow sm:text-3xl">

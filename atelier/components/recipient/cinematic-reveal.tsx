@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { Peek, VibeMotion } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 
 type Props = {
   peek: Peek;
@@ -176,7 +177,7 @@ export function CinematicReveal({
             transition={{ duration: heroMs / 1000, ease: 'easeOut' }}
             style={{
               backgroundImage: peek.heroImageUrl
-                ? `linear-gradient(180deg, hsl(var(--peek-bg))/0 30%, hsl(var(--peek-bg)) 100%), url(${peek.heroImageUrl})`
+                ? `linear-gradient(180deg, hsl(var(--peek-bg))/0 30%, hsl(var(--peek-bg)) 100%), ${cssUrl(peek.heroImageUrl)}`
                 : undefined,
               backgroundColor: peek.heroImageUrl
                 ? undefined
