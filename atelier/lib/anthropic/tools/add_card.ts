@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks, type UnlockRule } from '@/db/schema';
@@ -168,14 +168,6 @@ registerTool<Input, Output>({
       }
     }
 
-    const [lastCard] = await db
-      .select({ position: cards.position })
-      .from(cards)
-      .where(eq(cards.peekId, ctx.peekId))
-      .orderBy(desc(cards.position))
-      .limit(1);
-    const nextPosition = (lastCard?.position ?? -1) + 1;
-
     const unlockRule: UnlockRule | Record<string, never> =
       parsed.unlock_rule ?? {};
 
@@ -230,7 +222,7 @@ registerTool<Input, Output>({
       .values({
         peekId: ctx.peekId,
         variantGroupId: parsed.variant_group_id ?? null,
-        position: nextPosition,
+        position: sql`(SELECT COALESCE(MAX(${cards.position}), -1) + 1 FROM ${cards} WHERE ${cards.peekId} = ${ctx.peekId})`,
         type: parsed.type,
         title: parsed.title,
         description: finalDescription,
