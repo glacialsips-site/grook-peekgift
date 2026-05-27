@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePeekDraft } from '@/lib/peek/realtime';
 import type { PeekDraft } from '@/lib/peek/types';
 import { useMediaQuery } from '@/components/use-media-query';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { Button } from '@/components/ui/button';
 import { ChatPane, type InitialChatMessage } from './chat-pane';
 import { PreviewPane } from './preview-pane';
 import { PreviewSheet } from './preview-sheet';
@@ -15,6 +18,8 @@ type Props = {
   initialHistory?: InitialChatMessage[];
   anonSessionId?: string | null;
 };
+
+type ViewAs = 'curator' | 'recipient';
 
 function ChatFallback({ reset }: { reset: () => void }) {
   return (
@@ -55,11 +60,12 @@ function PreviewFallback({ reset }: { reset: () => void }) {
 export function BuildSurface({ peekId, initialDraft, initialHistory, anonSessionId }: Props) {
   const { draft, applySnapshot } = usePeekDraft(peekId, initialDraft);
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const [viewAs, setViewAs] = useState<ViewAs>('curator');
 
   return (
     <main
       id="main"
-      className="flex h-[100dvh] min-h-0 flex-col bg-background md:flex-row"
+      className="flex h-[100dvh] min-h-0 overflow-hidden flex-col bg-background md:flex-row"
       style={
         isDesktop
           ? undefined
@@ -78,7 +84,7 @@ export function BuildSurface({ peekId, initialDraft, initialHistory, anonSession
           peekDraft={draft}
           anonSessionId={anonSessionId ?? null}
           className={cn(
-            'flex-1 md:w-2/5 md:flex-none md:border-r md:border-border',
+            'flex-1 md:w-2/5 md:flex-none md:border-r md:border-border min-h-0',
           )}
         />
       </ErrorBoundary>
@@ -87,10 +93,37 @@ export function BuildSurface({ peekId, initialDraft, initialHistory, anonSession
         fallback={({ reset }) => <PreviewFallback reset={reset} />}
       >
         {isDesktop ? (
-          <PreviewPane
-            draft={draft}
-            className="flex-1 md:w-3/5 md:flex-none"
-          />
+          <div className="relative flex-1 md:w-3/5 md:flex-none min-h-0 overflow-y-auto">
+            {viewAs === 'curator' ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setViewAs('recipient')}
+                className="absolute right-3 top-3 z-20 gap-1.5 text-xs shadow-sm"
+                aria-label="Preview this Peek as the recipient"
+              >
+                <Eye className="h-3.5 w-3.5" aria-hidden />
+                View as: Curator
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setViewAs('curator')}
+                className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-background/80 px-2.5 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+                aria-label="Return to curator view"
+              >
+                <EyeOff className="h-3.5 w-3.5" aria-hidden />
+                Back to curator view
+              </button>
+            )}
+            <PreviewPane
+              draft={draft}
+              className="h-full"
+              // @ts-expect-error pending parallel merge of preview-pane viewAs prop
+              viewAs={viewAs}
+            />
+          </div>
         ) : (
           <PreviewSheet draft={draft} />
         )}
