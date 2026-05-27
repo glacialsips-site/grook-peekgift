@@ -112,10 +112,20 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     const count = await anonymousTurnCount(sessionId, ip);
     if (anonymousTurnExceeded(count)) {
-      return Response.json(
-        { error: 'signup_required', anonymous_turns_used: count },
-        { status: 401 },
-      );
+      const signupMessage =
+        "You're at the trial limit. Sign up to keep building — your peek will be saved.";
+      const sseBody =
+        `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: 'guest', message: signupMessage, used_cents: 0, limit_cents: 0, reason: 'anon_signup_required' })}\n\n` +
+        `event: error\ndata: ${JSON.stringify({ kind: 'error', message: signupMessage })}\n\n`;
+      return new Response(sseBody, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
+      });
     }
     await incrementAnonymousTurn(sessionId, ip);
   }
@@ -192,7 +202,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const message =
       throttle.reason ??
       "Daily compute limit reached. Try again tomorrow or publish a peek to unlock more.";
-    const body = `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: throttle.tier, message, used_cents: throttle.used_cents, limit_cents: throttle.limit_cents })}\n\nevent: error\ndata: ${JSON.stringify({ kind: 'error', message })}\n\n`;
+    const body = `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: throttle.tier, message, used_cents: throttle.used_cents, limit_cents: throttle.limit_cents, reason: 'tier_hard_cap' })}\n\nevent: error\ndata: ${JSON.stringify({ kind: 'error', message })}\n\n`;
     return new Response(body, {
       status: 200,
       headers: {

@@ -7,6 +7,9 @@ const isPublicRoute = createRouteMatcher([
   '/forgot-password(.*)',
   '/sso-callback(.*)',
   '/g/(.*)',              // recipient pages — public by design
+  '/build(.*)',           // anon curators allowed; chat route enforces deferred auth wall
+  '/api/chat(.*)',        // anon turn cap + tier throttle enforced inside the route
+  '/api/upload(.*)',      // anon uploads validated via peek-anon-session cookie + assertPeekAccess
   '/api/webhooks/(.*)',   // signed webhooks
   '/api/stripe/(.*)',     // signed Stripe webhooks
   '/api/pick(.*)',        // recipient picks (HMAC-signed cookie auth, not Clerk)

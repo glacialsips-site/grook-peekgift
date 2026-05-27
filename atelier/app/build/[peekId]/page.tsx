@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { BuildSurface } from '@/components/build/build-surface';
@@ -7,6 +7,11 @@ import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
 import { logger } from '@/lib/logger';
 import { rowToCard, rowToPeek, rowToVariantGroup } from '@/lib/peek/from-rows';
 import type { PeekDraft } from '@/lib/peek/types';
+import {
+  ensureAnonSessionId,
+  ensureCuratorRow,
+  readAnonSessionId,
+} from '@/lib/auth/server';
 
 const log = logger.child({ component: 'build/page' });
 
@@ -19,9 +24,6 @@ export default async function BuildPeekPage({
 }) {
   const { peekId } = await params;
   const { userId } = await auth();
-  if (!userId) {
-    redirect(`/sign-in?returnTo=/build/${peekId}`);
-  }
 
   const sb = getSupabaseService();
 
@@ -36,13 +38,71 @@ export default async function BuildPeekPage({
   }
   if (!peekRow) notFound();
 
-  const metadata = peekRow.metadata ?? {};
+  const metadata = (peekRow.metadata ?? {}) as Record<string, unknown>;
   const anonSessionRaw = metadata['anonymous_session_id'];
-  const anonSessionId = typeof anonSessionRaw === 'string' ? anonSessionRaw : null;
-  const ownedByUser = peekRow.curator_id && peekRow.curator_id === userId;
-  const ownedByAnon = !peekRow.curator_id && Boolean(anonSessionId);
-  if (!ownedByUser && !ownedByAnon) {
-    notFound();
+  const anonSessionId =
+    typeof anonSessionRaw === 'string' ? anonSessionRaw : null;
+
+  let effectivePeekRow = peekRow;
+
+  if (userId) {
+    const ownedByUser =
+      peekRow.curator_id !== null && peekRow.curator_id === userId;
+    const cookieAnon = await readAnonSessionId();
+    const claimable =
+      peekRow.curator_id === null &&
+      anonSessionId !== null &&
+      cookieAnon !== null &&
+      cookieAnon === anonSessionId;
+
+    if (!ownedByUser && !claimable) {
+      notFound();
+    }
+
+    if (!ownedByUser && claimable) {
+      await ensureCuratorRow(userId);
+      const nextMetadata: Record<string, unknown> = { ...metadata };
+      delete nextMetadata['anonymous_session_id'];
+      nextMetadata['claimed_from_anon_session_id'] = anonSessionId;
+      nextMetadata['claimed_at'] = new Date().toISOString();
+
+      const { data: claimed, error: claimErr } = await sb
+        .from('peeks')
+        .update({
+          curator_id: userId,
+          metadata: nextMetadata,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', peekId)
+        .is('curator_id', null)
+        .select('*')
+        .maybeSingle();
+
+      if (claimErr) {
+        log.error('claim_anon_peek_failed', {
+          peekId,
+          message: claimErr.message,
+        });
+        throw new Error(`Failed to claim peek: ${claimErr.message}`);
+      }
+      if (claimed) {
+        effectivePeekRow = claimed;
+        log.info('claimed_anon_peek', {
+          peekId,
+          userId,
+          anonSessionId,
+        });
+      }
+    }
+  } else {
+    const cookieAnon = await ensureAnonSessionId();
+    const ownedByAnon =
+      peekRow.curator_id === null &&
+      anonSessionId !== null &&
+      anonSessionId === cookieAnon;
+    if (!ownedByAnon) {
+      notFound();
+    }
   }
 
   const [cardsRes, groupsRes] = await Promise.all([
@@ -58,7 +118,7 @@ export default async function BuildPeekPage({
   }
 
   const initialDraft: PeekDraft = {
-    peek: rowToPeek(peekRow),
+    peek: rowToPeek(effectivePeekRow),
     cards: (cardsRes.data ?? [])
       .map(rowToCard)
       .sort((a, b) => a.position - b.position),
@@ -81,11 +141,14 @@ export default async function BuildPeekPage({
     log.error('loadChatHistory failed', { peekId, message });
   }
 
+  const finalAnonSessionId = userId ? null : await readAnonSessionId();
+
   return (
     <BuildSurface
       peekId={peekId}
       initialDraft={initialDraft}
       initialHistory={initialHistory}
+      anonSessionId={finalAnonSessionId}
     />
   );
 }

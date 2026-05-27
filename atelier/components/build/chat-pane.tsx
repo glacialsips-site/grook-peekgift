@@ -40,6 +40,7 @@ type Props = {
   initialHistory?: InitialChatMessage[];
   onPeekSnapshot?: (snapshot: PeekDraft) => void;
   peekDraft?: PeekDraft | null;
+  anonSessionId?: string | null;
 };
 
 type ImageAttachment = {
@@ -281,6 +282,7 @@ export function ChatPane({
   initialHistory = [],
   onPeekSnapshot,
   peekDraft,
+  anonSessionId,
 }: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
@@ -312,8 +314,14 @@ export function ChatPane({
   );
 
   useEffect(() => {
-    setSessionId(getOrCreateSessionId());
-  }, []);
+    if (typeof window === 'undefined') return;
+    if (anonSessionId && anonSessionId.length > 0) {
+      window.localStorage.setItem(SESSION_KEY, anonSessionId);
+      setSessionId(anonSessionId);
+    } else {
+      setSessionId(getOrCreateSessionId());
+    }
+  }, [anonSessionId]);
 
   useEffect(() => {
     const viewport = scrollRef.current?.parentElement;
@@ -402,16 +410,6 @@ export function ChatPane({
           signal: controller.signal,
         });
 
-        if (response.status === 401) {
-          const body = (await response.json().catch(() => null)) as
-            | { error?: string }
-            | null;
-          if (body?.error === 'signup_required') {
-            router.push(`/sign-in?returnTo=/build/${peekId}`);
-            return;
-          }
-        }
-
         if (!response.ok || !response.body) {
           throw new Error(`Chat request failed: ${response.status}`);
         }
@@ -440,6 +438,18 @@ export function ChatPane({
               const snap = evt.snapshot as unknown as PeekDraft | null;
               if (snap && snap.peek) {
                 onPeekSnapshotRef.current?.(snap);
+              }
+            }
+            if (evt.kind === 'tier_limit_reached') {
+              const evtReason =
+                'reason' in evt && typeof evt.reason === 'string'
+                  ? evt.reason
+                  : 'tier_hard_cap';
+              if (evtReason === 'anon_signup_required') {
+                router.push(
+                  `/sign-up?returnTo=${encodeURIComponent(`/build/${peekId}`)}&claim=true`,
+                );
+                return;
               }
             }
             dispatchEvent(evt, assistantMessage.id, peekId, setMessages);

@@ -24,4 +24,5 @@ export type SseEvent =
       message: string;
       used_cents: number;
       limit_cents: number;
+      reason?: 'anon_signup_required' | 'tier_hard_cap';
     };

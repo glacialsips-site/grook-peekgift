@@ -13,6 +13,7 @@ type Props = {
   peekId: string;
   initialDraft: PeekDraft;
   initialHistory?: InitialChatMessage[];
+  anonSessionId?: string | null;
 };
 
 function ChatFallback({ reset }: { reset: () => void }) {
@@ -51,7 +52,7 @@ function PreviewFallback({ reset }: { reset: () => void }) {
   );
 }
 
-export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
+export function BuildSurface({ peekId, initialDraft, initialHistory, anonSessionId }: Props) {
   const { draft, applySnapshot } = usePeekDraft(peekId, initialDraft);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -75,6 +76,7 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
           initialHistory={initialHistory ?? []}
           onPeekSnapshot={applySnapshot}
           peekDraft={draft}
+          anonSessionId={anonSessionId ?? null}
           className={cn(
             'flex-1 md:w-2/5 md:flex-none md:border-r md:border-border',
           )}
