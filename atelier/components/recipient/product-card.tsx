@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Gift } from 'lucide-react';
 import type { Card, VariantSelection } from '@/lib/peek/types';
 import { cn } from '@/lib/utils';
 import { PickButton } from './pick-button';
@@ -42,7 +43,7 @@ export function ProductCard({
     <motion.div
       layout
       className={cn(
-        'overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm transition-colors',
+        'flex h-full flex-col overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm transition-colors',
         isPicked && 'ring-2 ring-[hsl(var(--peek-accent))]/60',
       )}
     >
@@ -50,18 +51,47 @@ export function ProductCard({
         <div
           role="img"
           aria-label={card.title}
-          className="relative h-56 w-full bg-cover bg-center sm:h-64"
+          className="relative h-48 w-full bg-cover bg-center sm:h-56"
           style={{ backgroundImage: `url(${card.imageUrl})` }}
         />
       ) : (
         <div
           aria-hidden="true"
-          className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20"
-        />
+          className="relative flex h-36 w-full items-end overflow-hidden p-4 sm:h-40"
+          style={{
+            background:
+              'linear-gradient(135deg, hsl(var(--peek-accent) / 0.22) 0%, hsl(var(--peek-accent2) / 0.16) 100%)',
+          }}
+        >
+          <Gift
+            className="pointer-events-none absolute -right-2 -top-2 h-16 w-16 text-[hsl(var(--peek-accent))]/40"
+            aria-hidden="true"
+          />
+          <span
+            className="text-[10px] uppercase tracking-widest text-[hsl(var(--peek-accent))]/85"
+            style={{ fontFamily: 'var(--peek-font-heading)' }}
+          >
+            gift
+          </span>
+        </div>
       )}
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-base font-medium leading-tight">{card.title}</h3>
+          <h3
+            className={cn(
+              'leading-tight',
+              card.imageUrl
+                ? 'text-base font-medium'
+                : 'text-lg font-semibold',
+            )}
+            style={
+              card.imageUrl
+                ? undefined
+                : { fontFamily: 'var(--peek-font-heading)' }
+            }
+          >
+            {card.title}
+          </h3>
           {price ? (
             <span className="shrink-0 rounded-full bg-[hsl(var(--peek-accent))]/10 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
               {price}
