@@ -23,7 +23,14 @@ import type {
   VoiceVocabulary,
   VoiceWarmth,
 } from '@/db/schema/peeks';
-import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
+import type {
+  UnlockRule as SchemaUnlockRule,
+  UnlockRuleBeg as SchemaUnlockRuleBeg,
+  UnlockRuleDateAfter as SchemaUnlockRuleDateAfter,
+  UnlockRuleEvent as SchemaUnlockRuleEvent,
+  UnlockRuleRequiresPicks as SchemaUnlockRuleRequiresPicks,
+  UnlockRuleKind as SchemaUnlockRuleKind,
+} from '@/db/schema/cards';
 
 export type {
   RecipientProfile,
@@ -85,7 +92,21 @@ export type VariantGroup = {
 
 export type CardType = 'product' | 'activity' | 'aspirational' | 'digital';
 
-export type UnlockRule = Partial<SchemaUnlockRule>;
+export type UnlockRuleKind = SchemaUnlockRuleKind;
+
+export type UnlockRule = {
+  kind?: UnlockRuleKind;
+  beg_prompt?: string;
+  unlock_after?: string;
+  card_ids?: string[];
+};
+
+export type SchemaUnlockRules =
+  | SchemaUnlockRuleBeg
+  | SchemaUnlockRuleDateAfter
+  | SchemaUnlockRuleEvent
+  | SchemaUnlockRuleRequiresPicks
+  | SchemaUnlockRule;
 
 export type Card = {
   id: string;

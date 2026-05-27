@@ -34,11 +34,7 @@ function rowToPick(row: RealtimeRow): RecipientPick | null {
   };
 }
 
-export function usePeekPicks(
-  peekId: string,
-  recipientSessionId: string,
-  initial: RecipientPick[],
-) {
+export function usePeekPicks(peekId: string, initial: RecipientPick[]) {
   const [picks, setPicks] = useState<RecipientPick[]>(initial);
   const [pendingCardIds, setPendingCardIds] = useState<Set<string>>(
     () => new Set(),
@@ -129,7 +125,7 @@ export function usePeekPicks(
     return () => {
       sb.removeChannel(channel);
     };
-  }, [peekId, recipientSessionId]);
+  }, [peekId]);
 
   const mutate = useMemo(
     () => ({ setPending, refresh }),

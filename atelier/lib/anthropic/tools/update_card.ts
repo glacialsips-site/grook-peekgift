@@ -13,13 +13,40 @@ const CardTypeSchema = z.enum([
   'digital',
 ]);
 
-const UnlockRuleSchema = z
+const UnlockRuleBegSchema = z
   .object({
-    kind: z.enum(['beg', 'date_after', 'event']),
+    kind: z.literal('beg'),
     beg_prompt: z.string().min(1).max(280).optional(),
+  })
+  .strict();
+
+const UnlockRuleDateAfterSchema = z
+  .object({
+    kind: z.literal('date_after'),
+    unlock_after: z.string().min(1).max(64),
+  })
+  .strict();
+
+const UnlockRuleEventSchema = z
+  .object({
+    kind: z.literal('event'),
     unlock_after: z.string().min(1).max(64).optional(),
   })
   .strict();
+
+const UnlockRuleRequiresPicksSchema = z
+  .object({
+    kind: z.literal('requires_picks'),
+    card_ids: z.array(z.string().uuid()).min(1).max(20),
+  })
+  .strict();
+
+const UnlockRuleSchema = z.discriminatedUnion('kind', [
+  UnlockRuleBegSchema,
+  UnlockRuleDateAfterSchema,
+  UnlockRuleEventSchema,
+  UnlockRuleRequiresPicksSchema,
+]);
 
 const InputSchema = z
   .object({
@@ -51,7 +78,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'update_card',
   description:
-    "Patch fields on an existing card by id — only pass what you want to change; pass null to clear nullable fields. Use whenever you're refining (swap image, fix title, re-bind to a variant group, toggle reveal_value) instead of remove + re-add. source_url triggers an affiliate re-wrap.",
+    "Patch fields on an existing card by id — only pass what you want to change; pass null to clear nullable fields. Use whenever you're refining (swap image, fix title, re-bind to a variant group, toggle reveal_value, change a constraint) instead of remove + re-add. source_url triggers an affiliate re-wrap. unlock_rule supports kinds 'beg', 'date_after', 'event', and 'requires_picks' (card_ids the recipient must have picked first).",
   input_schema: {
     type: 'object',
     properties: {
@@ -75,10 +102,19 @@ registerTool<Input, Output>({
       is_locked: { type: 'boolean' },
       unlock_rule: {
         type: ['object', 'null'],
+        description:
+          "Constraint guarding the card. kind=beg: recipient must submit a non-empty beg_message. kind=requires_picks: recipient must have already picked every card in card_ids. kind=date_after: unlock_after is an ISO timestamp. kind=event: held until curator marks fulfilled.",
         properties: {
-          kind: { type: 'string', enum: ['beg', 'date_after', 'event'] },
+          kind: {
+            type: 'string',
+            enum: ['beg', 'date_after', 'event', 'requires_picks'],
+          },
           beg_prompt: { type: 'string' },
           unlock_after: { type: 'string' },
+          card_ids: {
+            type: 'array',
+            items: { type: 'string' },
+          },
         },
         required: ['kind'],
       },
