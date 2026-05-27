@@ -275,6 +275,8 @@ Three edits and you're cut over:
 
 ## Packet graph
 
+_Historical packet folders (01-foundation through 35-quality) have been moved to `_packets/_archive/integrated-packets/`. The tables below remain as the canonical lineage of branches, shas, and validation status._
+
 ### Batch 1 — DONE
 
 | # | Title | Branch | Sha | Notes |
