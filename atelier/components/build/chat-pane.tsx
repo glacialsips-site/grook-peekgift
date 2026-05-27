@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type {
   ChatMessage,
+  PeekDraft,
   SseEvent,
   ToolCallEvent,
 } from '@/lib/peek/types';
@@ -37,6 +38,9 @@ type Props = {
   peekId: string;
   className?: string;
   initialHistory?: InitialChatMessage[];
+  onPeekSnapshot?: (snapshot: PeekDraft) => void;
+  peekDraft?: PeekDraft | null;
+  anonSessionId?: string | null;
 };
 
 type ImageAttachment = {
@@ -49,6 +53,10 @@ type ApiHistoryEntry = {
   role: 'user' | 'assistant';
   content: unknown;
 };
+
+type AssistantContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'tool_use'; id: string; name: string; input: unknown };
 
 const SESSION_KEY = 'peek-anon-session';
 
@@ -161,15 +169,15 @@ function hydrateMessages(initial: InitialChatMessage[]): ChatMessage[] {
     const text = extractText(row.content);
     if (row.role === 'user') {
       const images = extractImages(row.content);
-      const parts: string[] = [];
-      if (images.length > 0) {
-        parts.push(...images.map(() => '[image]'));
-      }
-      if (text) parts.push(text);
+      const cleanedText = stripAttachmentGuidance(text);
       out.push({
         id: crypto.randomUUID(),
         role: 'user',
-        content: parts.join('\n') || (images.length > 0 ? '[image]' : ''),
+        content: cleanedText,
+        images:
+          images.length > 0
+            ? images.map((i) => ({ url: i.url, contentType: i.contentType }))
+            : undefined,
       });
       continue;
     }
@@ -184,6 +192,25 @@ function hydrateMessages(initial: InitialChatMessage[]): ChatMessage[] {
   return out;
 }
 
+function stripAttachmentGuidance(text: string): string {
+  if (!text.startsWith('[system] The curator just attached')) return text;
+  const lines = text.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line) break;
+    if (
+      !line.startsWith('[system]') &&
+      !/^\d+\.\s+https?:\/\//.test(line) &&
+      !line.includes('Supabase Storage URLs')
+    ) {
+      break;
+    }
+    i += 1;
+  }
+  return lines.slice(i).join('\n').trim();
+}
+
 function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
   const out: ApiHistoryEntry[] = [];
   for (const row of initial) {
@@ -193,7 +220,74 @@ function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
   return out;
 }
 
-export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
+function computeGhostPlaceholders(draft: PeekDraft | null | undefined): string[] {
+  if (!draft) {
+    return ['What else?'];
+  }
+  const peek = draft.peek;
+  const hasRecipient = Boolean(peek.recipientName);
+  const hasOccasion = Boolean(peek.occasion);
+  const hasHero = Boolean(peek.heroImageUrl);
+  const cardCount = draft.cards.length;
+  if (!hasRecipient) {
+    return [
+      'tell me who it is for',
+      'drop their name or a photo of them',
+      'what are they into right now?',
+    ];
+  }
+  if (!hasOccasion) {
+    return [
+      "what's the occasion?",
+      'birthday, anniversary, just because…',
+      'any specific date or vibe?',
+    ];
+  }
+  if (!hasHero && cardCount === 0) {
+    return [
+      'describe a vibe or drop a photo',
+      'paste a product link',
+      'an inside joke, a place, a memory?',
+    ];
+  }
+  if (!hasHero) {
+    return [
+      'describe a vibe or drop a photo',
+      'what should the cover feel like?',
+      'an inside joke or a memory to lean on?',
+    ];
+  }
+  if (cardCount === 0) {
+    return [
+      'paste a product link',
+      'an experience? a roast card?',
+      'drop anything — a song, a place, a meme',
+    ];
+  }
+  if (cardCount <= 3) {
+    return [
+      'want more options?',
+      'add a roast card or an experience?',
+      'paste another product link',
+      'any inside jokes to lock in?',
+    ];
+  }
+  return [
+    'what else?',
+    'any taunts, jokes, or locked surprises?',
+    'add a note for them?',
+    'ready to publish — or keep going?',
+  ];
+}
+
+export function ChatPane({
+  peekId,
+  className,
+  initialHistory = [],
+  onPeekSnapshot,
+  peekDraft,
+  anonSessionId,
+}: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     hydrateMessages(initialHistory),
@@ -204,17 +298,52 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
   const [sessionId, setSessionId] = useState('');
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+  const nearBottomRef = useRef(true);
   const apiHistoryRef = useRef<ApiHistoryEntry[]>(toApiHistory(initialHistory));
+  const onPeekSnapshotRef = useRef<Props['onPeekSnapshot']>(onPeekSnapshot);
 
   useEffect(() => {
-    setSessionId(getOrCreateSessionId());
+    onPeekSnapshotRef.current = onPeekSnapshot;
+  }, [onPeekSnapshot]);
+
+  const scrollSignal = useMemo(
+    () =>
+      messages.reduce(
+        (acc, m) =>
+          acc + (typeof m.content === 'string' ? m.content.length : 0),
+        messages.length,
+      ),
+    [messages],
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (anonSessionId && anonSessionId.length > 0) {
+      window.localStorage.setItem(SESSION_KEY, anonSessionId);
+      setSessionId(anonSessionId);
+    } else {
+      setSessionId(getOrCreateSessionId());
+    }
+  }, [anonSessionId]);
+
+  useEffect(() => {
+    const viewport = scrollRef.current?.parentElement;
+    if (!viewport) return;
+    const onScroll = () => {
+      const distance =
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      nearBottomRef.current = distance < 80;
+    };
+    onScroll();
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) return;
-    node.scrollTop = node.scrollHeight;
-  }, [messages]);
+    if (!nearBottomRef.current) return;
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [scrollSignal]);
 
   useEffect(() => {
     return () => {
@@ -239,28 +368,20 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
       if (!trimmed && images.length === 0) return;
       if (sending) return;
 
-      const userContentBlocks: Array<
-        | { type: 'image'; source: { type: 'url'; url: string } }
-        | { type: 'text'; text: string }
-      > = [];
-      for (const img of images) {
-        userContentBlocks.push({
-          type: 'image',
-          source: { type: 'url', url: img.url },
-        });
-      }
-      if (trimmed) {
-        userContentBlocks.push({ type: 'text', text: trimmed });
-      }
-
-      const userDisplay =
-        trimmed ||
-        (images.length > 0 ? `[${images.length} image${images.length === 1 ? '' : 's'}]` : '');
+      const apiAttachments = images.map((img) => ({
+        kind: 'image' as const,
+        url: img.url,
+        contentType: img.contentType,
+      }));
 
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'user',
-        content: userDisplay,
+        content: trimmed,
+        images:
+          images.length > 0
+            ? images.map((i) => ({ url: i.url, contentType: i.contentType }))
+            : undefined,
       };
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -277,11 +398,7 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const onlyBlock = userContentBlocks[0];
-      const apiUserMessage =
-        userContentBlocks.length === 1 && onlyBlock && onlyBlock.type === 'text'
-          ? onlyBlock.text
-          : userContentBlocks;
+      const apiUserMessage = trimmed;
 
       try {
         const response = await fetch('/api/chat', {
@@ -292,19 +409,10 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
             sessionId,
             history: apiHistoryRef.current,
             userMessage: apiUserMessage,
+            attachments: apiAttachments.length > 0 ? apiAttachments : undefined,
           }),
           signal: controller.signal,
         });
-
-        if (response.status === 401) {
-          const body = (await response.json().catch(() => null)) as
-            | { error?: string }
-            | null;
-          if (body?.error === 'signup_required') {
-            router.push(`/sign-in?returnTo=/build/${peekId}`);
-            return;
-          }
-        }
 
         if (!response.ok || !response.body) {
           throw new Error(`Chat request failed: ${response.status}`);
@@ -314,8 +422,8 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
         const decoder = new TextDecoder();
         let buffer = '';
 
-        let assistantTextAccum = '';
-        const assistantToolUses: Array<{ id: string; name: string }> = [];
+        const assistantContentBlocks: AssistantContentBlock[] = [];
+        const toolUseIndexById = new Map<string, number>();
 
         while (true) {
           const { done, value } = await reader.read();
@@ -325,24 +433,74 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
           buffer = parsed.buffer;
           for (const evt of parsed.events) {
             if (evt.kind === 'text') {
-              assistantTextAccum += evt.delta;
+              const last = assistantContentBlocks[assistantContentBlocks.length - 1];
+              if (last && last.type === 'text') {
+                last.text += evt.delta;
+              } else {
+                assistantContentBlocks.push({ type: 'text', text: evt.delta });
+              }
             } else if (evt.kind === 'tool_call') {
-              if (!assistantToolUses.find((t) => t.id === evt.id)) {
-                assistantToolUses.push({ id: evt.id, name: evt.name });
+              const existingIdx = toolUseIndexById.get(evt.id);
+              if (existingIdx === undefined) {
+                toolUseIndexById.set(evt.id, assistantContentBlocks.length);
+                assistantContentBlocks.push({
+                  type: 'tool_use',
+                  id: evt.id,
+                  name: evt.name,
+                  input: evt.input ?? {},
+                });
+              } else if (evt.input !== undefined) {
+                const block = assistantContentBlocks[existingIdx];
+                if (block && block.type === 'tool_use') {
+                  block.input = evt.input;
+                }
+              }
+            } else if (evt.kind === 'peek_update') {
+              const snap = evt.snapshot as unknown as PeekDraft | null;
+              if (snap && snap.peek) {
+                onPeekSnapshotRef.current?.(snap);
+              }
+            }
+            if (evt.kind === 'tier_limit_reached') {
+              const evtReason =
+                'reason' in evt && typeof evt.reason === 'string'
+                  ? evt.reason
+                  : 'tier_hard_cap';
+              if (evtReason === 'anon_signup_required') {
+                router.push(
+                  `/sign-up?returnTo=${encodeURIComponent(`/build/${peekId}`)}&claim=true`,
+                );
+                return;
               }
             }
             dispatchEvent(evt, assistantMessage.id, peekId, setMessages);
           }
         }
 
+        const persistedUserContent: Array<
+          | { type: 'image'; source: { type: 'url'; url: string } }
+          | { type: 'text'; text: string }
+        > = [];
+        for (const img of images) {
+          persistedUserContent.push({
+            type: 'image',
+            source: { type: 'url', url: img.url },
+          });
+        }
+        if (trimmed) {
+          persistedUserContent.push({ type: 'text', text: trimmed });
+        }
+        const historyUserContent: string | typeof persistedUserContent =
+          persistedUserContent.length === 1 &&
+          persistedUserContent[0]?.type === 'text'
+            ? trimmed
+            : persistedUserContent;
         apiHistoryRef.current = [
           ...apiHistoryRef.current,
-          { role: 'user', content: apiUserMessage },
+          { role: 'user', content: historyUserContent },
           {
             role: 'assistant',
-            content: assistantTextAccum
-              ? [{ type: 'text', text: assistantTextAccum }]
-              : [],
+            content: assistantContentBlocks,
           },
         ];
       } catch (err) {
@@ -408,6 +566,24 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
     [draft, pendingImages, sending],
   );
 
+  const ghostOptions = useMemo(
+    () => computeGhostPlaceholders(peekDraft),
+    [peekDraft],
+  );
+  const [ghostIndex, setGhostIndex] = useState(0);
+  useEffect(() => {
+    setGhostIndex(0);
+  }, [ghostOptions]);
+  useEffect(() => {
+    if (ghostOptions.length <= 1) return;
+    const id = window.setInterval(() => {
+      setGhostIndex((i) => (i + 1) % ghostOptions.length);
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [ghostOptions]);
+  const currentPlaceholder =
+    ghostOptions[ghostIndex] ?? ghostOptions[0] ?? 'What else?';
+
   return (
     <section
       className={cn(
@@ -432,12 +608,16 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
               <MessageBubble key={m.id} message={m} peekId={peekId} />
             ))}
           </AnimatePresence>
+          <div ref={endRef} aria-hidden="true" />
         </div>
       </ScrollArea>
 
       <form
         onSubmit={onSubmit}
-        className="border-t border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        className="relative z-30 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85"
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--chat-bottom-offset, 0px))',
+        }}
         aria-label="Send a message"
       >
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 px-4 py-3">
@@ -463,7 +643,7 @@ export function ChatPane({ peekId, className, initialHistory = [] }: Props) {
             value={draft}
             onChange={onTextareaChange}
             onKeyDown={onKeyDown}
-            placeholder="Tell Peek who this is for and what they love…"
+            placeholder={currentPlaceholder}
             disabled={sending}
             rows={1}
             className="min-h-11 resize-none overflow-hidden text-base"
@@ -554,6 +734,11 @@ function dispatchEvent(
     return;
   }
   if (evt.kind === 'error') {
+    const isModerationBlock = evt.error_kind === 'moderation_block';
+    const moderationReply =
+      isModerationBlock && typeof evt.user_message === 'string'
+        ? evt.user_message
+        : null;
     setMessages((prev) =>
       prev.map((m) =>
         m.id === assistantId && m.role === 'assistant'
@@ -563,7 +748,9 @@ function dispatchEvent(
               toolCalls: m.toolCalls.map((c) =>
                 c.status === 'pending' ? { ...c, status: 'error' } : c,
               ),
-              content: m.content || `Error: ${evt.message}`,
+              content:
+                m.content ||
+                (moderationReply ? moderationReply : `Error: ${evt.message}`),
             }
           : m,
       ),
@@ -602,8 +789,8 @@ function EmptyChatHint() {
     >
       <Sparkles className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
       <p className="text-base text-muted-foreground">
-        Start with who this Peek is for. Their name, the occasion, a thing they
-        love. Peek takes it from there.
+        We&apos;ll go back and forth. Tell me who it&apos;s for and I&apos;ll start
+        building — you can drop links, screenshots, or just describe.
       </p>
     </motion.div>
   );
@@ -646,6 +833,19 @@ function MessageBubble({
           isUser ? 'items-end' : 'items-start',
         )}
       >
+        {isUser && message.role === 'user' && message.images && message.images.length > 0 ? (
+          <div className="flex flex-wrap justify-end gap-1.5">
+            {message.images.map((img) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={img.url}
+                src={img.url}
+                alt={img.alt ?? 'Attached image'}
+                className="max-h-48 w-auto rounded-lg border border-border object-cover"
+              />
+            ))}
+          </div>
+        ) : null}
         {message.content ||
         (!isUser && message.role === 'assistant' && message.streaming) ? (
           <div

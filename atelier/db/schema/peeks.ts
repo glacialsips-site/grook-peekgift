@@ -1,5 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { index, jsonb, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  index,
+  integer,
+  jsonb,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { peekV2 } from './_schema';
 import { users } from './users';
 
@@ -30,6 +37,39 @@ export type VibePreset = 'playful' | 'romantic' | 'dry' | 'unhinged' | 'tender';
 
 export type VibeFontPairing = { display: string; body: string };
 
+export type VibeHeadingFont =
+  | 'serif'
+  | 'display'
+  | 'sans'
+  | 'mono'
+  | 'script';
+export type VibeBodyFont = 'sans' | 'serif' | 'mono';
+export type VibeTypography = {
+  heading: VibeHeadingFont;
+  body: VibeBodyFont;
+};
+export type VibeDensity = 'compact' | 'cozy' | 'breathable';
+export type VibeShape = 'sharp' | 'soft' | 'pillowy';
+export type VibeMood = 'minimal' | 'rich' | 'whimsical' | 'editorial';
+
+export type VoiceWarmth = 'restrained' | 'measured' | 'warm' | 'effusive';
+export type VoiceHumor = 'none' | 'gentle' | 'dry' | 'sharp';
+export type VoicePace = 'considered' | 'natural' | 'quick';
+export type VoiceFormality = 'casual' | 'neutral' | 'formal';
+export type VoiceEmoji = 'none' | 'rare' | 'occasional' | 'playful';
+export type VoiceVocabulary = 'slangy' | 'neutral' | 'elevated';
+export type VoiceLength = 'punchy' | 'natural' | 'fuller';
+
+export type VibeVoice = {
+  warmth?: VoiceWarmth;
+  humor?: VoiceHumor;
+  pace?: VoicePace;
+  formality?: VoiceFormality;
+  emoji?: VoiceEmoji;
+  vocabulary?: VoiceVocabulary;
+  length?: VoiceLength;
+};
+
 export type VibeCore = {
   preset?: VibePreset;
   tone?: string;
@@ -37,6 +77,11 @@ export type VibeCore = {
   mood_words?: string[];
   motion?: VibeMotion;
   font_pairing?: VibeFontPairing;
+  typography?: VibeTypography;
+  density?: VibeDensity;
+  shape?: VibeShape;
+  mood?: VibeMood;
+  voice?: VibeVoice;
 };
 
 export type VibeSignalSourceEntry = {
@@ -49,6 +94,14 @@ export type Vibe = VibeCore & {
   signal_source_history?: VibeSignalSourceEntry[];
 };
 
+export type RecipientProfile = {
+  favorite_things?: string[];
+  current_obsessions?: string[];
+  allergies_or_no_gos?: string[];
+  sizes?: Record<string, string>;
+  notes?: string;
+};
+
 export const peeks = peekV2.table(
   'peeks',
   {
@@ -58,6 +111,15 @@ export const peeks = peekV2.table(
     recipientName: text('recipient_name'),
     relationship: text('relationship'),
     occasion: text('occasion'),
+    giverNames: text('giver_names')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    budgetCents: integer('budget_cents'),
+    recipientProfile: jsonb('recipient_profile')
+      .$type<RecipientProfile>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     vibe: jsonb('vibe').$type<Vibe>().notNull().default(sql`'{}'::jsonb`),
     heroImageUrl: text('hero_image_url'),
     // 'user_upload' | 'unsplash' | 'ai_generated' | 'external'

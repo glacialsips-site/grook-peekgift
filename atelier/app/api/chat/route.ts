@@ -2,7 +2,8 @@ import type { NextRequest } from 'next/server';
 import type Anthropic from '@anthropic-ai/sdk';
 import { chatTurn, DEFAULT_MODEL } from '@/lib/anthropic';
 import '@/lib/anthropic/tools/bootstrap';
-import { getUserId } from '@/lib/auth/server';
+import { moderateInput, type ModerationResult } from '@/lib/anthropic/moderation';
+import { getCurrentUser, getUserId } from '@/lib/auth/server';
 import {
   anonymousTurnCount,
   anonymousTurnExceeded,
@@ -14,6 +15,7 @@ import {
   loadChatHistory,
 } from '@/lib/chat/persistence';
 import { track } from '@/lib/analytics/facade';
+import { checkAllowed } from '@/lib/usage/throttle';
 import { logger } from '@/lib/logger';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
 import {
@@ -23,6 +25,7 @@ import {
 } from '@/lib/rate-limit/redis';
 import { getClientIp } from '@/lib/security/client-ip';
 import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
+import { loadPeekSnapshot } from '@/lib/peek/snapshot';
 
 const log = logger.child({ component: 'api/chat' });
 
@@ -83,7 +86,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       { status: 400 },
     );
   }
-  const { peekId, sessionId, history, userMessage, model } = parsed.data;
+  const { peekId, sessionId, history, userMessage, attachments, model } =
+    parsed.data;
 
   const access = await assertPeekAccess({ peekId, userId, sessionId });
   if (!access.ok) {
@@ -109,10 +113,20 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     const count = await anonymousTurnCount(sessionId, ip);
     if (anonymousTurnExceeded(count)) {
-      return Response.json(
-        { error: 'signup_required', anonymous_turns_used: count },
-        { status: 401 },
-      );
+      const signupMessage =
+        "You're at the trial limit. Sign up to keep building — your peek will be saved.";
+      const sseBody =
+        `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: 'guest', message: signupMessage, used_cents: 0, limit_cents: 0, reason: 'anon_signup_required' })}\n\n` +
+        `event: error\ndata: ${JSON.stringify({ kind: 'error', message: signupMessage })}\n\n`;
+      return new Response(sseBody, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
+      });
     }
     await incrementAnonymousTurn(sessionId, ip);
   }
@@ -140,12 +154,115 @@ export async function POST(req: NextRequest): Promise<Response> {
     typeof userMessage === 'string'
       ? userMessage
       : (userMessage as Anthropic.ContentBlockParam[]);
-  const userContent: Anthropic.ContentBlockParam[] =
+  const baseUserContent: Anthropic.ContentBlockParam[] =
     typeof userInput === 'string'
-      ? [{ type: 'text', text: userInput }]
+      ? userInput.trim().length > 0
+        ? [{ type: 'text', text: userInput }]
+        : []
       : userInput;
 
+  const userContent: Anthropic.ContentBlockParam[] = [...baseUserContent];
+  if (attachments && attachments.length > 0) {
+    const bullets = attachments
+      .map((a, i) => {
+        const label = a.alt?.trim() ? ` — ${a.alt.trim()}` : '';
+        return `${i + 1}. ${a.url}${label}`;
+      })
+      .join('\n');
+    const guidance =
+      `[system] The curator just attached ${attachments.length} image${attachments.length === 1 ? '' : 's'}:\n` +
+      `${bullets}\n` +
+      `These are stable public Supabase Storage URLs. When you call set_hero_image, add_card, generate_hero_image, or any tool that takes an image_url, pass one of these exact URLs (use source: "user_upload" for set_hero_image). Do not invent or paraphrase URLs.`;
+    const imageBlocks: Anthropic.ContentBlockParam[] = attachments.map((a) => ({
+      type: 'image',
+      source: { type: 'url', url: a.url },
+    }));
+    userContent.unshift({ type: 'text', text: guidance }, ...imageBlocks);
+  }
+
+  if (userContent.length === 0) {
+    return Response.json({ error: 'empty_message' }, { status: 400 });
+  }
+
   const chosenModel = model ?? DEFAULT_MODEL;
+
+  const moderationText = baseUserContent
+    .filter((b): b is Anthropic.TextBlockParam => b.type === 'text')
+    .map((b) => b.text)
+    .join('\n')
+    .trim();
+
+  const [throttle, moderation] = await Promise.all([
+    checkAllowed({
+      userId,
+      sessionId,
+      vendor: 'anthropic',
+      kind: chosenModel,
+    }),
+    moderationText.length > 0
+      ? moderateInput({
+          text: moderationText,
+          field: 'chat_message',
+          peekId,
+          userId,
+          sessionId,
+        })
+      : Promise.resolve<ModerationResult>({ allow: true }),
+  ]);
+
+  if (!moderation.allow) {
+    log.info('moderation_block_chat', {
+      peekId,
+      sessionId,
+      reason: moderation.reason,
+    });
+    const blockSse =
+      `event: error\ndata: ${JSON.stringify({ kind: 'error', message: moderation.user_message, error_kind: 'moderation_block', user_message: moderation.user_message })}\n\n`;
+    return new Response(blockSse, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
+  }
+  if (!throttle.allow) {
+    log.warn('tier_limit_reached', {
+      tier: throttle.tier,
+      used_cents: throttle.used_cents,
+      limit_cents: throttle.limit_cents,
+      userId,
+      sessionId,
+    });
+    const message =
+      throttle.reason ??
+      "Daily compute limit reached. Try again tomorrow or publish a peek to unlock more.";
+    const body = `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: throttle.tier, message, used_cents: throttle.used_cents, limit_cents: throttle.limit_cents, reason: 'tier_hard_cap' })}\n\nevent: error\ndata: ${JSON.stringify({ kind: 'error', message })}\n\n`;
+    return new Response(body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
+  }
+  if (throttle.warn) {
+    userContent.unshift({
+      type: 'text',
+      text: `[system] The curator is at ${Math.round((throttle.used_cents / Math.max(throttle.limit_cents, 1)) * 100)}% of their daily compute budget (tier: ${throttle.tier}). Nudge them gently toward publishing this peek — once it's published, their limit jumps. Keep responses tighter; avoid speculative scrape/image generation unless they ask.`,
+    });
+  }
+
+  if (moderation.allow && moderation.warnings && moderation.warnings.length > 0) {
+    userContent.unshift({
+      type: 'text',
+      text: `[system] moderation_warning: ${moderation.warnings.join(', ')}. peek.gift is a gift-curation product and is not the right venue for legal, medical, or financial advice. Acknowledge briefly if relevant, then steer back to the gift.`,
+    });
+  }
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -169,6 +286,12 @@ export async function POST(req: NextRequest): Promise<Response> {
         }
       };
 
+      if (req.signal.aborted) {
+        safeClose();
+      } else {
+        req.signal.addEventListener('abort', safeClose, { once: true });
+      }
+
       const turnUsages: TurnUsage[] = [];
       let toolCallTotal = 0;
       const pendingToolNames = new Map<string, string>();
@@ -185,12 +308,53 @@ export async function POST(req: NextRequest): Promise<Response> {
         log.error('persist user message failed', { peekId, message });
       }
 
+      let curatorName: string | null = null;
+      if (userId) {
+        try {
+          const u = await getCurrentUser();
+          if (u) {
+            const composed = [u.firstName, u.lastName]
+              .filter((s): s is string => typeof s === 'string' && s.length > 0)
+              .join(' ')
+              .trim();
+            curatorName = composed.length > 0 ? composed : null;
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          log.warn('currentUser_failed', { message });
+        }
+      }
+      if (!curatorName?.trim()) curatorName = 'the curator';
+
+      let peekSummary: string | null = null;
+      try {
+        const snap = await loadPeekSnapshot(peekId);
+        if (snap) {
+          const recipient = snap.peek.recipientName?.trim();
+          const occasion = snap.peek.occasion?.trim();
+          const cardCount = snap.cards.length;
+          if (recipient) {
+            const occPart = occasion ? ` (${occasion})` : '';
+            peekSummary = `gift for ${recipient}${occPart}, ${cardCount} card${cardCount === 1 ? '' : 's'} so far`;
+          } else {
+            peekSummary = 'new peek (no recipient yet)';
+          }
+        } else {
+          peekSummary = 'new peek (no recipient yet)';
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        log.warn('peek_summary_load_failed', { peekId, message });
+      }
+
       try {
         const turn = chatTurn({
           ctx: { peekId, userId, sessionId },
           history: initialHistory,
           userMessage: userContent,
           model: chosenModel,
+          systemPromptOptions: { curatorName, peekSummary },
+          signal: req.signal,
           onToolResult: async (id, _name, output) => {
             safeEnqueue({ kind: 'tool_result', id, output });
             try {
@@ -203,6 +367,26 @@ export async function POST(req: NextRequest): Promise<Response> {
             } catch (err) {
               const message = err instanceof Error ? err.message : String(err);
               log.error('persist tool_result failed', {
+                peekId,
+                id,
+                message,
+              });
+            }
+            try {
+              const snapshot = await loadPeekSnapshot(peekId);
+              if (snapshot) {
+                safeEnqueue({
+                  kind: 'peek_update',
+                  snapshot: {
+                    peek: snapshot.peek,
+                    cards: snapshot.cards,
+                    variantGroups: snapshot.variantGroups,
+                  },
+                });
+              }
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              log.error('peek_update snapshot failed', {
                 peekId,
                 id,
                 message,
@@ -266,7 +450,6 @@ export async function POST(req: NextRequest): Promise<Response> {
             case 'message_end': {
               const usage = toTurnUsage(event.usage);
               turnUsages.push(usage);
-              safeEnqueue({ kind: 'turn_end', usage });
               break;
             }
             case 'error': {
@@ -302,6 +485,10 @@ export async function POST(req: NextRequest): Promise<Response> {
           }),
           { input_tokens: 0, output_tokens: 0 },
         );
+
+        if (!req.signal.aborted) {
+          safeEnqueue({ kind: 'turn_end', usage: aggregated });
+        }
 
         await track({
           name: 'chat_turn',

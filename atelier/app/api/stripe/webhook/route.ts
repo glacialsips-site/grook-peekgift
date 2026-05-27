@@ -27,6 +27,133 @@ async function logWebhook(payload: Record<string, unknown>, success: boolean) {
   }
 }
 
+type PublishOutcome = 'published' | 'already' | 'missing' | 'error';
+
+async function publishPeek(args: {
+  peekId: string;
+  curatorId: string | null;
+  source: 'checkout_session' | 'payment_intent';
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  amountTotal?: number | null;
+  currency?: string | null;
+}): Promise<PublishOutcome> {
+  const sb = getSupabaseService();
+  const { data: peek, error: peekErr } = await sb
+    .from('peeks')
+    .select('id, slug, status')
+    .eq('id', args.peekId)
+    .maybeSingle();
+  if (peekErr) {
+    log.error('peek_lookup_failed', { peekId: args.peekId, err: peekErr.message });
+    return 'error';
+  }
+  if (!peek) return 'missing';
+  if (peek.status === 'published' || peek.status === 'claimed') return 'already';
+
+  const nowIso = new Date().toISOString();
+  const shareUrl = `${env.APP_URL}/g/${peek.slug}`;
+  const { error: updErr } = await sb
+    .from('peeks')
+    .update({
+      status: 'published',
+      published_at: nowIso,
+      share_url: shareUrl,
+      stripe_checkout_session_id: args.stripeCheckoutSessionId ?? null,
+      stripe_payment_intent_id: args.stripePaymentIntentId ?? null,
+      updated_at: nowIso,
+    })
+    .eq('id', args.peekId);
+  if (updErr) {
+    log.error('peek_update_failed', { peekId: args.peekId, err: updErr.message });
+    return 'error';
+  }
+
+  await track({
+    name: 'publish',
+    peekId: args.peekId,
+    userId: args.curatorId,
+    payload: {
+      mock: false,
+      stripe_checkout_session_id: args.stripeCheckoutSessionId ?? undefined,
+      stripe_payment_intent_id: args.stripePaymentIntentId ?? undefined,
+      amount_total: args.amountTotal ?? undefined,
+      currency: args.currency ?? undefined,
+    },
+  });
+
+  log.info('peek_published', {
+    peekId: args.peekId,
+    source: args.source,
+    payment_intent_id: args.stripePaymentIntentId ?? null,
+  });
+  return 'published';
+}
+
+type PaymentFailedOutcome = 'recorded' | 'already_terminal' | 'missing' | 'error';
+
+async function markPeekPaymentFailed(args: {
+  peekId: string;
+  curatorId: string | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  failureReason?: string | null;
+  paymentMethodType?: string | null;
+}): Promise<PaymentFailedOutcome> {
+  const sb = getSupabaseService();
+  const { data: peek, error: peekErr } = await sb
+    .from('peeks')
+    .select('id, status')
+    .eq('id', args.peekId)
+    .maybeSingle();
+  if (peekErr) {
+    log.error('peek_lookup_failed', { peekId: args.peekId, err: peekErr.message });
+    return 'error';
+  }
+  if (!peek) return 'missing';
+  if (peek.status === 'published' || peek.status === 'claimed') {
+    return 'already_terminal';
+  }
+
+  const nowIso = new Date().toISOString();
+  if (peek.status !== 'draft') {
+    const { error: updErr } = await sb
+      .from('peeks')
+      .update({ status: 'draft', updated_at: nowIso })
+      .eq('id', args.peekId);
+    if (updErr) {
+      log.error('peek_revert_failed', { peekId: args.peekId, err: updErr.message });
+      return 'error';
+    }
+  }
+
+  const { error: evErr } = await sb.from('events').insert({
+    user_id: args.curatorId,
+    session_id: null,
+    peek_id: args.peekId,
+    kind: 'peek_payment_failed',
+    payload: {
+      stripe_checkout_session_id: args.stripeCheckoutSessionId ?? null,
+      stripe_payment_intent_id: args.stripePaymentIntentId ?? null,
+      failure_reason: args.failureReason ?? null,
+      payment_method_type: args.paymentMethodType ?? null,
+    },
+  });
+  if (evErr) {
+    log.error('peek_payment_failed_event_insert_failed', {
+      peekId: args.peekId,
+      err: evErr.message,
+    });
+  }
+
+  log.info('peek_payment_failed', {
+    peekId: args.peekId,
+    payment_intent_id: args.stripePaymentIntentId ?? null,
+    reason: args.failureReason ?? null,
+  });
+  return 'recorded';
+}
+
 export async function POST(req: NextRequest): Promise<Response> {
   const signature = req.headers.get('stripe-signature');
   if (!signature) {
@@ -63,77 +190,130 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   let success = false;
   try {
-    if (event.type !== 'checkout.session.completed') {
-      success = true;
-      return new Response('ok', { status: 200 });
+    switch (event.type) {
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded': {
+        const session = event.data.object;
+        const peekId = session.metadata?.['peek_id'];
+        const curatorId =
+          session.metadata?.['curator_clerk_id'] ?? session.metadata?.['curator_id'] ?? null;
+        if (!peekId) {
+          success = true;
+          return new Response('missing peek_id metadata', { status: 200 });
+        }
+        const paymentIntentId =
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : (session.payment_intent?.id ?? null);
+        const outcome = await publishPeek({
+          peekId,
+          curatorId,
+          source: 'checkout_session',
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          amountTotal: session.amount_total,
+          currency: session.currency,
+        });
+        if (outcome === 'error') {
+          return new Response('update failed', { status: 500 });
+        }
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
+
+      case 'checkout.session.async_payment_failed': {
+        const session = event.data.object;
+        const peekId = session.metadata?.['peek_id'];
+        const curatorId =
+          session.metadata?.['curator_clerk_id'] ?? session.metadata?.['curator_id'] ?? null;
+        if (!peekId) {
+          success = true;
+          return new Response('missing peek_id metadata', { status: 200 });
+        }
+        const paymentIntentId =
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : (session.payment_intent?.id ?? null);
+        const paymentMethodType =
+          session.payment_method_types && session.payment_method_types.length > 0
+            ? session.payment_method_types[0]
+            : null;
+        const failureReason =
+          (session as unknown as { last_payment_error?: { message?: string; code?: string } })
+            .last_payment_error?.message ??
+          (session as unknown as { last_payment_error?: { code?: string } }).last_payment_error
+            ?.code ??
+          null;
+        const outcome = await markPeekPaymentFailed({
+          peekId,
+          curatorId,
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          failureReason,
+          paymentMethodType,
+        });
+        if (outcome === 'error') {
+          return new Response('update failed', { status: 500 });
+        }
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
+
+      case 'payment_intent.succeeded': {
+        const pi = event.data.object;
+        const peekId = pi.metadata?.['peek_id'];
+        const curatorId =
+          pi.metadata?.['curator_clerk_id'] ?? pi.metadata?.['curator_id'] ?? null;
+        if (!peekId) {
+          success = true;
+          return new Response('missing peek_id metadata', { status: 200 });
+        }
+        const outcome = await publishPeek({
+          peekId,
+          curatorId,
+          source: 'payment_intent',
+          stripePaymentIntentId: pi.id,
+          amountTotal: pi.amount_received ?? pi.amount,
+          currency: pi.currency,
+        });
+        if (outcome === 'error') {
+          return new Response('update failed', { status: 500 });
+        }
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object;
+        log.info('invoice_paid', {
+          invoice_id: invoice.id,
+          customer: invoice.customer,
+          subscription: (invoice as unknown as { subscription?: string | null }).subscription ?? null,
+          amount_paid: invoice.amount_paid,
+        });
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
+
+      case 'customer.subscription.updated':
+      case 'customer.subscription.created':
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object;
+        log.info('subscription_event', {
+          type: event.type,
+          subscription_id: sub.id,
+          status: sub.status,
+          customer: sub.customer,
+        });
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
+
+      default: {
+        success = true;
+        return new Response('ok', { status: 200 });
+      }
     }
-
-    const session = event.data.object;
-    const peekId = session.metadata?.['peek_id'];
-    const curatorId = session.metadata?.['curator_id'] ?? null;
-    if (!peekId) {
-      success = true;
-      return new Response('missing peek_id metadata', { status: 200 });
-    }
-
-    const sb = getSupabaseService();
-    const { data: peek, error: peekErr } = await sb
-      .from('peeks')
-      .select('id, slug, status')
-      .eq('id', peekId)
-      .maybeSingle();
-
-    if (peekErr) {
-      return new Response(`lookup failed: ${peekErr.message}`, { status: 500 });
-    }
-    if (!peek) {
-      success = true;
-      return new Response('peek not found', { status: 200 });
-    }
-    if (peek.status === 'published' || peek.status === 'claimed') {
-      success = true;
-      return new Response('already published', { status: 200 });
-    }
-
-    const paymentIntentId =
-      typeof session.payment_intent === 'string'
-        ? session.payment_intent
-        : (session.payment_intent?.id ?? null);
-
-    const nowIso = new Date().toISOString();
-    const shareUrl = `${env.APP_URL}/g/${peek.slug}`;
-
-    const { error: updErr } = await sb
-      .from('peeks')
-      .update({
-        status: 'published',
-        published_at: nowIso,
-        share_url: shareUrl,
-        stripe_checkout_session_id: session.id,
-        stripe_payment_intent_id: paymentIntentId,
-        updated_at: nowIso,
-      })
-      .eq('id', peekId);
-
-    if (updErr) {
-      return new Response(`update failed: ${updErr.message}`, { status: 500 });
-    }
-
-    await track({
-      name: 'publish',
-      peekId,
-      userId: curatorId,
-      payload: {
-        mock: false,
-        stripe_checkout_session_id: session.id,
-        stripe_payment_intent_id: paymentIntentId,
-        amount_total: session.amount_total,
-        currency: session.currency,
-      },
-    });
-
-    success = true;
-    return new Response('ok', { status: 200 });
   } finally {
     void logWebhook(
       {

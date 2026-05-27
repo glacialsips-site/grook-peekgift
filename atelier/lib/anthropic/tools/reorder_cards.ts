@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { cards, peeks } from '@/db/schema';
@@ -19,7 +19,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'reorder_cards',
   description:
-    "Set the display order of cards in the Peek. Pass card_ids in the desired sequence — the first id becomes position 0, the second position 1, etc. Cards not included in the array keep their existing position (but will likely end up out of order — pass every card you want sorted).",
+    "Reorder the cards on the page — pass card_ids in the desired sequence (first id = position 0). Use when the curator wants the page sorted differently; include every card you want positioned to avoid stragglers. Always succeeds for ids that belong to this peek.",
   input_schema: {
     type: 'object',
     properties: {
@@ -33,21 +33,38 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
-    let updated = 0;
-    for (let i = 0; i < parsed.card_ids.length; i++) {
-      const cardId = parsed.card_ids[i];
-      if (!cardId) continue;
-      const result = await db
-        .update(cards)
-        .set({ position: i })
-        .where(and(eq(cards.id, cardId), eq(cards.peekId, ctx.peekId)))
-        .returning({ id: cards.id });
-      if (result.length > 0) updated++;
+    const cardIds = parsed.card_ids.filter((id): id is string => Boolean(id));
+    if (cardIds.length === 0) {
+      return { ok: true, updated: 0 };
     }
-    await db
-      .update(peeks)
-      .set({ updatedAt: new Date() })
-      .where(eq(peeks.id, ctx.peekId));
+
+    const updated = await db.transaction(async (tx) => {
+      await tx
+        .update(cards)
+        .set({ position: sql`-(${cards.position} + 1)` })
+        .where(
+          and(eq(cards.peekId, ctx.peekId), inArray(cards.id, cardIds)),
+        );
+
+      let count = 0;
+      for (let i = 0; i < cardIds.length; i++) {
+        const cardId = cardIds[i]!;
+        const result = await tx
+          .update(cards)
+          .set({ position: i })
+          .where(and(eq(cards.id, cardId), eq(cards.peekId, ctx.peekId)))
+          .returning({ id: cards.id });
+        if (result.length > 0) count++;
+      }
+
+      await tx
+        .update(peeks)
+        .set({ updatedAt: new Date() })
+        .where(eq(peeks.id, ctx.peekId));
+
+      return count;
+    });
+
     return { ok: true, updated };
   },
 });

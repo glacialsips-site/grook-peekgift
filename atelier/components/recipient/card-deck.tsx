@@ -2,8 +2,11 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkle } from 'lucide-react';
 import type { Card, VariantGroup, VibeMotion } from '@/lib/peek/types';
+import {
+  VariantGroupContainer,
+  gridClassesForCount,
+} from '@/components/build/variant-group-container';
 import { ProductCard } from './product-card';
 import { ActivityCard } from './activity-card';
 import { AspirationalCard } from './aspirational-card';
@@ -85,7 +88,12 @@ export function CardDeck({
   }
   for (const g of orderedGroups) {
     const groupCards = grouped.get(g.id) ?? [];
-    items.push({ kind: 'group', group: g, cards: groupCards, startIndex: renderIndex });
+    items.push({
+      kind: 'group',
+      group: g,
+      cards: groupCards,
+      startIndex: renderIndex,
+    });
     renderIndex += groupCards.length;
   }
 
@@ -214,30 +222,14 @@ function VariantGroupBlock({
   onPick: (args: PickArgs) => Promise<boolean>;
   onUnpick: (cardId: string) => Promise<boolean>;
 }) {
-  const label =
-    group.selection === 'pick_one'
-      ? 'Pick one'
-      : group.selection === 'pick_any'
-        ? 'Pick any'
-        : 'All of these';
   const headDelay = revealed ? 0 : Math.min(startIndex * stagger, 1.6);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: headDelay, ease: 'easeOut' }}
-      className="flex flex-col gap-3 rounded-2xl border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))]/60 p-4"
+    <VariantGroupContainer
+      group={group}
+      memberCount={cards.length}
+      delay={headDelay}
     >
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="inline-flex items-center text-sm font-semibold uppercase tracking-wider text-[hsl(var(--peek-ink))]/70">
-          <Sparkle className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-          {group.title}
-        </h2>
-        <span className="rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
-          {label}
-        </span>
-      </div>
-      <div className="flex flex-col gap-3">
+      <div className={gridClassesForCount(cards.length)}>
         {cards.map((card, i) => (
           <SingleCard
             key={card.id}
@@ -254,6 +246,6 @@ function VariantGroupBlock({
           />
         ))}
       </div>
-    </motion.div>
+    </VariantGroupContainer>
   );
 }

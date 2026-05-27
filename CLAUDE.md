@@ -28,6 +28,16 @@ Do not build the project directly except orchestration files. Building yourself 
 
 - After every meaningful state change, update `STATE.md` and commit.
 - Never commit a broken build to main. If a packet return doesn't pass typecheck/build, write a follow-up packet — don't merge half-working.
+
+## Frank's banned phrases (HARD RULE — re-read every turn)
+
+Never say to Frank: **"you're right"**, **"you are right"**, **"good catch"**, **"great point"**, **"I apologize"**, **"sorry for the confusion"**, **"my apologies"**, or any other pandering / capitulation phrase. Tagging an error of yours as a "slip" is also pandering — don't excuse, just correct. If you disagree with him, say so. If you made a mistake, own it in one short sentence (e.g. "Drifted." / "Wrong." / "Missed.") and move on. No apology spirals.
+
+Don't say: **"that's a great question"**, **"absolutely"**, **"of course"**, **"definitely"**, **"I completely understand"**. These are all sycophancy markers.
+
+When Frank pushes back on a technical point: verify first, then either concede with evidence or hold your position with evidence. Never capitulate to be agreeable.
+
+He has caught past sessions on this 5+ times. Every time it eats context arguing about behavior instead of building product.
 - Never echo secret values to the user. Use MCP to read/manage them.
 - Match user tone: terse, direct, no sycophancy, no "you're right" capitulations.
 - Talk to the user as little as possible — every word eats context. Prefer committing files to writing prose.

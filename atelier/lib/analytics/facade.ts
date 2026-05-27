@@ -152,7 +152,8 @@ export type AnalyticsEvent =
       payload: {
         url?: string;
         ok: boolean;
-        provider?: string;
+        provider?: string | null;
+        degraded?: boolean;
         product?: Record<string, unknown>;
         affiliate_url?: string;
         affiliate_network?: string;

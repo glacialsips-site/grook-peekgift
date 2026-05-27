@@ -7,6 +7,8 @@ import type {
   peeks,
   picks,
   relationships,
+  tierConfig,
+  usageLedger,
   users,
   variantGroups,
   webhookLog,
@@ -59,6 +61,8 @@ export type Database = {
       affiliate_revenue: TableType<typeof affiliateRevenue>;
       chat_messages: TableType<typeof chatMessages>;
       webhook_log: TableType<typeof webhookLog>;
+      usage_ledger: TableType<typeof usageLedger>;
+      tier_config: TableType<typeof tierConfig>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

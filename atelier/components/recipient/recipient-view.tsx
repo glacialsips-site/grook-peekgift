@@ -5,7 +5,6 @@ import {
   PeekVibeProvider,
   type Vibe as ProviderVibe,
 } from '@/components/peek-vibe-provider';
-import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/components/ui/use-toast';
 import type { PeekDraft, Vibe } from '@/lib/peek/types';
 import { CinematicReveal } from './cinematic-reveal';
@@ -16,7 +15,7 @@ import { usePeekPicks, type RecipientPick } from './realtime';
 
 type Props = {
   draft: PeekDraft;
-  recipientSessionId: string;
+  peekId: string;
   initialPicks: RecipientPick[];
 };
 
@@ -40,22 +39,22 @@ function toProviderVibe(vibe: Vibe | null | undefined): ProviderVibe {
     mood_words: vibe.mood_words,
     palette: vibe.palette ?? PROVIDER_DEFAULT.palette,
     font_pairing: vibe.font_pairing,
+    typography: vibe.typography,
+    density: vibe.density,
+    shape: vibe.shape,
+    mood: vibe.mood,
   };
 }
 
 export function RecipientView({
   draft,
-  recipientSessionId,
+  peekId,
   initialPicks,
 }: Props) {
   const { peek, cards, variantGroups } = draft;
   const providerVibe = useMemo(() => toProviderVibe(peek.vibe), [peek.vibe]);
   const [revealed, setRevealed] = useState(false);
-  const { picks, pendingCardIds, mutate } = usePeekPicks(
-    peek.id,
-    recipientSessionId,
-    initialPicks,
-  );
+  const { picks, pendingCardIds, mutate } = usePeekPicks(peekId, initialPicks);
   const { toast } = useToast();
 
   const pickedCardIds = useMemo(
@@ -81,10 +80,10 @@ export function RecipientView({
         const res = await fetch('/api/pick', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             peekId: peek.id,
             cardId,
-            recipientSessionId,
             begMessage,
             recipientNote,
           }),
@@ -106,7 +105,7 @@ export function RecipientView({
         mutate.setPending(cardId, false);
       }
     },
-    [mutate, peek.id, recipientSessionId, toast],
+    [mutate, peek.id, toast],
   );
 
   const handleUnpick = useCallback(
@@ -116,10 +115,10 @@ export function RecipientView({
         const res = await fetch('/api/pick', {
           method: 'DELETE',
           headers: { 'content-type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             peekId: peek.id,
             cardId,
-            recipientSessionId,
           }),
         });
         const body = (await res.json()) as { ok?: boolean; error?: string };
@@ -139,7 +138,7 @@ export function RecipientView({
         mutate.setPending(cardId, false);
       }
     },
-    [mutate, peek.id, recipientSessionId, toast],
+    [mutate, peek.id, toast],
   );
 
   return (
@@ -174,7 +173,6 @@ export function RecipientView({
             />
           </div>
         </div>
-        <Toaster />
       </main>
     </PeekVibeProvider>
   );

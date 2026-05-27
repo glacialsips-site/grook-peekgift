@@ -5,9 +5,30 @@ export interface SseTurnUsage {
   cache_creation_input_tokens?: number;
 }
 
+export interface PeekUpdateSnapshot {
+  peek: unknown;
+  cards: unknown[];
+  variantGroups: unknown[];
+}
+
 export type SseEvent =
   | { kind: 'text'; delta: string }
   | { kind: 'tool_call'; id: string; name: string; input?: unknown }
   | { kind: 'tool_result'; id: string; output: unknown }
+  | { kind: 'peek_update'; snapshot: PeekUpdateSnapshot }
   | { kind: 'turn_end'; usage: SseTurnUsage }
-  | { kind: 'error'; message: string };
+  | {
+      kind: 'error';
+      message: string;
+      error_kind?: 'moderation_block';
+      user_message?: string;
+      categories?: string[];
+    }
+  | {
+      kind: 'tier_limit_reached';
+      tier: string;
+      message: string;
+      used_cents: number;
+      limit_cents: number;
+      reason?: 'anon_signup_required' | 'tier_hard_cap';
+    };

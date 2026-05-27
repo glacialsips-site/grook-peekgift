@@ -18,7 +18,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'remove_card',
   description:
-    'Delete a card from the Peek by id. Idempotent in the sense that removing a card that is no longer there returns ok: true. Always confirm with the curator before deleting cards they explicitly added.',
+    "Delete a card from the page by id. Use when the curator wants something off the page; idempotent — removing a missing card still returns ok: true. Prefer update_card when you're refining a card rather than dropping it.",
   input_schema: {
     type: 'object',
     properties: {

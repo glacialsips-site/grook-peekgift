@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { randomUUID } from 'node:crypto';
-import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getSupabaseService } from '@/lib/supabase/service';
 import type { DbRow } from '@/lib/supabase/database.types';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
-import { GuestSecretMissingError, signRecipient } from '@/lib/security/recipient';
+import {
+  GuestSecretMissingError,
+  ensureRecipientSessionCookie,
+} from '@/lib/security/recipient';
 import { logger } from '@/lib/logger';
 
 const log = logger.child({ component: 'g/[slug]/page' });
@@ -16,13 +17,9 @@ import type {
   PeekDraft,
   UnlockRule,
   VariantGroup,
-  Vibe,
 } from '@/lib/peek/types';
 
 export const dynamic = 'force-dynamic';
-
-const COOKIE_NAME = 'recipient_session';
-const COOKIE_TTL_DAYS = 365;
 
 type PeekRow = DbRow<'peeks'>;
 type CardRow = DbRow<'cards'>;
@@ -37,6 +34,9 @@ function toPeek(row: PeekRow): Peek {
     recipientName: row.recipient_name,
     relationship: row.relationship,
     occasion: row.occasion,
+    giverNames: row.giver_names ?? [],
+    budgetCents: row.budget_cents ?? null,
+    recipientProfile: row.recipient_profile ?? {},
     vibe: row.vibe,
     heroImageUrl: row.hero_image_url,
     heroImageSource: row.hero_image_source,
@@ -79,23 +79,6 @@ function toVariantGroup(row: VariantGroupRow): VariantGroup {
     selection: row.selection,
     position: row.position,
   };
-}
-
-async function ensureRecipientSession(): Promise<string> {
-  const jar = await cookies();
-  const existing = jar.get(COOKIE_NAME)?.value;
-  if (existing && existing.length > 0) return existing;
-  const fresh = randomUUID();
-  jar.set({
-    name: COOKIE_NAME,
-    value: fresh,
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env['NODE_ENV'] === 'production',
-    path: '/',
-    maxAge: COOKIE_TTL_DAYS * 24 * 60 * 60,
-  });
-  return fresh;
 }
 
 export async function generateMetadata({
@@ -165,21 +148,21 @@ export default async function RecipientPage({
   if (!peekRes.data) notFound();
   const peek = toPeek(peekRes.data);
 
-  const recipientSessionId = await ensureRecipientSession();
-
-  if (peek.status !== 'published') {
-    return <AlmostReady peek={peek} />;
-  }
-
-  let recipientSignature: string;
+  let session: { sessionId: string; signature: string };
   try {
-    recipientSignature = signRecipient(recipientSessionId);
+    session = await ensureRecipientSessionCookie();
   } catch (err) {
     if (err instanceof GuestSecretMissingError) {
       throw new Error('service_unavailable: GUEST_CLAIM_TOKEN_SECRET missing');
     }
     throw err;
   }
+
+  if (peek.status !== 'published' && peek.status !== 'claimed') {
+    return <AlmostReady peek={peek} />;
+  }
+
+  const recipientSignature = session.signature;
 
   const [cardsRes, groupsRes, picksRes] = await Promise.all([
     sb.from('cards').select('*').eq('peek_id', peek.id),
@@ -224,7 +207,7 @@ export default async function RecipientPage({
   return (
     <RecipientView
       draft={draft}
-      recipientSessionId={recipientSessionId}
+      peekId={peek.id}
       initialPicks={myPicks}
     />
   );

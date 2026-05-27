@@ -35,7 +35,7 @@ const HISTORY_LIMIT = 10;
 registerTool<Input, Output>({
   name: 'update_vibe',
   description:
-    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Never re-sends fields you do not want to change. signal_source defaults to "curator" — pass another value only when relaying an upstream auto-classifier signal.',
+    "MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use continuously as signals arrive (palette extraction, new card mix, tone shift, voice refinement). signal_source defaults to 'curator' — only override when relaying an upstream auto-classifier.",
   input_schema: {
     type: 'object',
     properties: {
@@ -71,6 +71,67 @@ registerTool<Input, Output>({
         },
         required: ['display', 'body'],
       },
+      typography: {
+        type: 'object',
+        properties: {
+          heading: {
+            type: 'string',
+            enum: ['serif', 'display', 'sans', 'mono', 'script'],
+          },
+          body: {
+            type: 'string',
+            enum: ['sans', 'serif', 'mono'],
+          },
+        },
+        required: ['heading', 'body'],
+      },
+      density: {
+        type: 'string',
+        enum: ['compact', 'cozy', 'breathable'],
+      },
+      shape: {
+        type: 'string',
+        enum: ['sharp', 'soft', 'pillowy'],
+      },
+      mood: {
+        type: 'string',
+        enum: ['minimal', 'rich', 'whimsical', 'editorial'],
+      },
+      voice: {
+        type: 'object',
+        description:
+          "How YOU (Peek) talk to the curator. Refine when new signals arrive — curator mirrors back in slangy register, occasion turns out to be a memorial not a birthday, recipient is a kid, etc. All sub-fields optional.",
+        properties: {
+          warmth: {
+            type: 'string',
+            enum: ['restrained', 'measured', 'warm', 'effusive'],
+          },
+          humor: {
+            type: 'string',
+            enum: ['none', 'gentle', 'dry', 'sharp'],
+          },
+          pace: {
+            type: 'string',
+            enum: ['considered', 'natural', 'quick'],
+          },
+          formality: {
+            type: 'string',
+            enum: ['casual', 'neutral', 'formal'],
+          },
+          emoji: {
+            type: 'string',
+            enum: ['none', 'rare', 'occasional', 'playful'],
+          },
+          vocabulary: {
+            type: 'string',
+            enum: ['slangy', 'neutral', 'elevated'],
+          },
+          length: {
+            type: 'string',
+            enum: ['punchy', 'natural', 'fuller'],
+          },
+        },
+      },
       signal_source: {
         type: 'string',
         enum: ['curator', 'hero_palette', 'tone_classifier', 'card_mix'],
@@ -98,6 +159,15 @@ registerTool<Input, Output>({
       ...(parsed.motion !== undefined ? { motion: parsed.motion } : {}),
       ...(parsed.font_pairing !== undefined
         ? { font_pairing: parsed.font_pairing }
+        : {}),
+      ...(parsed.typography !== undefined
+        ? { typography: parsed.typography }
+        : {}),
+      ...(parsed.density !== undefined ? { density: parsed.density } : {}),
+      ...(parsed.shape !== undefined ? { shape: parsed.shape } : {}),
+      ...(parsed.mood !== undefined ? { mood: parsed.mood } : {}),
+      ...(parsed.voice !== undefined
+        ? { voice: { ...(current.voice ?? {}), ...parsed.voice } }
         : {}),
     };
 

@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks, variantGroups } from '@/db/schema';
@@ -22,7 +22,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'add_variant_group',
   description:
-    "Create a variant group that bundles cards together. 'pick_one' = recipient chooses one. 'pick_any' = recipient picks any subset. 'pick_all' = the group is the gift as a whole. After this, attach cards to the group by passing variant_group_id to add_card.",
+    "Create a group of cards the recipient chooses between. selection='pick_one' means exactly one card in the group can be picked (later picks within the group swap out the prior pick — picking a sibling automatically un-picks the others). selection='pick_any' lets the recipient pick zero or more independently. selection='pick_all' bundles the group — picking any card in the group auto-picks the others (and un-picking removes them all). Use whenever you want sibling alternatives (colors, sizes, dinner options) or a bundle that must move together. Pass the returned id to add_card as variant_group_id.",
   input_schema: {
     type: 'object',
     properties: {
@@ -33,6 +33,8 @@ registerTool<Input, Output>({
       selection: {
         type: 'string',
         enum: ['pick_one', 'pick_any', 'pick_all'],
+        description:
+          "pick_one = exactly one (swap on new pick); pick_any = independent; pick_all = bundle moves together.",
       },
     },
     required: ['title', 'selection'],
@@ -40,21 +42,13 @@ registerTool<Input, Output>({
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
 
-    const [lastGroup] = await db
-      .select({ position: variantGroups.position })
-      .from(variantGroups)
-      .where(eq(variantGroups.peekId, ctx.peekId))
-      .orderBy(desc(variantGroups.position))
-      .limit(1);
-    const nextPosition = (lastGroup?.position ?? -1) + 1;
-
     const [row] = await db
       .insert(variantGroups)
       .values({
         peekId: ctx.peekId,
         title: parsed.title,
         selection: parsed.selection,
-        position: nextPosition,
+        position: sql`(SELECT COALESCE(MAX(${variantGroups.position}), -1) + 1 FROM ${variantGroups} WHERE ${variantGroups.peekId} = ${ctx.peekId})`,
       })
       .returning({ id: variantGroups.id });
     if (!row) throw new Error('failed to create variant group');

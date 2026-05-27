@@ -1,6 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import {
+  Caveat,
+  Cormorant_Garamond,
+  DM_Mono,
+  Fraunces,
+  Inter,
+  Playfair_Display,
+} from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import { Providers } from '@/components/providers';
+import { Toaster } from '@/components/ui/toaster';
 import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 import './globals.css';
@@ -8,6 +17,38 @@ import './globals.css';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap',
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['300', '400', '500'],
+  display: 'swap',
+});
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  variable: '--font-script',
+  display: 'swap',
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-body-serif',
+  weight: ['300', '400', '500', '600'],
   display: 'swap',
 });
 
@@ -86,6 +127,11 @@ export default function RootLayout({
         <body
           className={cn(
             inter.variable,
+            playfair.variable,
+            fraunces.variable,
+            dmMono.variable,
+            caveat.variable,
+            cormorant.variable,
             'min-h-[100dvh] bg-background text-foreground antialiased',
           )}
         >
@@ -95,7 +141,10 @@ export default function RootLayout({
           >
             Skip to main content
           </a>
-          {children}
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
           <script
             type="application/ld+json"
             // eslint-disable-next-line react/no-danger

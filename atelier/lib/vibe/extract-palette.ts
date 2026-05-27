@@ -1,6 +1,7 @@
 import 'server-only';
 import { Vibrant } from 'node-vibrant/node';
 import { logger } from '@/lib/logger';
+import { assessPaletteQuality } from './palette-quality';
 
 const log = logger.child({ component: 'vibe/extract-palette' });
 
@@ -25,14 +26,20 @@ const MAX_BYTES = 12 * 1024 * 1024;
 
 export async function extractPalette(
   imageUrl: string,
-): Promise<ExtractedPalette> {
+): Promise<ExtractedPalette | null> {
   try {
     const buffer = await fetchImageBuffer(imageUrl);
-    if (!buffer) return DEFAULT_PALETTE;
+    if (!buffer) {
+      log.info('palette_extract_rejected', {
+        imageUrl,
+        reason: 'fetch_failed',
+      });
+      return null;
+    }
 
     const swatches = await Vibrant.from(buffer).getPalette();
 
-    return {
+    const candidate: ExtractedPalette = {
       bg:
         swatches.LightMuted?.hex ??
         swatches.LightVibrant?.hex ??
@@ -52,12 +59,24 @@ export async function extractPalette(
         swatches.Vibrant?.hex ??
         DEFAULT_PALETTE.accent2,
     };
+
+    const quality = assessPaletteQuality(candidate);
+    if (!quality.ok) {
+      log.info('palette_extract_rejected', {
+        imageUrl,
+        reason: quality.reason,
+        palette: candidate,
+      });
+      return null;
+    }
+
+    return candidate;
   } catch (err) {
     log.warn('extractPalette failed', {
       imageUrl,
       err: err instanceof Error ? err.message : String(err),
     });
-    return DEFAULT_PALETTE;
+    return null;
   }
 }
 

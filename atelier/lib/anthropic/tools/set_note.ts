@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks } from '@/db/schema';
+import { moderateInput } from '@/lib/anthropic/moderation';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
 import { registerTool } from './index';
 
@@ -12,15 +13,14 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-interface Output {
-  ok: true;
-  note_md: string;
-}
+type Output =
+  | { ok: true; note_md: string }
+  | { ok: false; error: 'moderation_block'; user_message: string };
 
 registerTool<Input, Output>({
   name: 'set_note',
   description:
-    "Set the curator's hand-written note that opens the Peek. Markdown is supported. Idempotent — call again to overwrite. Keep it short and in the curator's voice; you can offer to draft it but the final words land here.",
+    "Set the personal note that opens the page (markdown supported). Use once you have something concrete in the curator's voice; idempotent — call again to overwrite. The final words should sound like the curator, not you.",
   input_schema: {
     type: 'object',
     properties: {
@@ -33,6 +33,22 @@ registerTool<Input, Output>({
   },
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
+
+    const verdict = await moderateInput({
+      text: parsed.note_md,
+      field: 'note',
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+    });
+    if (!verdict.allow) {
+      return {
+        ok: false,
+        error: 'moderation_block',
+        user_message: verdict.user_message,
+      };
+    }
+
     const [row] = await db
       .update(peeks)
       .set({

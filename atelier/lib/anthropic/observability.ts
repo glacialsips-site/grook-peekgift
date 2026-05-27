@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic } from './client';
 import { getPostHogServer, trackFireAndForget } from '@/lib/analytics/facade';
 import { logger } from '@/lib/logger';
+import { recordUsageFireAndForget } from '@/lib/usage/record';
 
 const log = logger.child({ component: 'anthropic/observability' });
 
@@ -119,6 +120,22 @@ function captureSingle(payload: CapturePayload): void {
       tool_calls: payload.toolCalls,
       streaming: payload.streaming,
       stop_reason: payload.stopReason,
+    },
+  });
+
+  recordUsageFireAndForget({
+    userId: payload.ctx.userId,
+    sessionId: payload.ctx.sessionId,
+    peekId: payload.ctx.peekId,
+    vendor: 'anthropic',
+    kind: payload.model,
+    payload: {
+      input_tokens: payload.usage.input_tokens,
+      output_tokens: payload.usage.output_tokens,
+      cache_read_input_tokens: payload.usage.cache_read_input_tokens ?? 0,
+      cache_creation_input_tokens:
+        payload.usage.cache_creation_input_tokens ?? 0,
+      peek_id: payload.ctx.peekId,
     },
   });
 }
@@ -336,6 +353,23 @@ export function beginTurnCapture(ctx: LlmCallContext): TurnCapture {
           stop_reason: lastStopReason,
         },
       });
+
+      for (const r of rollups) {
+        recordUsageFireAndForget({
+          userId: ctx.userId,
+          sessionId: ctx.sessionId,
+          peekId: ctx.peekId,
+          vendor: 'anthropic',
+          kind: r.model,
+          payload: {
+            input_tokens: r.inputTokens,
+            output_tokens: r.outputTokens,
+            cache_read_input_tokens: r.cacheReadInputTokens,
+            cache_creation_input_tokens: r.cacheCreationInputTokens,
+            peek_id: ctx.peekId,
+          },
+        });
+      }
     },
   };
 }

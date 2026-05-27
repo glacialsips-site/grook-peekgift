@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Check, Copy, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
+import { subscribePostgresChanges } from '@/lib/peek/subscribe-postgres-changes';
 import type { DbRow } from '@/lib/supabase/database.types';
 import type { PeekStatus } from '@/lib/peek/types';
 
@@ -49,25 +50,25 @@ export function PublishStatus({
 
     const sb = getSupabaseBrowser();
     let cancelled = false;
-    const channel = sb
-      .channel(`publish:${peekId}`)
-      .on(
-        'postgres_changes' as never,
-        {
-          event: 'UPDATE',
-          schema: 'peek_v2',
-          table: 'peeks',
-          filter: `id=eq.${peekId}`,
-        },
-        (payload: { new: Partial<DbRow<'peeks'>> }) => {
-          if (cancelled) return;
-          const row = payload.new;
-          if (isPeekStatus(row.status)) setStatus(row.status);
-          if (typeof row.share_url === 'string') setShareUrl(row.share_url);
-          if (typeof row.slug === 'string') setSlug(row.slug);
-        },
-      )
-      .subscribe();
+    const channel = sb.channel(`publish:${peekId}`);
+    subscribePostgresChanges<Partial<DbRow<'peeks'>> & Record<string, unknown>>(
+      channel,
+      {
+        event: 'UPDATE',
+        schema: 'peek_v2',
+        table: 'peeks',
+        filter: `id=eq.${peekId}`,
+      },
+      (payload) => {
+        if (cancelled) return;
+        if (payload.eventType !== 'UPDATE') return;
+        const row = payload.new;
+        if (isPeekStatus(row.status)) setStatus(row.status);
+        if (typeof row.share_url === 'string') setShareUrl(row.share_url);
+        if (typeof row.slug === 'string') setSlug(row.slug);
+      },
+    );
+    channel.subscribe();
 
     const startedAt = Date.now();
     const poll = async () => {

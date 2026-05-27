@@ -1,24 +1,61 @@
 import type {
+  RecipientProfile,
   Vibe,
+  VibeBodyFont,
   VibeCore,
+  VibeDensity,
   VibeFontPairing,
+  VibeHeadingFont,
+  VibeMood,
   VibeMotion,
   VibePalette,
   VibePreset,
+  VibeShape,
   VibeSignalSource,
   VibeSignalSourceEntry,
+  VibeTypography,
+  VibeVoice,
+  VoiceEmoji,
+  VoiceFormality,
+  VoiceHumor,
+  VoiceLength,
+  VoicePace,
+  VoiceVocabulary,
+  VoiceWarmth,
 } from '@/db/schema/peeks';
-import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
+import type {
+  UnlockRule as SchemaUnlockRule,
+  UnlockRuleBeg as SchemaUnlockRuleBeg,
+  UnlockRuleDateAfter as SchemaUnlockRuleDateAfter,
+  UnlockRuleEvent as SchemaUnlockRuleEvent,
+  UnlockRuleRequiresPicks as SchemaUnlockRuleRequiresPicks,
+  UnlockRuleKind as SchemaUnlockRuleKind,
+} from '@/db/schema/cards';
 
 export type {
+  RecipientProfile,
   Vibe,
+  VibeBodyFont,
   VibeCore,
+  VibeDensity,
   VibeFontPairing,
+  VibeHeadingFont,
+  VibeMood,
   VibeMotion,
   VibePalette,
   VibePreset,
+  VibeShape,
   VibeSignalSource,
   VibeSignalSourceEntry,
+  VibeTypography,
+  VibeVoice,
+  VoiceEmoji,
+  VoiceFormality,
+  VoiceHumor,
+  VoiceLength,
+  VoicePace,
+  VoiceVocabulary,
+  VoiceWarmth,
 };
 
 export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
@@ -30,6 +67,9 @@ export type Peek = {
   recipientName: string | null;
   relationship: string | null;
   occasion: string | null;
+  giverNames: string[];
+  budgetCents: number | null;
+  recipientProfile: RecipientProfile;
   vibe: Vibe;
   heroImageUrl: string | null;
   heroImageSource: string | null;
@@ -52,7 +92,21 @@ export type VariantGroup = {
 
 export type CardType = 'product' | 'activity' | 'aspirational' | 'digital';
 
-export type UnlockRule = Partial<SchemaUnlockRule>;
+export type UnlockRuleKind = SchemaUnlockRuleKind;
+
+export type UnlockRule = {
+  kind?: UnlockRuleKind;
+  beg_prompt?: string;
+  unlock_after?: string;
+  card_ids?: string[];
+};
+
+export type SchemaUnlockRules =
+  | SchemaUnlockRuleBeg
+  | SchemaUnlockRuleDateAfter
+  | SchemaUnlockRuleEvent
+  | SchemaUnlockRuleRequiresPicks
+  | SchemaUnlockRule;
 
 export type Card = {
   id: string;
@@ -81,12 +135,36 @@ export type PeekDraft = {
 };
 
 export const DEFAULT_VIBE: Vibe = {
-  tone: 'warm',
+  tone: 'warm, open, unhurried',
+  palette: {
+    bg: '#F7F4EE',
+    surface: '#ECE7DD',
+    ink: '#1F1B16',
+    accent: '#7C6A58',
+    accent2: '#C7B299',
+  },
+  mood_words: ['warm', 'open', 'unhurried'],
   motion: 'soft',
+  font_pairing: { display: 'Fraunces', body: 'Inter' },
+  typography: { heading: 'serif', body: 'sans' },
+  density: 'cozy',
+  shape: 'soft',
+  mood: 'minimal',
+};
+
+export type ChatMessageImage = {
+  url: string;
+  contentType?: string;
+  alt?: string;
 };
 
 export type ChatMessage =
-  | { id: string; role: 'user'; content: string }
+  | {
+      id: string;
+      role: 'user';
+      content: string;
+      images?: ChatMessageImage[];
+    }
   | {
       id: string;
       role: 'assistant';

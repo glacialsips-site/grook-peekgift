@@ -13,25 +13,27 @@ export const scrapeWorkerFn = inngest.createFunction(
     triggers: [scrapeRequestedEvent],
   },
   async ({ event, step }) => {
-    const { url, placeholderCardId } = event.data;
+    const { url, placeholderCardId, peekId } = event.data;
 
-    const product = await step.run('scrape', async () => {
-      const outcome = await scrapePipeline(url);
-      if (!outcome.ok) {
-        throw new Error(outcome.error);
-      }
-      return outcome.product;
+    const outcome = await step.run('scrape', async () => {
+      return scrapePipeline(url, { peekId: peekId ?? null });
     });
 
     await step.run('update-card', async () => {
+      if (!outcome.ok) return;
+      const product = outcome.product;
       await db
         .update(cards)
         .set({
-          title: product.title ?? 'Scrape failed',
+          title: product.title,
           description: product.description ?? null,
           imageUrl: product.imageUrl ?? null,
           valueCents: product.valueCents ?? null,
           sourceRetailer: product.sourceRetailer ?? null,
+          metadata: {
+            scrape_provider: outcome.provider,
+            scrape_degraded: outcome.degraded,
+          },
         })
         .where(eq(cards.id, placeholderCardId));
     });

@@ -17,7 +17,9 @@ import './scrape_url';
 import './set_hero_image';
 import './set_note';
 import './set_recipient';
+import './set_recipient_profile';
 import './set_vibe';
+import './update_card';
 import './update_vibe';
 
 export {};

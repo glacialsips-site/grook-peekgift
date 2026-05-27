@@ -7,6 +7,7 @@ import { getSupabaseService } from '@/lib/supabase/service';
 import { sendEmail } from '@/lib/email/send';
 import { PeekShareMessageEmail } from '@/lib/email/templates/peek-share-message';
 import { trackFireAndForget } from '@/lib/analytics/facade';
+import { recordUsageFireAndForget } from '@/lib/usage/record';
 import {
   enforceRateLimit,
   limiters,
@@ -68,6 +69,15 @@ function recordShareSend(args: {
     userId: args.userId,
     payload: { channel: args.channel },
   });
+  if (args.outcome === 'sent') {
+    recordUsageFireAndForget({
+      userId: args.userId,
+      peekId: args.peekId,
+      vendor: args.channel === 'sms' ? 'twilio' : 'resend',
+      kind: args.channel === 'sms' ? 'sms' : 'email',
+      payload: { peek_id: args.peekId },
+    });
+  }
 }
 
 async function sendSms(args: {

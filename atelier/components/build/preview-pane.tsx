@@ -2,7 +2,15 @@
 
 import { useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Lock, MapPin, Sparkle } from 'lucide-react';
+import {
+  Calendar,
+  Gift,
+  Laugh,
+  Lock,
+  MapPin,
+  Sparkle,
+  Sparkles,
+} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -11,12 +19,44 @@ import {
 } from '@/components/peek-vibe-provider';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import type { Card, PeekDraft, VariantGroup, Vibe } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
+import type {
+  Card,
+  CardType,
+  PeekDraft,
+  VariantGroup,
+  Vibe,
+} from '@/lib/peek/types';
+import { TeachingSurface } from './teaching/teaching-surface';
+import {
+  VariantGroupContainer,
+  gridClassesForCount,
+} from './variant-group-container';
+
+export type PreviewViewAs = 'curator' | 'recipient';
 
 type Props = {
   draft: PeekDraft;
   className?: string;
+  viewAs?: PreviewViewAs;
 };
+
+function isPeekEmpty(draft: PeekDraft): boolean {
+  const p = draft.peek;
+  if (p.recipientName && p.recipientName.trim().length > 0) return false;
+  if (p.occasion && p.occasion.trim().length > 0) return false;
+  if (p.relationship && p.relationship.trim().length > 0) return false;
+  if (p.giverNames && p.giverNames.length > 0) return false;
+  if (p.heroImageUrl) return false;
+  if (p.noteMd && p.noteMd.trim().length > 0) return false;
+  if (draft.cards.length > 0) return false;
+  if (draft.variantGroups.length > 0) return false;
+  const v = p.vibe ?? {};
+  if (v.palette || v.mood || (v.mood_words && v.mood_words.length > 0)) {
+    return false;
+  }
+  return true;
+}
 
 const PROVIDER_DEFAULT: ProviderVibe = {
   tone: 'warm',
@@ -38,6 +78,10 @@ function toProviderVibe(vibe: Vibe | null | undefined): ProviderVibe {
     mood_words: vibe.mood_words,
     palette: vibe.palette ?? PROVIDER_DEFAULT.palette,
     font_pairing: vibe.font_pairing,
+    typography: vibe.typography,
+    density: vibe.density,
+    shape: vibe.shape,
+    mood: vibe.mood,
   };
 }
 
@@ -51,7 +95,49 @@ function formatPrice(cents: number | null): string | null {
   }).format(dollars);
 }
 
-export function PreviewPane({ draft, className }: Props) {
+export function PreviewPane({
+  draft,
+  className,
+  viewAs = 'curator',
+}: Props) {
+  const empty = isPeekEmpty(draft);
+
+  if (empty) {
+    return (
+      <section
+        className={cn(
+          'relative flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground',
+          className,
+        )}
+        aria-label="Peek preview"
+      >
+        <TeachingSurface>
+          {(sample) => <DraftRender draft={sample} viewAs={viewAs} />}
+        </TeachingSurface>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={cn(
+        'relative flex h-full min-h-0 flex-col bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]',
+        className,
+      )}
+      aria-label="Peek preview"
+    >
+      <DraftRender draft={draft} viewAs={viewAs} />
+    </section>
+  );
+}
+
+function DraftRender({
+  draft,
+  viewAs,
+}: {
+  draft: PeekDraft;
+  viewAs: PreviewViewAs;
+}) {
   const providerVibe = useMemo(
     () => toProviderVibe(draft.peek.vibe),
     [draft.peek.vibe],
@@ -87,114 +173,254 @@ export function PreviewPane({ draft, className }: Props) {
     [draft.variantGroups],
   );
 
+  const budgetTally = useMemo(() => {
+    if (viewAs !== 'curator') return null;
+    const sum = draft.cards.reduce(
+      (acc, c) => acc + (c.valueCents ?? 0),
+      0,
+    );
+    return { sum, budget: draft.peek.budgetCents };
+  }, [viewAs, draft.cards, draft.peek.budgetCents]);
+
   return (
-    <section
-      className={cn(
-        'flex h-full min-h-0 flex-col bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]',
-        className,
-      )}
-      aria-label="Peek preview"
-    >
-      <PeekVibeProvider vibe={providerVibe}>
-        <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-          <Hero peek={draft.peek} />
+    <PeekVibeProvider vibe={providerVibe}>
+      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]">
+        {budgetTally &&
+        (budgetTally.sum > 0 || budgetTally.budget != null) ? (
+          <BudgetBadge sum={budgetTally.sum} budget={budgetTally.budget} />
+        ) : null}
 
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-5 py-8">
-            <RecipientHeader peek={draft.peek} />
+        <PreviewHero peek={draft.peek} />
 
-            {draft.peek.noteMd ? (
-              <article
-                className={cn(
-                  'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
-                  'prose-headings:text-[hsl(var(--peek-ink))]',
-                  'prose-strong:text-[hsl(var(--peek-ink))]',
-                  'prose-a:text-[hsl(var(--peek-accent))]',
-                )}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {draft.peek.noteMd}
-                </ReactMarkdown>
-              </article>
-            ) : (
-              <EmptyHint>
-                A personal note will appear here as you tell Peek more.
-              </EmptyHint>
-            )}
+        <div
+          className="mx-auto flex w-full max-w-2xl flex-col px-5"
+          style={{
+            gap: 'var(--peek-space-8)',
+            paddingTop: 'var(--peek-space-6)',
+            paddingBottom: 'var(--peek-space-8)',
+          }}
+        >
+          {draft.peek.noteMd ? (
+            <article
+              className={cn(
+                'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
+                'prose-headings:text-[hsl(var(--peek-ink))]',
+                'prose-strong:text-[hsl(var(--peek-ink))]',
+                'prose-a:text-[hsl(var(--peek-accent))]',
+              )}
+              style={{ fontFamily: 'var(--peek-font-body)' }}
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {draft.peek.noteMd}
+              </ReactMarkdown>
+            </article>
+          ) : (
+            <EmptyHint>
+              A personal note will appear here as you tell Peek more.
+            </EmptyHint>
+          )}
 
-            <Separator className="bg-[hsl(var(--peek-ink))]/10" />
+          <Separator className="bg-[hsl(var(--peek-ink))]/10" />
 
-            <div className="flex flex-col gap-6">
-              {ungrouped.length === 0 && orderedGroups.length === 0 ? (
-                <EmptyHint>No cards yet — keep chatting.</EmptyHint>
-              ) : null}
+          <div className="flex flex-col gap-6">
+            {ungrouped.length === 0 && orderedGroups.length === 0 ? (
+              <EmptyHint>No cards yet — keep chatting.</EmptyHint>
+            ) : null}
 
-              <AnimatePresence initial={false}>
-                {ungrouped.map((card, idx) => (
-                  <CardItem key={card.id} card={card} index={idx} />
-                ))}
-              </AnimatePresence>
-
-              {orderedGroups.map((group, gi) => (
-                <VariantGroupBlock
-                  key={group.id}
-                  group={group}
-                  cards={grouped.get(group.id) ?? []}
-                  baseIndex={ungrouped.length + gi}
+            <AnimatePresence initial={false}>
+              {ungrouped.map((card, idx) => (
+                <CardItem
+                  key={card.id}
+                  card={card}
+                  index={idx}
+                  viewAs={viewAs}
                 />
               ))}
-            </div>
+            </AnimatePresence>
+
+            {orderedGroups.map((group, gi) => (
+              <VariantGroupBlock
+                key={group.id}
+                group={group}
+                cards={grouped.get(group.id) ?? []}
+                baseIndex={ungrouped.length + gi}
+                viewAs={viewAs}
+              />
+            ))}
           </div>
         </div>
-      </PeekVibeProvider>
-    </section>
+      </div>
+    </PeekVibeProvider>
   );
 }
 
-function Hero({ peek }: { peek: PeekDraft['peek'] }) {
+function BudgetBadge({
+  sum,
+  budget,
+}: {
+  sum: number;
+  budget: number | null;
+}) {
+  const sumFmt = formatPrice(sum) ?? '$0';
+  const over = budget != null && sum > budget;
+  const label =
+    budget == null
+      ? `${sumFmt} (no budget set)`
+      : `${sumFmt} / ${formatPrice(budget) ?? '$0'} proposed`;
+  return (
+    <div className="pointer-events-none absolute right-3 top-3 z-30">
+      <span
+        className={cn(
+          'pointer-events-auto inline-flex items-center gap-1.5 rounded-full border bg-background/95 px-3 py-1.5 text-[11px] font-semibold shadow-md backdrop-blur',
+          over
+            ? 'border-red-500/30 text-red-600 dark:text-red-400'
+            : 'border-[hsl(var(--peek-ink))]/15 text-[hsl(var(--peek-ink))]/75',
+        )}
+        title={
+          over ? 'Proposed value exceeds budget' : 'Curator-only budget tally'
+        }
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
+  const name = peek.recipientName ?? 'your person';
+  const givers = peek.giverNames ?? [];
+  const hasGivers = givers.length > 0;
+  const display = peek.vibe?.font_pairing?.display;
+  const headingFont = display ?? 'var(--peek-font-heading)';
+
   if (peek.heroImageUrl) {
     return (
-      <div
-        role="img"
-        aria-label="Hero preview"
-        className="relative h-48 w-full bg-cover bg-center sm:h-64 md:h-80"
-        style={{ backgroundImage: `url(${peek.heroImageUrl})` }}
-      >
+      <header className="relative w-full overflow-hidden">
         <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--peek-bg))]/80 to-transparent"
-        />
-      </div>
+          role="img"
+          aria-label={`Hero image for ${name}`}
+          className="relative h-[42vh] min-h-[260px] w-full sm:h-[52vh]"
+        >
+          <motion.div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: cssUrl(peek.heroImageUrl) }}
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.0, ease: 'easeOut' }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 px-6 pb-6 sm:pb-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
+              className="text-4xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-5xl"
+              style={{ fontFamily: headingFont }}
+            >
+              {name}
+            </motion.h1>
+            {peek.occasion ? (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
+                className="text-base text-white/85 drop-shadow sm:text-lg"
+                style={{ fontFamily: headingFont }}
+              >
+                {peek.occasion}
+              </motion.p>
+            ) : peek.relationship ? (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
+                className="text-xs uppercase tracking-widest text-white/75 drop-shadow"
+              >
+                {peek.relationship}
+              </motion.p>
+            ) : null}
+            {hasGivers ? (
+              <motion.p
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.7, ease: 'easeOut' }}
+                className="text-xs uppercase tracking-widest text-white/75 drop-shadow"
+              >
+                from {givers.join(', ')}
+              </motion.p>
+            ) : null}
+            {!peek.occasion && !hasGivers && !peek.relationship ? (
+              <p className="text-sm text-white/60 drop-shadow">
+                Who is this for?
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </header>
     );
   }
-  return (
-    <motion.div
-      aria-hidden="true"
-      className="h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/40 via-[hsl(var(--peek-accent2))]/30 to-[hsl(var(--peek-surface))] sm:h-48"
-      animate={{ opacity: [0.7, 1, 0.7] }}
-      transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-    />
-  );
-}
 
-function RecipientHeader({ peek }: { peek: PeekDraft['peek'] }) {
-  const name = peek.recipientName ?? 'your person';
-  const subtitleParts = [peek.relationship, peek.occasion].filter(
-    (v): v is string => Boolean(v),
-  );
   return (
-    <header className="flex flex-col gap-1">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-        {name}
-      </h1>
-      {subtitleParts.length > 0 ? (
-        <p className="text-sm text-[hsl(var(--peek-ink))]/60">
-          {subtitleParts.join(' · ')}
-        </p>
-      ) : (
-        <p className="text-sm text-[hsl(var(--peek-ink))]/40">
-          Who is this for?
-        </p>
-      )}
+    <header className="relative w-full overflow-hidden">
+      <motion.div
+        className="relative flex h-[36vh] min-h-[220px] w-full flex-col items-start justify-end bg-gradient-to-br from-[hsl(var(--peek-accent))]/55 via-[hsl(var(--peek-accent2))]/40 to-[hsl(var(--peek-surface))] px-6 pb-6 sm:h-[44vh]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+      >
+        <motion.h1
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
+          className="text-4xl font-semibold tracking-tight text-[hsl(var(--peek-ink))] sm:text-5xl"
+          style={{ fontFamily: headingFont }}
+        >
+          {name}
+        </motion.h1>
+        {peek.occasion ? (
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="mt-1 text-base text-[hsl(var(--peek-ink))]/75 sm:text-lg"
+            style={{ fontFamily: headingFont }}
+          >
+            {peek.occasion}
+          </motion.p>
+        ) : peek.relationship ? (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.55, delay: 0.5 }}
+            className="mt-1 text-xs uppercase tracking-widest text-[hsl(var(--peek-ink))]/60"
+          >
+            {peek.relationship}
+          </motion.p>
+        ) : null}
+        {hasGivers ? (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.55, delay: 0.6 }}
+            className="mt-1 text-xs uppercase tracking-widest text-[hsl(var(--peek-ink))]/60"
+          >
+            from {givers.join(', ')}
+          </motion.p>
+        ) : null}
+        {!peek.occasion && !hasGivers && !peek.relationship ? (
+          <p className="mt-1 text-sm text-[hsl(var(--peek-ink))]/45">
+            Who is this for?
+          </p>
+        ) : null}
+      </motion.div>
     </header>
   );
 }
@@ -211,8 +437,23 @@ function EmptyHint({ children }: { children: React.ReactNode }) {
   );
 }
 
-function CardItem({ card, index }: { card: Card; index: number }) {
-  const price = card.revealValue ? formatPrice(card.valueCents) : null;
+function CardItem({
+  card,
+  index,
+  viewAs,
+  compact,
+}: {
+  card: Card;
+  index: number;
+  viewAs: PreviewViewAs;
+  compact?: boolean;
+}) {
+  const showCuratorPrice =
+    viewAs === 'curator' && card.valueCents != null;
+  const showRecipientPrice = viewAs === 'recipient' && card.revealValue;
+  const showPrice = showCuratorPrice || showRecipientPrice;
+  const price = showPrice ? formatPrice(card.valueCents) : null;
+  const priceIsHidden = showCuratorPrice && !card.revealValue;
 
   return (
     <motion.article
@@ -225,14 +466,18 @@ function CardItem({ card, index }: { card: Card; index: number }) {
         delay: Math.min(index * 0.04, 0.3),
         ease: 'easeOut',
       }}
-      className="relative overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm"
+      className="relative flex flex-col overflow-hidden border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm"
+      style={{ borderRadius: 'var(--peek-radius-lg)' }}
     >
       {card.imageUrl ? (
         <div
           role="img"
           aria-label={card.title}
-          className="relative h-44 w-full bg-cover bg-center sm:h-56"
-          style={{ backgroundImage: `url(${card.imageUrl})` }}
+          className={cn(
+            'relative w-full bg-cover bg-center',
+            compact ? 'h-36 sm:h-40' : 'h-44 sm:h-56',
+          )}
+          style={{ backgroundImage: cssUrl(card.imageUrl) }}
         >
           {card.isLocked ? <LockOverlay card={card} /> : null}
           {card.isTaunt && card.tauntText ? (
@@ -240,22 +485,27 @@ function CardItem({ card, index }: { card: Card; index: number }) {
           ) : null}
         </div>
       ) : (
-        <div
-          aria-hidden="true"
-          className="relative h-32 w-full bg-gradient-to-br from-[hsl(var(--peek-accent))]/20 to-[hsl(var(--peek-accent2))]/20"
-        >
-          {card.isLocked ? <LockOverlay card={card} /> : null}
-          {card.isTaunt && card.tauntText ? (
-            <TauntOverlay text={card.tauntText} />
-          ) : null}
-        </div>
+        <TextOnlyHero card={card} compact={compact} />
       )}
 
-      <div className="flex flex-col gap-1.5 p-4">
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-base font-medium leading-tight">{card.title}</h3>
+          <h3
+            className="text-base font-medium leading-tight"
+            style={{ fontFamily: 'var(--peek-font-heading)' }}
+          >
+            {card.title}
+          </h3>
           {price ? (
-            <span className="shrink-0 rounded-full bg-[hsl(var(--peek-accent))]/10 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
+            <span
+              className={cn(
+                'shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
+                priceIsHidden
+                  ? 'border border-dashed border-[hsl(var(--peek-accent))]/40 text-[hsl(var(--peek-accent))]/70'
+                  : 'bg-[hsl(var(--peek-accent))]/10 text-[hsl(var(--peek-accent))]',
+              )}
+              title={priceIsHidden ? 'Hidden from recipient' : undefined}
+            >
               {price}
             </span>
           ) : null}
@@ -273,6 +523,49 @@ function CardItem({ card, index }: { card: Card; index: number }) {
         ) : null}
       </div>
     </motion.article>
+  );
+}
+
+const TYPE_ICON: Record<CardType, typeof Gift> = {
+  product: Gift,
+  activity: Calendar,
+  aspirational: Sparkles,
+  digital: Sparkle,
+};
+
+function TextOnlyHero({ card, compact }: { card: Card; compact?: boolean }) {
+  const Icon = card.isTaunt ? Laugh : TYPE_ICON[card.type] ?? Gift;
+  return (
+    <div
+      aria-hidden={card.isTaunt ? undefined : 'true'}
+      className={cn(
+        'relative flex w-full items-end overflow-hidden',
+        compact ? 'h-28 sm:h-32' : 'h-32 sm:h-36',
+      )}
+      style={{
+        background:
+          'linear-gradient(135deg, hsl(var(--peek-accent) / 0.18) 0%, hsl(var(--peek-accent2) / 0.14) 100%)',
+      }}
+    >
+      <div className="pointer-events-none absolute -right-3 -top-3 opacity-40">
+        <Icon
+          className="h-16 w-16 text-[hsl(var(--peek-accent))]/60"
+          aria-hidden="true"
+        />
+      </div>
+      <div className="flex flex-col gap-1 p-4">
+        <span
+          className="text-[10px] uppercase tracking-widest text-[hsl(var(--peek-accent))]/85"
+          style={{ fontFamily: 'var(--peek-font-heading)' }}
+        >
+          {card.type}
+        </span>
+      </div>
+      {card.isLocked ? <LockOverlay card={card} /> : null}
+      {card.isTaunt && card.tauntText ? (
+        <TauntOverlay text={card.tauntText} />
+      ) : null}
+    </div>
   );
 }
 
@@ -305,43 +598,31 @@ function VariantGroupBlock({
   group,
   cards,
   baseIndex,
+  viewAs,
 }: {
   group: VariantGroup;
   cards: Card[];
   baseIndex: number;
+  viewAs: PreviewViewAs;
 }) {
-  const label =
-    group.selection === 'pick_one'
-      ? 'Pick one'
-      : group.selection === 'pick_any'
-        ? 'Pick any'
-        : 'All of these';
+  const compact = cards.length >= 2;
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="flex flex-col gap-3 rounded-2xl border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))]/60 p-4"
-    >
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--peek-ink))]/70">
-          <Sparkle className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
-          {group.title}
-        </h2>
-        <span className="rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs text-[hsl(var(--peek-accent))]">
-          {label}
-        </span>
-      </div>
-      <div className="flex flex-col gap-3">
-        {cards.length === 0 ? (
-          <EmptyHint>This group is still being filled in.</EmptyHint>
-        ) : (
-          cards.map((card, i) => (
-            <CardItem key={card.id} card={card} index={baseIndex + i} />
-          ))
-        )}
-      </div>
-    </motion.div>
+    <VariantGroupContainer group={group} memberCount={cards.length}>
+      {cards.length === 0 ? (
+        <EmptyHint>This group is still being filled in.</EmptyHint>
+      ) : (
+        <div className={gridClassesForCount(cards.length)}>
+          {cards.map((card, i) => (
+            <CardItem
+              key={card.id}
+              card={card}
+              index={baseIndex + i}
+              viewAs={viewAs}
+              compact={compact}
+            />
+          ))}
+        </div>
+      )}
+    </VariantGroupContainer>
   );
 }

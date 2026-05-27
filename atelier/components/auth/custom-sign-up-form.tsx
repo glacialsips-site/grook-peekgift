@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSignUp } from '@clerk/nextjs/legacy';
+import { useAuth, useSignUp } from '@clerk/nextjs';
+import type { OAuthStrategy, SetActiveNavigate } from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,10 +14,17 @@ import { parseClerkError } from './clerk-error';
 type Step = { kind: 'start' } | { kind: 'verify_email'; email: string };
 
 export function CustomSignUpForm() {
-  const { signUp, setActive, isLoaded } = useSignUp();
+  const { signUp, fetchStatus } = useSignUp();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const redirectUrl = search.get('redirect_url') ?? '/build';
+  const redirectUrl = search.get('returnTo') ?? '/build';
+
+  useEffect(() => {
+    if (authLoaded && isSignedIn) {
+      router.replace(redirectUrl);
+    }
+  }, [authLoaded, isSignedIn, router, redirectUrl]);
 
   const [step, setStep] = useState<Step>({ kind: 'start' });
   const [email, setEmail] = useState('');
@@ -27,57 +35,60 @@ export function CustomSignUpForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoaded || !signUp) {
-    return (
-      <div className="py-8 text-center text-sm text-muted-foreground">
-        loading…
-      </div>
-    );
-  }
+  const busy = submitting || fetchStatus === 'fetching';
 
-  async function handleOAuth(strategy: 'oauth_google') {
-    if (!signUp) return;
-    setError(null);
-    try {
-      await signUp.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: redirectUrl,
-      });
-    } catch (e) {
-      setError(parseClerkError(e));
+  const navigateAfterSession: SetActiveNavigate = async ({ session, decorateUrl }) => {
+    if (session?.currentTask) return;
+    const url = decorateUrl(redirectUrl);
+    if (url.startsWith('http')) {
+      window.location.href = url;
+      return;
     }
+    router.push(url);
+  };
+
+  async function handleOAuth(strategy: OAuthStrategy) {
+    setError(null);
+    const { error: ssoError } = await signUp.sso({
+      strategy,
+      redirectUrl,
+      redirectCallbackUrl: '/sso-callback',
+    });
+    if (ssoError) setError(parseClerkError(ssoError));
   }
 
   async function onSubmitStart(ev: FormEvent) {
     ev.preventDefault();
-    if (!signUp) return;
     setError(null);
     setSubmitting(true);
     try {
-      await signUp.create({
+      const { error: createError } = await signUp.create({
         emailAddress: email,
         password,
         firstName: firstName.trim() || undefined,
         lastName: lastName.trim() || undefined,
       });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      if (createError) {
+        setError(parseClerkError(createError));
+        return;
+      }
+      const { error: sendError } = await signUp.verifications.sendEmailCode();
+      if (sendError) {
+        setError(parseClerkError(sendError));
+        return;
+      }
       setStep({ kind: 'verify_email', email });
-    } catch (e) {
-      setError(parseClerkError(e));
     } finally {
       setSubmitting(false);
     }
   }
 
   async function onResend() {
-    if (!signUp) return;
     setError(null);
     setSubmitting(true);
     try {
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-    } catch (e) {
-      setError(parseClerkError(e));
+      const { error: sendError } = await signUp.verifications.sendEmailCode();
+      if (sendError) setError(parseClerkError(sendError));
     } finally {
       setSubmitting(false);
     }
@@ -85,22 +96,31 @@ export function CustomSignUpForm() {
 
   async function onSubmitVerify(ev: FormEvent) {
     ev.preventDefault();
-    if (!signUp) return;
     setError(null);
     setSubmitting(true);
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl);
+      const { error: verifyError } = await signUp.verifications.verifyEmailCode({
+        code,
+      });
+      if (verifyError) {
+        setError(parseClerkError(verifyError));
         return;
       }
-      setError('Sign-up needs another step. Try again.');
-    } catch (e) {
-      setError(parseClerkError(e));
+      if (signUp.status !== 'complete') {
+        setError('Sign-up needs another step. Try again.');
+        return;
+      }
+      const { error: finalizeError } = await signUp.finalize({
+        navigate: navigateAfterSession,
+      });
+      if (finalizeError) setError(parseClerkError(finalizeError));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (authLoaded && isSignedIn) {
+    return null;
   }
 
   if (step.kind === 'start') {
@@ -109,7 +129,7 @@ export function CustomSignUpForm() {
         <OAuthButton
           provider="google"
           onClick={() => handleOAuth('oauth_google')}
-          disabled={submitting}
+          disabled={busy}
         />
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
@@ -172,7 +192,7 @@ export function CustomSignUpForm() {
           <Button
             type="submit"
             className="h-11 w-full"
-            disabled={submitting || !email || !password}
+            disabled={busy || !email || !password}
           >
             Create account
           </Button>
@@ -206,7 +226,7 @@ export function CustomSignUpForm() {
       <Button
         type="submit"
         className="h-11 w-full"
-        disabled={submitting || code.length < 6}
+        disabled={busy || code.length < 6}
       >
         Verify
       </Button>
@@ -214,7 +234,7 @@ export function CustomSignUpForm() {
         <button
           type="button"
           onClick={onResend}
-          disabled={submitting}
+          disabled={busy}
           className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
         >
           Didn't get it? Resend.
