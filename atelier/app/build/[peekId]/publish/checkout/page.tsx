@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabaseService } from '@/lib/supabase/service';
-import { EmbeddedCheckoutPanel } from '@/components/build/embedded-checkout';
+import { PaymentElementForm } from '@/components/build/payment-element-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,11 +33,11 @@ export default async function PublishCheckoutPage({
   }
 
   const headline = peek.recipient_name
-    ? `Send ${peek.recipient_name}'s Peek`
-    : 'Send your Peek';
+    ? `Publish ${peek.recipient_name}’s Peek`
+    : 'Publish your Peek';
   const subhead = peek.occasion
-    ? `One-time $12 — for ${peek.occasion}.`
-    : 'One-time $12 to publish the link.';
+    ? `One-time — for ${peek.occasion}. Share with as many people as you want.`
+    : 'One-time. Share with as many people as you want.';
 
   return (
     <main
@@ -45,12 +45,14 @@ export default async function PublishCheckoutPage({
       className="min-h-[100dvh] bg-background px-4 py-10 sm:px-6"
       aria-label="Complete payment to publish your Peek"
     >
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <header className="flex flex-col gap-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">{headline}</h1>
-          <p className="text-sm text-muted-foreground">{subhead}</p>
+      <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+        <header className="flex flex-col gap-1.5 text-center">
+          <h1 className="font-[var(--peek-font-heading)] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {headline}
+          </h1>
+          <p className="text-sm text-muted-foreground sm:text-base">{subhead}</p>
         </header>
-        <EmbeddedCheckoutPanel peekId={peekId} />
+        <PaymentElementForm peekId={peekId} mode="payment" />
       </div>
     </main>
   );
