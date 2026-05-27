@@ -64,6 +64,27 @@
       "when": 1780019000000,
       "tag": "0008_usage_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780105000000,
+      "tag": "0009_usage_ledger_peek_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780192000000,
+      "tag": "0010_realtime_picks_publication",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780192500000,
+      "tag": "0011_card_position_unique",
+      "breakpoints": true
     }
   ]
 }
