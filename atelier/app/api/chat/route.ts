@@ -3,7 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { chatTurn, DEFAULT_MODEL } from '@/lib/anthropic';
 import '@/lib/anthropic/tools/bootstrap';
 import { moderateInput, type ModerationResult } from '@/lib/anthropic/moderation';
-import { getUserId } from '@/lib/auth/server';
+import { getCurrentUser, getUserId } from '@/lib/auth/server';
 import {
   anonymousTurnCount,
   anonymousTurnExceeded,
@@ -286,6 +286,12 @@ export async function POST(req: NextRequest): Promise<Response> {
         }
       };
 
+      if (req.signal.aborted) {
+        safeClose();
+      } else {
+        req.signal.addEventListener('abort', safeClose, { once: true });
+      }
+
       const turnUsages: TurnUsage[] = [];
       let toolCallTotal = 0;
       const pendingToolNames = new Map<string, string>();
@@ -302,12 +308,53 @@ export async function POST(req: NextRequest): Promise<Response> {
         log.error('persist user message failed', { peekId, message });
       }
 
+      let curatorName: string | null = null;
+      if (userId) {
+        try {
+          const u = await getCurrentUser();
+          if (u) {
+            const composed = [u.firstName, u.lastName]
+              .filter((s): s is string => typeof s === 'string' && s.length > 0)
+              .join(' ')
+              .trim();
+            curatorName = composed.length > 0 ? composed : null;
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          log.warn('currentUser_failed', { message });
+        }
+      }
+      if (!curatorName?.trim()) curatorName = 'the curator';
+
+      let peekSummary: string | null = null;
+      try {
+        const snap = await loadPeekSnapshot(peekId);
+        if (snap) {
+          const recipient = snap.peek.recipientName?.trim();
+          const occasion = snap.peek.occasion?.trim();
+          const cardCount = snap.cards.length;
+          if (recipient) {
+            const occPart = occasion ? ` (${occasion})` : '';
+            peekSummary = `gift for ${recipient}${occPart}, ${cardCount} card${cardCount === 1 ? '' : 's'} so far`;
+          } else {
+            peekSummary = 'new peek (no recipient yet)';
+          }
+        } else {
+          peekSummary = 'new peek (no recipient yet)';
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        log.warn('peek_summary_load_failed', { peekId, message });
+      }
+
       try {
         const turn = chatTurn({
           ctx: { peekId, userId, sessionId },
           history: initialHistory,
           userMessage: userContent,
           model: chosenModel,
+          systemPromptOptions: { curatorName, peekSummary },
+          signal: req.signal,
           onToolResult: async (id, _name, output) => {
             safeEnqueue({ kind: 'tool_result', id, output });
             try {
@@ -403,7 +450,6 @@ export async function POST(req: NextRequest): Promise<Response> {
             case 'message_end': {
               const usage = toTurnUsage(event.usage);
               turnUsages.push(usage);
-              safeEnqueue({ kind: 'turn_end', usage });
               break;
             }
             case 'error': {
@@ -439,6 +485,10 @@ export async function POST(req: NextRequest): Promise<Response> {
           }),
           { input_tokens: 0, output_tokens: 0 },
         );
+
+        if (!req.signal.aborted) {
+          safeEnqueue({ kind: 'turn_end', usage: aggregated });
+        }
 
         await track({
           name: 'chat_turn',
