@@ -50,6 +50,7 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.supabase.co' },
       { protocol: 'https', hostname: '**.netlify.app' },
       { protocol: 'https', hostname: 'peek.gift' },
+      { protocol: 'https', hostname: '**.peek.gift' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'cdn.fal.media' },
     ],

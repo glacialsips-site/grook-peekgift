@@ -122,7 +122,11 @@ export default function RootLayout({
   };
 
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInFallbackRedirectUrl="/build"
+      signUpFallbackRedirectUrl="/build"
+      afterSignOutUrl="/"
+    >
       <html lang="en" suppressHydrationWarning>
         <body
           className={cn(

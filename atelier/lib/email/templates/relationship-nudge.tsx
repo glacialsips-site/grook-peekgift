@@ -1,3 +1,5 @@
+import { env } from '@/lib/env';
+
 type Props = {
   recipientName: string;
   relationship: string | null;
@@ -81,7 +83,7 @@ export function RelationshipNudgeEmail({
         <p style={paragraphStyle}>{opener}</p>
         <p style={paragraphStyle}>{memory}</p>
         <p style={{ ...paragraphStyle, marginBottom: '24px' }}>
-          <a href="https://peek.gift/build" style={buttonStyle}>
+          <a href={`${env.APP_URL.replace(/\/+$/, '')}/build`} style={buttonStyle}>
             Start a new Peek
           </a>
         </p>
