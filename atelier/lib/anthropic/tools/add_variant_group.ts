@@ -22,7 +22,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'add_variant_group',
   description:
-    "Create a group of cards the recipient chooses between (pick_one, pick_any, or pick_all). Use whenever you want to offer alternatives — sibling colors of the same shoe, three candle scents, two dinner options. Then pass the returned id to add_card as variant_group_id.",
+    "Create a group of cards the recipient chooses between. selection='pick_one' means exactly one card in the group can be picked (later picks within the group swap out the prior pick — picking a sibling automatically un-picks the others). selection='pick_any' lets the recipient pick zero or more independently. selection='pick_all' bundles the group — picking any card in the group auto-picks the others (and un-picking removes them all). Use whenever you want sibling alternatives (colors, sizes, dinner options) or a bundle that must move together. Pass the returned id to add_card as variant_group_id.",
   input_schema: {
     type: 'object',
     properties: {
@@ -33,6 +33,8 @@ registerTool<Input, Output>({
       selection: {
         type: 'string',
         enum: ['pick_one', 'pick_any', 'pick_all'],
+        description:
+          "pick_one = exactly one (swap on new pick); pick_any = independent; pick_all = bundle moves together.",
       },
     },
     required: ['title', 'selection'],
