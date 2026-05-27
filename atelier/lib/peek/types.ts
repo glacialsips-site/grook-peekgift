@@ -23,7 +23,14 @@ import type {
   VoiceVocabulary,
   VoiceWarmth,
 } from '@/db/schema/peeks';
-import type { UnlockRule as SchemaUnlockRule } from '@/db/schema/cards';
+import type {
+  UnlockRule as SchemaUnlockRule,
+  UnlockRuleBeg as SchemaUnlockRuleBeg,
+  UnlockRuleDateAfter as SchemaUnlockRuleDateAfter,
+  UnlockRuleEvent as SchemaUnlockRuleEvent,
+  UnlockRuleRequiresPicks as SchemaUnlockRuleRequiresPicks,
+  UnlockRuleKind as SchemaUnlockRuleKind,
+} from '@/db/schema/cards';
 
 export type {
   RecipientProfile,
