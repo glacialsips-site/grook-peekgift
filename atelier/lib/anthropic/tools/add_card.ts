@@ -57,7 +57,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'add_card',
   description:
-    "Add a card to the Peek. Required: type ('product'|'activity'|'aspirational'|'digital') and title. Everything else is optional but the richer the better — image_url, description, value_cents (for big-reveals), source_url (we'll affiliate-wrap it later), variant_group_id to bundle into a group, is_taunt+taunt_text for the rude joke cards, is_locked+unlock_rule for cards the recipient has to beg for. Auto-positions to the end of the Peek.",
+    "Add a gift card to the page — product, activity, aspirational, or digital. Use whenever you have a concrete option to put on the page; pass source_url to auto-scrape image/description/price and affiliate-wrap the link. Failures on the inline scrape are non-fatal — the card still inserts with whatever you provided.",
   input_schema: {
     type: 'object',
     properties: {

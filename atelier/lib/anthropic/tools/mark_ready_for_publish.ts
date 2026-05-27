@@ -13,7 +13,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'mark_ready_for_publish',
   description:
-    "Signal that the Peek is ready to publish — emits a 'mark_ready' event the UI listens for to surface the paywall. Call this when the curator says they're done and the Peek has at least a recipient, a vibe, a hero (image or AI), a note, and at least one card.",
+    "Signal the page is ready and surface the paywall to the curator. Call once the curator confirms they're done and the page has a recipient, a hero, a note, and at least one card. Always succeeds.",
   input_schema: {
     type: 'object',
     properties: {},

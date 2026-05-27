@@ -51,7 +51,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'update_card',
   description:
-    "Patch fields on an existing card without losing card_id or variant_group attachment. Pass card_id + only the fields you want to change. Pass null to clear a nullable field (image_url, description, value_cents, variant_group_id, etc.). Use this instead of remove_card + add_card when refining: swapping the image, fixing the title, attaching to a different variant group, toggling reveal_value, adding a taunt overlay. Type, title, and similar can be reassigned. source_url re-wraps the affiliate link.",
+    "Patch fields on an existing card by id — only pass what you want to change; pass null to clear nullable fields. Use whenever you're refining (swap image, fix title, re-bind to a variant group, toggle reveal_value) instead of remove + re-add. source_url triggers an affiliate re-wrap.",
   input_schema: {
     type: 'object',
     properties: {

@@ -27,7 +27,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_recipient',
   description:
-    "Set who this Peek is for and the occasion. Idempotent — call again to overwrite. Pass recipient_name (e.g. 'Mom'), and optionally relationship (e.g. 'mother', 'best friend'), occasion (e.g. 'birthday', 'anniversary', 'just because'), giver_names (array — capture every named giver so the cover can say 'from Mom & Dad' or 'from the Henderson clan'), and budget_cents (integer dollars*100; capture as soon as the curator mentions a number, even loosely — 'around $200' -> 20000).",
+    "Set who the page is for and the occasion, plus optional relationship, giver_names, and budget_cents. Call early — this drives the whole page's visual and tonal direction. Idempotent — call again to overwrite.",
   input_schema: {
     type: 'object',
     properties: {

@@ -34,7 +34,7 @@ type Output =
 registerTool<Input, Output>({
   name: 'scrape_url',
   description:
-    "Scrape a product/activity URL the curator pasted to pull title, description, image, price, and retailer — then add a card to the Peek with that data. The scrape runs synchronously through a cascade (Browserbase → ZenRows → Jina → Anthropic web_fetch) with graceful degrade so it ALWAYS returns a usable card, even if just the domain name. The card is affiliate-wrapped automatically. Returns card_id, title, image_url, and a `degraded` flag (true if all scrape tiers failed and we're showing a stub). After calling this, you can refer to the new card by its card_id.",
+    "Fetch a product/activity URL and create a card from it — pulls title, image, description, price, retailer, and affiliate-wraps the link. Use freely whenever the curator drops a link. Cascades through providers (Browserbase → ZenRows → Jina → web fetch) and always returns something useful — even a domain stub for hostile sites; check the `degraded` flag and ask for a screenshot if the result is thin.",
   input_schema: {
     type: 'object',
     properties: {

@@ -22,7 +22,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'add_variant_group',
   description:
-    "Create a variant group that bundles cards together. 'pick_one' = recipient chooses one. 'pick_any' = recipient picks any subset. 'pick_all' = the group is the gift as a whole. After this, attach cards to the group by passing variant_group_id to add_card.",
+    "Create a group of cards the recipient chooses between (pick_one, pick_any, or pick_all). Use whenever you want to offer alternatives — sibling colors of the same shoe, three candle scents, two dinner options. Then pass the returned id to add_card as variant_group_id.",
   input_schema: {
     type: 'object',
     properties: {

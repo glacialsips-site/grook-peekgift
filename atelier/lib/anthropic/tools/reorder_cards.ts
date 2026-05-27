@@ -19,7 +19,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'reorder_cards',
   description:
-    "Set the display order of cards in the Peek. Pass card_ids in the desired sequence — the first id becomes position 0, the second position 1, etc. Cards not included in the array keep their existing position (but will likely end up out of order — pass every card you want sorted).",
+    "Reorder the cards on the page — pass card_ids in the desired sequence (first id = position 0). Use when the curator wants the page sorted differently; include every card you want positioned to avoid stragglers. Always succeeds for ids that belong to this peek.",
   input_schema: {
     type: 'object',
     properties: {
