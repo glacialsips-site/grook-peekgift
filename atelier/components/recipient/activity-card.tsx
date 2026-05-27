@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type { Card, VariantSelection } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 import { cn } from '@/lib/utils';
 import { PickButton } from './pick-button';
 import type { RecipientPick } from './realtime';
@@ -76,7 +77,7 @@ export function ActivityCard({
             role="img"
             aria-label={card.title}
             className="relative h-44 w-full bg-cover bg-center sm:h-56"
-            style={{ backgroundImage: `url(${card.imageUrl})` }}
+            style={{ backgroundImage: cssUrl(card.imageUrl) }}
           />
         ) : (
           <div

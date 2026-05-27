@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Gift } from 'lucide-react';
 import type { Card, VariantSelection } from '@/lib/peek/types';
+import { cssUrl } from '@/lib/security/css-url';
 import { cn } from '@/lib/utils';
 import { PickButton } from './pick-button';
 import type { RecipientPick } from './realtime';
@@ -52,7 +53,7 @@ export function ProductCard({
           role="img"
           aria-label={card.title}
           className="relative h-48 w-full bg-cover bg-center sm:h-56"
-          style={{ backgroundImage: `url(${card.imageUrl})` }}
+          style={{ backgroundImage: cssUrl(card.imageUrl) }}
         />
       ) : (
         <div
