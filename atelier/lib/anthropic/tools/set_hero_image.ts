@@ -29,7 +29,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_hero_image',
   description:
-    "Pin a hero image for the Peek. Pass image_url (must be reachable) and source — 'user_upload' for curator-supplied, 'unsplash' for stock, 'ai_generated' if you went through generate_hero_image, 'external' for any other web URL. After setting, palette extraction runs in the background and will call update_vibe with the result.",
+    "Set the page's cover image from a reachable URL with a source label (user_upload | unsplash | ai_generated | external). Use for uploads or any URL you already have; pair with generate_hero_image when you want one made from scratch. Palette extraction runs in the background and feeds update_vibe automatically.",
   input_schema: {
     type: 'object',
     properties: {

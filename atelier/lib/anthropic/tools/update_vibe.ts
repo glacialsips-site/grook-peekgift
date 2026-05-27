@@ -35,7 +35,7 @@ const HISTORY_LIMIT = 10;
 registerTool<Input, Output>({
   name: 'update_vibe',
   description:
-    'MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use this continuously as new signals arrive: hero image came back in cool blues -> update palette.accent; cards skewed playful -> bump motion to lively; recipient note was unexpectedly tender -> soften tone. Style-engine fields (typography, density, shape, mood) can also be refined here as the page identity sharpens. The voice sub-object refines how YOU talk to the curator — sharpen it on turn 1-2 when you have first signals, and again whenever new info changes the register (curator turns out to be reserved, occasion turns out to be heavier than first stated, etc). Never re-sends fields you do not want to change. signal_source defaults to "curator" — pass another value only when relaying an upstream auto-classifier signal.',
+    "MERGE partial vibe updates into the existing vibe — provided fields overwrite, absent fields are preserved. Use continuously as signals arrive (palette extraction, new card mix, tone shift, voice refinement). signal_source defaults to 'curator' — only override when relaying an upstream auto-classifier.",
   input_schema: {
     type: 'object',
     properties: {

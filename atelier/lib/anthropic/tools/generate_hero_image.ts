@@ -26,7 +26,7 @@ type Output =
 registerTool<Input, Output>({
   name: 'generate_hero_image',
   description:
-    "Generate an image with fal.ai (Flux). Pass a short, evocative prompt — what the image should look like at a glance — and optionally an aspect ratio (default 16:9). The result is auto-stored and set as the page's cover photo. Use this freely whenever a generated image is the right move. On the rare occasion image gen is offline, returns { ok: false } gracefully so you can ask the user for a description or upload instead — there's no reason to avoid calling it.",
+    "Generate an image via fal.ai Flux from an evocative prompt, auto-store it, and set it as the page's cover. Use freely — for the cover or for card art (it works for both, just call set_hero_image vs. update_card after). Returns { ok: false } if image gen is offline or rate-limited; in that case ask the curator for an upload or use set_hero_image with a fallback URL.",
   input_schema: {
     type: 'object',
     properties: {

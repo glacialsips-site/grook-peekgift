@@ -23,7 +23,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_recipient_profile',
   description:
-    "Curator-only scratchpad about the recipient. Hidden from the recipient. MERGE semantics: provided keys overwrite, absent keys are preserved. Use eagerly as facts surface: favorite_things (durable likes — 'spicy food', 'Negronis'), current_obsessions (right-now things — 'Severance', 'Stanley cups'), allergies_or_no_gos (peanut allergy, no engraved gifts, no jewelry), sizes ({shirt: 'M', shoe: '9 women'}), notes (free-form details that don't fit elsewhere). Steer card picks against this profile; never echo it back verbatim.",
+    "Curator-only scratchpad about the recipient (favorite_things, current_obsessions, allergies_or_no_gos, sizes, notes) — hidden from the recipient. Use eagerly as facts surface in chat; steer card picks against it but never echo it back verbatim. Merge semantics: provided keys overwrite, absent keys are preserved.",
   input_schema: {
     type: 'object',
     properties: {

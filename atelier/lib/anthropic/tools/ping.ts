@@ -17,7 +17,7 @@ interface PingOutput {
 registerTool<PingInput, PingOutput>({
   name: 'ping',
   description:
-    'Health-check tool. Takes no arguments. Returns `{ pong: true, at: <ISO timestamp> }`. Use this only when explicitly testing that tool-use is wired up.',
+    "Health-check tool that returns { pong: true, at: <ISO timestamp> }. Use only when explicitly testing tool-use wiring. Always succeeds.",
   input_schema: {
     type: 'object',
     properties: {},

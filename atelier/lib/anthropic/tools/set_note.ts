@@ -20,7 +20,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_note',
   description:
-    "Set the curator's hand-written note that opens the Peek. Markdown is supported. Idempotent — call again to overwrite. Keep it short and in the curator's voice; you can offer to draft it but the final words land here.",
+    "Set the personal note that opens the page (markdown supported). Use once you have something concrete in the curator's voice; idempotent — call again to overwrite. The final words should sound like the curator, not you.",
   input_schema: {
     type: 'object',
     properties: {

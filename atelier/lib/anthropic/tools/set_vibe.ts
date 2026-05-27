@@ -206,7 +206,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'set_vibe',
   description:
-    "REPLACE the entire visual + tonal vibe of the Peek. Use this once at the start when you have a clear read on what the page should feel like. After this, use update_vibe to merge new signals (hero palette extraction, card drift, etc). Pass a preset and/or override individual fields — provided fields win over the preset; absent fields fall back to the preset. The style-engine fields (typography, density, shape, mood) shape the page's LOOK. The voice sub-object shapes how YOU talk to the curator — match register to the curator's writing style and the occasion's gravity.",
+    "REPLACE the page's visual + tonal vibe — palette, typography, density, shape, mood, and an optional voice sub-object that records how you're talking. Use once early when you have a clear read; afterwards prefer update_vibe for refinements. A preset gives a coherent starting point; individual fields override it.",
   input_schema: {
     type: 'object',
     properties: {

@@ -1,6 +1,6 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic, assertAnthropicConfigured, DEFAULT_MODEL } from './client';
-import { loadProgressBlock } from './progress-block';
+import { loadPeekStateJson } from './progress-block';
 import { getSystemPrompt, type SystemPromptOptions } from './system-prompt';
 import { getToolSchemas, runTool, type ToolContext } from './tools/index';
 import './tools/bootstrap';
@@ -50,7 +50,7 @@ export async function* chatTurn(
   const model = input.model ?? DEFAULT_MODEL;
   const maxTokens = input.maxTokens ?? DEFAULT_MAX_TOKENS;
   const tools = getToolSchemas();
-  const baseSystem = getSystemPrompt(input.systemPromptOptions ?? {});
+  const baseOpts = input.systemPromptOptions ?? {};
 
   const userContent: Anthropic.ContentBlockParam[] =
     typeof input.userMessage === 'string'
@@ -67,10 +67,11 @@ export async function* chatTurn(
 
   try {
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
-      const progressBlock = await loadProgressBlock(input.ctx.peekId);
-      const system: Anthropic.TextBlockParam[] = progressBlock
-        ? [...baseSystem, { type: 'text', text: progressBlock }]
-        : baseSystem;
+      const peekStateJson = await loadPeekStateJson(input.ctx.peekId);
+      const system = getSystemPrompt({
+        ...baseOpts,
+        peekStateJson: peekStateJson ?? baseOpts.peekStateJson ?? null,
+      });
 
       const params: Anthropic.MessageStreamParams = {
         model,
