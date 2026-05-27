@@ -14,17 +14,17 @@ type CueKey = 'hero' | 'chat' | 'card';
 const CUE_SEQUENCE: { key: CueKey; durationMs: number; copy: string }[] = [
   {
     key: 'hero',
-    durationMs: 2000,
+    durationMs: 4000,
     copy: 'cover photo — auto-generated or upload your own',
   },
   {
     key: 'chat',
-    durationMs: 1300,
+    durationMs: 3500,
     copy: 'drop a product link, voice note, or just describe a vibe',
   },
   {
     key: 'card',
-    durationMs: 1300,
+    durationMs: 3500,
     copy: 'pick one, pick a few, lock the cool stuff behind a beg',
   },
 ];
