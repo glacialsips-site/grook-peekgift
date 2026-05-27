@@ -26,14 +26,19 @@ export interface IterationUsage {
   stop_reason: Anthropic.StopReason | null;
 }
 
+export interface ChatTurnSystemPromptOptions extends SystemPromptOptions {
+  peekSummary?: string | null;
+}
+
 export interface ChatTurnInput {
   ctx: ToolContext;
   history: Anthropic.MessageParam[];
   userMessage: string | Anthropic.ContentBlockParam[];
   model?: string;
   maxTokens?: number;
-  systemPromptOptions?: SystemPromptOptions;
+  systemPromptOptions?: ChatTurnSystemPromptOptions;
   thinking?: Anthropic.ThinkingConfigParam;
+  signal?: AbortSignal;
   onToolResult?: (
     id: string,
     name: string,
@@ -60,7 +65,8 @@ export async function* chatTurn(
   const model = input.model ?? DEFAULT_MODEL;
   const maxTokens = input.maxTokens ?? DEFAULT_MAX_TOKENS;
   const tools = withToolsCacheControl(getToolSchemas());
-  const baseOpts = input.systemPromptOptions ?? {};
+  const baseOpts: ChatTurnSystemPromptOptions = input.systemPromptOptions ?? {};
+  const signal = input.signal;
 
   const userContent: Anthropic.ContentBlockParam[] =
     typeof input.userMessage === 'string'
@@ -77,10 +83,24 @@ export async function* chatTurn(
 
   try {
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      if (signal?.aborted) {
+        return { history: messages, iterations };
+      }
+
       const peekStateJson = await loadPeekStateJson(input.ctx.peekId);
+      const resolvedPeekState =
+        peekStateJson ?? baseOpts.peekStateJson ?? null;
+      const summary = baseOpts.peekSummary?.trim();
+      const dynamicPeekState =
+        summary && summary.length > 0
+          ? resolvedPeekState
+            ? `Peek summary: ${summary}\n\n${resolvedPeekState}`
+            : `Peek summary: ${summary}`
+          : resolvedPeekState;
+
       const system = getSystemPrompt({
-        ...baseOpts,
-        peekStateJson: peekStateJson ?? baseOpts.peekStateJson ?? null,
+        curatorName: baseOpts.curatorName ?? null,
+        peekStateJson: dynamicPeekState,
       });
 
       const params: Anthropic.MessageStreamParams = {
@@ -97,20 +117,48 @@ export async function* chatTurn(
       const iterationCapture = turnCapture.iteration(params);
       const startedAt = Date.now();
 
-      for await (const event of streamMessage(anthropic, params)) {
-        yield event;
-        if (event.type === 'message_end') {
-          finalMessage = event.message;
-          iterations.push({
-            iteration: i,
-            usage: event.usage,
-            stop_reason: event.stop_reason,
-          });
-          iterationCapture.recordFinal({ message: event.message, startedAt });
-        } else if (event.type === 'error') {
-          iterationCapture.recordError({ error: event.error, startedAt });
-          return { history: messages, iterations };
+      const streamIter = streamMessage(anthropic, params);
+      let aborted = false;
+      const onAbort = (): void => {
+        aborted = true;
+        streamIter.return(undefined).catch(() => undefined);
+      };
+      if (signal) {
+        if (signal.aborted) {
+          onAbort();
+        } else {
+          signal.addEventListener('abort', onAbort, { once: true });
         }
+      }
+      try {
+        for await (const event of streamIter) {
+          if (signal?.aborted) {
+            aborted = true;
+            break;
+          }
+          yield event;
+          if (event.type === 'message_end') {
+            finalMessage = event.message;
+            iterations.push({
+              iteration: i,
+              usage: event.usage,
+              stop_reason: event.stop_reason,
+            });
+            iterationCapture.recordFinal({ message: event.message, startedAt });
+          } else if (event.type === 'error') {
+            iterationCapture.recordError({ error: event.error, startedAt });
+            return { history: messages, iterations };
+          }
+        }
+      } finally {
+        if (signal) signal.removeEventListener('abort', onAbort);
+        if (aborted) {
+          await streamIter.return(undefined).catch(() => undefined);
+        }
+      }
+
+      if (aborted || signal?.aborted) {
+        return { history: messages, iterations };
       }
 
       if (!finalMessage) {
@@ -138,6 +186,9 @@ export async function* chatTurn(
 
       const toolResults: Anthropic.ToolResultBlockParam[] = [];
       for (const call of pendingToolCalls) {
+        if (signal?.aborted) {
+          return { history: messages, iterations };
+        }
         let output: unknown;
         let isError = false;
         try {
