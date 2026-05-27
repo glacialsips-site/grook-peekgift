@@ -1,5 +1,8 @@
 import 'server-only';
+import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
+import { recordUsageFireAndForget } from '@/lib/usage/record';
+import type { Vendor } from '@/lib/usage/cost';
 import { browserbaseScrape } from './browserbase';
 import { extractProduct, type ScrapedProduct } from './extract';
 import { zenrowsScrape } from './zenrows';
@@ -45,6 +48,8 @@ async function withTimeout<T>(
 export interface ScrapePipelineOptions {
   peekId?: string | null;
   rehost?: boolean;
+  userId?: string | null;
+  sessionId?: string | null;
 }
 
 function domainFromUrl(url: string): string {
@@ -122,12 +127,32 @@ async function tryRendererTier(
   }
 }
 
+const TIER_VENDOR: Record<Exclude<ScrapeProvider, 'degraded'>, Vendor> = {
+  browserbase: 'browserbase',
+  zenrows: 'zenrows',
+  jina: 'jina',
+  anthropic_fetch: 'anthropic',
+};
+
+function tierConfigured(name: Exclude<ScrapeProvider, 'degraded'>): boolean {
+  switch (name) {
+    case 'browserbase':
+      return Boolean(env.BROWSERBASE_API_KEY && env.BROWSERBASE_PROJECT_ID);
+    case 'zenrows':
+      return Boolean(env.ZENROWS_API_KEY);
+    case 'jina':
+      return true;
+    case 'anthropic_fetch':
+      return Boolean(env.ANTHROPIC_API_KEY);
+  }
+}
+
 async function runPipeline(
   url: string,
   opts: ScrapePipelineOptions,
 ): Promise<ScrapeOutcome> {
   const tiers: Array<{
-    name: ScrapeProvider;
+    name: Exclude<ScrapeProvider, 'degraded'>;
     run: () => Promise<ScrapedProduct | null>;
   }> = [
     {
@@ -149,7 +174,17 @@ async function runPipeline(
   ];
 
   for (const tier of tiers) {
+    const configured = tierConfigured(tier.name);
     const product = await tier.run();
+    if (configured) {
+      recordUsageFireAndForget({
+        userId: opts.userId ?? null,
+        sessionId: opts.sessionId ?? null,
+        vendor: TIER_VENDOR[tier.name],
+        kind: tier.name === 'anthropic_fetch' ? 'web_fetch' : 'scrape',
+        payload: { url, ok: product !== null, peek_id: opts.peekId ?? null },
+      });
+    }
     if (!product) {
       log.debug('tier_returned_null', { tier: tier.name, url });
       continue;

@@ -5,6 +5,8 @@ import { events, peeks } from '@/db/schema';
 import { generateFalImage, type FalAspect } from '@/lib/image-gen/fal';
 import { rehostImage } from '@/lib/image-gen/rehost';
 import { scheduleEvolveVibe } from '@/lib/vibe/evolve';
+import { checkAllowed } from '@/lib/usage/throttle';
+import { recordUsageFireAndForget } from '@/lib/usage/record';
 import { registerTool } from './index';
 
 const AspectSchema = z.enum(['16:9', '4:3', '1:1', '9:16']);
@@ -43,9 +45,35 @@ registerTool<Input, Output>({
     const parsed = InputSchema.parse(input);
     const aspect: FalAspect = parsed.aspect ?? '16:9';
 
+    const verdict = await checkAllowed({
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+      vendor: 'fal',
+      kind: 'flux/schnell',
+    });
+    if (!verdict.allow) {
+      return {
+        ok: false,
+        error: 'tier_limit_reached',
+        suggestion: verdict.reason ?? 'Daily compute limit reached. Try again tomorrow or publish a peek to unlock more.',
+      };
+    }
+
     const generation = await generateFalImage({
       prompt: parsed.prompt,
       aspect,
+    });
+
+    recordUsageFireAndForget({
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+      vendor: 'fal',
+      kind: 'fal-ai/flux/schnell',
+      payload: {
+        aspect,
+        ok: generation.ok,
+        peek_id: ctx.peekId,
+      },
     });
     if (!generation.ok || !generation.imageUrl) {
       return {

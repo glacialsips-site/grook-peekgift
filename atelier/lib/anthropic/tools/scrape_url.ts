@@ -57,7 +57,11 @@ registerTool<Input, Output>({
       payload: { url: parsed.url },
     });
 
-    const outcome = await scrapePipeline(parsed.url, { peekId: ctx.peekId });
+    const outcome = await scrapePipeline(parsed.url, {
+      peekId: ctx.peekId,
+      userId: ctx.userId,
+      sessionId: ctx.sessionId,
+    });
     if (!outcome.ok) {
       log.warn('pipeline_returned_not_ok', { url: parsed.url, error: outcome.error });
       return { ok: false, error: outcome.error };

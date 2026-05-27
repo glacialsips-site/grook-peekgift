@@ -134,6 +134,8 @@ registerTool<Input, Output>({
       try {
         const outcome = await scrapePipeline(parsed.source_url, {
           peekId: ctx.peekId,
+          userId: ctx.userId,
+          sessionId: ctx.sessionId,
         });
         if (outcome.ok) {
           scrapeProvider = outcome.provider;

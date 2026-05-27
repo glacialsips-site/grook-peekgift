@@ -14,6 +14,7 @@ import {
   loadChatHistory,
 } from '@/lib/chat/persistence';
 import { track } from '@/lib/analytics/facade';
+import { checkAllowed } from '@/lib/usage/throttle';
 import { logger } from '@/lib/logger';
 import { ChatRequestSchema, type SseEvent, type TurnUsage } from './schema';
 import {
@@ -173,6 +174,41 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   const chosenModel = model ?? DEFAULT_MODEL;
+
+  const throttle = await checkAllowed({
+    userId,
+    sessionId,
+    vendor: 'anthropic',
+    kind: chosenModel,
+  });
+  if (!throttle.allow) {
+    log.warn('tier_limit_reached', {
+      tier: throttle.tier,
+      used_cents: throttle.used_cents,
+      limit_cents: throttle.limit_cents,
+      userId,
+      sessionId,
+    });
+    const message =
+      throttle.reason ??
+      "Daily compute limit reached. Try again tomorrow or publish a peek to unlock more.";
+    const body = `event: tier_limit_reached\ndata: ${JSON.stringify({ kind: 'tier_limit_reached', tier: throttle.tier, message, used_cents: throttle.used_cents, limit_cents: throttle.limit_cents })}\n\nevent: error\ndata: ${JSON.stringify({ kind: 'error', message })}\n\n`;
+    return new Response(body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
+  }
+  if (throttle.warn) {
+    userContent.unshift({
+      type: 'text',
+      text: `[system] The curator is at ${Math.round((throttle.used_cents / Math.max(throttle.limit_cents, 1)) * 100)}% of their daily compute budget (tier: ${throttle.tier}). Nudge them gently toward publishing this peek — once it's published, their limit jumps. Keep responses tighter; avoid speculative scrape/image generation unless they ask.`,
+    });
+  }
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
