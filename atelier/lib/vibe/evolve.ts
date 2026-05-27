@@ -6,6 +6,7 @@ import {
   type Vibe,
   type VibeCore,
   type VibePalette,
+  type VibePreset,
   type VibeSignalSource,
   type VibeSignalSourceEntry,
 } from '@/db/schema';
@@ -88,7 +89,7 @@ async function derivePatch(
     return {
       source: 'tone_classifier',
       patch: {
-        tone: tone.tone,
+        preset: tone.tone as VibePreset,
         mood_words: tone.mood_words,
         motion: tone.motion,
       },

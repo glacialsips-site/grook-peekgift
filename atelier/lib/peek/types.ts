@@ -135,8 +135,21 @@ export type PeekDraft = {
 };
 
 export const DEFAULT_VIBE: Vibe = {
-  tone: 'warm',
+  tone: 'warm, open, unhurried',
+  palette: {
+    bg: '#F7F4EE',
+    surface: '#ECE7DD',
+    ink: '#1F1B16',
+    accent: '#7C6A58',
+    accent2: '#C7B299',
+  },
+  mood_words: ['warm', 'open', 'unhurried'],
   motion: 'soft',
+  font_pairing: { display: 'Fraunces', body: 'Inter' },
+  typography: { heading: 'serif', body: 'sans' },
+  density: 'cozy',
+  shape: 'soft',
+  mood: 'minimal',
 };
 
 export type ChatMessageImage = {

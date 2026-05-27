@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { ensureAnonSessionId, ensureCuratorRow } from '@/lib/auth/server';
 import { getSupabaseService } from '@/lib/supabase/service';
+import { DEFAULT_VIBE } from '@/lib/peek/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default async function BuildLandingPage() {
         slug,
         curator_id: userId,
         status: 'draft',
-        vibe: {},
+        vibe: DEFAULT_VIBE,
         metadata: {},
       })
       .select('id')
@@ -44,7 +45,7 @@ export default async function BuildLandingPage() {
       slug,
       curator_id: null,
       status: 'draft',
-      vibe: {},
+      vibe: DEFAULT_VIBE,
       metadata: { anonymous_session_id: anonSessionId },
     })
     .select('id')
