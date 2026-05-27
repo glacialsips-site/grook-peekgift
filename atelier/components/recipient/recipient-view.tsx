@@ -5,7 +5,6 @@ import {
   PeekVibeProvider,
   type Vibe as ProviderVibe,
 } from '@/components/peek-vibe-provider';
-import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/components/ui/use-toast';
 import type { PeekDraft, Vibe } from '@/lib/peek/types';
 import { CinematicReveal } from './cinematic-reveal';
@@ -174,7 +173,6 @@ export function RecipientView({
             />
           </div>
         </div>
-        <Toaster />
       </main>
     </PeekVibeProvider>
   );

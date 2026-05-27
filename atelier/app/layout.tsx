@@ -8,6 +8,8 @@ import {
   Playfair_Display,
 } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import { Providers } from '@/components/providers';
+import { Toaster } from '@/components/ui/toaster';
 import { env } from '@/lib/env';
 import { cn } from '@/lib/utils';
 import './globals.css';
@@ -139,7 +141,10 @@ export default function RootLayout({
           >
             Skip to main content
           </a>
-          {children}
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
           <script
             type="application/ld+json"
             // eslint-disable-next-line react/no-danger
