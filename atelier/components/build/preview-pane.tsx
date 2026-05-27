@@ -12,11 +12,29 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { Card, PeekDraft, VariantGroup, Vibe } from '@/lib/peek/types';
+import { TeachingSurface } from './teaching/teaching-surface';
 
 type Props = {
   draft: PeekDraft;
   className?: string;
 };
+
+function isPeekEmpty(draft: PeekDraft): boolean {
+  const p = draft.peek;
+  if (p.recipientName && p.recipientName.trim().length > 0) return false;
+  if (p.occasion && p.occasion.trim().length > 0) return false;
+  if (p.relationship && p.relationship.trim().length > 0) return false;
+  if (p.giverNames && p.giverNames.length > 0) return false;
+  if (p.heroImageUrl) return false;
+  if (p.noteMd && p.noteMd.trim().length > 0) return false;
+  if (draft.cards.length > 0) return false;
+  if (draft.variantGroups.length > 0) return false;
+  const v = p.vibe ?? {};
+  if (v.palette || v.mood || (v.mood_words && v.mood_words.length > 0)) {
+    return false;
+  }
+  return true;
+}
 
 const PROVIDER_DEFAULT: ProviderVibe = {
   tone: 'warm',
@@ -56,6 +74,38 @@ function formatPrice(cents: number | null): string | null {
 }
 
 export function PreviewPane({ draft, className }: Props) {
+  const empty = isPeekEmpty(draft);
+
+  if (empty) {
+    return (
+      <section
+        className={cn(
+          'relative flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground',
+          className,
+        )}
+        aria-label="Peek preview"
+      >
+        <TeachingSurface>
+          {(sample) => <DraftRender draft={sample} />}
+        </TeachingSurface>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className={cn(
+        'flex h-full min-h-0 flex-col bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]',
+        className,
+      )}
+      aria-label="Peek preview"
+    >
+      <DraftRender draft={draft} />
+    </section>
+  );
+}
+
+function DraftRender({ draft }: { draft: PeekDraft }) {
   const providerVibe = useMemo(
     () => toProviderVibe(draft.peek.vibe),
     [draft.peek.vibe],
@@ -92,72 +142,64 @@ export function PreviewPane({ draft, className }: Props) {
   );
 
   return (
-    <section
-      className={cn(
-        'flex h-full min-h-0 flex-col bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]',
-        className,
-      )}
-      aria-label="Peek preview"
-    >
-      <PeekVibeProvider vibe={providerVibe}>
-        <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-          <Hero peek={draft.peek} />
+    <PeekVibeProvider vibe={providerVibe}>
+      <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]">
+        <Hero peek={draft.peek} />
 
-          <div
-            className="mx-auto flex w-full max-w-2xl flex-col px-5"
-            style={{
-              gap: 'var(--peek-space-8)',
-              paddingTop: 'var(--peek-space-8)',
-              paddingBottom: 'var(--peek-space-8)',
-            }}
-          >
-            <RecipientHeader peek={draft.peek} />
+        <div
+          className="mx-auto flex w-full max-w-2xl flex-col px-5"
+          style={{
+            gap: 'var(--peek-space-8)',
+            paddingTop: 'var(--peek-space-8)',
+            paddingBottom: 'var(--peek-space-8)',
+          }}
+        >
+          <RecipientHeader peek={draft.peek} />
 
-            {draft.peek.noteMd ? (
-              <article
-                className={cn(
-                  'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
-                  'prose-headings:text-[hsl(var(--peek-ink))]',
-                  'prose-strong:text-[hsl(var(--peek-ink))]',
-                  'prose-a:text-[hsl(var(--peek-accent))]',
-                )}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {draft.peek.noteMd}
-                </ReactMarkdown>
-              </article>
-            ) : (
-              <EmptyHint>
-                A personal note will appear here as you tell Peek more.
-              </EmptyHint>
-            )}
+          {draft.peek.noteMd ? (
+            <article
+              className={cn(
+                'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
+                'prose-headings:text-[hsl(var(--peek-ink))]',
+                'prose-strong:text-[hsl(var(--peek-ink))]',
+                'prose-a:text-[hsl(var(--peek-accent))]',
+              )}
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {draft.peek.noteMd}
+              </ReactMarkdown>
+            </article>
+          ) : (
+            <EmptyHint>
+              A personal note will appear here as you tell Peek more.
+            </EmptyHint>
+          )}
 
-            <Separator className="bg-[hsl(var(--peek-ink))]/10" />
+          <Separator className="bg-[hsl(var(--peek-ink))]/10" />
 
-            <div className="flex flex-col gap-6">
-              {ungrouped.length === 0 && orderedGroups.length === 0 ? (
-                <EmptyHint>No cards yet — keep chatting.</EmptyHint>
-              ) : null}
+          <div className="flex flex-col gap-6">
+            {ungrouped.length === 0 && orderedGroups.length === 0 ? (
+              <EmptyHint>No cards yet — keep chatting.</EmptyHint>
+            ) : null}
 
-              <AnimatePresence initial={false}>
-                {ungrouped.map((card, idx) => (
-                  <CardItem key={card.id} card={card} index={idx} />
-                ))}
-              </AnimatePresence>
-
-              {orderedGroups.map((group, gi) => (
-                <VariantGroupBlock
-                  key={group.id}
-                  group={group}
-                  cards={grouped.get(group.id) ?? []}
-                  baseIndex={ungrouped.length + gi}
-                />
+            <AnimatePresence initial={false}>
+              {ungrouped.map((card, idx) => (
+                <CardItem key={card.id} card={card} index={idx} />
               ))}
-            </div>
+            </AnimatePresence>
+
+            {orderedGroups.map((group, gi) => (
+              <VariantGroupBlock
+                key={group.id}
+                group={group}
+                cards={grouped.get(group.id) ?? []}
+                baseIndex={ungrouped.length + gi}
+              />
+            ))}
           </div>
         </div>
-      </PeekVibeProvider>
-    </section>
+      </div>
+    </PeekVibeProvider>
   );
 }
 
