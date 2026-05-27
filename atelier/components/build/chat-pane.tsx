@@ -54,6 +54,10 @@ type ApiHistoryEntry = {
   content: unknown;
 };
 
+type AssistantContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'tool_use'; id: string; name: string; input: unknown };
+
 const SESSION_KEY = 'peek-anon-session';
 
 function getOrCreateSessionId(): string {
@@ -418,8 +422,8 @@ export function ChatPane({
         const decoder = new TextDecoder();
         let buffer = '';
 
-        let assistantTextAccum = '';
-        const assistantToolUses: Array<{ id: string; name: string }> = [];
+        const assistantContentBlocks: AssistantContentBlock[] = [];
+        const toolUseIndexById = new Map<string, number>();
 
         while (true) {
           const { done, value } = await reader.read();
@@ -429,10 +433,27 @@ export function ChatPane({
           buffer = parsed.buffer;
           for (const evt of parsed.events) {
             if (evt.kind === 'text') {
-              assistantTextAccum += evt.delta;
+              const last = assistantContentBlocks[assistantContentBlocks.length - 1];
+              if (last && last.type === 'text') {
+                last.text += evt.delta;
+              } else {
+                assistantContentBlocks.push({ type: 'text', text: evt.delta });
+              }
             } else if (evt.kind === 'tool_call') {
-              if (!assistantToolUses.find((t) => t.id === evt.id)) {
-                assistantToolUses.push({ id: evt.id, name: evt.name });
+              const existingIdx = toolUseIndexById.get(evt.id);
+              if (existingIdx === undefined) {
+                toolUseIndexById.set(evt.id, assistantContentBlocks.length);
+                assistantContentBlocks.push({
+                  type: 'tool_use',
+                  id: evt.id,
+                  name: evt.name,
+                  input: evt.input ?? {},
+                });
+              } else if (evt.input !== undefined) {
+                const block = assistantContentBlocks[existingIdx];
+                if (block && block.type === 'tool_use') {
+                  block.input = evt.input;
+                }
               }
             } else if (evt.kind === 'peek_update') {
               const snap = evt.snapshot as unknown as PeekDraft | null;
@@ -479,9 +500,7 @@ export function ChatPane({
           { role: 'user', content: historyUserContent },
           {
             role: 'assistant',
-            content: assistantTextAccum
-              ? [{ type: 'text', text: assistantTextAccum }]
-              : [],
+            content: assistantContentBlocks,
           },
         ];
       } catch (err) {
