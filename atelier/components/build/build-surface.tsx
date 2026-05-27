@@ -59,6 +59,11 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
     <main
       id="main"
       className="flex h-[100dvh] min-h-0 flex-col bg-background md:flex-row"
+      style={
+        isDesktop
+          ? undefined
+          : ({ '--chat-bottom-offset': '92px' } as React.CSSProperties)
+      }
       aria-label="Build your Peek"
     >
       <ErrorBoundary
@@ -69,6 +74,7 @@ export function BuildSurface({ peekId, initialDraft, initialHistory }: Props) {
           peekId={peekId}
           initialHistory={initialHistory ?? []}
           onPeekSnapshot={applySnapshot}
+          peekDraft={draft}
           className={cn(
             'flex-1 md:w-2/5 md:flex-none md:border-r md:border-border',
           )}

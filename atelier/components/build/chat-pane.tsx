@@ -39,6 +39,7 @@ type Props = {
   className?: string;
   initialHistory?: InitialChatMessage[];
   onPeekSnapshot?: (snapshot: PeekDraft) => void;
+  peekDraft?: PeekDraft | null;
 };
 
 type ImageAttachment = {
@@ -214,11 +215,72 @@ function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
   return out;
 }
 
+function computeGhostPlaceholders(draft: PeekDraft | null | undefined): string[] {
+  if (!draft) {
+    return ['What else?'];
+  }
+  const peek = draft.peek;
+  const hasRecipient = Boolean(peek.recipientName);
+  const hasOccasion = Boolean(peek.occasion);
+  const hasHero = Boolean(peek.heroImageUrl);
+  const cardCount = draft.cards.length;
+  if (!hasRecipient) {
+    return [
+      'tell me who it is for',
+      'drop their name or a photo of them',
+      'what are they into right now?',
+    ];
+  }
+  if (!hasOccasion) {
+    return [
+      "what's the occasion?",
+      'birthday, anniversary, just because…',
+      'any specific date or vibe?',
+    ];
+  }
+  if (!hasHero && cardCount === 0) {
+    return [
+      'describe a vibe or drop a photo',
+      'paste a product link',
+      'an inside joke, a place, a memory?',
+    ];
+  }
+  if (!hasHero) {
+    return [
+      'describe a vibe or drop a photo',
+      'what should the cover feel like?',
+      'an inside joke or a memory to lean on?',
+    ];
+  }
+  if (cardCount === 0) {
+    return [
+      'paste a product link',
+      'an experience? a roast card?',
+      'drop anything — a song, a place, a meme',
+    ];
+  }
+  if (cardCount <= 3) {
+    return [
+      'want more options?',
+      'add a roast card or an experience?',
+      'paste another product link',
+      'any inside jokes to lock in?',
+    ];
+  }
+  return [
+    'what else?',
+    'any taunts, jokes, or locked surprises?',
+    'add a note for them?',
+    'ready to publish — or keep going?',
+  ];
+}
+
 export function ChatPane({
   peekId,
   className,
   initialHistory = [],
   onPeekSnapshot,
+  peekDraft,
 }: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
@@ -475,6 +537,24 @@ export function ChatPane({
     [draft, pendingImages, sending],
   );
 
+  const ghostOptions = useMemo(
+    () => computeGhostPlaceholders(peekDraft),
+    [peekDraft],
+  );
+  const [ghostIndex, setGhostIndex] = useState(0);
+  useEffect(() => {
+    setGhostIndex(0);
+  }, [ghostOptions]);
+  useEffect(() => {
+    if (ghostOptions.length <= 1) return;
+    const id = window.setInterval(() => {
+      setGhostIndex((i) => (i + 1) % ghostOptions.length);
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [ghostOptions]);
+  const currentPlaceholder =
+    ghostOptions[ghostIndex] ?? ghostOptions[0] ?? 'What else?';
+
   return (
     <section
       className={cn(
@@ -505,7 +585,10 @@ export function ChatPane({
 
       <form
         onSubmit={onSubmit}
-        className="border-t border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        className="relative z-30 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85"
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--chat-bottom-offset, 0px))',
+        }}
         aria-label="Send a message"
       >
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 px-4 py-3">
@@ -531,7 +614,7 @@ export function ChatPane({
             value={draft}
             onChange={onTextareaChange}
             onKeyDown={onKeyDown}
-            placeholder="Tell Peek who this is for and what they love…"
+            placeholder={currentPlaceholder}
             disabled={sending}
             rows={1}
             className="min-h-11 resize-none overflow-hidden text-base"
@@ -670,8 +753,8 @@ function EmptyChatHint() {
     >
       <Sparkles className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
       <p className="text-base text-muted-foreground">
-        Start with who this Peek is for. Their name, the occasion, a thing they
-        love. Peek takes it from there.
+        We&apos;ll go back and forth. Tell me who it&apos;s for and I&apos;ll start
+        building — you can drop links, screenshots, or just describe.
       </p>
     </motion.div>
   );

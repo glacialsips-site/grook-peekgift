@@ -21,7 +21,7 @@ type Props = {
   buttonLabel?: string;
 };
 
-const ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
+const ACCEPT = 'image/*';
 
 export function FilePicker({
   peekId,
@@ -109,6 +109,7 @@ export function FilePicker({
         ref={inputRef}
         type="file"
         accept={ACCEPT}
+        multiple={false}
         className="hidden"
         onChange={handleChange}
         aria-hidden="true"
