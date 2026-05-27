@@ -92,7 +92,21 @@ export type VariantGroup = {
 
 export type CardType = 'product' | 'activity' | 'aspirational' | 'digital';
 
-export type UnlockRule = Partial<SchemaUnlockRule>;
+export type UnlockRuleKind = SchemaUnlockRuleKind;
+
+export type UnlockRule = {
+  kind?: UnlockRuleKind;
+  beg_prompt?: string;
+  unlock_after?: string;
+  card_ids?: string[];
+};
+
+export type SchemaUnlockRules =
+  | SchemaUnlockRuleBeg
+  | SchemaUnlockRuleDateAfter
+  | SchemaUnlockRuleEvent
+  | SchemaUnlockRuleRequiresPicks
+  | SchemaUnlockRule;
 
 export type Card = {
   id: string;
