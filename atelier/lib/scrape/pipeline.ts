@@ -180,6 +180,7 @@ async function runPipeline(
       recordUsageFireAndForget({
         userId: opts.userId ?? null,
         sessionId: opts.sessionId ?? null,
+        peekId: opts.peekId ?? null,
         vendor: TIER_VENDOR[tier.name],
         kind: tier.name === 'anthropic_fetch' ? 'web_fetch' : 'scrape',
         payload: { url, ok: product !== null, peek_id: opts.peekId ?? null },

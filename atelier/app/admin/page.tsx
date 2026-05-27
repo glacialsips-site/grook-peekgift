@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getUserId } from '@/lib/auth/server';
 import { getUserTier } from '@/lib/usage/tier';
@@ -32,11 +33,21 @@ interface VendorBreakdown {
   calls: number;
 }
 
+interface PeekSpendRow {
+  peek_id: string;
+  slug: string | null;
+  recipient_name: string | null;
+  status: string | null;
+  cost_cents: number;
+  calls: number;
+}
+
 interface AdminSnapshot {
   totalCents: number;
   byVendor: VendorBreakdown[];
   byTier: Array<{ tier: string; cost_cents: number; users: number }>;
   topUsers: UserSpendRow[];
+  topPeeks: PeekSpendRow[];
 }
 
 async function loadSnapshot(): Promise<AdminSnapshot> {
@@ -45,7 +56,7 @@ async function loadSnapshot(): Promise<AdminSnapshot> {
 
   const { data: ledgerRows } = await sb
     .from('usage_ledger')
-    .select('user_id, vendor, kind, cost_cents')
+    .select('user_id, peek_id, vendor, kind, cost_cents')
     .gte('ts', sinceIso);
 
   const rows = ledgerRows ?? [];
@@ -56,6 +67,7 @@ async function loadSnapshot(): Promise<AdminSnapshot> {
     string,
     { cost: number; chat_turns: number; scrapes: number; image_gens: number }
   >();
+  const peekMap = new Map<string, { cost: number; calls: number }>();
   const anonAgg = { cost: 0, chat_turns: 0, scrapes: 0, image_gens: 0 };
 
   for (const r of rows) {
@@ -84,6 +96,12 @@ async function loadSnapshot(): Promise<AdminSnapshot> {
     }
     if (r.vendor === 'fal') target.image_gens += 1;
     if (r.user_id) userMap.set(r.user_id, target);
+    if (r.peek_id) {
+      const p = peekMap.get(r.peek_id) ?? { cost: 0, calls: 0 };
+      p.cost += cost;
+      p.calls += 1;
+      peekMap.set(r.peek_id, p);
+    }
   }
 
   const userIds = Array.from(userMap.keys());
@@ -154,7 +172,41 @@ async function loadSnapshot(): Promise<AdminSnapshot> {
     .map(([vendor, v]) => ({ vendor, cost_cents: v.cost, calls: v.calls }))
     .sort((a, b) => b.cost_cents - a.cost_cents);
 
-  return { totalCents, byVendor, byTier, topUsers };
+  const peekIds = Array.from(peekMap.keys());
+  const peekInfo = new Map<
+    string,
+    { slug: string | null; recipient_name: string | null; status: string | null }
+  >();
+  if (peekIds.length > 0) {
+    const { data: peeksData } = await sb
+      .from('peeks')
+      .select('id, slug, recipient_name, status')
+      .in('id', peekIds);
+    for (const p of peeksData ?? []) {
+      peekInfo.set(p.id, {
+        slug: p.slug,
+        recipient_name: p.recipient_name,
+        status: p.status,
+      });
+    }
+  }
+  const topPeeks: PeekSpendRow[] = peekIds
+    .map((id) => {
+      const agg = peekMap.get(id);
+      const info = peekInfo.get(id);
+      return {
+        peek_id: id,
+        slug: info?.slug ?? null,
+        recipient_name: info?.recipient_name ?? null,
+        status: info?.status ?? null,
+        cost_cents: agg?.cost ?? 0,
+        calls: agg?.calls ?? 0,
+      };
+    })
+    .sort((a, b) => b.cost_cents - a.cost_cents)
+    .slice(0, 25);
+
+  return { totalCents, byVendor, byTier, topUsers, topPeeks };
 }
 
 function dollars(cents: number): string {
@@ -281,6 +333,84 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold">Top peeks by spend (24h)</h2>
+        <p className="mt-1 text-muted-foreground">
+          Click a peek to see vendor · kind breakdown for that curator session.
+        </p>
+        <div className="mt-4 overflow-x-auto rounded-lg border">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-muted/40 uppercase">
+              <tr>
+                <th className="px-3 py-2">Peek</th>
+                <th className="px-3 py-2">Slug</th>
+                <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2 text-right">Calls</th>
+                <th className="px-3 py-2 text-right">Spend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshot.topPeeks.map((p) => (
+                <tr key={p.peek_id} className="border-t">
+                  <td className="px-3 py-2 font-mono text-[11px]">
+                    <Link
+                      href={`/admin/peek/${p.peek_id}`}
+                      className="underline"
+                    >
+                      {p.recipient_name ?? p.peek_id.slice(0, 8)}
+                    </Link>
+                    <div className="text-muted-foreground">{p.peek_id}</div>
+                  </td>
+                  <td className="px-3 py-2 font-mono">{p.slug ?? '—'}</td>
+                  <td className="px-3 py-2">{p.status ?? '—'}</td>
+                  <td className="px-3 py-2 text-right">{p.calls}</td>
+                  <td className="px-3 py-2 text-right">
+                    {dollars(p.cost_cents)}
+                  </td>
+                </tr>
+              ))}
+              {snapshot.topPeeks.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-3 py-6 text-center text-muted-foreground"
+                  >
+                    No peek-attributed usage in the last 24h. (Rows from before
+                    the peek_id column was added show up under Top users only.)
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <form
+          action={async (formData: FormData) => {
+            'use server';
+            const raw = String(formData.get('peek_id') ?? '').trim();
+            if (!raw) return;
+            const { redirect } = await import('next/navigation');
+            redirect(`/admin/peek/${encodeURIComponent(raw)}`);
+          }}
+          className="mt-4 flex items-center gap-2"
+        >
+          <label className="text-xs uppercase text-muted-foreground">
+            Jump to peek_id:
+          </label>
+          <input
+            name="peek_id"
+            type="text"
+            placeholder="00000000-0000-0000-0000-000000000000"
+            className="flex-1 rounded border px-2 py-1 font-mono text-xs"
+          />
+          <button
+            type="submit"
+            className="rounded bg-foreground px-3 py-1 text-xs text-background"
+          >
+            Apply
+          </button>
+        </form>
       </section>
 
       <section className="mt-10">

@@ -72,6 +72,7 @@ function recordShareSend(args: {
   if (args.outcome === 'sent') {
     recordUsageFireAndForget({
       userId: args.userId,
+      peekId: args.peekId,
       vendor: args.channel === 'sms' ? 'twilio' : 'resend',
       kind: args.channel === 'sms' ? 'sms' : 'email',
       payload: { peek_id: args.peekId },

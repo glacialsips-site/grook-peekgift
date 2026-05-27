@@ -67,6 +67,7 @@ registerTool<Input, Output>({
     recordUsageFireAndForget({
       userId: ctx.userId,
       sessionId: ctx.sessionId,
+      peekId: ctx.peekId,
       vendor: 'fal',
       kind: 'fal-ai/flux/schnell',
       payload: {
