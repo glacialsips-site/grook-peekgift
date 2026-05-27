@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles } from 'lucide-react';
@@ -13,11 +13,6 @@ type Props = {
   className?: string;
 };
 
-type CheckoutResponse =
-  | { url: string }
-  | { mock: true; redirect_url: string }
-  | { error: string; message?: string };
-
 export function PublishCta({
   peekId,
   disabled = false,
@@ -25,51 +20,13 @@ export function PublishCta({
   className,
 }: Props) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [loading, setLoading] = useState(false);
 
-  async function handleClick() {
-    if (disabled || loading) return;
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ peekId }),
-      });
-      const data = (await res.json()) as CheckoutResponse;
-
-      if (!res.ok || 'error' in data) {
-        const message =
-          'error' in data
-            ? data.message ?? data.error
-            : `request failed (${res.status})`;
-        setError(message);
-        setLoading(false);
-        return;
-      }
-
-      if ('mock' in data && data.mock) {
-        startTransition(() => {
-          router.push(data.redirect_url);
-        });
-        return;
-      }
-
-      if ('url' in data && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      setError('unexpected response');
-      setLoading(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'network error';
-      setError(message);
-      setLoading(false);
-    }
+  function handleClick() {
+    if (disabled || isPending) return;
+    startTransition(() => {
+      router.push(`/build/${peekId}/publish/checkout`);
+    });
   }
 
   return (
@@ -82,12 +39,11 @@ export function PublishCta({
         type="button"
         size="lg"
         onClick={handleClick}
-        disabled={disabled || loading || isPending}
+        disabled={disabled || isPending}
         className="min-h-11 w-full"
-        aria-busy={loading || isPending}
-        aria-describedby={error ? 'publish-cta-error' : undefined}
+        aria-busy={isPending}
       >
-        {loading || isPending ? (
+        {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
             Opening checkout…
@@ -99,16 +55,6 @@ export function PublishCta({
           </>
         )}
       </Button>
-      {error ? (
-        <p
-          id="publish-cta-error"
-          role="alert"
-          aria-live="assertive"
-          className="mt-2 text-center text-xs text-destructive"
-        >
-          {error}
-        </p>
-      ) : null}
     </motion.div>
   );
 }
