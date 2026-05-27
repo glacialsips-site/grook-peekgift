@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { Peek, VibeMotion } from '@/lib/peek/types';
 
@@ -19,6 +19,8 @@ const MOTION_SCALE: Record<VibeMotion, number> = {
   lively: 1.25,
 };
 
+const GAP_MS = 200;
+
 export function CinematicReveal({
   peek,
   cardCount,
@@ -30,11 +32,12 @@ export function CinematicReveal({
   const reduce = useReducedMotion();
   const scale = MOTION_SCALE[vibeMotion];
   const heroMs = Math.round(900 * scale);
-  const nameDelayMs = Math.round(700 * scale);
   const nameMs = Math.round(900 * scale);
-  const noteDelayMs = nameDelayMs + nameMs;
   const noteMs = peek.noteMd ? Math.min(1600, Math.round(800 * scale)) : 0;
-  const cardsDelayMs = noteDelayMs + noteMs + 200;
+  const gapMs = Math.round(GAP_MS * scale);
+  const nameDelayMs = heroMs;
+  const noteDelayMs = nameDelayMs + nameMs + gapMs;
+  const cardsDelayMs = noteDelayMs + noteMs + gapMs;
   const cardStaggerMs = Math.round(180 * scale);
   const totalMs =
     cardsDelayMs + Math.max(cardStaggerMs * Math.min(cardCount, 6), 400);
@@ -43,34 +46,102 @@ export function CinematicReveal({
     'hero',
   );
 
+  const startedAtRef = useRef<number | null>(null);
+  const elapsedRef = useRef<number>(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const pausedRef = useRef<boolean>(false);
+  const onDoneRef = useRef(onDone);
+
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
+
   useEffect(() => {
     if (revealed) return;
     if (reduce) {
       setPhase('done');
-      onDone();
+      onDoneRef.current();
       return;
     }
-    const t1 = setTimeout(() => setPhase('name'), heroMs);
-    const t2 = setTimeout(() => setPhase('note'), nameDelayMs);
-    const t3 = setTimeout(() => setPhase('cards'), cardsDelayMs);
-    const t4 = setTimeout(() => {
-      setPhase('done');
-      onDone();
-    }, totalMs);
+
+    const schedule = (elapsed: number) => {
+      const phases: Array<{ at: number; run: () => void }> = [
+        { at: nameDelayMs, run: () => setPhase('name') },
+        { at: noteDelayMs, run: () => setPhase('note') },
+        { at: cardsDelayMs, run: () => setPhase('cards') },
+        {
+          at: totalMs,
+          run: () => {
+            setPhase('done');
+            onDoneRef.current();
+          },
+        },
+      ];
+      for (const { at, run } of phases) {
+        const remaining = at - elapsed;
+        if (remaining <= 0) {
+          run();
+        } else {
+          timersRef.current.push(setTimeout(run, remaining));
+        }
+      }
+    };
+
+    const clearTimers = () => {
+      for (const t of timersRef.current) clearTimeout(t);
+      timersRef.current = [];
+    };
+
+    const pause = () => {
+      if (pausedRef.current) return;
+      if (startedAtRef.current == null) return;
+      pausedRef.current = true;
+      elapsedRef.current += Date.now() - startedAtRef.current;
+      startedAtRef.current = null;
+      clearTimers();
+    };
+
+    const resume = () => {
+      if (!pausedRef.current) return;
+      pausedRef.current = false;
+      startedAtRef.current = Date.now();
+      schedule(elapsedRef.current);
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) pause();
+      else resume();
+    };
+
+    startedAtRef.current = Date.now();
+    elapsedRef.current = 0;
+    pausedRef.current = false;
+    schedule(0);
+
+    if (typeof document !== 'undefined' && document.hidden) {
+      pause();
+    }
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('blur', pause);
+    window.addEventListener('focus', resume);
+
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      clearTimers();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('blur', pause);
+      window.removeEventListener('focus', resume);
+      startedAtRef.current = null;
+      elapsedRef.current = 0;
+      pausedRef.current = false;
     };
   }, [
     revealed,
     reduce,
-    heroMs,
     nameDelayMs,
+    noteDelayMs,
     cardsDelayMs,
     totalMs,
-    onDone,
   ]);
 
   const display = peek.vibe?.font_pairing?.display;
