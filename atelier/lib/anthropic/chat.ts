@@ -10,6 +10,16 @@ import { beginTurnCapture } from './observability';
 const MAX_TOOL_ITERATIONS = 10;
 const DEFAULT_MAX_TOKENS = 4096;
 
+function withToolsCacheControl(tools: Anthropic.Tool[]): Anthropic.Tool[] {
+  if (tools.length === 0) return tools;
+  const lastIndex = tools.length - 1;
+  return tools.map((tool, i) =>
+    i === lastIndex
+      ? { ...tool, cache_control: { type: 'ephemeral' } }
+      : tool,
+  );
+}
+
 export interface IterationUsage {
   iteration: number;
   usage: Anthropic.Usage;
@@ -49,7 +59,7 @@ export async function* chatTurn(
 
   const model = input.model ?? DEFAULT_MODEL;
   const maxTokens = input.maxTokens ?? DEFAULT_MAX_TOKENS;
-  const tools = getToolSchemas();
+  const tools = withToolsCacheControl(getToolSchemas());
   const baseOpts = input.systemPromptOptions ?? {};
 
   const userContent: Anthropic.ContentBlockParam[] =
