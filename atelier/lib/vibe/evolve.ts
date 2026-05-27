@@ -5,12 +5,14 @@ import {
   peeks,
   type Vibe,
   type VibeCore,
+  type VibePalette,
   type VibeSignalSource,
   type VibeSignalSourceEntry,
 } from '@/db/schema';
 import { classifyCards, type CardSignal } from './classify-cards';
 import { classifyTone } from './classify-tone';
-import { extractPalette } from './extract-palette';
+import { extractPalette, type ExtractedPalette } from './extract-palette';
+import { blendPalettes } from './palette-quality';
 import { logger } from '@/lib/logger';
 
 const log = logger.child({ component: 'vibe/evolve' });
@@ -35,7 +37,7 @@ export async function evolveVibe(
     if (!row) return;
     const current: Vibe = row.vibe ?? {};
 
-    const result = await derivePatch(signal);
+    const result = await derivePatch(signal, current);
     if (!result || isEmptyPatch(result.patch)) return;
 
     const history = current.signal_source_history ?? [];
@@ -70,10 +72,15 @@ interface PatchResult {
   patch: Partial<VibeCore>;
 }
 
-async function derivePatch(signal: VibeSignal): Promise<PatchResult | null> {
+async function derivePatch(
+  signal: VibeSignal,
+  current: Vibe,
+): Promise<PatchResult | null> {
   if (signal.kind === 'hero_image') {
-    const palette = await extractPalette(signal.imageUrl);
-    return { source: 'hero_palette', patch: { palette } };
+    const extracted = await extractPalette(signal.imageUrl);
+    if (!extracted) return null;
+    const seasoned = seasonPalette(current.palette, extracted);
+    return { source: 'hero_palette', patch: { palette: seasoned } };
   }
   if (signal.kind === 'note') {
     const tone = await classifyTone(signal.text);
@@ -92,6 +99,34 @@ async function derivePatch(signal: VibeSignal): Promise<PatchResult | null> {
     return { source: 'card_mix', patch };
   }
   return null;
+}
+
+function seasonPalette(
+  existing: VibePalette | undefined,
+  extracted: ExtractedPalette,
+): VibePalette {
+  const blended = blendPalettes(toExtractedShape(existing), extracted);
+  const result: VibePalette = {
+    bg: blended.bg,
+    surface: blended.surface,
+    ink: blended.ink,
+    accent: blended.accent,
+  };
+  if (blended.accent2) result.accent2 = blended.accent2;
+  return result;
+}
+
+function toExtractedShape(
+  p: VibePalette | undefined,
+): ExtractedPalette | undefined {
+  if (!p) return undefined;
+  return {
+    bg: p.bg,
+    surface: p.surface,
+    ink: p.ink,
+    accent: p.accent,
+    accent2: p.accent2 ?? p.accent,
+  };
 }
 
 function isEmptyPatch(patch: Partial<VibeCore>): boolean {
