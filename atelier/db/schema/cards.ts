@@ -39,11 +39,39 @@ export const variantGroups = peekV2.table('variant_groups', {
 export type VariantGroup = typeof variantGroups.$inferSelect;
 export type NewVariantGroup = typeof variantGroups.$inferInsert;
 
-export type UnlockRule = {
-  kind: 'beg' | 'date_after' | 'event';
+export type UnlockRuleBeg = {
+  kind: 'beg';
   beg_prompt?: string;
+};
+
+export type UnlockRuleDateAfter = {
+  kind: 'date_after';
+  unlock_after: string;
+};
+
+export type UnlockRuleEvent = {
+  kind: 'event';
   unlock_after?: string;
 };
+
+export type UnlockRuleRequiresPicks = {
+  kind: 'requires_picks';
+  card_ids: string[];
+};
+
+export type UnlockRule =
+  | UnlockRuleBeg
+  | UnlockRuleDateAfter
+  | UnlockRuleEvent
+  | UnlockRuleRequiresPicks;
+
+export const UNLOCK_RULE_KINDS = [
+  'beg',
+  'date_after',
+  'event',
+  'requires_picks',
+] as const;
+export type UnlockRuleKind = (typeof UNLOCK_RULE_KINDS)[number];
 
 export const cards = peekV2.table(
   'cards',
