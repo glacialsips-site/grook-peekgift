@@ -19,13 +19,40 @@ const CardTypeSchema = z.enum([
   'digital',
 ]);
 
-const UnlockRuleSchema = z
+const UnlockRuleBegSchema = z
   .object({
-    kind: z.enum(['beg', 'date_after', 'event']),
+    kind: z.literal('beg'),
     beg_prompt: z.string().min(1).max(280).optional(),
+  })
+  .strict();
+
+const UnlockRuleDateAfterSchema = z
+  .object({
+    kind: z.literal('date_after'),
+    unlock_after: z.string().min(1).max(64),
+  })
+  .strict();
+
+const UnlockRuleEventSchema = z
+  .object({
+    kind: z.literal('event'),
     unlock_after: z.string().min(1).max(64).optional(),
   })
   .strict();
+
+const UnlockRuleRequiresPicksSchema = z
+  .object({
+    kind: z.literal('requires_picks'),
+    card_ids: z.array(z.string().uuid()).min(1).max(20),
+  })
+  .strict();
+
+const UnlockRuleSchema = z.discriminatedUnion('kind', [
+  UnlockRuleBegSchema,
+  UnlockRuleDateAfterSchema,
+  UnlockRuleEventSchema,
+  UnlockRuleRequiresPicksSchema,
+]);
 
 const InputSchema = z
   .object({
@@ -57,7 +84,7 @@ interface Output {
 registerTool<Input, Output>({
   name: 'add_card',
   description:
-    "Add a gift card to the page — product, activity, aspirational, or digital. Use whenever you have a concrete option to put on the page; pass source_url to auto-scrape image/description/price and affiliate-wrap the link. Failures on the inline scrape are non-fatal — the card still inserts with whatever you provided.",
+    "Add a gift card to the page — product, activity, aspirational, or digital. Use whenever you have a concrete option to put on the page; pass source_url to auto-scrape image/description/price and affiliate-wrap the link. Failures on the inline scrape are non-fatal — the card still inserts with whatever you provided. Lock a card with is_locked + unlock_rule: kind 'beg' (recipient writes a pitch), 'requires_picks' (must have picked specific card_ids first), 'date_after' (unlock at ISO timestamp), or 'event'.",
   input_schema: {
     type: 'object',
     properties: {
@@ -95,10 +122,20 @@ registerTool<Input, Output>({
       is_locked: { type: 'boolean' },
       unlock_rule: {
         type: 'object',
+        description:
+          "Constraint guarding the card. kind=beg: recipient must submit a non-empty beg_message. kind=requires_picks: recipient must have already picked every card in card_ids. kind=date_after: unlock_after is an ISO timestamp. kind=event: held until curator marks fulfilled.",
         properties: {
-          kind: { type: 'string', enum: ['beg', 'date_after', 'event'] },
+          kind: {
+            type: 'string',
+            enum: ['beg', 'date_after', 'event', 'requires_picks'],
+          },
           beg_prompt: { type: 'string' },
           unlock_after: { type: 'string' },
+          card_ids: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'UUIDs of cards that must already be picked.',
+          },
         },
         required: ['kind'],
       },
