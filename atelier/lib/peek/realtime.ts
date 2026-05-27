@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  RealtimePostgresChangesPayload,
   RealtimePostgresInsertPayload,
   RealtimePostgresUpdatePayload,
   RealtimePostgresDeletePayload,
 } from '@supabase/supabase-js';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
+import { subscribePostgresChanges } from './subscribe-postgres-changes';
 import type {
   Card,
   CardType,
@@ -181,116 +181,115 @@ export function usePeekDraft(
 
   useEffect(() => {
     const sb = getSupabaseBrowser();
-    const channel = sb
-      .channel(`peek:${peekId}`)
-      .on(
-        'postgres_changes' as never,
-        {
-          event: '*',
-          schema: 'peek_v2',
-          table: 'peeks',
-          filter: `id=eq.${peekId}`,
-        },
-        (payload: RealtimePostgresChangesPayload<RealtimeRow>) => {
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            const next = rowToPeek(
+    const channel = sb.channel(`peek:${peekId}`);
+    subscribePostgresChanges<RealtimeRow>(
+      channel,
+      {
+        event: '*',
+        schema: 'peek_v2',
+        table: 'peeks',
+        filter: `id=eq.${peekId}`,
+      },
+      (payload) => {
+        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+          const next = rowToPeek(
+            (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
+          );
+          setDraft((prev) => ({ ...prev, peek: next }));
+        }
+      },
+    );
+    subscribePostgresChanges<RealtimeRow>(
+      channel,
+      {
+        event: '*',
+        schema: 'peek_v2',
+        table: 'cards',
+        filter: `peek_id=eq.${peekId}`,
+      },
+      (payload) => {
+        setDraft((prev) => {
+          if (payload.eventType === 'INSERT') {
+            const card = rowToCard(
+              (payload as RealtimePostgresInsertPayload<RealtimeRow>).new,
+            );
+            const exists = prev.cards.some((c) => c.id === card.id);
+            const nextCards = exists
+              ? prev.cards.map((c) => (c.id === card.id ? card : c))
+              : [...prev.cards, card];
+            return { ...prev, cards: sortByPosition(nextCards) };
+          }
+          if (payload.eventType === 'UPDATE') {
+            const card = rowToCard(
               (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
             );
-            setDraft((prev) => ({ ...prev, peek: next }));
+            return {
+              ...prev,
+              cards: sortByPosition(
+                prev.cards.map((c) => (c.id === card.id ? card : c)),
+              ),
+            };
           }
-        },
-      )
-      .on(
-        'postgres_changes' as never,
-        {
-          event: '*',
-          schema: 'peek_v2',
-          table: 'cards',
-          filter: `peek_id=eq.${peekId}`,
-        },
-        (payload: RealtimePostgresChangesPayload<RealtimeRow>) => {
-          setDraft((prev) => {
-            if (payload.eventType === 'INSERT') {
-              const card = rowToCard(
-                (payload as RealtimePostgresInsertPayload<RealtimeRow>).new,
-              );
-              const exists = prev.cards.some((c) => c.id === card.id);
-              const nextCards = exists
-                ? prev.cards.map((c) => (c.id === card.id ? card : c))
-                : [...prev.cards, card];
-              return { ...prev, cards: sortByPosition(nextCards) };
-            }
-            if (payload.eventType === 'UPDATE') {
-              const card = rowToCard(
-                (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
-              );
-              return {
-                ...prev,
-                cards: sortByPosition(
-                  prev.cards.map((c) => (c.id === card.id ? card : c)),
-                ),
-              };
-            }
-            if (payload.eventType === 'DELETE') {
-              const oldRow = (payload as RealtimePostgresDeletePayload<RealtimeRow>)
-                .old;
-              const oldIdRaw = oldRow ? oldRow['id'] : null;
-              const oldId = typeof oldIdRaw === 'string' ? oldIdRaw : '';
-              return {
-                ...prev,
-                cards: prev.cards.filter((c) => c.id !== oldId),
-              };
-            }
-            return prev;
-          });
-        },
-      )
-      .on(
-        'postgres_changes' as never,
-        {
-          event: '*',
-          schema: 'peek_v2',
-          table: 'variant_groups',
-          filter: `peek_id=eq.${peekId}`,
-        },
-        (payload: RealtimePostgresChangesPayload<RealtimeRow>) => {
-          setDraft((prev) => {
-            if (payload.eventType === 'INSERT') {
-              const vg = rowToVariantGroup(
-                (payload as RealtimePostgresInsertPayload<RealtimeRow>).new,
-              );
-              const exists = prev.variantGroups.some((g) => g.id === vg.id);
-              const nextGroups = exists
-                ? prev.variantGroups.map((g) => (g.id === vg.id ? vg : g))
-                : [...prev.variantGroups, vg];
-              return { ...prev, variantGroups: sortByPosition(nextGroups) };
-            }
-            if (payload.eventType === 'UPDATE') {
-              const vg = rowToVariantGroup(
-                (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
-              );
-              return {
-                ...prev,
-                variantGroups: sortByPosition(
-                  prev.variantGroups.map((g) => (g.id === vg.id ? vg : g)),
-                ),
-              };
-            }
-            if (payload.eventType === 'DELETE') {
-              const oldRow = (payload as RealtimePostgresDeletePayload<RealtimeRow>)
-                .old;
-              const oldIdRaw = oldRow ? oldRow['id'] : null;
-              const oldId = typeof oldIdRaw === 'string' ? oldIdRaw : '';
-              return {
-                ...prev,
-                variantGroups: prev.variantGroups.filter((g) => g.id !== oldId),
-              };
-            }
-            return prev;
-          });
-        },
-      )
-      .subscribe();
+          if (payload.eventType === 'DELETE') {
+            const oldRow = (payload as RealtimePostgresDeletePayload<RealtimeRow>)
+              .old;
+            const oldIdRaw = oldRow ? oldRow['id'] : null;
+            const oldId = typeof oldIdRaw === 'string' ? oldIdRaw : '';
+            return {
+              ...prev,
+              cards: prev.cards.filter((c) => c.id !== oldId),
+            };
+          }
+          return prev;
+        });
+      },
+    );
+    subscribePostgresChanges<RealtimeRow>(
+      channel,
+      {
+        event: '*',
+        schema: 'peek_v2',
+        table: 'variant_groups',
+        filter: `peek_id=eq.${peekId}`,
+      },
+      (payload) => {
+        setDraft((prev) => {
+          if (payload.eventType === 'INSERT') {
+            const vg = rowToVariantGroup(
+              (payload as RealtimePostgresInsertPayload<RealtimeRow>).new,
+            );
+            const exists = prev.variantGroups.some((g) => g.id === vg.id);
+            const nextGroups = exists
+              ? prev.variantGroups.map((g) => (g.id === vg.id ? vg : g))
+              : [...prev.variantGroups, vg];
+            return { ...prev, variantGroups: sortByPosition(nextGroups) };
+          }
+          if (payload.eventType === 'UPDATE') {
+            const vg = rowToVariantGroup(
+              (payload as RealtimePostgresUpdatePayload<RealtimeRow>).new,
+            );
+            return {
+              ...prev,
+              variantGroups: sortByPosition(
+                prev.variantGroups.map((g) => (g.id === vg.id ? vg : g)),
+              ),
+            };
+          }
+          if (payload.eventType === 'DELETE') {
+            const oldRow = (payload as RealtimePostgresDeletePayload<RealtimeRow>)
+              .old;
+            const oldIdRaw = oldRow ? oldRow['id'] : null;
+            const oldId = typeof oldIdRaw === 'string' ? oldIdRaw : '';
+            return {
+              ...prev,
+              variantGroups: prev.variantGroups.filter((g) => g.id !== oldId),
+            };
+          }
+          return prev;
+        });
+      },
+    );
+    channel.subscribe();
 
     return () => {
       sb.removeChannel(channel);
