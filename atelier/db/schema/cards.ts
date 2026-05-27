@@ -7,6 +7,7 @@ import {
   numeric,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { peekV2 } from './_schema';
@@ -26,15 +27,21 @@ export const variantSelection = peekV2.enum('variant_selection', [
   'pick_all',
 ]);
 
-export const variantGroups = peekV2.table('variant_groups', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  peekId: uuid('peek_id')
-    .notNull()
-    .references(() => peeks.id, { onDelete: 'cascade' }),
-  title: text('title').notNull(),
-  selection: variantSelection('selection').notNull(),
-  position: integer('position').notNull().default(0),
-});
+export const variantGroups = peekV2.table(
+  'variant_groups',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    peekId: uuid('peek_id')
+      .notNull()
+      .references(() => peeks.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    selection: variantSelection('selection').notNull(),
+    position: integer('position').notNull().default(0),
+  },
+  (t) => [
+    uniqueIndex('variant_groups_peek_position_uniq').on(t.peekId, t.position),
+  ],
+);
 
 export type VariantGroup = typeof variantGroups.$inferSelect;
 export type NewVariantGroup = typeof variantGroups.$inferInsert;
@@ -119,6 +126,7 @@ export const cards = peekV2.table(
   (t) => [
     index('cards_peek_id_idx').on(t.peekId),
     index('cards_variant_group_id_idx').on(t.variantGroupId),
+    uniqueIndex('cards_peek_position_uniq').on(t.peekId, t.position),
   ],
 );
 

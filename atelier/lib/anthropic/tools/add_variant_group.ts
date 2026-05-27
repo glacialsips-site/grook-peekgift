@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db/client';
 import { peeks, variantGroups } from '@/db/schema';
@@ -42,21 +42,13 @@ registerTool<Input, Output>({
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
 
-    const [lastGroup] = await db
-      .select({ position: variantGroups.position })
-      .from(variantGroups)
-      .where(eq(variantGroups.peekId, ctx.peekId))
-      .orderBy(desc(variantGroups.position))
-      .limit(1);
-    const nextPosition = (lastGroup?.position ?? -1) + 1;
-
     const [row] = await db
       .insert(variantGroups)
       .values({
         peekId: ctx.peekId,
         title: parsed.title,
         selection: parsed.selection,
-        position: nextPosition,
+        position: sql`(SELECT COALESCE(MAX(${variantGroups.position}), -1) + 1 FROM ${variantGroups} WHERE ${variantGroups.peekId} = ${ctx.peekId})`,
       })
       .returning({ id: variantGroups.id });
     if (!row) throw new Error('failed to create variant group');
