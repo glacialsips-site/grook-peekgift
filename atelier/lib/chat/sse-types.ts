@@ -17,4 +17,11 @@ export type SseEvent =
   | { kind: 'tool_result'; id: string; output: unknown }
   | { kind: 'peek_update'; snapshot: PeekUpdateSnapshot }
   | { kind: 'turn_end'; usage: SseTurnUsage }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string }
+  | {
+      kind: 'tier_limit_reached';
+      tier: string;
+      message: string;
+      used_cents: number;
+      limit_cents: number;
+    };

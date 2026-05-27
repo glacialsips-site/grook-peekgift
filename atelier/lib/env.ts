@@ -59,7 +59,9 @@ const schema = z.object({
   GUEST_CLAIM_TOKEN_SECRET: z
     .string()
     .min(32, 'GUEST_CLAIM_TOKEN_SECRET must be >=32 chars')
-    .optional()
+    .optional(),
+
+  ADMIN_CLERK_USER_IDS: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

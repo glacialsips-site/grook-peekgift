@@ -8,6 +8,7 @@ export const users = peekV2.table('users', {
   email: text('email').notNull(),
   displayName: text('display_name'),
   avatarUrl: text('avatar_url'),
+  tier: text('tier').notNull().default('authenticated'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .default(sql`now()`),
