@@ -63,22 +63,31 @@ export async function POST(req: Request) {
       const email =
         u.email_addresses.find((e) => e.id === u.primary_email_address_id)
           ?.email_address ?? null;
-      if (!email) {
-        success = true;
-        return new Response('missing email', { status: 200 });
-      }
       const displayName =
         [u.first_name, u.last_name].filter(Boolean).join(' ') || null;
-      const { error } = await db.from('users').upsert(
-        {
-          clerk_user_id: u.id,
-          email,
-          display_name: displayName,
-          avatar_url: u.image_url ?? null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'clerk_user_id' },
-      );
+
+      // Always upsert. On user.created with no primary email yet (OAuth race,
+      // pending verification), insert with email=NULL — the row must exist so
+      // downstream FK references (curator_id, etc.) don't violate.
+      // On user.updated, if we have a new email include it (this covers the
+      // "previously NULL, now resolved" case); if we don't, omit the column so
+      // the existing value is preserved.
+      const payload: Record<string, unknown> = {
+        clerk_user_id: u.id,
+        display_name: displayName,
+        avatar_url: u.image_url ?? null,
+        updated_at: new Date().toISOString(),
+      };
+      if (email !== null) {
+        payload['email'] = email;
+      } else if (evt.type === 'user.created') {
+        // Explicitly insert NULL on first create when no email is available.
+        payload['email'] = null;
+      }
+
+      const { error } = await db
+        .from('users')
+        .upsert(payload, { onConflict: 'clerk_user_id' });
       if (error) {
         return new Response(`upsert failed: ${error.message}`, { status: 500 });
       }
