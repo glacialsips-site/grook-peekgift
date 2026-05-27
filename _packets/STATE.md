@@ -1,5 +1,56 @@
 # STATE — live build status
 
+## SPINE/ landed (2026-05-27)
+
+The orchestration spine — canonical artifacts that hold the product architecture across sessions — is in `_packets/SPINE/`. Read `_packets/SPINE/README.md` first for ordering.
+
+What's in SPINE/ (all on `claude/bold-ride-Li5zK`, eventually merging to trunk):
+
+| File | Purpose |
+|---|---|
+| `README.md` | Reading order + ownership rules |
+| `CAPABILITY_INVENTORY.md` | Every vendor × every feature × peek.gift use case, tiered |
+| `CURATOR_PROMPT.md` | Peek's system prompt (5-layer cached) + per-turn interpolations |
+| `CUTOVER.md` | peek.gift apex cutover plan (5 steps, same Netlify project) |
+| `URL-AUDIT.md` | Backend-vendor URL drift audit + remediation |
+| `SLUG_MODEL.ts` | Zod schema for the slug data model (derived from Drizzle) |
+| `TOOL_MANIFEST.md` | Every tool Peek can call, schema + side effect + routing |
+| `skills/copy-house-style.md` | Peek's voice manual |
+| `skills/voice-camera-protocol.md` | Voice + camera mode UX |
+| `skills/vibe-direction.md` | 7-dial vibe engine |
+| `skills/image-direction.md` | fal.ai brief patterns per occasion |
+| `skills/share-mechanics.md` | Share-pack pipeline (6 platform variants) |
+| `skills/reveal-mechanics.md` | Cinematic reveal (magazine-cover default per H7) |
+| `skills/affiliate-strategy.md` | Tool decision tree, affiliate_search spec |
+| `skills/rules-engine-patterns.md` | 9 named picks/locks patterns |
+| `skills/occasion-templates/*.md` | 10 occasion templates (princess-bday → just-because) |
+
+**Spine ownership rule:** if any packet, sub, or session contradicts a SPINE doc, the contradiction is wrong (or SPINE needs a follow-up update first). SPINE supersedes legacy `BRAIN-DUMP.md` / `CONCEPT-V2.md` / `CONCEPT-INVENTORY.md` where they conflict, but those remain canonical for product brief + legacy state.
+
+### In-code fixes that landed alongside SPINE
+
+Three small URL-drift fixes per `_packets/SPINE/URL-AUDIT.md`:
+- `atelier/app/layout.tsx` — `<ClerkProvider>` now passes `signInFallbackRedirectUrl="/build"`, `signUpFallbackRedirectUrl="/build"`, `afterSignOutUrl="/"`. Prevents users completing OAuth from landing on legacy `peek.gift` apex.
+- `atelier/lib/email/templates/relationship-nudge.tsx` — replaced hardcoded `https://peek.gift/build` with `${env.APP_URL}/build`.
+- `atelier/next.config.mjs` — added `**.peek.gift` to `images.remotePatterns`.
+
+### Pending Frank decisions
+1. Stripe webhook URL drift fix (`we_1Tb7PhCEKPUsVee1Jz6Kcxkb` → `vnext.peek.gift/api/stripe/webhook`).
+2. Clerk Svix webhook URL verification (manual via Svix one-time-link).
+3. Google Places API key restrictions — moot now since Frank dropped Places dependency (Stripe Address Element will handle address autosuggest).
+
+### Frank's parallel work queue
+
+Account signups + Netlify env vars + Stripe Dashboard tasks tracked in `_packets/SPINE/CAPABILITY_INVENTORY.md` §J.
+
+### Next from orchestrator
+- Draft Tier 0 dispatch packets (40-50 per CAPABILITY_INVENTORY §K).
+- Wave 2 BUGS items in parallel.
+- Migrate the curator system prompt in `atelier/lib/anthropic/system-prompt.ts` to the new CURATOR_PROMPT.md + skills loader.
+- Implement prompt caching across the new big system block (1-line fix; massive cost win).
+
+---
+
 _Last updated: 2026-05-26 by cc-on-web orchestrator session — batch 4 prep landed; about to dispatch all 8._
 
 ## READ FIRST — batch 4 prep (pre-dispatch fixes)

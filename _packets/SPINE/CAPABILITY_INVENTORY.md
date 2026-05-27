@@ -18,7 +18,7 @@ The product brief in CONCEPT-V2 and BRAIN-DUMP already nails WHAT the product is
 `ANTHROPIC-API-CONTEXT.md` covers the mechanics (caching, batching, streaming, rate limits, telemetry). This section is the **agentic** features that build "make any idiot build this page."
 
 ### A1. Tool use (function calling) ✅ WIRED
-13 tools registered today (packet 11): `set_recipient`, `set_vibe`, `update_vibe`, `set_hero_image`, `generate_hero_image`, `set_note`, `add_variant_group`, `add_card`, `remove_card`, `reorder_cards`, `scrape_url`, `mark_ready_for_publish`, `ping`. peek.gift use: every chat utterance can mutate the page mid-stream — curator says "ferrari" → `add_card({type:'aspirational',…})` fires before model finishes the next sentence. **THE** killer feature. Spine expansion (TOOL_MANIFEST.md) adds ~15 more tools: `affiliate_search`, `place_search_v2`, `share_pack_generate`, `invite_cocurator`, `propose_checkout`, `set_countdown`, `set_rules_template`, `request_voice_capture`, `request_camera_capture`, `set_reaction_capture_consent`, `transcribe_chunk`, `set_song_card`, `set_movie_card`, `attach_files_api_ref`, `set_curator_memory`.
+13 tools registered today (packet 11): `set_recipient`, `set_vibe`, `update_vibe`, `set_hero_image`, `generate_hero_image`, `set_note`, `add_variant_group`, `add_card`, `remove_card`, `reorder_cards`, `scrape_url`, `mark_ready_for_publish`, `ping`. peek.gift use: every chat utterance can mutate the page mid-stream — curator says "ferrari" → `add_card({type:'aspirational',…})` fires before model finishes the next sentence. **THE** killer feature. Spine expansion (TOOL_MANIFEST.md) adds ~15 more tools: `affiliate_search`, `activity_search` (Viator/OpenTable/Ticketmaster/Booking/GetYourGuide affiliate-driven, no Google Places), `share_pack_generate`, `invite_cocurator`, `propose_checkout`, `set_countdown`, `set_rules_template`, `request_voice_capture`, `request_camera_capture`, `set_reaction_capture_consent`, `transcribe_chunk`, `set_song_card`, `set_movie_card`, `attach_files_api_ref`, `set_curator_memory`.
 
 ### A2. Streaming SSE ✅ WIRED
 `app/api/chat/route.ts`. Text streams to chat UI; tool_use blocks emit live to preview pane. M07 (turn_end per inner iteration) addressed in Wave 1.
@@ -137,6 +137,8 @@ Custom UI locked per packet 28 (no Clerk branding visible).
 
 Custom Payment Element locked per packet 15.
 
+> **Stripe principle: ALL payment methods, ALL currencies, ALL countries, automatic_tax on.** Frank's account already has Tax + Adaptive Pricing activated. Every Stripe payment method that's account-enabled (cards, Link, Apple Pay, Google Pay, ACH, Klarna, Afterpay, Affirm, Cash App, iDEAL, Bancontact, SEPA, EPS, etc.) routes through the Payment Element with NO per-method opt-in code. Custom checkout with custom branding (per packet 15). Tax + Adaptive Pricing automatic at the Session level.
+
 | ID | Feature | Status | peek.gift use |
 |---|---|---|---|
 | C1 | Payment Element | ✅ | Default checkout |
@@ -158,6 +160,7 @@ Custom Payment Element locked per packet 15.
 | C17 | Receipt customization | 💡 | Branded receipts |
 | C18 | Radar (fraud) | 💡 | Auto-on at Stripe Standard. No extra wiring needed |
 | C19 | Customer Sessions (Custom checkout) | 🟡 | Payment Element wired; richer Customer Session for variants TBD |
+| C20 | Address Element (Link autocomplete) | 💡 | Address auto-suggest in checkout flow + curator profile + recipient delivery addresses (when Tier 2 fulfillment ships). Comes free with Stripe Checkout/Payment Element configuration; just enable. Replaces any need for Google Places autocomplete |
 
 ---
 
@@ -218,12 +221,6 @@ Outbound wrap wired (packet 24). Caveats:
 
 ### E8. Sovrn 🟡 PARTIAL
 Wrap wired. No revenue webhook. Same catalog-search gap as Skimlinks.
-
-### E9. Google Places ✅ WIRED
-Activity card location search. Net-new:
-- **Place Photos API** — richer activity card hero
-- **Reviews API** — recipient sees ratings
-- **Routes API** — multi-stop activity cards (pub crawl, dinner crawl)
 
 ### E10. PostHog 🟡 PARTIAL
 Analytics + provider + LLM observability wired (packet 25). Session replay needs CSP fix (M23 in Wave 1.5 — closed); proxy strips headers (B18 in Wave 1 — closed).
@@ -287,7 +284,37 @@ Free OAuth. **Song cards.** Curator says "her favorite is Taylor Swift" → Spot
 $99/yr Apple Developer. Same as Spotify for Apple users.
 
 ### G3. Mapbox OR Google Maps SDK 💡 NET-NEW (Tier 1)
-Google Places already wired (E9); this is the rendering layer. Activity card with embedded map. "Dinner at Carbone" → mini-map with marker + neighborhood vibe.
+Activity card rendering layer. "Dinner at Carbone" → mini-map with marker + neighborhood vibe. Place data sourced via the activity affiliate APIs (OpenTable, Viator, etc.) — no separate Places API dependency.
+
+### G3a. Booking.com Partner Hub 💡 NET-NEW (Tier 1 — affiliate)
+Hotel/lodging affiliate. Free signup. peek.gift use: travel-gift activity cards (honeymoon, anniversary trips). ~4% commission.
+
+### G3b. Expedia Group Partner API 💡 NET-NEW (Tier 1 — affiliate)
+Broader travel (hotels + flights + cars + activities). Free signup, harder approval. peek.gift use: cross-vertical travel gifting (honeymoon package, surprise weekend, family reunion).
+
+### G3c. Airbnb Affiliate 💡 NET-NEW (Tier 1 — affiliate)
+Via Skimlinks coverage (verify) or direct. peek.gift use: stay-gift cards (anniversary getaway, friend group trip).
+
+### G3d. TripAdvisor Affiliate 💡 NET-NEW (Tier 1 — affiliate)
+Reviews + bookings hybrid. peek.gift use: activity / restaurant / hotel cards with social-proof ratings baked in.
+
+### G3e. GetYourGuide Partner 💡 NET-NEW (Tier 1 — affiliate)
+Viator competitor, often better international commission. peek.gift use: international tour/experience gifting (European city tours, Asia day-trips).
+
+### G3f. Amazon SiteStripe (Amazon Associates) 💡 NET-NEW (Tier 1 — affiliate)
+Amazon is NOT in Skimlinks coverage. Direct integration required if Amazon links are wanted. peek.gift use: ubiquitous product cards (Amazon is where ~70% of US shoppers default to "is it on Amazon?").
+
+### G3g. Apple Services Performance Partners 💡 NET-NEW (Tier 1 — affiliate)
+App Store / iTunes / Music / Books / Podcasts affiliate. peek.gift use: digital cards (apps, songs, books, audiobooks, podcasts) with revenue.
+
+### G3h. Walmart Affiliate Program (Impact-managed) 💡 NET-NEW (Tier 1 — affiliate)
+Walmart is NOT in Skimlinks. Direct integration. peek.gift use: mass-market product reach (the recipient who shops Walmart, not Bloomingdale's).
+
+### G3i. Target Affiliates Program (Impact-managed) 💡 NET-NEW (Tier 1 — affiliate)
+Target NOT in Skimlinks. Direct integration. peek.gift use: same as Walmart — mass-market reach with Target's distinct catalog.
+
+### G3j. Best Buy Affiliate 💡 NET-NEW (Tier 1 — affiliate)
+Covered via Skimlinks (no separate signup needed; just verify on activation). peek.gift use: electronics product cards.
 
 ### G4. Viator API 💡 NET-NEW (Tier 1 — affiliate)
 Tour/experience affiliate. peek.gift use: activity card affiliate wrap when curator picks a tour. Revenue.
@@ -382,7 +409,7 @@ Per prior conversation: **demote Tailwind, don't rip it.** Tailwind becomes layo
 | 5 | Anthropic Files API (large uploads) | 💡 | A8 |
 | 6 | Anthropic Extended Thinking (creative tool calls) | 💡 | A5 |
 | 7 | **Affiliate search tool** (Skimlinks/Sovrn catalog search → suggestion UI) | 💡 | E7 + E8 + H6 |
-| 8 | Place search expansion (Places + Viator + OpenTable) | 🟡 | E9 + G4 + G5 |
+| 8 | Activity card affiliate search (Viator + OpenTable + Ticketmaster direct; Stripe Address Element for any address autosuggest needs) | 💡 | G4 + G5 + G6 + C20 |
 | 9 | **Voice** (Deepgram STT + ElevenLabs TTS, toggle off default) | 💡 | F1 + F2 + H3 + H8 |
 | 10 | **Camera** (MediaRecorder + Supabase Storage) | 💡 | F3 + H4 |
 | 11 | Clerk Passkeys + Apple/Google OAuth + magic link | 💡 | B4 + B5 + B2 |
@@ -404,6 +431,9 @@ Per prior conversation: **demote Tailwind, don't rip it.** Tailwind becomes layo
 - TMDB movie cards (G7)
 - YouTube oEmbed video cards (G8)
 - Viator + OpenTable + Ticketmaster affiliate (G4-G6)
+- Travel affiliate stack: Booking.com + Expedia + Airbnb + TripAdvisor + GetYourGuide (G3a-G3e)
+- Retailer direct affiliates (not in Skimlinks): Amazon + Apple + Walmart + Target (G3f-G3i)
+- Best Buy + other Skimlinks-covered retailers — verify-and-flip, no separate signup (G3j)
 - Clerk Organizations (co-curation) (B7 + H5)
 - Stripe Connect (creator payouts when creator program launches) (C9)
 - Anthropic Citations on aspirational cards (A11)
@@ -459,6 +489,16 @@ Per PROD-PARALLEL POLICY in CLAUDE.md: **do NOT provision proactively**, surface
 | Viator | Affiliate partner approval | 1 | Tour affiliate |
 | OpenTable | Affiliate program signup | 1 | Restaurant affiliate |
 | Ticketmaster Partner Network | Application | 1 | Event affiliate |
+| Booking.com Partner Hub | Free signup | 1 | Hotel/lodging affiliate (~4% comm) |
+| Expedia Group Partner API | Free signup, harder approval | 1 | Cross-vertical travel (hotels + flights + cars) |
+| Airbnb Affiliate | Verify Skimlinks coverage first; else direct | 1 | Stay-gift cards |
+| TripAdvisor Affiliate | Application | 1 | Reviews + bookings hybrid |
+| GetYourGuide Partner | Application | 1 | Tours/experiences (better intl commission than Viator) |
+| Amazon Associates (SiteStripe) | Application — NOT in Skimlinks; direct required | 1 | Amazon product cards (~70% of US shoppers' default retailer) |
+| Apple Services Performance Partners | Application | 1 | App Store / iTunes / Music / Books / Podcasts digital cards |
+| Walmart Affiliate (Impact) | Application — NOT in Skimlinks; direct required | 1 | Mass-market product reach |
+| Target Affiliates (Impact) | Application — NOT in Skimlinks; direct required | 1 | Mass-market product reach |
+| Best Buy Affiliate | Covered via Skimlinks — verify on activation, no separate signup | 1 | Electronics product cards |
 | Tolt OR Rewardful | $49-99/mo | 1 | Creator referral |
 | Ayrshare OR Buffer | $29-49/mo | 2 | Social outbound |
 | Pinterest | Free OAuth | 2 | Inbound mood-board |
@@ -466,6 +506,8 @@ Per PROD-PARALLEL POLICY in CLAUDE.md: **do NOT provision proactively**, surface
 | Mux OR Cloudflare Stream OR Bunny | Pay-as-you-go | 2 | Longer reaction videos |
 | Canva | API access | 2 | Power-curator design import |
 | Apple Developer | $99/yr | 2 | Only if Apple Music integration |
+
+> **Affiliate signup principle:** Skimlinks + Sovrn cover MOST major retailers (Nordstrom, Macy's, Bloomingdale's, Sephora, Etsy, etc.) without separate signup — outbound link wrap auto-attributes. Only **Amazon, Apple, Walmart, Target** need direct integration because they're not in those networks. Travel/lodging (Booking, Expedia, Airbnb, TripAdvisor, GetYourGuide) need direct affiliate accounts because Skimlinks coverage is weak in travel. Tier 1 across the board because approval cycles are slow (1-6 weeks) — start applications in parallel as soon as the spine ships.
 
 ---
 
@@ -490,7 +532,7 @@ Order of dispatch (Tier 0 first, parallel where safe):
 3. **Packet 42 — Affiliate search + suggestion UI** (Skimlinks/Sovrn catalog search, curator sidebar deck)
 4. **Packet 43 — Voice mode toggle** (Deepgram + ElevenLabs/Cartesia streaming pipe)
 5. **Packet 44 — Camera capture** (MediaRecorder → Storage; reaction capture flow)
-6. **Packet 45 — Stripe surface expansion** (Link + Apple/Google Pay + Klarna/Afterpay/Affirm + customer portal)
+6. **Packet 45 — Stripe surface expansion** (Link + Apple/Google Pay + Klarna/Afterpay/Affirm + customer portal + Address Element for address autosuggest)
 7. **Packet 46 — Clerk surface expansion** (Passkeys + magic link + social OAuth)
 8. **Packet 47 — Realtime live preview** (Supabase Realtime → co-curator + recipient see edits live)
 9. **Packet 48 — Share-pack batch gen** (Inngest fan-out + Batch API; 6 platform variants generated post-publish)
