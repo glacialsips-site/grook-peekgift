@@ -141,11 +141,14 @@ export default async function BuildPeekPage({
     log.error('loadChatHistory failed', { peekId, message });
   }
 
+  const finalAnonSessionId = userId ? null : await readAnonSessionId();
+
   return (
     <BuildSurface
       peekId={peekId}
       initialDraft={initialDraft}
       initialHistory={initialHistory}
+      anonSessionId={finalAnonSessionId}
     />
   );
 }
