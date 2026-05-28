@@ -15,6 +15,8 @@ Every tool listed here MUST be registered in `atelier/lib/anthropic/tools/bootst
 
 **Naming:** snake_case for all tool names + input keys. Mirrors Anthropic's recommendation and the existing 13. Don't slip into camelCase for new tools.
 
+**Default model: Sonnet 4.6** (`claude-sonnet-4-6`) for every chat turn that dispatches tools. Opus 4.7 (`claude-opus-4-7`) is opt-in per-call for specific creative jobs — primarily `set_note` drafting with extended thinking (see `request_extended_thinking` below + CAPABILITY_INVENTORY §A5) and rare disambiguation passes. Tools themselves are model-agnostic; the model is selected at `messages.create` time by the chat route, not per-tool.
+
 ---
 
 ## Existing tools (13, from packet 11)
@@ -609,8 +611,8 @@ The 15 tools per CURATOR_PROMPT §"the tool list mentioned in §A1." Each needs 
 ### `request_extended_thinking` — 💡 NET-NEW (system primitive, not a tool)
 
 - **Vendor:** Anthropic (per CAPABILITY_INVENTORY §A5)
-- **Status:** 💡 NET-NEW. Strictly speaking, NOT a tool — it's a `thinking: { type: 'enabled', budget_tokens: N }` parameter on the next `messages.create` call. Documented here so workers know the surface exists.
-- **When Peek "calls" it:** Conceptually, Peek flags a turn as deserving extended thinking. The chat route detects (via a sentinel in Peek's last message OR a specific tool-result signal) and re-issues the next call with thinking enabled. Specifically: drafting the personal note (CURATOR_PROMPT §5), designing tricky rules trees, disambiguating recipient profile from conflicting signals.
+- **Status:** 💡 NET-NEW. Strictly speaking, NOT a tool — it's a `thinking: { type: 'enabled', budget_tokens: N }` parameter on the next `messages.create` call, paired with `model: 'claude-opus-4-7'` (Opus 4.7 is the opt-in extended-thinking model; the default Sonnet 4.6 supports thinking too but Opus is the creative-job choice). Documented here so workers know the surface exists.
+- **When Peek "calls" it:** Conceptually, Peek flags a turn as deserving extended thinking. The chat route detects (via a sentinel in Peek's last message OR a specific tool-result signal) and re-issues the next call with thinking enabled on Opus 4.7. Specifically: drafting the personal note (CURATOR_PROMPT §5), designing tricky rules trees, disambiguating recipient profile from conflicting signals. All non-flagged turns stay on Sonnet 4.6.
 - **Anti-pattern:** NEVER in voice mode (per skills/voice-camera-protocol.md §2 — kills latency).
 - **Cross-refs:** CAPABILITY_INVENTORY §A5.
 

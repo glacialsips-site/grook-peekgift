@@ -39,12 +39,12 @@ Per ANTHROPIC-API-CONTEXT §Prompt Caching: 90% input-cost cut on chat surfaces.
 peek.gift use: **THE** biggest unhit lever. Big system prompt + 28+ tools + Skills library will easily exceed 1024-token cache minimum. Verify current `lib/anthropic/chat.ts` does NOT set this; if missing, ship as a 1-line packet.
 
 ### A5. Extended thinking 💡 NET-NEW (Sonnet 4.6, Opus 4.7 both support)
-Use sparingly — burns latency. Apply to:
+**Default chat model: Sonnet 4.6** (`claude-sonnet-4-6`). Opus 4.7 is opt-in per-call for specific creative jobs, NOT the default. Use sparingly — burns latency. Apply Opus 4.7 + extended thinking to:
 - Writing the curator's personal note in the curator's voice from 3-4 signals (Peek's hardest creative job)
 - Designing tricky rules trees ("3 watches, cheapest one is beg-locked, oldest one is gag-card")
 - Disambiguating a recipient profile when curator gives conflicting signals
 NOT for mid-stream tool calls (kills perceived latency).
-Implementation: conditional `thinking: { type: 'enabled', budget_tokens: 8000 }` on specific tool dispatch phases.
+Implementation: conditional `thinking: { type: 'enabled', budget_tokens: 8000 }` + `model: 'claude-opus-4-7'` only on specific tool dispatch phases. All other turns stay on Sonnet 4.6.
 
 ### A6. Anthropic Skills 💡 NET-NEW
 Capability bundles loaded into Claude's context. Frank explicitly mentioned ("styles thing"). Build the `peek/*` library:
