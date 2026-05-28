@@ -36,7 +36,7 @@ export function Hero() {
 
       <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <Link
-          href="/sign-up?returnTo=/build"
+          href="/build"
           className="inline-flex h-14 min-h-11 items-center justify-center rounded-full bg-foreground px-10 text-lg font-medium text-background shadow-lg shadow-foreground/10 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Make one

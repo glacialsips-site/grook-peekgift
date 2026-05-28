@@ -27,7 +27,6 @@ import type {
   VariantGroup,
   Vibe,
 } from '@/lib/peek/types';
-import { TeachingSurface } from './teaching/teaching-surface';
 import {
   VariantGroupContainer,
   gridClassesForCount,
@@ -114,9 +113,7 @@ export function PreviewPane({
         )}
         aria-label="Peek preview"
       >
-        <TeachingSurface>
-          {(sample) => <DraftRender draft={sample} viewAs={viewAs} />}
-        </TeachingSurface>
+        <BlankPreviewHint />
       </section>
     );
   }
@@ -133,6 +130,27 @@ export function PreviewPane({
     >
       <DraftRender draft={draft} viewAs={viewAs} />
     </section>
+  );
+}
+
+function BlankPreviewHint() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
+      <div
+        aria-hidden="true"
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/60"
+      >
+        <Sparkles className="h-7 w-7 text-muted-foreground" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-base font-medium text-foreground">
+          Hey, who&apos;s this for?
+        </p>
+        <p className="max-w-[28ch] text-sm text-muted-foreground">
+          Tell Peek about them in the chat. The preview comes to life as you go.
+        </p>
+      </div>
+    </div>
   );
 }
 

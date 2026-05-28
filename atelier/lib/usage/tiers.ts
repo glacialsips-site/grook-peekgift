@@ -28,7 +28,7 @@ export interface TierLimit {
 export type TierLimits = Record<TierName, TierLimit>;
 
 export const DEFAULT_TIER_LIMITS: TierLimits = {
-  guest:               { period_hours: 24, hard_cents: 5,      soft_cents: 4 },
+  guest:               { period_hours: 24, hard_cents: 999999, soft_cents: 999999 },
   authenticated:       { period_hours: 24, hard_cents: 50,     soft_cents: 40 },
   purchased_once:      { period_hours: 24, hard_cents: 200,    soft_cents: 160 },
   purchased_multiple:  { period_hours: 24, hard_cents: 500,    soft_cents: 400 },

@@ -29,7 +29,7 @@ export function FinalCta() {
         </p>
 
         <Link
-          href="/sign-up?returnTo=/build"
+          href="/build"
           className="group mt-10 inline-flex h-14 min-h-11 items-center justify-center gap-2 rounded-full bg-foreground px-10 text-lg font-medium text-background shadow-lg shadow-foreground/10 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Make one
