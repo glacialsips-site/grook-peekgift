@@ -7,11 +7,7 @@ import { loadChatHistory, serializeHistory } from '@/lib/chat/persistence';
 import { logger } from '@/lib/logger';
 import { rowToCard, rowToPeek, rowToVariantGroup } from '@/lib/peek/from-rows';
 import type { PeekDraft } from '@/lib/peek/types';
-import {
-  ensureAnonSessionId,
-  ensureCuratorRow,
-  readAnonSessionId,
-} from '@/lib/auth/server';
+import { ensureCuratorRow, readAnonSessionId } from '@/lib/auth/server';
 
 const log = logger.child({ component: 'build/page' });
 
@@ -95,10 +91,12 @@ export default async function BuildPeekPage({
       }
     }
   } else {
-    const cookieAnon = await ensureAnonSessionId();
+    // Middleware mints the anon cookie before this Server Component runs.
+    const cookieAnon = await readAnonSessionId();
     const ownedByAnon =
       peekRow.curator_id === null &&
       anonSessionId !== null &&
+      cookieAnon !== null &&
       anonSessionId === cookieAnon;
     if (!ownedByAnon) {
       notFound();
