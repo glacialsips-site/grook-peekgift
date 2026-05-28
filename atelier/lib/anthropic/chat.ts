@@ -10,12 +10,12 @@ import { beginTurnCapture } from './observability';
 const MAX_TOOL_ITERATIONS = 10;
 const DEFAULT_MAX_TOKENS = 4096;
 
-function withToolsCacheControl(tools: Anthropic.Tool[]): Anthropic.Tool[] {
+export function withToolsCacheControl(tools: Anthropic.Tool[]): Anthropic.Tool[] {
   if (tools.length === 0) return tools;
   const lastIndex = tools.length - 1;
   return tools.map((tool, i) =>
     i === lastIndex
-      ? { ...tool, cache_control: { type: 'ephemeral' } }
+      ? { ...tool, cache_control: { type: 'ephemeral', ttl: '1h' } }
       : tool,
   );
 }
