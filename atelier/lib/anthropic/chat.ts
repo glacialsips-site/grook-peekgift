@@ -137,9 +137,17 @@ export async function* chatTurn(
           ? { type: 'enabled', budget_tokens: thinkingBudget }
           : input.thinking;
 
+      // W02 from BUGS-WAVE2: max_tokens must be > thinking.budget_tokens or
+      // the API 400s. When thinking is active, bump max_tokens to budget +
+      // generous output headroom.
+      const effectiveMaxTokens =
+        thinkingParam?.type === 'enabled'
+          ? Math.max(maxTokens, thinkingParam.budget_tokens + 4096)
+          : maxTokens;
+
       const params: Anthropic.MessageStreamParams = {
         model,
-        max_tokens: maxTokens,
+        max_tokens: effectiveMaxTokens,
         system,
         messages,
         tools:
