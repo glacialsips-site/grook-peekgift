@@ -485,12 +485,24 @@ export async function POST(req: NextRequest): Promise<Response> {
               parts.push(`Curator profile:\n${profile.content}`);
             }
             if (kv.length > 0) {
+              const nowMs = Date.now();
+              // W06 from BUGS-WAVE2: enforce expires_at on KV entries
+              // (set_curator_memory writes `{value, expires_at, set_at}`).
+              // Without this filter, stale entries persist forever and bleed
+              // into the system prompt of every future peek.
               const kvPairs = kv
                 .map((r) => {
                   try {
                     const parsed = JSON.parse(r.content ?? '') as {
                       value: unknown;
+                      expires_at?: string | null;
                     };
+                    if (parsed.expires_at) {
+                      const expMs = Date.parse(parsed.expires_at);
+                      if (Number.isFinite(expMs) && expMs <= nowMs) {
+                        return null;
+                      }
+                    }
                     const key = r.path
                       .replace(kvPrefix, '')
                       .replace(/\.json$/, '');

@@ -17,7 +17,11 @@ type Input = z.infer<typeof InputSchema>;
 
 type Output =
   | { ok: true; budget_tokens: number; consumed_on_next_iteration: true }
-  | { ok: false; error: 'voice_mode_blocks_thinking' | 'already_pending' };
+  | {
+      ok: false;
+      error: 'voice_mode_blocks_thinking' | 'already_pending' | 'invalid_input';
+      detail?: string;
+    };
 
 registerTool<Input, Output>({
   name: 'request_extended_thinking',
@@ -42,7 +46,16 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
-    InputSchema.parse(input);
+    // W09 from BUGS-WAVE2: structured invalid_input envelope.
+    try {
+      InputSchema.parse(input);
+    } catch (err) {
+      return {
+        ok: false,
+        error: 'invalid_input',
+        detail: err instanceof Error ? err.message : String(err),
+      };
+    }
     // Voice mode is signaled via session metadata in a later packet (43);
     // for now we trust the model's prompt-level guardrail.
     requestExtendedThinking(ctx.sessionId);

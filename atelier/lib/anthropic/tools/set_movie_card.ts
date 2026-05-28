@@ -11,7 +11,9 @@ const InputSchema = z
   .refine((x) => x.tmdb_id || x.query, { message: 'need tmdb_id or query' });
 type Input = z.infer<typeof InputSchema>;
 
-type Output = { ok: false; error: 'not_implemented_yet'; user_message: string };
+type Output =
+  | { ok: false; error: 'not_implemented_yet'; user_message: string }
+  | { ok: false; error: 'invalid_input'; detail: string };
 
 registerTool<Input, Output>({
   name: 'set_movie_card',
@@ -28,7 +30,17 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input): Promise<Output> => {
-    InputSchema.parse(input);
+    // W09 from BUGS-WAVE2: surface invalid input as a structured envelope
+    // so the model recovers gracefully instead of seeing a raw Zod string.
+    try {
+      InputSchema.parse(input);
+    } catch (err) {
+      return {
+        ok: false,
+        error: 'invalid_input',
+        detail: err instanceof Error ? err.message : String(err),
+      };
+    }
     return {
       ok: false,
       error: 'not_implemented_yet',
