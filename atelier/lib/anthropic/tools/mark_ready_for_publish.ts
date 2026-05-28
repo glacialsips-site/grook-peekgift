@@ -64,7 +64,6 @@ registerTool<Input, Output>({
         heroImageUrl: peeks.heroImageUrl,
         noteMd: peeks.noteMd,
         vibe: peeks.vibe,
-        metadata: peeks.metadata,
         shareUrl: peeks.shareUrl,
       })
       .from(peeks)
@@ -101,15 +100,10 @@ registerTool<Input, Output>({
       };
     }
 
-    // Status is 'draft'. Idempotency: if we've already marked this peek ready,
-    // don't re-emit the event and don't re-surface the paywall as a "new" step.
-    const metadata: Record<string, unknown> =
-      (peek.metadata as Record<string, unknown> | null) ?? {};
-    const alreadyMarkedReady =
-      typeof metadata['markedReadyAt'] === 'string' &&
-      (metadata['markedReadyAt'] as string).length > 0;
-
-    if (alreadyMarkedReady) {
+    // Status is 'draft' or 'ready_for_publish'. Idempotency: if status is
+    // already ready_for_publish, don't re-emit the event and don't re-surface
+    // the paywall as a "new" step.
+    if (peek.status === 'ready_for_publish') {
       return { ok: true, next_step: 'paywall', already_ready: true };
     }
 
@@ -158,23 +152,19 @@ registerTool<Input, Output>({
       };
     }
 
-    // Atomic transition: only mark ready if still in draft AND not yet marked.
-    // This guards against a concurrent call that races us to ready/publish.
+    // Atomic transition: only flip status if still in draft. Also stamp
+    // metadata.markedReadyAt for audit / analytics + back-compat with any
+    // pre-enum tooling that reads the metadata key. This guards against a
+    // concurrent call that races us to ready/publish.
     const nowIso = new Date().toISOString();
     const updated = await db
       .update(peeks)
       .set({
+        status: 'ready_for_publish',
         metadata: sql`jsonb_set(${peeks.metadata}, '{markedReadyAt}', to_jsonb(${nowIso}::text), true)`,
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(peeks.id, ctx.peekId),
-          eq(peeks.status, 'draft'),
-          // Don't overwrite if a concurrent call beat us to it.
-          sql`(${peeks.metadata} ->> 'markedReadyAt') IS NULL`,
-        ),
-      )
+      .where(and(eq(peeks.id, ctx.peekId), eq(peeks.status, 'draft')))
       .returning({ id: peeks.id });
 
     if (updated.length === 0) {
@@ -183,7 +173,6 @@ registerTool<Input, Output>({
         .select({
           status: peeks.status,
           shareUrl: peeks.shareUrl,
-          metadata: peeks.metadata,
         })
         .from(peeks)
         .where(eq(peeks.id, ctx.peekId))
@@ -198,9 +187,7 @@ registerTool<Input, Output>({
             share_url: recheck.shareUrl ?? null,
           };
         }
-        const rcMeta =
-          (recheck.metadata as Record<string, unknown> | null) ?? {};
-        if (typeof rcMeta['markedReadyAt'] === 'string') {
+        if (recheck.status === 'ready_for_publish') {
           return { ok: true, next_step: 'paywall', already_ready: true };
         }
       }

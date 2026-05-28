@@ -12,6 +12,7 @@ import { users } from './users';
 
 export const peekStatus = peekV2.enum('peek_status', [
   'draft',
+  'ready_for_publish',
   'published',
   'claimed',
   'archived',

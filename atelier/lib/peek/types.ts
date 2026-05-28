@@ -58,7 +58,12 @@ export type {
   VoiceWarmth,
 };
 
-export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
+export type PeekStatus =
+  | 'draft'
+  | 'ready_for_publish'
+  | 'published'
+  | 'claimed'
+  | 'archived';
 
 export type Peek = {
   id: string;

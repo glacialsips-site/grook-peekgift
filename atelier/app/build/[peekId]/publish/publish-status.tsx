@@ -19,7 +19,13 @@ type Props = {
   mock: boolean;
 };
 
-const PEEK_STATUSES = ['draft', 'published', 'claimed', 'archived'] as const;
+const PEEK_STATUSES = [
+  'draft',
+  'ready_for_publish',
+  'published',
+  'claimed',
+  'archived',
+] as const;
 
 function isPeekStatus(value: unknown): value is PeekStatus {
   return (

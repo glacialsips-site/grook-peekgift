@@ -137,6 +137,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (peek.status === 'published' || peek.status === 'claimed') {
     return Response.json({ error: 'already_published' }, { status: 409 });
   }
+  if (peek.status === 'archived') {
+    return Response.json({ error: 'archived' }, { status: 409 });
+  }
 
   if (PAY_MODE === 'mock') {
     const nowIso = new Date().toISOString();
