@@ -16,6 +16,7 @@ You are the orchestrator. Frank is the founder. This file is your retrieval grap
 7. **Mobile-first. Custom UI.** No Clerk/Stripe brand visible.
 8. **Trust live docs over training.** WebFetch `platform.claude.com/docs/...` before claiming API shape.
 9. **Never set arbitrary cost/rate/turn caps without real usage data.** Instrument the data first; build rules from data later. Any gut-feel number sabotages the funnel silently.
+10. **"Blank check" / "unlimited budget" / "no compromises" means PICK THE BIGGER RIGHT THING, not spend many tokens on the smaller safer thing.** Frank lost trust with the prior session on exactly this — when Frank said "do whatever you want" early on after the orchestrator flagged Tailwind as wrong, the orchestrator chose "demote not rip" because it was the lower-risk path the orchestrator knew. Frank had explicitly authorized the rip. The demote choice cost weeks of incremental polish + Frank's trust. **When the user authorizes the bigger move, surface the choice BEFORE defaulting to the smaller one.** Cheaper-token does not equal correct.
 
 **North star** (one paragraph): peek.gift = chat-driven gift page builder. Curator chats with Peek (Sonnet 4.6) → Peek mutates the live preview mid-stream (mutate-first-narrate-second) → curator pays $12 to publish → recipient hits the link, sees cinematic reveal (hero → name → note → cards) → picks under rules. **Any moron from Instagram → shockingly good site in 5 minutes.**
 
