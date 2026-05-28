@@ -145,13 +145,19 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (initialHistory.length === 0) {
     try {
       const persisted = await loadChatHistory(peekId);
+      // B11-redux (server leg): tool_result rows are persisted as their own
+      // role='tool_result' rows. Anthropic's API requires them as user-turn
+      // content blocks immediately after the assistant tool_use. Re-shape
+      // them as user-role messages here so the replay path matches what the
+      // client-side toApiHistory() does in chat-pane.tsx.
       initialHistory = persisted
-        .filter(
-          (row): row is typeof row & { role: 'user' | 'assistant' } =>
-            row.role === 'user' || row.role === 'assistant',
+        .filter((row) =>
+          row.role === 'user' ||
+          row.role === 'assistant' ||
+          row.role === 'tool_result',
         )
         .map((row) => ({
-          role: row.role,
+          role: row.role === 'tool_result' ? 'user' : row.role,
           content: row.content as Anthropic.MessageParam['content'],
         }));
     } catch (err) {
