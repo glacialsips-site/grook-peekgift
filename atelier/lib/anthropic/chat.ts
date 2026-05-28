@@ -15,8 +15,29 @@ import { getPostHogServer } from '@/lib/analytics/facade';
 
 const MAX_TOOL_ITERATIONS = 10;
 const DEFAULT_MAX_TOKENS = 4096;
+const MAX_TOOL_RESULT_BYTES = 24 * 1024;
 
 const log = logger.child({ component: 'anthropic/chat' });
+
+function safeStringifyToolOutput(output: unknown): string {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(output);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return JSON.stringify({ error: 'serialization_failed', detail: msg });
+  }
+  if (typeof serialized !== 'string') {
+    return JSON.stringify({ error: 'serialization_returned_undefined' });
+  }
+  if (serialized.length <= MAX_TOOL_RESULT_BYTES) return serialized;
+  return JSON.stringify({
+    truncated: true,
+    original_bytes: serialized.length,
+    note: 'tool output exceeded 24KB; head retained for model recovery',
+    head: serialized.slice(0, MAX_TOOL_RESULT_BYTES - 200),
+  });
+}
 
 type AnyTool =
   | Anthropic.Tool
@@ -89,6 +110,14 @@ export async function* chatTurn(
   const baseOpts: ChatTurnSystemPromptOptions = input.systemPromptOptions ?? {};
   const signal = input.signal;
 
+  // C05 from BUGS-CHAT-LOOP: per-turn id so request_extended_thinking can't
+  // be raced between two parallel chatTurn invocations sharing a sessionId.
+  const turnId =
+    typeof globalThis.crypto?.randomUUID === 'function'
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const ctx: ToolContext = { ...input.ctx, turnId };
+
   const userContent: Anthropic.ContentBlockParam[] =
     typeof input.userMessage === 'string'
       ? [{ type: 'text', text: input.userMessage }]
@@ -100,7 +129,7 @@ export async function* chatTurn(
   ];
 
   const iterations: IterationUsage[] = [];
-  const turnCapture = beginTurnCapture(input.ctx);
+  const turnCapture = beginTurnCapture(ctx);
 
   try {
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
@@ -108,7 +137,7 @@ export async function* chatTurn(
         return { history: messages, iterations };
       }
 
-      const peekStateJson = await loadPeekStateJson(input.ctx.peekId);
+      const peekStateJson = await loadPeekStateJson(ctx.peekId);
       const resolvedPeekState =
         peekStateJson ?? baseOpts.peekStateJson ?? null;
       const summary = baseOpts.peekSummary?.trim();
@@ -123,14 +152,11 @@ export async function* chatTurn(
         ...baseOpts,
         curatorName: baseOpts.curatorName ?? null,
         peekStateJson: dynamicPeekState,
-        peekId: baseOpts.peekId ?? input.ctx.peekId,
+        peekId: baseOpts.peekId ?? ctx.peekId,
         curatorMemory: baseOpts.curatorMemory ?? null,
       });
 
-      // Extended thinking: if a prior iteration called
-      // `request_extended_thinking`, the flag is set for this sessionId.
-      // Consume it once for THIS iteration's messages.create call only.
-      const thinkingConsumed = consumeExtendedThinking(input.ctx.sessionId);
+      const thinkingConsumed = consumeExtendedThinking(ctx.sessionId, turnId);
       const thinkingBudget = env.EXTENDED_THINKING_BUDGET_TOKENS ?? 8000;
       const thinkingParam: Anthropic.ThinkingConfigParam | undefined =
         thinkingConsumed
@@ -161,6 +187,7 @@ export async function* chatTurn(
       const pendingToolCalls: PendingToolCall[] = [];
       const iterationCapture = turnCapture.iteration(params);
       const startedAt = Date.now();
+      let messageEnded = false;
 
       const streamIter = streamMessage(anthropic, params);
       let aborted = false;
@@ -184,6 +211,7 @@ export async function* chatTurn(
           yield event;
           if (event.type === 'message_end') {
             finalMessage = event.message;
+            messageEnded = true;
             iterations.push({
               iteration: i,
               usage: event.usage,
@@ -191,7 +219,12 @@ export async function* chatTurn(
             });
             iterationCapture.recordFinal({ message: event.message, startedAt });
           } else if (event.type === 'error') {
-            iterationCapture.recordError({ error: event.error, startedAt });
+            // C10 from BUGS-CHAT-LOOP: only record error when message_end
+            // hasn't already populated the rollup; otherwise we'd add a
+            // duplicate zero-token iteration entry.
+            if (!messageEnded) {
+              iterationCapture.recordError({ error: event.error, startedAt });
+            }
             return { history: messages, iterations };
           }
         }
@@ -230,20 +263,18 @@ export async function* chatTurn(
       }
 
       const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      let abortedMidDispatch = false;
       for (const call of pendingToolCalls) {
         if (signal?.aborted) {
-          return { history: messages, iterations };
+          abortedMidDispatch = true;
+          break;
         }
         let output: unknown;
         let isError = false;
-        // memory tool returns a string; everything else returns JSON.
-        // Track separately so we can pass the raw string content through
-        // the tool_result block as Anthropic expects.
         let memoryResultString: string | undefined;
         try {
           if (call.name === 'memory') {
-            if (!input.ctx.userId) {
-              // Anon — graceful: return a SHORT string per Memory protocol.
+            if (!ctx.userId) {
               memoryResultString =
                 'Error: Memory requires sign-in. Use set_recipient_profile or peek metadata for transient state instead.';
               output = { ok: false, error: 'memory_unauthorized' };
@@ -251,34 +282,30 @@ export async function* chatTurn(
               const cmd =
                 call.input as Anthropic.Beta.Messages.BetaMemoryTool20250818Command;
               memoryResultString = await dispatchMemoryCommand(
-                { clerkUserId: input.ctx.userId },
+                { clerkUserId: ctx.userId },
                 cmd,
               );
               output = { ok: true, memory_response: memoryResultString };
-              // Telemetry: per-event, not aggregated. Emit directly to
-              // PostHog so we don't force a facade type change for every
-              // new event surface in this packet (memory.command,
-              // extended_thinking.requested, etc.).
               try {
                 const ph = getPostHogServer();
                 if (ph) {
                   ph.capture({
-                    distinctId: input.ctx.userId,
+                    distinctId: ctx.userId,
                     event: 'memory_command',
                     properties: {
                       command: cmd.command,
-                      peek_id: input.ctx.peekId,
-                      session_id: input.ctx.sessionId,
+                      peek_id: ctx.peekId,
+                      session_id: ctx.sessionId,
                       ok: !memoryResultString.startsWith('Error:'),
                     },
                   });
                 }
               } catch (_phErr) {
-                // PostHog issues never break the chat loop.
+                void 0;
               }
             }
           } else {
-            output = await runTool(call.name, call.input, input.ctx);
+            output = await runTool(call.name, call.input, ctx);
           }
         } catch (err) {
           isError = true;
@@ -290,15 +317,39 @@ export async function* chatTurn(
           }
         }
 
-        await input.onToolResult?.(call.id, call.name, output);
+        try {
+          await input.onToolResult?.(call.id, call.name, output);
+        } catch (cbErr) {
+          const msg = cbErr instanceof Error ? cbErr.message : String(cbErr);
+          log.warn('onToolResult_threw', { name: call.name, msg });
+        }
 
         const resultBlock: Anthropic.ToolResultBlockParam = {
           type: 'tool_result',
           tool_use_id: call.id,
-          content: memoryResultString ?? JSON.stringify(output),
+          content: memoryResultString ?? safeStringifyToolOutput(output),
         };
         if (isError) resultBlock.is_error = true;
         toolResults.push(resultBlock);
+      }
+
+      if (abortedMidDispatch) {
+        // C11 from BUGS-CHAT-LOOP: synthesize is_error tool_results for
+        // not-yet-dispatched calls so every assistant tool_use has a
+        // matching tool_result follow-up. Without this, the next replay
+        // would see a dangling tool_use and Anthropic 400s.
+        const dispatched = new Set(toolResults.map((r) => r.tool_use_id));
+        for (const call of pendingToolCalls) {
+          if (dispatched.has(call.id)) continue;
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: call.id,
+            content: JSON.stringify({ error: 'aborted_mid_turn' }),
+            is_error: true,
+          });
+        }
+        messages.push({ role: 'user', content: toolResults });
+        return { history: messages, iterations };
       }
 
       messages.push({ role: 'user', content: toolResults });

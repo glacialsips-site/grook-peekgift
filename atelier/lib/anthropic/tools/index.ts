@@ -4,6 +4,7 @@ export interface ToolContext {
   peekId: string;
   userId: string | null;
   sessionId: string;
+  turnId?: string;
 }
 
 export interface ToolDefinition<Input = unknown, Output = unknown> {
