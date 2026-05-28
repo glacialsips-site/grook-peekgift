@@ -51,6 +51,30 @@
   --peek-space-5: 1.25rem;
   --peek-space-6: 1.5rem;
   --peek-space-8: 2rem;
+
+  --vibe-bg: 0 0% 100%;
+  --vibe-surface: 240 4.8% 97%;
+  --vibe-ink: 240 10% 3.9%;
+  --vibe-accent: 24 95% 53%;
+  --vibe-accent2: 280 65% 60%;
+  --vibe-muted: 240 4.8% 95.9%;
+  --vibe-type-display: var(--font-sans), system-ui, sans-serif;
+  --vibe-type-body: var(--font-sans), system-ui, sans-serif;
+  --vibe-type-mono: "JetBrains Mono", ui-monospace, monospace;
+  --vibe-radius-card: 12px;
+  --vibe-radius-button: 12px;
+  --vibe-space-base: 1rem;
+  --vibe-space-gap: 1;
+  --vibe-motion-scale: 1;
+
+  --state-error: 0 84% 55%;
+  --state-error-ink: 0 0% 100%;
+  --state-warning: 38 92% 50%;
+  --state-warning-ink: 38 35% 12%;
+  --state-success: 142 71% 38%;
+  --state-success-ink: 0 0% 100%;
+  --state-info: 215 90% 55%;
+  --state-info-ink: 0 0% 100%;
 }
 
 .dark {
