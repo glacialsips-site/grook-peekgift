@@ -2,9 +2,13 @@
 
 ## When this skill applies
 
-Always loaded as part of the common skills bundle. Peek's job is to mutate the page mid-conversation; the affiliate-routing layer is how product mutations turn into a real card AND into revenue without making Peek (or the curator) think about commerce. Read this when you're deciding what tool to call after the curator says something product-shaped — a URL, a brand name, a category, an activity, or an abstract direction.
+Always loaded as part of the common skills bundle. Peek's job is to mutate the page mid-conversation; this skill is how product mutations land as real cards. Read this when you're deciding what tool to call after the curator says something product-shaped — a URL, a brand name, a category, an activity, or an abstract direction.
 
-The contract: **scrape → web_search → affiliate_search → place_search_v2 → propose-from-patterns.** Decide in that order. Only one tool per move unless you're queueing a deliberate batch.
+## Current state (2026-05-28)
+
+**`affiliate_search` is NOT available.** Skimlinks + Sovrn signups are deferred indefinitely (Frank, 2026-05-28: "we don't have affiliates right now"). The fallback `web_search` IS the primary product-discovery tool. The `affiliate_search` tool registration is gated on `SKIMLINKS_PUBLISHER_ID || SOVRN_API_KEY` — neither is set, so Peek will not see `affiliate_search` in its tool list. Don't try to call it; don't reference it to the curator.
+
+The live contract: **scrape → web_search → place_search_v2 → propose-from-patterns.** Decide in that order. Only one tool per move unless you're queueing a deliberate batch.
 
 ---
 
@@ -18,24 +22,19 @@ The tool wraps the source URL through `wrapAffiliateLink()` with a `peekId`-only
 
 When the scrape returns `degraded: true` (a domain stub instead of a real product), tell the curator: "Got the link but it came back thin — got a screenshot?" Don't pretend the placeholder is the final card.
 
-### Curator named a specific product → `web_search` OR `affiliate_search`
+### Curator named a specific product → `web_search`
 
 "Stanley Quencher H2.0" / "AirPods Pro 2" / "Le Creuset Dutch Oven" / "the Knock subscription espresso." These are named products with a canonical SKU. You don't have a URL but you have an identifier the curator chose.
 
-Two paths:
+Call `web_search` (Anthropic-native server tool) to find the canonical retailer link, then `scrape_url` on the result. This is scrape-after-search; Peek's flow stays single-tool-per-turn (one search, then one scrape on the next turn).
 
-- **`web_search` (Anthropic native, A9 in CAPABILITY_INVENTORY)** — when you need current price/availability or to disambiguate ("Stanley Quencher" could mean half a dozen colorways). Search, pick the canonical retailer link, then call `scrape_url` with that link. This becomes scrape-after-search; Peek's flow stays single-tool-per-turn.
-- **`affiliate_search` (net-new, see §2)** — when the named product fits cleanly into an affiliate merchant's catalog AND there are siblings worth considering. Stanley Quencher → Skimlinks catalog query returns Stanley, Yeti, Hydro Flask, Owala as alternatives. The curator gets options without asking.
+When `web_search` is unavailable — Frank hasn't enabled it yet at console.anthropic.com → Settings → Privacy — the server tool returns `error_code: 'unavailable'`. Surface that gracefully to the curator: "I can't pull product info right now — got a link I can scrape?" Don't loop on the failure.
 
-The split: web_search is cheaper, faster, and right when the curator is decisive ("get her the Stanley, blue"). affiliate_search is right when the curator is exploring ("she likes those big water bottles").
+### Curator named a category → `web_search`
 
-### Curator named a category → `affiliate_search`
+"Coffee gift" / "outdoor gear for camping" / "kitchen stuff" / "a nice candle." No SKU, no URL — they've named a slot. Use `web_search` to surface 2-3 candidates, then propose them in chat. Curator picks one (or asks for different options), then `scrape_url` the chosen retailer link.
 
-"Coffee gift" / "outdoor gear for camping" / "kitchen stuff" / "a nice candle." No SKU, no URL — they've named a slot. This is where `affiliate_search` shines.
-
-`affiliate_search` queries Skimlinks + Sovrn merchant catalogs and returns 3-5 candidates with affiliate URLs pre-wrapped. The curator picks one, or "add the second one too," or "swap the Stanley for the Yeti." See §2 for the tool spec.
-
-Don't propose more than 5. The suggestion UI gets crowded fast; 3 is the sweet spot, 5 is the ceiling.
+Don't propose more than 3-5 candidates per turn. The chat gets crowded fast; 3 is the sweet spot, 5 is the ceiling.
 
 ### Curator named an activity / location → `place_search_v2`
 
@@ -43,20 +42,22 @@ Don't propose more than 5. The suggestion UI gets crowded fast; 3 is the sweet s
 
 Activity cards are higher EPC than product cards on average (OpenTable pays $1/seated cover, Viator pays ~8%). When the curator's signal is split between product and activity, bias toward activity unless the recipient is clearly a "stuff" person.
 
-### Curator described abstractly → propose + then `affiliate_search`
+### Curator described abstractly → propose + then `web_search`
 
 "Something elegant for her birthday" / "what would feel right for him" / "I don't know — surprise me." No signal you can hand to a search tool yet. You go in two beats:
 
 1. Propose 3 concrete directions in chat ("I'm hearing elegant — coffee table book + a Diptyque candle + a Loewe puzzle bag locked behind a beg, OR sentimental — a framed print of the place you two met + a Spotify playlist + dinner at her favorite, OR practical — a Knock espresso maker + a really good carry-on. Which lane?").
-2. Once they pick a lane, NOW call `affiliate_search` for the slot(s) you don't yet have. Don't blind-search before they've picked a direction — you'll get whiplash.
+2. Once they pick a lane, NOW call `web_search` for the slot(s) you don't yet have. Don't blind-search before they've picked a direction — you'll get whiplash.
 
 The propose-then-search flow is the curator-protocol "propose, don't lecture" rule made specific. Lecture is "what kind of coffee?" Propose is "I'm thinking Stanley or Yeti or that Breville espresso machine — which lane?"
 
 ---
 
-## 2. The `affiliate_search` tool (proposed spec)
+## 2. The `affiliate_search` tool (deferred indefinitely)
 
-Net-new tool. Lives at `atelier/lib/anthropic/tools/affiliate_search.ts`. Status: ABSENT (per CONCEPT-INVENTORY §4) — needs to be built. The CONCEPT-V2 §8 "Suggested Items" feature depends on it.
+Net-new tool. Lives at `atelier/lib/anthropic/tools/affiliate_search.ts` as scaffolding only — the handler returns `not_implemented_yet` even when keyed, and the entire `registerTool` call is gated behind `SKIMLINKS_PUBLISHER_ID || SOVRN_API_KEY`. Neither is set in production, so the tool is invisible to the model. Peek won't see it, can't call it, won't surface it to the curator.
+
+Skimlinks + Sovrn signups are demoted per Frank's 2026-05-28 call ("we don't have affiliates right now"). The spec below is preserved as the design-of-record for when affiliate revenue comes back on the table.
 
 ### Zod schema (proposed)
 
@@ -286,23 +287,23 @@ The card shows the product. It does NOT show "from Amazon," "Best Price at Walma
 
 This is BRAIN-DUMP rule: "the cards feel like the sender's gift, not Amazon's wishlist." Never violate it.
 
-### Never call `affiliate_search` for activities, restaurants, or events
+### Never call a search tool for activities, restaurants, or events
 
-That's `place_search_v2` territory. Skimlinks doesn't have restaurant listings; calling it for "dinner at Carbone" returns nothing useful or returns wrong-category junk (a cookbook titled "Carbone" maybe). Use the right tool.
+That's `place_search_v2` territory. `web_search` can return a restaurant URL but it's slower + less structured than `place_search_v2` for that category. Use the right tool.
 
 ### Never call `web_search` when `scrape_url` works
 
 If the curator pasted a URL, you have a URL. Don't web-search around it to find a "better" URL. Scrape the one they gave you. Their judgment > your fact-finding. If the page is paywalled / broken / 404 (the scrape will tell you via `outcome.ok: false`), THEN ask the curator for a different link.
 
-### Never call `affiliate_search` repeatedly for the same category in one session
+### Never call `web_search` repeatedly for the same category in one session
 
-Curator says "coffee gift" — you call once, return 3 options. Curator says "those are wrong, more elegant" — you do NOT re-call `affiliate_search` with `query: 'elegant coffee gift'`. You ask one clarifying question ("more like a $200 Breville or more like a single beautiful pour-over kettle?") and search ONCE more with the refined query. Searches cost API quota; over-searching burns it.
+Curator says "coffee gift" — you call once, return 3 options. Curator says "those are wrong, more elegant" — you do NOT re-call `web_search` with `query: 'elegant coffee gift'`. You ask one clarifying question ("more like a $200 Breville or more like a single beautiful pour-over kettle?") and search ONCE more with the refined query. `web_search` is billed per call (`$10/1000`) and has a `max_uses` cap (5 per turn) — burning it on near-duplicate queries means you can't search later when it matters.
 
 The exception: if the curator pivots categories ("forget coffee, what about candles?") — that's a new category, new search. Different from refining within one.
 
-### Never auto-add the highest-affiliate-rate result without curator confirmation
+### Never auto-add a web_search result without curator confirmation
 
-`affiliate_search` returns suggestions; it does NOT add cards. The transition from suggestion → card is the curator's move (drag-drop or "add this one"). Peek can NARRATE a recommendation ("the Stanley feels closest to her — adding unless you want a different one"), but the add still flows through `add_card` with the curator's implicit OK in the next turn if they don't object.
+`web_search` surfaces candidates; it does NOT add cards. Propose 2-3 in chat ("Stanley, Yeti, or that big Owala — which lands?") and let the curator pick. Once they pick, `scrape_url` the chosen URL and `add_card` from the scrape result. Peek can NARRATE a recommendation ("the Stanley feels closest to her — going with that unless you want a different one"), but the add still needs implicit OK.
 
 The exception: when the curator's prior turn explicitly said "just add the best one" — that's permission. Add it; describe what you did in one line.
 
@@ -330,10 +331,10 @@ Aspirational cards CAN be affiliate-wrapped if the recipient could plausibly rec
 ## TL;DR for Peek
 
 - URL in message → `scrape_url`.
-- Specific product named → `web_search` (decisive) or `affiliate_search` (exploratory).
-- Category named → `affiliate_search`.
+- Specific product named → `web_search`, propose result, `scrape_url` the chosen link.
+- Category named → `web_search` (2-3 candidates), curator picks, `scrape_url` the winner.
 - Activity/place named → `place_search_v2`.
-- Abstract → propose 3 directions in chat, then search ONCE the curator picks a lane.
-- Results render in the right-rail Suggestion deck (curator drags-drops or clicks-add).
-- Never wrap twice. Never expose retailer branding. Never push high-commission over fit.
+- Abstract → propose 3 directions in chat, then `web_search` ONCE the curator picks a lane.
+- If `web_search` returns `error_code: 'unavailable'` (Anthropic web search not yet enabled in console) → tell the curator you can't pull product info and ask for a link to scrape.
+- Never wrap twice. Never expose retailer branding. `affiliate_search` is not in your toolset; don't reference it.
 - Revenue comes back via Skimlinks webhook → `affiliate_revenue` table → curator dashboard (later). You don't think about it. You just call the right tool.
