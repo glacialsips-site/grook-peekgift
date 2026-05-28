@@ -1,15 +1,5 @@
 import type { OccasionType } from './system-prompt';
 
-/**
- * Map a free-text occasion field (whatever the curator or `set_recipient`
- * stored) to one of the canonical OccasionType values that have a
- * matching skill template under `lib/anthropic/skills/occasion-templates/`.
- *
- * Returns null when no template applies — Block 3 then omits the
- * occasion-template skill (mode-specific skills can still load). A
- * follow-up Haiku classifier (per CAPABILITY_INVENTORY §H2 — A2
- * conditional loading) can be wired in to handle the long tail.
- */
 export function classifyOccasionToTemplate(
   occasion: string | null | undefined,
 ): OccasionType | null {

@@ -20,14 +20,12 @@ function extractJson(rawText: string): unknown {
   try {
     return JSON.parse(trimmed);
   } catch {
-    // continue
   }
   const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fence?.[1]) {
     try {
       return JSON.parse(fence[1]);
     } catch {
-      // continue
     }
   }
   const first = trimmed.indexOf('{');

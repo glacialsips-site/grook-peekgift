@@ -2,19 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Mobile-first audit suite. Drives a Chromium at iPhone-class viewports
-// against the local dev server, captures screenshots, and flags layout
-// issues (horizontal scroll, tap-target sizes, off-screen content).
-//
-// Output:
-//   - atelier/tests/e2e/screenshots/mobile/<route>--<viewport>.png
-//   - atelier/tests/e2e/screenshots/mobile/findings.json (machine-readable)
-
 type Viewport = { width: number; height: number; label: string };
 
 const VIEWPORTS: Viewport[] = [
-  { width: 375, height: 812, label: '375x812' }, // iPhone SE / 12 mini
-  { width: 414, height: 896, label: '414x896' }, // iPhone Pro Max
+  { width: 375, height: 812, label: '375x812' },
+  { width: 414, height: 896, label: '414x896' },
 ];
 
 const ROUTES: { name: string; path: string; needsAuthBypass?: boolean }[] = [
@@ -52,7 +44,6 @@ async function captureAudit(
   ensureDir();
   await page.setViewportSize({ width: vp.width, height: vp.height });
   await page.goto(routePath, { waitUntil: 'domcontentloaded' });
-  // Settle: wait for fonts + any client-side effect
   await page.waitForLoadState('networkidle').catch(() => undefined);
   await page.waitForTimeout(400);
 
@@ -60,7 +51,6 @@ async function captureAudit(
   const screenshotPath = path.join(SCREENSHOT_DIR, screenshotName);
   await page.screenshot({ path: screenshotPath, fullPage: false });
 
-  // Check for horizontal scroll
   const hasHorizScroll = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
   });
@@ -78,7 +68,6 @@ async function captureAudit(
     });
   }
 
-  // Check tap targets: <button>, <a>, [role="button"], input[type=submit]
   const smallTargets = await page.evaluate(() => {
     const sel =
       'button, a[href], [role="button"], input[type="submit"], input[type="button"]';
@@ -86,14 +75,10 @@ async function captureAudit(
     const out: { tag: string; text: string; w: number; h: number; visible: boolean }[] = [];
     for (const el of nodes) {
       const rect = el.getBoundingClientRect();
-      // Skip hidden / zero-size
       if (rect.width === 0 || rect.height === 0) continue;
       const style = getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden') continue;
       if ((style.pointerEvents ?? '') === 'none') continue;
-      // Skip sr-only utilities (visually-hidden skip links etc.). Tailwind's
-      // sr-only sets width:1px / height:1px and absolute positioning — those
-      // are intentionally tiny and not real tap targets.
       if (
         (rect.width <= 1 && rect.height <= 1) ||
         (style.position === 'absolute' &&
@@ -128,8 +113,6 @@ async function captureAudit(
     });
   }
 
-  // Check key content is on screen: any element with very large negative
-  // offset or right-of-viewport that has visible text content
   const offscreen = await page.evaluate(() => {
     const out: { tag: string; text: string; x: number; w: number }[] = [];
     const nodes = Array.from(
@@ -149,7 +132,6 @@ async function captureAudit(
         });
       }
     }
-    // Dedupe by text
     const seen = new Set<string>();
     return out.filter((o) => {
       const k = `${o.tag}:${o.text}`;
@@ -186,7 +168,6 @@ test.describe('Mobile-first audit', () => {
         });
         const page = await ctx.newPage();
         await captureAudit(page, route.name, route.path, vp);
-        // Sanity: page rendered
         await expect(page.locator('body')).toBeVisible();
         await ctx.close();
       });
@@ -209,14 +190,12 @@ test.describe('Mobile build-surface preview sheet', () => {
     await page.waitForLoadState('networkidle').catch(() => undefined);
     await page.waitForTimeout(400);
 
-    // The preview sheet renders only on mobile (md:hidden)
     const sheet = page.getByRole('dialog', { name: /live preview/i });
     await expect(sheet).toBeVisible();
 
     const screenshotPath = path.join(SCREENSHOT_DIR, 'build--sheet-half.png');
     await page.screenshot({ path: screenshotPath, fullPage: false });
 
-    // Click the toggle to cycle to "full"
     const toggle = page.locator('#preview-sheet-label');
     await toggle.click();
     await page.waitForTimeout(500);
@@ -224,8 +203,6 @@ test.describe('Mobile build-surface preview sheet', () => {
     const fullPath = path.join(SCREENSHOT_DIR, 'build--sheet-full.png');
     await page.screenshot({ path: fullPath, fullPage: false });
 
-    // Chat input should not be visually buried under the half sheet — when
-    // sheet is closed, the input must be reachable. Cycle once more to closed.
     await toggle.click();
     await page.waitForTimeout(300);
     await toggle.click();

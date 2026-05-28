@@ -4,14 +4,6 @@ import { env } from '@/lib/env';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { validatePath, prefixForUser } from './paths';
 
-// Anthropic Memory tool (`memory_20250818`) backing store. The model emits
-// `tool_use` blocks with one of six commands; we own the storage.
-//
-// CRITICAL: the error-message strings here MUST match Anthropic's spec
-// EXACTLY. The model is trained on the specific phrasings ("Error: File
-// not found", "File created successfully at: <path>") — deviating breaks
-// the model's ability to recover. Treat them as protocol.
-
 type MemoryCommand = Anthropic.Beta.Messages.BetaMemoryTool20250818Command;
 type ViewCommand = Anthropic.Beta.Messages.BetaMemoryTool20250818ViewCommand;
 type CreateCommand = Anthropic.Beta.Messages.BetaMemoryTool20250818CreateCommand;

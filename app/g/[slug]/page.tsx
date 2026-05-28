@@ -48,7 +48,6 @@ export default async function GiftPage({ params }: { params: Promise<{ slug: str
     q<{ card_id: string }>(`SELECT card_id FROM picks WHERE peek_id = $1`, [peek.id])
   ]);
 
-  // Log a view (fire and forget)
   q(`INSERT INTO recipient_views (peek_id) VALUES ($1)`, [peek.id]).catch(() => {});
 
   return (

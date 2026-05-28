@@ -20,7 +20,6 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-// Anthropic Files API ceiling per https://docs.anthropic.com/en/docs/build-with-claude/files
 const MAX_SIZE = 500 * 1024 * 1024;
 
 const ALLOWED = new Set([
@@ -108,7 +107,6 @@ export async function POST(req: NextRequest): Promise<Response> {
     );
   }
 
-  // Append to peeks.metadata.uploaded_files[].
   try {
     const [row] = await db
       .select({ metadata: peeks.metadata })

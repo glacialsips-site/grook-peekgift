@@ -123,7 +123,6 @@ export const peeks = peekV2.table(
       .default(sql`'{}'::jsonb`),
     vibe: jsonb('vibe').$type<Vibe>().notNull().default(sql`'{}'::jsonb`),
     heroImageUrl: text('hero_image_url'),
-    // 'user_upload' | 'unsplash' | 'ai_generated' | 'external'
     heroImageSource: text('hero_image_source'),
     heroPrompt: text('hero_prompt'),
     noteMd: text('note_md'),

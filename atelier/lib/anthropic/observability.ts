@@ -217,9 +217,7 @@ export interface StreamCaptureHandle {
 }
 
 export interface TurnCapture {
-  /** Per-iteration handle. Each loop iteration calls one of recordFinal / recordError. */
   iteration(params: Anthropic.MessageStreamParams): StreamCaptureHandle;
-  /** Emit one aggregated PostHog `$ai_generation` event for the whole turn. */
   flush(): void;
 }
 

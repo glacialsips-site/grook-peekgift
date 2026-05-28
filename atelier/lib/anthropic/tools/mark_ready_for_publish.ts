@@ -79,8 +79,6 @@ registerTool<Input, Output>({
       };
     }
 
-    // Already published / claimed / archived → refuse + do not emit the event,
-    // do not re-surface the paywall.
     if (peek.status === 'published' || peek.status === 'claimed') {
       const where = peek.shareUrl ? ` at ${peek.shareUrl}` : '';
       return {
@@ -100,14 +98,10 @@ registerTool<Input, Output>({
       };
     }
 
-    // Status is 'draft' or 'ready_for_publish'. Idempotency: if status is
-    // already ready_for_publish, don't re-emit the event and don't re-surface
-    // the paywall as a "new" step.
     if (peek.status === 'ready_for_publish') {
       return { ok: true, next_step: 'paywall', already_ready: true };
     }
 
-    // Preconditions for marking ready.
     const missing: MissingField[] = [];
 
     if (!peek.recipientName || peek.recipientName.trim().length === 0) {
@@ -120,13 +114,11 @@ registerTool<Input, Output>({
       missing.push('hero_image');
     }
 
-    // Vibe must be set with at least a preset — proves the vibe engine ran.
     const vibe = peek.vibe as { preset?: unknown } | null;
     if (!vibe || typeof vibe.preset !== 'string' || vibe.preset.length === 0) {
       missing.push('vibe_preset');
     }
 
-    // At least one real (non-taunt) card.
     const [realCardCount] = await db
       .select({ n: sql<number>`count(*)::int` })
       .from(cards)
@@ -152,10 +144,6 @@ registerTool<Input, Output>({
       };
     }
 
-    // Atomic transition: only flip status if still in draft. Also stamp
-    // metadata.markedReadyAt for audit / analytics + back-compat with any
-    // pre-enum tooling that reads the metadata key. This guards against a
-    // concurrent call that races us to ready/publish.
     const nowIso = new Date().toISOString();
     const updated = await db
       .update(peeks)
@@ -168,7 +156,6 @@ registerTool<Input, Output>({
       .returning({ id: peeks.id });
 
     if (updated.length === 0) {
-      // Lost the race — re-read and answer accordingly.
       const [recheck] = await db
         .select({
           status: peeks.status,
@@ -191,7 +178,6 @@ registerTool<Input, Output>({
           return { ok: true, next_step: 'paywall', already_ready: true };
         }
       }
-      // Fallthrough — shouldn't happen, but degrade gracefully.
       return { ok: true, next_step: 'paywall', already_ready: true };
     }
 

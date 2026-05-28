@@ -66,10 +66,6 @@ const schema = z.object({
   WEB_SEARCH_MAX_USES: z.coerce.number().int().positive().optional(),
   WEB_FETCH_MAX_USES: z.coerce.number().int().positive().optional(),
   MEMORY_MAX_FILES_PER_CURATOR: z.coerce.number().int().positive().optional(),
-  // W18 from BUGS-WAVE2: clamp at 50KB to match the DB CHECK constraint in
-  // migration 0013 (`size_bytes <= 51200`). Setting this higher in env would
-  // create-then-CHECK-fail at insert time with a Postgres error instead of
-  // the friendly "File too large" string the Memory protocol expects.
   MEMORY_MAX_FILE_KB: z.coerce.number().int().min(1).max(50).optional(),
   EXTENDED_THINKING_BUDGET_TOKENS: z.coerce.number().int().positive().optional(),
 

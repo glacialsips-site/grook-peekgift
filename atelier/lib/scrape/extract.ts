@@ -75,14 +75,12 @@ function extractJsonText(rawText: string): unknown {
   try {
     return JSON.parse(trimmed);
   } catch {
-    // continue to fenced/braced extraction
   }
   const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fence?.[1]) {
     try {
       return JSON.parse(fence[1]);
     } catch {
-      // fall through
     }
   }
   const first = trimmed.indexOf('{');

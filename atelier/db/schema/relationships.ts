@@ -4,7 +4,6 @@ import { peekV2 } from './_schema';
 import { peeks } from './peeks';
 import { users } from './users';
 
-// The relationship graph for recurring nudges.
 export const relationships = peekV2.table(
   'relationships',
   {
@@ -13,7 +12,6 @@ export const relationships = peekV2.table(
       .notNull()
       .references(() => users.clerkUserId),
     recipientName: text('recipient_name').notNull(),
-    // 'mom', 'girlfriend', 'best friend'
     relationship: text('relationship'),
     birthday: date('birthday'),
     anniversary: date('anniversary'),

@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
 
   const base = process.env.APP_URL || 'http://localhost:3000';
 
-  // Pre-warm OG image so first share-preview lookup is cheap
   generateOgImage(peek_id).catch(() => {});
 
   if (isMockPay()) {

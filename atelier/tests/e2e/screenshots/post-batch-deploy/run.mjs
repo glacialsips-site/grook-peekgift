@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Drive the live vnext.peek.gift site and screenshot every step of the curator flow
-// at both 375x812 (mobile) and 1280x800 (desktop).
 import { chromium } from 'playwright-core';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -19,7 +17,6 @@ const STEPS = [
   { id: 'build-anon', path: '/build', wait: 3000 },
   { id: 'signin', path: '/sign-in', wait: 2500 },
   { id: 'signup', path: '/sign-up', wait: 2500 },
-  // 3 distinct-vibe peeks (drafts, but page should render shell)
   { id: 'peek-editorial-c248cd434497', path: '/g/c248cd434497', wait: 3000 },
   { id: 'peek-playful-bf54d5549a2f', path: '/g/bf54d5549a2f', wait: 3000 },
   { id: 'peek-princess-52c72d59c026', path: '/g/52c72d59c026', wait: 3000 },

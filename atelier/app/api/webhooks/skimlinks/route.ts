@@ -45,9 +45,6 @@ function toRawPayload(evt: SkimlinksEvent): Record<string, unknown> {
 export async function POST(req: NextRequest) {
   const secret = env.SKIMLINKS_WEBHOOK_SECRET;
   if (!secret) {
-    // No secret configured: gracefully no-op so unkeyed deliveries don't pile
-    // up as failed retries on Skimlinks' side. Log so we know if events arrive
-    // before the integration is provisioned.
     log.warn('webhook_unconfigured', {
       reason: 'SKIMLINKS_WEBHOOK_SECRET unset',
     });

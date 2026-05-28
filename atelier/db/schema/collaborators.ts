@@ -18,7 +18,6 @@ export const peekCollaborators = peekV2.table(
       .notNull()
       .references(() => peeks.id, { onDelete: 'cascade' }),
     userId: text('user_id').references(() => users.clerkUserId),
-    // for pre-signup invites
     invitedEmail: text('invited_email'),
     role: collaboratorRole('role').notNull(),
     inviteToken: text('invite_token').unique(),

@@ -21,25 +21,6 @@ type Props = {
   onSkip: () => void;
 };
 
-/**
- * Magazine-cover-opening reveal — see `_packets/SPINE/skills/reveal-mechanics.md` §3.
- *
- * Phase order: hero → name → occasion → note → cards → done.
- *
- *  - hero: backdrop starts at 110% scale, blurred 4px, desaturated to 55%, then
- *    eases into 100% / 0 blur / full saturation — like a magazine cover coming
- *    into focus.
- *  - name: short names (≤20 chars) typewriter at ~50ms/char; long names fade-up.
- *  - occasion: fade-up subtitle below name (skipped if no occasion).
- *  - note: word-by-word fade-up at ~80ms/word; long notes (>50 words) batch
- *    into ~7-word lines so the duration stays inside the cap.
- *  - cards: deal-in teaser that crossfades into the real card deck below. The
- *    actual CardDeck renders the interactive cards once `revealed` flips true.
- *
- * `vibe.motion` multiplies every duration uniformly. `prefers-reduced-motion`
- * bypasses the whole choreography — the component renders nothing and signals
- * done immediately so the peek surface is interactive from t=0.
- */
 export function CinematicReveal({
   peek,
   cardCount,
@@ -135,7 +116,6 @@ export function CinematicReveal({
       const initialPhase = phaseAtElapsed(plan, elapsed);
       setPhase(initialPhase);
 
-      // Snap the typewriter to wherever it should be at this elapsed point.
       if (plan.name.style === 'typewriter') {
         if (elapsed >= plan.name.startMs + plan.name.durationMs) {
           setTypedName(name);
@@ -233,7 +213,6 @@ export function CinematicReveal({
 
   if (reduce) return null;
 
-  // Hero-phase visuals: 1.10 → 1.00 scale, blur 4px → 0, saturate 0.55 → 1.
   const heroSeconds = plan.hero.durationMs / 1000;
   const showOverlay = !revealed;
   const heroExpanded = phase !== 'hero';
@@ -267,7 +246,6 @@ export function CinematicReveal({
             }
           }}
         >
-          {/* Hero backdrop — magazine cover coming into focus. */}
           <motion.div
             className="pointer-events-none absolute inset-0"
             initial={{
@@ -303,7 +281,6 @@ export function CinematicReveal({
             aria-hidden="true"
           />
 
-          {/* Vibe accent wash to deepen the lighting effect when no hero image. */}
           {!peek.heroImageUrl ? (
             <motion.div
               aria-hidden="true"
@@ -318,7 +295,6 @@ export function CinematicReveal({
             />
           ) : null}
 
-          {/* Stage: name + occasion + note + card teaser. */}
           <div className="relative z-10 flex w-full flex-col items-center px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)]">
             <div className="flex w-full max-w-2xl flex-col items-center gap-3 text-center">
               <AnimatePresence>
@@ -437,7 +413,6 @@ export function CinematicReveal({
               </AnimatePresence>
             </div>
 
-            {/* Card teaser strip — slim deal-in hint that mirrors the deck below. */}
             <AnimatePresence>
               {showCardsTeaser && plan.cards.visibleCount > 0 ? (
                 <motion.div
@@ -493,7 +468,6 @@ export function CinematicReveal({
   );
 }
 
-/** Chunk a flat list of word-tokens into roughly-equal lines for long notes. */
 function chunkWordsToLines(words: string[], perLine: number): string[][] {
   const out: string[][] = [];
   for (let i = 0; i < words.length; i += perLine) {

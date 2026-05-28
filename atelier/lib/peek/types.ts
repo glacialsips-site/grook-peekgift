@@ -139,10 +139,6 @@ export type PeekDraft = {
   variantGroups: VariantGroup[];
 };
 
-// Vivid default vibe lives in `lib/vibe/defaults.ts` (the brand-new-peek
-// starting point — warm cream / deep indigo / saffron). Re-exported here so
-// every legacy `import { DEFAULT_VIBE } from '@/lib/peek/types'` callsite
-// keeps working.
 export {
   DEFAULT_VIBE,
   applyDefaultVibe,

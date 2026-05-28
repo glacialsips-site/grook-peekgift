@@ -14,8 +14,6 @@ type Output =
 
 registerTool<Input, Output>({
   name: 'propose_checkout',
-  // W05 from BUGS-WAVE2: test coupon code intentionally NOT in this description
-  // (Peek would see it and surface it to curators despite the prompt rule).
   description:
     "Open the Stripe Checkout Session for the $12 publish fee. ONLY call after mark_ready_for_publish returned ok AND the curator confirmed they're ready. This is the bookend — fires once per peek; idempotent on already-paid peeks. Optional coupon_code is for promotional discounts the curator already knows about; never volunteer codes the curator hasn't mentioned.",
   input_schema: {
@@ -30,7 +28,6 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input): Promise<Output> => {
-    // W09 from BUGS-WAVE2: structured invalid_input envelope.
     try {
       InputSchema.parse(input);
     } catch (err) {

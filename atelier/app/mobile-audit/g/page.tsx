@@ -1,5 +1,3 @@
-// DEV-ONLY mobile-audit fixture mounting RecipientView against a published
-// fake peek. 404 in production.
 import { notFound } from 'next/navigation';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import type { PeekDraft } from '@/lib/peek/types';

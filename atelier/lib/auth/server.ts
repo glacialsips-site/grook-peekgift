@@ -31,16 +31,6 @@ export async function readAnonSessionId(): Promise<string | null> {
   return value && value.length > 0 ? value : null;
 }
 
-/**
- * Ensures the anon session cookie exists, minting it if not.
- *
- * IMPORTANT: Next 16 forbids cookie WRITES inside Server Components. The /build*
- * routes rely on `proxy.ts` middleware to mint the cookie before the SC renders,
- * so SCs only call `readAnonSessionId`. This helper remains for Route Handlers
- * and Server Actions, which may still write cookies. If called from a context
- * where writes are forbidden, we swallow the write error and return the value
- * (the cookie won't persist beyond this request, but the caller still gets an id).
- */
 export async function ensureAnonSessionId(): Promise<string> {
   const jar = await cookies();
   const existing = jar.get(ANON_SESSION_COOKIE)?.value;

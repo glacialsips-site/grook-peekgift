@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 
-// Tiny dependency-free confetti. Fires on mount, runs ~2.5s, cleans up.
 export default function Confetti({ color = '#ff5a3c' }: { color?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
 

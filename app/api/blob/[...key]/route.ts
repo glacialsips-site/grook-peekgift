@@ -3,8 +3,6 @@ import { getBytes } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
-// Serves blob bytes back. Public — anyone with the (random) key can fetch.
-// Acceptable for image/audio assets; we add long-lived cache headers.
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ key: string[] }> }) {
   const { key } = await ctx.params;
   const fullKey = key.map(decodeURIComponent).join('/');

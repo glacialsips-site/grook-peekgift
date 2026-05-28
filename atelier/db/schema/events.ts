@@ -4,7 +4,6 @@ import { peekV2 } from './_schema';
 import { peeks } from './peeks';
 import { users } from './users';
 
-// Single source of truth for analytics.
 export const events = peekV2.table(
   'events',
   {
@@ -12,12 +11,9 @@ export const events = peekV2.table(
     ts: timestamp('ts', { withTimezone: true })
       .notNull()
       .default(sql`now()`),
-    // null for anon
     userId: text('user_id').references(() => users.clerkUserId),
-    // for anon tracking
     sessionId: text('session_id'),
     peekId: uuid('peek_id').references(() => peeks.id, { onDelete: 'set null' }),
-    // 'chat_turn', 'card_added', 'pick', 'share', 'publish', etc.
     kind: text('kind').notNull(),
     payload: jsonb('payload')
       .$type<Record<string, unknown>>()

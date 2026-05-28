@@ -110,8 +110,6 @@ export async function* chatTurn(
   const baseOpts: ChatTurnSystemPromptOptions = input.systemPromptOptions ?? {};
   const signal = input.signal;
 
-  // C05 from BUGS-CHAT-LOOP: per-turn id so request_extended_thinking can't
-  // be raced between two parallel chatTurn invocations sharing a sessionId.
   const turnId =
     typeof globalThis.crypto?.randomUUID === 'function'
       ? globalThis.crypto.randomUUID()
@@ -163,9 +161,6 @@ export async function* chatTurn(
           ? { type: 'enabled', budget_tokens: thinkingBudget }
           : input.thinking;
 
-      // W02 from BUGS-WAVE2: max_tokens must be > thinking.budget_tokens or
-      // the API 400s. When thinking is active, bump max_tokens to budget +
-      // generous output headroom.
       const effectiveMaxTokens =
         thinkingParam?.type === 'enabled'
           ? Math.max(maxTokens, thinkingParam.budget_tokens + 4096)
@@ -219,9 +214,6 @@ export async function* chatTurn(
             });
             iterationCapture.recordFinal({ message: event.message, startedAt });
           } else if (event.type === 'error') {
-            // C10 from BUGS-CHAT-LOOP: only record error when message_end
-            // hasn't already populated the rollup; otherwise we'd add a
-            // duplicate zero-token iteration entry.
             if (!messageEnded) {
               iterationCapture.recordError({ error: event.error, startedAt });
             }
@@ -334,10 +326,6 @@ export async function* chatTurn(
       }
 
       if (abortedMidDispatch) {
-        // C11 from BUGS-CHAT-LOOP: synthesize is_error tool_results for
-        // not-yet-dispatched calls so every assistant tool_use has a
-        // matching tool_result follow-up. Without this, the next replay
-        // would see a dangling tool_use and Anthropic 400s.
         const dispatched = new Set(toolResults.map((r) => r.tool_use_id));
         for (const call of pendingToolCalls) {
           if (dispatched.has(call.id)) continue;

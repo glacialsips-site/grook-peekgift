@@ -5,7 +5,6 @@ import { cards } from './cards';
 import { peeks } from './peeks';
 import { picks } from './picks';
 
-// Webhook-fed from Skimlinks/Sovrn.
 export const affiliateRevenue = peekV2.table('affiliate_revenue', {
   id: uuid('id').primaryKey().defaultRandom(),
   network: text('network').notNull(),
@@ -17,7 +16,6 @@ export const affiliateRevenue = peekV2.table('affiliate_revenue', {
   amountCents: integer('amount_cents'),
   commissionCents: integer('commission_cents'),
   currency: text('currency').notNull().default('USD'),
-  // 'pending' | 'confirmed' | 'reversed'
   status: text('status'),
   rawPayload: jsonb('raw_payload').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at', { withTimezone: true })

@@ -1,20 +1,3 @@
-/**
- * Regression test for the recipient_segment_error 500 on /g/[slug].
- *
- * Root cause: the Server Component called `ensureRecipientSessionCookie()`
- * which invoked `cookies().set(...)` from inside a Server Component. Next 16
- * forbids cookie writes during Server Component rendering — every recipient
- * hitting a published peek got a 500 with digest 3668081153.
- *
- * The fix moved cookie minting to `proxy.ts` middleware (legal context for
- * cookie writes) and switched the Server Component to a read-only path via
- * `readRecipientSessionFromCookies()`.
- *
- * This test exercises the post-fix code path: simulate middleware having
- * already minted a signed recipient_session cookie, render the SC for a
- * published peek, and assert the RecipientView renders with the recipient
- * name embedded. Also asserts the SC never attempts a cookies.set().
- */
 import { createHmac } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';

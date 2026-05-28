@@ -17,10 +17,8 @@ export const picks = peekV2.table(
     pickedAt: timestamp('picked_at', { withTimezone: true })
       .notNull()
       .default(sql`now()`),
-    // hashed session id or claim token
     recipientSignature: text('recipient_signature'),
     recipientNote: text('recipient_note'),
-    // if locked card required a beg
     begMessage: text('beg_message'),
     begApprovedAt: timestamp('beg_approved_at', { withTimezone: true }),
     fulfilledAt: timestamp('fulfilled_at', { withTimezone: true }),

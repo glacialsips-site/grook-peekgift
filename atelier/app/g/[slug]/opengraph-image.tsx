@@ -256,7 +256,6 @@ export default async function Image({
       }
     }
   } catch {
-    /* fall through to regenerate */
   }
 
   const rendered = new ImageResponse(<OgCard peek={peek} />, size);

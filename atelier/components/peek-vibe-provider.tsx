@@ -17,11 +17,6 @@ export type Density = VibeDensity;
 export type Shape = VibeShape;
 export type Mood = VibeMood;
 
-/**
- * Shape mirrors `VibeCore` from `db/schema/peeks.ts` — kept as a re-declared
- * type so the provider can be consumed without depending on the Drizzle
- * schema module directly (matters for storybook / test renders).
- */
 export interface Vibe {
   tone?: string;
   palette?: {

@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
     user_message?: { text?: string; image_url?: string | null };
   };
 
-  // Ensure curator row exists w/ email + name for emails later
   const user = await currentUser();
   await q(
     `INSERT INTO curators (clerk_user_id, email, display_name)
@@ -36,7 +35,6 @@ export async function POST(req: NextRequest) {
     ]
   );
 
-  // Ensure peek + session exist
   let peekId = body.peek_id;
   if (!peekId) {
     const newPeek = await q1<{ id: string }>(
@@ -56,14 +54,12 @@ export async function POST(req: NextRequest) {
     sessionId = newSess.id;
   }
 
-  // Load history
   const histRows = await q<{ role: string; content: any }>(
     `SELECT role, content FROM chat_messages WHERE session_id = $1 ORDER BY created_at ASC`,
     [sessionId]
   );
   const history = histRows.map((r) => ({ role: r.role as 'user' | 'assistant', content: r.content as any }));
 
-  // Append new user message
   const userBlocks: any[] = [];
   if (body.user_message?.image_url) {
     userBlocks.push({ type: 'image', source: { type: 'url', url: body.user_message.image_url } });

@@ -1,10 +1,5 @@
 import type Anthropic from '@anthropic-ai/sdk';
 
-/**
- * Public, normalized stream event surface. We collapse the SDK's raw
- * `RawMessageStreamEvent` union into a smaller set of cases that the chat
- * route + UI care about: text deltas, tool-use lifecycle, and final usage.
- */
 export type StreamEvent =
   | { type: 'text_delta'; text: string }
   | { type: 'thinking_delta'; text: string }
@@ -20,25 +15,12 @@ interface ToolUseAccumulator {
   index: number;
 }
 
-/**
- * Wrap `client.messages.stream(params)` and yield normalized events. The
- * generator drains the SDK's typed event API (`on('text', ...)`,
- * `on('inputJson', ...)`, `on('contentBlock', ...)`, `on('finalMessage', ...)`)
- * and bridges into an async iterator.
- *
- * Errors are emitted as `{ type: 'error', error }` and terminate the
- * generator; the underlying SDK stream is aborted automatically when the
- * consumer breaks out of the loop.
- */
 export async function* streamMessage(
   client: Anthropic,
   params: Anthropic.MessageStreamParams,
 ): AsyncGenerator<StreamEvent, void, void> {
   const stream = client.messages.stream(params);
 
-  // Event queue + a pending resolver so we can bridge the SDK's emitter API
-  // into an `AsyncGenerator`. The SDK fires listeners synchronously from its
-  // internal loop; we buffer and yield in order.
   const queue: StreamEvent[] = [];
   let done = false;
   let pendingResolve: (() => void) | null = null;
@@ -56,14 +38,9 @@ export async function* streamMessage(
     wake();
   };
 
-  // Track tool_use blocks by content-block index so we can emit
-  // structured start / delta / end events.
   const toolUses: Map<number, ToolUseAccumulator> = new Map();
 
   stream.on('streamEvent', (event) => {
-    // Handle the structured per-block lifecycle here so we can track tool_use
-    // indices. We do NOT emit text/inputJson here — those come from the
-    // dedicated `text` / `inputJson` listeners which already deliver deltas.
     if (event.type === 'content_block_start') {
       const block = event.content_block;
       if (block.type === 'tool_use') {
@@ -84,10 +61,6 @@ export async function* streamMessage(
     if (event.type === 'content_block_stop') {
       const tu = toolUses.get(event.index);
       if (tu) {
-        // The full parsed input is available on the snapshot once the block
-        // closes; we capture it from finalMessage as well, but emit a
-        // best-effort end event here so consumers can mark the tool as
-        // dispatchable as soon as the model finishes streaming it.
         push({
           type: 'tool_use_end',
           id: tu.id,
@@ -109,17 +82,11 @@ export async function* streamMessage(
   });
 
   stream.on('inputJson', (partialJson, jsonSnapshot) => {
-    // The SDK doesn't pass us the content-block index on this event, but the
-    // model only streams input_json for one tool_use at a time per content
-    // block. Find the most recently started open tool_use and attribute the
-    // delta to it. If multiple are open we fall back to the lowest index.
     let target: ToolUseAccumulator | undefined;
     for (const tu of toolUses.values()) {
       if (!target || tu.index < target.index) target = tu;
     }
     if (!target) return;
-    // We pass jsonSnapshot through opaquely; consumers can either reparse the
-    // partial_json themselves or wait for the final tool_use_end with input.
     void jsonSnapshot;
     push({
       type: 'tool_use_delta',
@@ -130,8 +97,6 @@ export async function* streamMessage(
   });
 
   stream.on('finalMessage', (message) => {
-    // Re-emit tool_use_end with parsed inputs from the final message so
-    // downstream callers don't have to reparse partial JSON.
     for (const [index, block] of message.content.entries()) {
       if (block.type === 'tool_use') {
         push({

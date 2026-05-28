@@ -25,7 +25,6 @@ export async function prewarmCache(
   }
   const tools = withToolsCacheControl(rawTools);
 
-  // max_tokens: 1 because the SDK rejects 0 on chat-completion paths.
   const params: Anthropic.MessageCreateParamsNonStreaming = {
     model,
     max_tokens: 1,

@@ -1,16 +1,3 @@
-// Full end-to-end Memory tool flow against an in-memory Supabase mock that
-// mirrors the exact query patterns the production code (dispatchMemoryCommand
-// + chat/route.ts curator_memory loader) emits.
-//
-// Six scenarios per the packet:
-//   1. View namespace directory (with trailing slash) → empty listing.
-//   2. Create profile.md → row lands in curator_memory.
-//   3. Re-view profile.md → content round-trips.
-//   4. New session, same clerk_user_id: load curator memory the same way
-//      chat/route.ts does; verify the profile.md content shows up.
-//   5. Cross-user namespace probe rejected with outside_namespace.
-//   6. URL-encoded traversal rejected with encoded_traversal.
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const TEST_USER = 'test_user_memory_e2e';

@@ -26,9 +26,6 @@ async function logWebhook(payload: Record<string, unknown>, success: boolean) {
 export async function POST(req: Request) {
   const secret = env.CLERK_WEBHOOK_SIGNING_SECRET;
   if (!secret) {
-    // No signing secret configured: gracefully no-op so unkeyed deliveries
-    // don't pile up as failed retries on Clerk's side. Log so we notice if
-    // events arrive before the integration is provisioned.
     log.warn('webhook_unconfigured', {
       reason: 'CLERK_WEBHOOK_SIGNING_SECRET unset',
     });
@@ -77,12 +74,6 @@ export async function POST(req: Request) {
       const displayName =
         [u.first_name, u.last_name].filter(Boolean).join(' ') || null;
 
-      // Always upsert. On user.created with no primary email yet (OAuth race,
-      // pending verification), insert with email=NULL — the row must exist so
-      // downstream FK references (curator_id, etc.) don't violate.
-      // On user.updated, if we have a new email include it (this covers the
-      // "previously NULL, now resolved" case); if we don't, omit the column so
-      // the existing value is preserved.
       const payload: Record<string, unknown> = {
         clerk_user_id: u.id,
         display_name: displayName,
@@ -92,7 +83,6 @@ export async function POST(req: Request) {
       if (email !== null) {
         payload['email'] = email;
       } else if (evt.type === 'user.created') {
-        // Explicitly insert NULL on first create when no email is available.
         payload['email'] = null;
       }
 

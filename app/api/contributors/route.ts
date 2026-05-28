@@ -5,8 +5,6 @@ import { sendEmail } from '@/lib/resend';
 
 export const runtime = 'nodejs';
 
-// POST: invite a co-curator to a peek. Body: { peek_id, email?, message? }
-// Curator must own the peek. Returns invite token + share URL.
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return new Response('unauthorized', { status: 401 });

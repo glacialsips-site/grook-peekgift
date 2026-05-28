@@ -96,13 +96,9 @@ export const cards = peekV2.table(
     title: text('title').notNull(),
     description: text('description'),
     imageUrl: text('image_url'),
-    // hidden from recipient
     sourceUrl: text('source_url'),
-    // hidden from recipient
     sourceRetailer: text('source_retailer'),
-    // computed at scrape time
     affiliateUrl: text('affiliate_url'),
-    // 'skimlinks' | 'sovrn' | 'amazon_associates' | 'direct'
     affiliateNetwork: text('affiliate_network'),
     commissionPct: numeric('commission_pct', { precision: 5, scale: 2 }),
     valueCents: integer('value_cents'),
@@ -116,7 +112,6 @@ export const cards = peekV2.table(
       .default(sql`'{}'::jsonb`),
     proposedDate: timestamp('proposed_date', { withTimezone: true }),
     locationHint: text('location_hint'),
-    // which contributor added it (for group peeks)
     addedByUserId: text('added_by_user_id').references(() => users.clerkUserId),
     metadata: jsonb('metadata')
       .$type<Record<string, unknown>>()

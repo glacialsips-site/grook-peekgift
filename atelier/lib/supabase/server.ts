@@ -34,7 +34,6 @@ export async function createSupabaseServer() {
             cookieStore.set(name, value, options),
           );
         } catch {
-          // server-component context — cookies are read-only here
         }
       },
     },
