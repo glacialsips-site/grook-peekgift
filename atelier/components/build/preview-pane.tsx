@@ -587,7 +587,10 @@ function LockOverlay({ card }: { card: Card }) {
 function TauntOverlay({ text }: { text: string }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--peek-ink))]/10 p-4 text-center">
-      <p className="font-serif text-xl italic text-[hsl(var(--peek-ink))] drop-shadow-sm sm:text-2xl">
+      <p
+        className="text-xl italic text-[hsl(var(--peek-ink))] drop-shadow-sm sm:text-2xl"
+        style={{ fontFamily: 'var(--peek-font-heading)' }}
+      >
         “{text}”
       </p>
     </div>

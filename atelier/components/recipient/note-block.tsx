@@ -55,6 +55,7 @@ export function NoteBlock({ peek, revealed }: Props) {
         'prose-strong:text-[hsl(var(--peek-ink))]',
         'prose-a:text-[hsl(var(--peek-accent))]',
       )}
+      style={{ fontFamily: 'var(--peek-font-body)' }}
       aria-label="A note from the giver"
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{typed}</ReactMarkdown>

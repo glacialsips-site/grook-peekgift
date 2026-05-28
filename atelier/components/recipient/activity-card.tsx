@@ -68,9 +68,10 @@ export function ActivityCard({
       <motion.div
         layout
         className={cn(
-          'flex h-full flex-col overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm',
+          'flex h-full flex-col overflow-hidden border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm',
           isPicked && 'ring-2 ring-[hsl(var(--peek-accent))]/60',
         )}
+        style={{ borderRadius: 'var(--peek-radius-lg)' }}
       >
         {card.imageUrl ? (
           <div
