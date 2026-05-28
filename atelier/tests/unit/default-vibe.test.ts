@@ -7,20 +7,9 @@ import {
 } from '@/lib/vibe/defaults';
 import { vibeCss } from '@/lib/vibe/css-vars';
 
-/**
- * Snapshot the CSS-var bundle the preview pane will actually render when a
- * brand-new peek (no chat yet) loads. The packet brief: "a blank peek looks
- * ALIVE." That means the var bundle must encode distinct visual choices —
- * not generic Tailwind grey-on-white.
- *
- * We snapshot the var record (not a DOM render — vitest runs in `node`).
- * This is the bridge between the dial set and the on-page treatment, so
- * if the default ever regresses to neutral, this test fails.
- */
-
-const BLAND_BASELINE_BG = '0 0% 100%'; // pure white — generic SaaS
-const BLAND_BASELINE_INK = '240 10% 4%'; // near-black — generic SaaS
-const TAILWIND_DEFAULT_RADIUS_PX = ['0px', '2px', '4px']; // tailwind default rounded variants
+const BLAND_BASELINE_BG = '0 0% 100%';
+const BLAND_BASELINE_INK = '240 10% 4%';
+const TAILWIND_DEFAULT_RADIUS_PX = ['0px', '2px', '4px'];
 
 describe('DEFAULT_VIBE — vivid baseline', () => {
   it('locks the seven dials to opinionated values', () => {
@@ -58,7 +47,6 @@ describe('DEFAULT_VIBE → vibeCss snapshot', () => {
   const vars = vibeCss(DEFAULT_VIBE);
 
   it('emits all seven dials into the CSS bundle', () => {
-    // Palette — every channel populated
     expect(vars['--peek-bg']).toBeDefined();
     expect(vars['--peek-surface']).toBeDefined();
     expect(vars['--peek-ink']).toBeDefined();
@@ -68,7 +56,6 @@ describe('DEFAULT_VIBE → vibeCss snapshot', () => {
     expect(vars['--vibe-ink']).toBeDefined();
     expect(vars['--vibe-accent']).toBeDefined();
 
-    // Typography — serif display + sans body + always-on mono
     expect(vars['--peek-font-heading']).toBeDefined();
     expect(vars['--peek-font-body']).toBeDefined();
     expect(vars['--vibe-type-display']).toContain('Fraunces');
