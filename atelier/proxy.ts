@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -21,10 +23,43 @@ const isPublicRoute = createRouteMatcher([
   '/mobile-audit(.*)',    // local-only mobile-audit fixture pages (page guards production with 404)
 ]);
 
+// Routes where an anonymous-session cookie must be present so Server Components
+// can attribute peek rows to a guest curator. Server Components can READ cookies
+// in Next 16 but cannot WRITE them — we mint the cookie here instead.
+const requiresAnonSessionCookie = createRouteMatcher([
+  '/build(.*)',
+  '/api/chat(.*)',
+  '/api/upload(.*)',
+]);
+
+const ANON_SESSION_COOKIE = 'peek-anon-session';
+const ANON_SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
+
+  if (!requiresAnonSessionCookie(req)) return;
+
+  const existing = req.cookies.get(ANON_SESSION_COOKIE)?.value;
+  if (existing && existing.length > 0) return;
+
+  // Mint the cookie now so downstream Server Components see it on this request
+  // AND it persists for follow-up requests.
+  const fresh = randomUUID();
+  req.cookies.set(ANON_SESSION_COOKIE, fresh);
+  const response = NextResponse.next({ request: req });
+  response.cookies.set({
+    name: ANON_SESSION_COOKIE,
+    value: fresh,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env['NODE_ENV'] === 'production',
+    path: '/',
+    maxAge: ANON_SESSION_MAX_AGE,
+  });
+  return response;
 });
 
 export const config = {
