@@ -50,12 +50,18 @@ export function NoteBlock({ peek, revealed }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className={cn(
-        'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
+        'prose max-w-none text-[hsl(var(--peek-ink))]',
         'prose-headings:text-[hsl(var(--peek-ink))]',
         'prose-strong:text-[hsl(var(--peek-ink))]',
         'prose-a:text-[hsl(var(--peek-accent))]',
       )}
-      style={{ fontFamily: 'var(--peek-font-body)' }}
+      style={{
+        fontFamily: 'var(--peek-font-body)',
+        fontSize: 'var(--vibe-type-scale-body)',
+        fontWeight: 'var(--vibe-type-weight-body)',
+        letterSpacing: 'var(--vibe-type-tracking-body)',
+        lineHeight: 'var(--vibe-type-leading-body)',
+      }}
       aria-label="A note from the giver"
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{typed}</ReactMarkdown>

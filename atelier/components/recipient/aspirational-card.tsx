@@ -62,7 +62,15 @@ export function AspirationalCard({
                   className="h-6 w-6 text-[hsl(var(--peek-ink))]/70"
                   aria-hidden="true"
                 />
-                <p className="px-6 text-center text-sm font-medium text-[hsl(var(--peek-ink))]/85">
+                <p
+                  className="px-6 text-center text-[hsl(var(--peek-ink))]/85"
+                  style={{
+                    fontSize: 'var(--vibe-type-scale-body)',
+                    fontWeight: 'var(--vibe-type-weight-body)',
+                    letterSpacing: 'var(--vibe-type-tracking-body)',
+                    lineHeight: 'var(--vibe-type-leading-body)',
+                  }}
+                >
                   {card.unlockRule?.beg_prompt ?? 'Locked — make your case'}
                 </p>
               </div>
@@ -79,25 +87,54 @@ export function AspirationalCard({
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-3">
             <h3
-              className="text-lg font-semibold leading-tight"
-              style={{ fontFamily: 'var(--peek-font-heading)' }}
+              style={{
+                fontFamily: 'var(--peek-font-heading)',
+                fontSize: 'var(--vibe-type-scale-h2)',
+                fontWeight: 'var(--vibe-type-weight-h2)',
+                letterSpacing: 'var(--vibe-type-tracking-h2)',
+                lineHeight: 'var(--vibe-type-leading-h2)',
+              }}
             >
               {card.title}
             </h3>
             {card.isLocked ? (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
+              <span
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-[hsl(var(--peek-accent))]"
+                style={{
+                  fontSize: 'var(--vibe-type-scale-small)',
+                  fontWeight: 'var(--vibe-type-weight-small)',
+                  letterSpacing: 'var(--vibe-type-tracking-small)',
+                  lineHeight: 'var(--vibe-type-leading-small)',
+                }}
+              >
                 <Lock className="h-3 w-3" aria-hidden="true" />
                 locked
               </span>
             ) : null}
           </div>
           {card.description ? (
-            <p className="text-sm text-[hsl(var(--peek-ink))]/70">
+            <p
+              className="text-[hsl(var(--peek-ink))]/70"
+              style={{
+                fontSize: 'var(--vibe-type-scale-body)',
+                fontWeight: 'var(--vibe-type-weight-body)',
+                letterSpacing: 'var(--vibe-type-tracking-body)',
+                lineHeight: 'var(--vibe-type-leading-body)',
+              }}
+            >
               {card.description}
             </p>
           ) : null}
           {pick?.begMessage ? (
-            <p className="rounded-md bg-[hsl(var(--peek-bg))]/40 px-3 py-2 text-xs italic text-[hsl(var(--peek-ink))]/70">
+            <p
+              className="rounded-md bg-[hsl(var(--peek-bg))]/40 px-3 py-2 italic text-[hsl(var(--peek-ink))]/70"
+              style={{
+                fontSize: 'var(--vibe-type-scale-small)',
+                fontWeight: 'var(--vibe-type-weight-small)',
+                letterSpacing: 'var(--vibe-type-tracking-small)',
+                lineHeight: 'var(--vibe-type-leading-small)',
+              }}
+            >
               your case: {pick.begMessage}
             </p>
           ) : null}

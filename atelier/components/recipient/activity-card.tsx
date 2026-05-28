@@ -94,8 +94,14 @@ export function ActivityCard({
               aria-hidden="true"
             />
             <span
-              className="text-[10px] uppercase tracking-widest text-[hsl(var(--peek-accent))]/85"
-              style={{ fontFamily: 'var(--peek-font-heading)' }}
+              className="uppercase text-[hsl(var(--peek-accent))]/85"
+              style={{
+                fontFamily: 'var(--peek-font-heading)',
+                fontSize: 'var(--vibe-type-scale-small)',
+                fontWeight: 'var(--vibe-type-weight-small)',
+                letterSpacing: 'var(--vibe-type-tracking-small)',
+                lineHeight: 'var(--vibe-type-leading-small)',
+              }}
             >
               do this together
             </span>
@@ -103,26 +109,48 @@ export function ActivityCard({
         )}
         <div className="flex flex-1 flex-col gap-3 p-4">
           <h3
-            className={cn(
-              'leading-tight',
-              card.imageUrl
-                ? 'text-base font-medium'
-                : 'text-lg font-semibold',
-            )}
-            style={
-              card.imageUrl
+            style={{
+              fontFamily: card.imageUrl
                 ? undefined
-                : { fontFamily: 'var(--peek-font-heading)' }
-            }
+                : 'var(--peek-font-heading)',
+              fontSize: card.imageUrl
+                ? 'var(--vibe-type-scale-h3)'
+                : 'var(--vibe-type-scale-h2)',
+              fontWeight: card.imageUrl
+                ? 'var(--vibe-type-weight-h3)'
+                : 'var(--vibe-type-weight-h2)',
+              letterSpacing: card.imageUrl
+                ? 'var(--vibe-type-tracking-h3)'
+                : 'var(--vibe-type-tracking-h2)',
+              lineHeight: card.imageUrl
+                ? 'var(--vibe-type-leading-h3)'
+                : 'var(--vibe-type-leading-h2)',
+            }}
           >
             {card.title}
           </h3>
           {card.description ? (
-            <p className="text-sm text-[hsl(var(--peek-ink))]/70">
+            <p
+              className="text-[hsl(var(--peek-ink))]/70"
+              style={{
+                fontSize: 'var(--vibe-type-scale-body)',
+                fontWeight: 'var(--vibe-type-weight-body)',
+                letterSpacing: 'var(--vibe-type-tracking-body)',
+                lineHeight: 'var(--vibe-type-leading-body)',
+              }}
+            >
               {card.description}
             </p>
           ) : null}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[hsl(var(--peek-ink))]/60">
+          <div
+            className="flex flex-wrap items-center gap-3 text-[hsl(var(--peek-ink))]/60"
+            style={{
+              fontSize: 'var(--vibe-type-scale-small)',
+              fontWeight: 'var(--vibe-type-weight-small)',
+              letterSpacing: 'var(--vibe-type-tracking-small)',
+              lineHeight: 'var(--vibe-type-leading-small)',
+            }}
+          >
             {date ? (
               <span className="inline-flex items-center gap-1">
                 <CalendarDays className="h-3 w-3" aria-hidden="true" />
@@ -142,7 +170,15 @@ export function ActivityCard({
             ) : null}
           </div>
           {pick?.recipientNote ? (
-            <p className="rounded-md bg-[hsl(var(--peek-bg))]/40 px-3 py-2 text-xs italic text-[hsl(var(--peek-ink))]/70">
+            <p
+              className="rounded-md bg-[hsl(var(--peek-bg))]/40 px-3 py-2 italic text-[hsl(var(--peek-ink))]/70"
+              style={{
+                fontSize: 'var(--vibe-type-scale-small)',
+                fontWeight: 'var(--vibe-type-weight-small)',
+                letterSpacing: 'var(--vibe-type-tracking-small)',
+                lineHeight: 'var(--vibe-type-leading-small)',
+              }}
+            >
               your reply: {pick.recipientNote}
             </p>
           ) : null}

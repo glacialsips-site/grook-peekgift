@@ -135,6 +135,99 @@ const MOOD_TEXTURE: Record<VibeMood, Record<string, string>> = {
   editorial: { '--vibe-mood-grain': '0.02', '--vibe-mood-overlay': '0' },
 };
 
+type TypeRole = 'display' | 'h1' | 'h2' | 'h3' | 'body' | 'small';
+
+type TypeScaleAxis = {
+  min: number;
+  max: number;
+  vw: number;
+};
+
+type TypeScalePreset = Record<TypeRole, TypeScaleAxis>;
+
+const TYPE_SCALE_DENSITY: Record<VibeDensity, TypeScalePreset> = {
+  compact: {
+    display: { min: 1.875, max: 3, vw: 5 },
+    h1: { min: 1.5, max: 2.375, vw: 4.2 },
+    h2: { min: 1.25, max: 1.75, vw: 3 },
+    h3: { min: 1.0625, max: 1.375, vw: 2.4 },
+    body: { min: 0.9375, max: 1, vw: 1 },
+    small: { min: 0.75, max: 0.8125, vw: 0.9 },
+  },
+  cozy: {
+    display: { min: 2.25, max: 3.75, vw: 6 },
+    h1: { min: 1.875, max: 3, vw: 5 },
+    h2: { min: 1.5, max: 2.25, vw: 4 },
+    h3: { min: 1.25, max: 1.75, vw: 3 },
+    body: { min: 1, max: 1.125, vw: 1.2 },
+    small: { min: 0.8125, max: 0.875, vw: 1 },
+  },
+  breathable: {
+    display: { min: 2.75, max: 5.25, vw: 8 },
+    h1: { min: 2.25, max: 4, vw: 6.5 },
+    h2: { min: 1.75, max: 2.75, vw: 5 },
+    h3: { min: 1.375, max: 2, vw: 3.6 },
+    body: { min: 1.0625, max: 1.25, vw: 1.4 },
+    small: { min: 0.875, max: 0.9375, vw: 1 },
+  },
+};
+
+const TYPE_MOOD_FACTOR: Record<VibeMood, number> = {
+  minimal: 0.94,
+  rich: 1.03,
+  whimsical: 1.12,
+  editorial: 1.08,
+};
+
+const TYPE_WEIGHT: Record<VibeMood, Record<TypeRole, string>> = {
+  minimal: { display: '500', h1: '500', h2: '500', h3: '500', body: '400', small: '500' },
+  rich: { display: '600', h1: '600', h2: '600', h3: '600', body: '400', small: '500' },
+  whimsical: { display: '800', h1: '800', h2: '700', h3: '700', body: '500', small: '600' },
+  editorial: { display: '700', h1: '700', h2: '600', h3: '600', body: '400', small: '600' },
+};
+
+const TYPE_TRACKING: Record<VibeMood, Record<TypeRole, string>> = {
+  minimal: { display: '-0.02em', h1: '-0.02em', h2: '-0.015em', h3: '-0.01em', body: '0em', small: '0.02em' },
+  rich: { display: '-0.015em', h1: '-0.015em', h2: '-0.01em', h3: '-0.005em', body: '0em', small: '0.05em' },
+  whimsical: { display: '-0.005em', h1: '-0.005em', h2: '0em', h3: '0.005em', body: '0.005em', small: '0.08em' },
+  editorial: { display: '-0.03em', h1: '-0.025em', h2: '-0.02em', h3: '-0.015em', body: '-0.005em', small: '0.16em' },
+};
+
+const TYPE_LEADING: Record<VibeDensity, Record<TypeRole, string>> = {
+  compact: { display: '1', h1: '1.05', h2: '1.1', h3: '1.15', body: '1.45', small: '1.4' },
+  cozy: { display: '1.05', h1: '1.1', h2: '1.2', h3: '1.25', body: '1.55', small: '1.45' },
+  breathable: { display: '1.1', h1: '1.2', h2: '1.3', h3: '1.35', body: '1.7', small: '1.55' },
+};
+
+function fluid(axis: TypeScaleAxis, factor: number): string {
+  const min = (axis.min * factor).toFixed(3);
+  const max = (axis.max * factor).toFixed(3);
+  const vw = (axis.vw * factor).toFixed(2);
+  return `clamp(${min}rem, ${min}rem + ${vw}vw, ${max}rem)`;
+}
+
+function emitTypeScale(
+  density: VibeDensity | undefined,
+  mood: VibeMood | undefined,
+): VibeCssVars {
+  const d = density ?? 'cozy';
+  const m = mood ?? 'rich';
+  const preset = TYPE_SCALE_DENSITY[d];
+  const factor = TYPE_MOOD_FACTOR[m];
+  const weights = TYPE_WEIGHT[m];
+  const tracking = TYPE_TRACKING[m];
+  const leading = TYPE_LEADING[d];
+  const out: VibeCssVars = {};
+  const roles: TypeRole[] = ['display', 'h1', 'h2', 'h3', 'body', 'small'];
+  for (const role of roles) {
+    out[`--vibe-type-scale-${role}`] = fluid(preset[role], factor);
+    out[`--vibe-type-weight-${role}`] = weights[role];
+    out[`--vibe-type-tracking-${role}`] = tracking[role];
+    out[`--vibe-type-leading-${role}`] = leading[role];
+  }
+  return out;
+}
+
 function hexToHslTriple(hex: string): string | null {
   const h = hex.replace('#', '').trim();
   if (h.length !== 3 && h.length !== 6) return null;
@@ -284,6 +377,9 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
   if (vibe.mood) {
     Object.assign(out, MOOD_TEXTURE[vibe.mood]);
   }
+
+  // ── Type scale (fluid, density × mood) ─────────────────────────────────
+  Object.assign(out, emitTypeScale(vibe.density, vibe.mood));
 
   return out;
 }

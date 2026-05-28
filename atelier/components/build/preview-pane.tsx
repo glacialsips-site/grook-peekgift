@@ -366,10 +366,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
-              className="text-4xl font-semibold tracking-tight drop-shadow-lg sm:text-5xl"
+              className="drop-shadow-lg"
               style={{
                 fontFamily: headingFont,
                 color: 'hsl(var(--peek-bg))',
+                fontSize: 'var(--vibe-type-scale-display)',
+                fontWeight: 'var(--vibe-type-weight-display)',
+                letterSpacing: 'var(--vibe-type-tracking-display)',
+                lineHeight: 'var(--vibe-type-leading-display)',
               }}
             >
               {name}
@@ -379,10 +383,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
-                className="text-base drop-shadow sm:text-lg"
+                className="drop-shadow"
                 style={{
                   fontFamily: headingFont,
                   color: 'hsl(var(--peek-bg) / 0.92)',
+                  fontSize: 'var(--vibe-type-scale-h3)',
+                  fontWeight: 'var(--vibe-type-weight-h3)',
+                  letterSpacing: 'var(--vibe-type-tracking-h3)',
+                  lineHeight: 'var(--vibe-type-leading-h3)',
                 }}
               >
                 {peek.occasion}
@@ -392,8 +400,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
-                className="text-xs uppercase tracking-widest drop-shadow"
-                style={{ color: 'hsl(var(--peek-bg) / 0.82)' }}
+                className="uppercase drop-shadow"
+                style={{
+                  color: 'hsl(var(--peek-bg) / 0.82)',
+                  fontSize: 'var(--vibe-type-scale-small)',
+                  fontWeight: 'var(--vibe-type-weight-small)',
+                  letterSpacing: 'var(--vibe-type-tracking-small)',
+                  lineHeight: 'var(--vibe-type-leading-small)',
+                }}
               >
                 {peek.relationship}
               </motion.p>
@@ -403,16 +417,28 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.7, ease: 'easeOut' }}
-                className="text-xs uppercase tracking-widest drop-shadow"
-                style={{ color: 'hsl(var(--peek-bg) / 0.82)' }}
+                className="uppercase drop-shadow"
+                style={{
+                  color: 'hsl(var(--peek-bg) / 0.82)',
+                  fontSize: 'var(--vibe-type-scale-small)',
+                  fontWeight: 'var(--vibe-type-weight-small)',
+                  letterSpacing: 'var(--vibe-type-tracking-small)',
+                  lineHeight: 'var(--vibe-type-leading-small)',
+                }}
               >
                 from {givers.join(', ')}
               </motion.p>
             ) : null}
             {!peek.occasion && !hasGivers && !peek.relationship ? (
               <p
-                className="text-sm drop-shadow"
-                style={{ color: 'hsl(var(--peek-bg) / 0.7)' }}
+                className="drop-shadow"
+                style={{
+                  color: 'hsl(var(--peek-bg) / 0.7)',
+                  fontSize: 'var(--vibe-type-scale-body)',
+                  fontWeight: 'var(--vibe-type-weight-body)',
+                  letterSpacing: 'var(--vibe-type-tracking-body)',
+                  lineHeight: 'var(--vibe-type-leading-body)',
+                }}
               >
                 Who is this for?
               </p>
@@ -439,10 +465,13 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
-          className="text-4xl font-semibold tracking-tight sm:text-5xl"
           style={{
             fontFamily: headingFont,
             color: 'hsl(var(--peek-ink))',
+            fontSize: 'var(--vibe-type-scale-display)',
+            fontWeight: 'var(--vibe-type-weight-display)',
+            letterSpacing: 'var(--vibe-type-tracking-display)',
+            lineHeight: 'var(--vibe-type-leading-display)',
           }}
         >
           {name}
@@ -452,10 +481,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.45 }}
-            className="mt-1 text-base sm:text-lg"
+            className="mt-1"
             style={{
               fontFamily: headingFont,
               color: 'hsl(var(--peek-ink) / 0.78)',
+              fontSize: 'var(--vibe-type-scale-h3)',
+              fontWeight: 'var(--vibe-type-weight-h3)',
+              letterSpacing: 'var(--vibe-type-tracking-h3)',
+              lineHeight: 'var(--vibe-type-leading-h3)',
             }}
           >
             {peek.occasion}
@@ -465,8 +498,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.55, delay: 0.5 }}
-            className="mt-1 text-xs uppercase tracking-widest"
-            style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
+            className="mt-1 uppercase"
+            style={{
+              color: 'hsl(var(--peek-ink) / 0.62)',
+              fontSize: 'var(--vibe-type-scale-small)',
+              fontWeight: 'var(--vibe-type-weight-small)',
+              letterSpacing: 'var(--vibe-type-tracking-small)',
+              lineHeight: 'var(--vibe-type-leading-small)',
+            }}
           >
             {peek.relationship}
           </motion.p>
@@ -476,8 +515,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.55, delay: 0.6 }}
-            className="mt-1 text-xs uppercase tracking-widest"
-            style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
+            className="mt-1 uppercase"
+            style={{
+              color: 'hsl(var(--peek-ink) / 0.62)',
+              fontSize: 'var(--vibe-type-scale-small)',
+              fontWeight: 'var(--vibe-type-weight-small)',
+              letterSpacing: 'var(--vibe-type-tracking-small)',
+              lineHeight: 'var(--vibe-type-leading-small)',
+            }}
           >
             from {givers.join(', ')}
           </motion.p>
@@ -575,10 +620,13 @@ function CardItem({
       >
         <div className="flex items-start justify-between gap-3">
           <h3
-            className="text-base font-medium leading-tight"
             style={{
               fontFamily: 'var(--peek-font-heading)',
               color: 'hsl(var(--peek-ink))',
+              fontSize: 'var(--vibe-type-scale-h3)',
+              fontWeight: 'var(--vibe-type-weight-h3)',
+              letterSpacing: 'var(--vibe-type-tracking-h3)',
+              lineHeight: 'var(--vibe-type-leading-h3)',
             }}
           >
             {card.title}
@@ -586,12 +634,16 @@ function CardItem({
           {price ? (
             <span
               className={cn(
-                'shrink-0 px-2 py-0.5 text-xs font-medium',
+                'shrink-0 px-2 py-0.5',
                 priceIsHidden ? 'border border-dashed' : '',
               )}
               style={{
                 borderRadius: 'var(--vibe-radius-button, 9999px)',
                 fontFamily: 'var(--peek-font-body)',
+                fontSize: 'var(--vibe-type-scale-small)',
+                fontWeight: 'var(--vibe-type-weight-small)',
+                letterSpacing: 'var(--vibe-type-tracking-small)',
+                lineHeight: 'var(--vibe-type-leading-small)',
                 borderColor: priceIsHidden
                   ? 'hsl(var(--peek-accent) / 0.45)'
                   : undefined,
@@ -610,10 +662,13 @@ function CardItem({
         </div>
         {card.description ? (
           <p
-            className="text-sm"
             style={{
               color: 'hsl(var(--peek-ink) / 0.72)',
               fontFamily: 'var(--peek-font-body)',
+              fontSize: 'var(--vibe-type-scale-body)',
+              fontWeight: 'var(--vibe-type-weight-body)',
+              letterSpacing: 'var(--vibe-type-tracking-body)',
+              lineHeight: 'var(--vibe-type-leading-body)',
             }}
           >
             {card.description}
@@ -621,8 +676,14 @@ function CardItem({
         ) : null}
         {card.locationHint ? (
           <p
-            className="mt-1 inline-flex items-center gap-1 text-xs"
-            style={{ color: 'hsl(var(--peek-ink) / 0.55)' }}
+            className="mt-1 inline-flex items-center gap-1"
+            style={{
+              color: 'hsl(var(--peek-ink) / 0.55)',
+              fontSize: 'var(--vibe-type-scale-small)',
+              fontWeight: 'var(--vibe-type-weight-small)',
+              letterSpacing: 'var(--vibe-type-tracking-small)',
+              lineHeight: 'var(--vibe-type-leading-small)',
+            }}
           >
             <MapPin className="h-3 w-3" aria-hidden="true" />
             {card.locationHint}
@@ -663,10 +724,14 @@ function TextOnlyHero({ card, compact }: { card: Card; compact?: boolean }) {
       </div>
       <div className="flex flex-col gap-1 p-4">
         <span
-          className="text-[10px] uppercase tracking-widest"
+          className="uppercase"
           style={{
             fontFamily: 'var(--peek-font-heading)',
             color: 'hsl(var(--peek-accent) / 0.88)',
+            fontSize: 'var(--vibe-type-scale-small)',
+            fontWeight: 'var(--vibe-type-weight-small)',
+            letterSpacing: 'var(--vibe-type-tracking-small)',
+            lineHeight: 'var(--vibe-type-leading-small)',
           }}
         >
           {card.type}
@@ -693,10 +758,14 @@ function LockOverlay({ card }: { card: Card }) {
         style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
       />
       <p
-        className="px-4 text-sm font-medium"
+        className="px-4"
         style={{
           color: 'hsl(var(--peek-ink) / 0.82)',
           fontFamily: 'var(--peek-font-body)',
+          fontSize: 'var(--vibe-type-scale-body)',
+          fontWeight: 'var(--vibe-type-weight-body)',
+          letterSpacing: 'var(--vibe-type-tracking-body)',
+          lineHeight: 'var(--vibe-type-leading-body)',
         }}
       >
         {prompt}
@@ -712,10 +781,14 @@ function TauntOverlay({ text }: { text: string }) {
       style={{ backgroundColor: 'hsl(var(--peek-ink) / 0.12)' }}
     >
       <p
-        className="text-xl italic drop-shadow-sm sm:text-2xl"
+        className="italic drop-shadow-sm"
         style={{
           fontFamily: 'var(--peek-font-heading)',
           color: 'hsl(var(--peek-ink))',
+          fontSize: 'var(--vibe-type-scale-h2)',
+          fontWeight: 'var(--vibe-type-weight-h2)',
+          letterSpacing: 'var(--vibe-type-tracking-h2)',
+          lineHeight: 'var(--vibe-type-leading-h2)',
         }}
       >
         “{text}”

@@ -70,8 +70,14 @@ export function ProductCard({
             aria-hidden="true"
           />
           <span
-            className="text-[10px] uppercase tracking-widest text-[hsl(var(--peek-accent))]/85"
-            style={{ fontFamily: 'var(--peek-font-heading)' }}
+            className="uppercase text-[hsl(var(--peek-accent))]/85"
+            style={{
+              fontFamily: 'var(--peek-font-heading)',
+              fontSize: 'var(--vibe-type-scale-small)',
+              fontWeight: 'var(--vibe-type-weight-small)',
+              letterSpacing: 'var(--vibe-type-tracking-small)',
+              lineHeight: 'var(--vibe-type-leading-small)',
+            }}
           >
             gift
           </span>
@@ -80,28 +86,50 @@ export function ProductCard({
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <h3
-            className={cn(
-              'leading-tight',
-              card.imageUrl
-                ? 'text-base font-medium'
-                : 'text-lg font-semibold',
-            )}
-            style={
-              card.imageUrl
+            style={{
+              fontFamily: card.imageUrl
                 ? undefined
-                : { fontFamily: 'var(--peek-font-heading)' }
-            }
+                : 'var(--peek-font-heading)',
+              fontSize: card.imageUrl
+                ? 'var(--vibe-type-scale-h3)'
+                : 'var(--vibe-type-scale-h2)',
+              fontWeight: card.imageUrl
+                ? 'var(--vibe-type-weight-h3)'
+                : 'var(--vibe-type-weight-h2)',
+              letterSpacing: card.imageUrl
+                ? 'var(--vibe-type-tracking-h3)'
+                : 'var(--vibe-type-tracking-h2)',
+              lineHeight: card.imageUrl
+                ? 'var(--vibe-type-leading-h3)'
+                : 'var(--vibe-type-leading-h2)',
+            }}
           >
             {card.title}
           </h3>
           {price ? (
-            <span className="shrink-0 rounded-full bg-[hsl(var(--peek-accent))]/10 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
+            <span
+              className="shrink-0 rounded-full bg-[hsl(var(--peek-accent))]/10 px-2 py-0.5 text-[hsl(var(--peek-accent))]"
+              style={{
+                fontSize: 'var(--vibe-type-scale-small)',
+                fontWeight: 'var(--vibe-type-weight-small)',
+                letterSpacing: 'var(--vibe-type-tracking-small)',
+                lineHeight: 'var(--vibe-type-leading-small)',
+              }}
+            >
               {price}
             </span>
           ) : null}
         </div>
         {card.description ? (
-          <p className="text-sm text-[hsl(var(--peek-ink))]/70">
+          <p
+            className="text-[hsl(var(--peek-ink))]/70"
+            style={{
+              fontSize: 'var(--vibe-type-scale-body)',
+              fontWeight: 'var(--vibe-type-weight-body)',
+              letterSpacing: 'var(--vibe-type-tracking-body)',
+              lineHeight: 'var(--vibe-type-leading-body)',
+            }}
+          >
             {card.description}
           </p>
         ) : null}

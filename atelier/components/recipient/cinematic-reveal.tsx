@@ -332,8 +332,14 @@ export function CinematicReveal({
                       duration: Math.max(plan.name.durationMs / 1000, 0.3),
                       ease: 'easeOut',
                     }}
-                    className="px-2 text-4xl font-semibold tracking-tight text-[hsl(var(--peek-ink))] drop-shadow-sm sm:text-6xl"
-                    style={display ? { fontFamily: display } : undefined}
+                    className="px-2 text-[hsl(var(--peek-ink))] drop-shadow-sm"
+                    style={{
+                      fontFamily: display ?? undefined,
+                      fontSize: 'var(--vibe-type-scale-display)',
+                      fontWeight: 'var(--vibe-type-weight-display)',
+                      letterSpacing: 'var(--vibe-type-tracking-display)',
+                      lineHeight: 'var(--vibe-type-leading-display)',
+                    }}
                   >
                     <span className="sr-only">for {name}</span>
                     <span aria-hidden="true">
@@ -364,8 +370,14 @@ export function CinematicReveal({
                       duration: Math.max(plan.occasion.durationMs / 1000, 0.25),
                       ease: 'easeOut',
                     }}
-                    className="text-base uppercase tracking-[0.2em] text-[hsl(var(--peek-ink))]/70 sm:text-lg"
-                    style={display ? { fontFamily: display } : undefined}
+                    className="uppercase text-[hsl(var(--peek-ink))]/70"
+                    style={{
+                      fontFamily: display ?? undefined,
+                      fontSize: 'var(--vibe-type-scale-h3)',
+                      fontWeight: 'var(--vibe-type-weight-h3)',
+                      letterSpacing: 'var(--vibe-type-tracking-small)',
+                      lineHeight: 'var(--vibe-type-leading-h3)',
+                    }}
                   >
                     {occasion}
                   </motion.p>
@@ -376,7 +388,7 @@ export function CinematicReveal({
                 {showNote ? (
                   <motion.p
                     key="note"
-                    className="mt-2 max-w-xl text-balance text-base leading-relaxed text-[hsl(var(--peek-ink))]/85 sm:text-lg"
+                    className="mt-2 max-w-xl text-balance text-[hsl(var(--peek-ink))]/85"
                     initial="hidden"
                     animate="visible"
                     exit={{ opacity: 0 }}
@@ -390,7 +402,13 @@ export function CinematicReveal({
                         },
                       },
                     }}
-                    style={body ? { fontFamily: body } : undefined}
+                    style={{
+                      fontFamily: body ?? undefined,
+                      fontSize: 'var(--vibe-type-scale-body)',
+                      fontWeight: 'var(--vibe-type-weight-body)',
+                      letterSpacing: 'var(--vibe-type-tracking-body)',
+                      lineHeight: 'var(--vibe-type-leading-body)',
+                    }}
                     aria-label="A note from the giver"
                   >
                     {plan.note.style === 'word'

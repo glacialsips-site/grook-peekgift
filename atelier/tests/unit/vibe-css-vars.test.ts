@@ -161,11 +161,34 @@ describe('vibeCss', () => {
     expect(out['--vibe-motion-scale']).toBe('1');
   });
 
-  it('still leaves --vibe-* outputs absent when dials are missing', () => {
+  it('still leaves dial-conditional --vibe-* outputs absent when dials are missing', () => {
     const out = vibeCss({ tone: 'warm' });
     expect(out['--vibe-bg']).toBeUndefined();
     expect(out['--vibe-radius-card']).toBeUndefined();
     expect(out['--vibe-motion-scale']).toBeUndefined();
+  });
+
+  it('emits fluid type scale that morphs across density × mood', () => {
+    const p = vibeCss(princessBday);
+    const b = vibeCss(bachelorette);
+    const w = vibeCss(wedding);
+
+    for (const role of ['display', 'h1', 'h2', 'h3', 'body', 'small'] as const) {
+      expect(p[`--vibe-type-scale-${role}`]).toMatch(/^clamp\(/);
+      expect(b[`--vibe-type-scale-${role}`]).toMatch(/^clamp\(/);
+      expect(w[`--vibe-type-scale-${role}`]).toMatch(/^clamp\(/);
+      expect(p[`--vibe-type-weight-${role}`]).toBeTruthy();
+      expect(p[`--vibe-type-tracking-${role}`]).toBeTruthy();
+      expect(p[`--vibe-type-leading-${role}`]).toBeTruthy();
+    }
+
+    expect(p['--vibe-type-scale-display']).not.toBe(w['--vibe-type-scale-display']);
+    expect(p['--vibe-type-scale-display']).not.toBe(b['--vibe-type-scale-display']);
+    expect(b['--vibe-type-scale-display']).not.toBe(w['--vibe-type-scale-display']);
+
+    expect(p['--vibe-type-weight-display']).not.toBe(w['--vibe-type-weight-display']);
+    expect(p['--vibe-type-tracking-display']).not.toBe(w['--vibe-type-tracking-display']);
+    expect(p['--vibe-type-leading-display']).not.toBe(w['--vibe-type-leading-display']);
   });
 
   it('honours explicit font_pairing over the typography category', () => {
