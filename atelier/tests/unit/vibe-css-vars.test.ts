@@ -95,22 +95,17 @@ describe('vibeCss', () => {
 
   it('emits all 7 dial outputs when fully specified', () => {
     const out = vibeCss(princessBday);
-    // Palette
     expect(out['--vibe-bg']).toBeTruthy();
     expect(out['--vibe-ink']).toBeTruthy();
     expect(out['--vibe-accent']).toBeTruthy();
     expect(out['--vibe-muted']).toBeTruthy();
-    // Typography
     expect(out['--vibe-type-display']).toBeTruthy();
     expect(out['--vibe-type-body']).toBeTruthy();
     expect(out['--vibe-type-mono']).toBeTruthy();
-    // Density
     expect(out['--vibe-space-base']).toBeTruthy();
     expect(out['--vibe-space-gap']).toBeTruthy();
-    // Shape
     expect(out['--vibe-radius-card']).toBeTruthy();
     expect(out['--vibe-radius-button']).toBeTruthy();
-    // Motion
     expect(out['--vibe-motion-scale']).toBeTruthy();
   });
 
@@ -119,26 +114,21 @@ describe('vibeCss', () => {
     const b = vibeCss(bachelorette);
     const w = vibeCss(wedding);
 
-    // Palettes must differ
     expect(p['--peek-bg']).not.toBe(b['--peek-bg']);
     expect(p['--peek-bg']).not.toBe(w['--peek-bg']);
     expect(b['--peek-bg']).not.toBe(w['--peek-bg']);
     expect(p['--peek-accent']).not.toBe(b['--peek-accent']);
 
-    // Typography must differ between display+sans and serif+serif
     expect(p['--peek-font-heading']).not.toBe(w['--peek-font-heading']);
     expect(p['--peek-font-body']).not.toBe(w['--peek-font-body']);
 
-    // Density must differ between compact and breathable
     expect(p['--vibe-space-base']).not.toBe(w['--vibe-space-base']);
     expect(p['--peek-space-8']).not.toBe(w['--peek-space-8']);
 
-    // Shape must differ between pillowy/sharp/soft
     expect(p['--peek-radius']).not.toBe(b['--peek-radius']);
     expect(p['--peek-radius']).not.toBe(w['--peek-radius']);
     expect(b['--peek-radius']).not.toBe(w['--peek-radius']);
 
-    // Motion must differ between lively and soft
     expect(p['--vibe-motion-scale']).not.toBe(w['--vibe-motion-scale']);
   });
 

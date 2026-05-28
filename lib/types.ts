@@ -1,13 +1,11 @@
-// Shared types for peek-gift vNext
-
 export type CardType = 'product' | 'activity' | 'aspirational' | 'digital';
 export type PeekStatus = 'draft' | 'published' | 'claimed' | 'archived';
 export type VariantSelection = 'pick_one' | 'pick_any' | 'pick_all';
 
 export interface Vibe {
-  tone?: string;            // 'playful' | 'romantic' | 'dry' | 'tender' | 'unhinged' ...
+  tone?: string;
   palette?: {
-    bg: string;             // hex
+    bg: string;
     surface: string;
     ink: string;
     accent: string;

@@ -1,7 +1,3 @@
-// Netlify Blobs adapter. Zero-config in production (Netlify injects the runtime token),
-// falls back to local on-disk for dev. Used for uploaded photos, generated hero images,
-// voice notes, OG image cache.
-
 import { getStore } from '@netlify/blobs';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -19,7 +15,6 @@ interface StoredObject {
   contentType?: string;
 }
 
-// Single namespace; key prefixes keep things organized.
 const STORE_NAME = 'peek-v2';
 
 function isOnNetlify(): boolean {
@@ -42,7 +37,6 @@ export async function putBytes(
       contentType: opts.contentType
     };
   }
-  // Dev fallback: write into .next/cache/blobs/
   const root = path.join(process.cwd(), '.next', 'cache', 'blobs');
   const file = path.join(root, key);
   await fs.mkdir(path.dirname(file), { recursive: true });

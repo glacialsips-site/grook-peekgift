@@ -7,23 +7,6 @@ import {
   tokenizeWords,
 } from '@/lib/reveal/phases';
 
-/**
- * Magazine-cover-opening reveal — snapshot tests for the phase choreography.
- *
- * The reveal component schedules React state transitions against a pure
- * `PhasePlan`. These tests cover:
- *
- *  - the canonical phase ordering (hero → name → occasion → note → cards → done)
- *  - three snapshot reveal moments for one representative peek vibe (princess-bday
- *    soft, with note + occasion + 6 cards): initial, mid-reveal, post-reveal
- *  - vibe.motion uniformly multiplies durations (still 0.6x, soft 1x, lively 1.25x)
- *  - graceful degradation when inputs are missing (no note, no occasion, no cards)
- *  - long-name / long-note branching (typewriter vs fade; word vs line)
- *  - visibility-pause math (`phaseAtElapsed` resuming mid-phase)
- *
- * No DOM, no renderer — the phase math is the contract.
- */
-
 describe('reveal phases — canonical ordering', () => {
   it('exposes the phase order in REVEAL_PHASES', () => {
     expect(REVEAL_PHASES).toEqual([
@@ -161,7 +144,7 @@ describe('reveal phases — note choreography branches', () => {
     const plan = planPhases({
       motion: 'soft',
       hasNote: true,
-      noteWordCount: 300, // forces line-batch + would exceed cap
+      noteWordCount: 300,
       nameLength: 6,
       hasOccasion: false,
       cardCount: 0,
@@ -182,7 +165,6 @@ describe('reveal phases — graceful degradation', () => {
     });
     expect(plan.occasion.visible).toBe(false);
     expect(plan.occasion.durationMs).toBe(0);
-    // Note starts at occasionStart since occasion is zero-duration.
     expect(plan.note.startMs).toBe(plan.occasion.startMs);
     expect(plan.note.visible).toBe(true);
   });
@@ -198,7 +180,6 @@ describe('reveal phases — graceful degradation', () => {
     });
     expect(plan.note.visible).toBe(false);
     expect(plan.note.durationMs).toBe(0);
-    // Cards start at noteStart since note is zero-duration.
     expect(plan.cards.startMs).toBe(plan.note.startMs);
   });
 
@@ -230,14 +211,11 @@ describe('reveal phases — graceful degradation', () => {
 });
 
 describe('reveal phases — snapshot for princess-bday soft (12 words, 6 cards)', () => {
-  // Representative peek vibe: princess-bday soft would actually be 'lively',
-  // but the prompt specifically asks for one peek vibe and the canonical math
-  // is the soft 1x case. Snapshot covers initial, mid-reveal, post-reveal.
   const plan = planPhases({
     motion: 'soft',
     hasNote: true,
     noteWordCount: 12,
-    nameLength: 8, // "Penelope"
+    nameLength: 8,
     hasOccasion: true,
     cardCount: 6,
   });

@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// These tests assert that webhook (and webhook-adjacent proxy) routes return
-// 200 with a `skipped: 'service_not_configured'` body when their service keys
-// are unset — NOT 500. Returning 500 causes upstream providers (Skimlinks,
-// Clerk, Stripe, Inngest, PostHog) to pile up failed delivery retries.
-
 const ORIGINAL_ENV = { ...process.env };
 
 const loggerWarn = vi.fn();
@@ -25,7 +20,6 @@ vi.mock('@/lib/logger', () => ({
 
 beforeEach(() => {
   process.env = { ...ORIGINAL_ENV };
-  // Clear keys this test cares about so we control the "unset" condition.
   delete process.env['SKIMLINKS_WEBHOOK_SECRET'];
   delete process.env['CLERK_WEBHOOK_SIGNING_SECRET'];
   delete process.env['STRIPE_WEBHOOK_SECRET'];

@@ -1,7 +1,3 @@
-// Image generation pipeline. Tries providers in order: Replicate → Fal → fallback gradient SVG.
-// All return a *public URL* that the page can render. AI-generated images get cached in
-// Netlify Blobs so we don't re-bill on re-views.
-
 import { putBytes, blobKey } from './storage';
 import { q, q1opt } from './db';
 
@@ -18,7 +14,6 @@ interface HeroResult {
   error?: string;
 }
 
-// Replicate's FLUX-schnell — fast, cheap (~$0.003/image), great quality
 const REPLICATE_MODEL = 'black-forest-labs/flux-schnell';
 
 const ASPECT_DIMS: Record<string, { width: number; height: number }> = {
@@ -31,7 +26,6 @@ const ASPECT_DIMS: Record<string, { width: number; height: number }> = {
 export async function generateHero(opts: HeroOpts): Promise<HeroResult> {
   const dims = ASPECT_DIMS[opts.aspect || '16:9'];
 
-  // Provider 1: Replicate
   if (process.env.REPLICATE_API_TOKEN) {
     try {
       const url = await viaReplicate(opts.prompt, dims);
@@ -44,7 +38,6 @@ export async function generateHero(opts: HeroOpts): Promise<HeroResult> {
     }
   }
 
-  // Provider 2: Fal
   if (process.env.FAL_API_KEY) {
     try {
       const url = await viaFal(opts.prompt, dims);
@@ -57,7 +50,6 @@ export async function generateHero(opts: HeroOpts): Promise<HeroResult> {
     }
   }
 
-  // Fallback: build a placeholder gradient SVG. Not magic but better than empty.
   const svg = gradientPlaceholder(opts.prompt, dims);
   const stored = await putBytes(blobKey('hero/fallback', opts.peek_id, 'svg'), new TextEncoder().encode(svg), {
     contentType: 'image/svg+xml'
@@ -90,11 +82,9 @@ async function viaReplicate(prompt: string, dims: { width: number; height: numbe
     return null;
   }
   const body = await res.json();
-  // With Prefer:wait, the output array is filled in synchronously
   const output = body.output;
   if (Array.isArray(output) && output[0]) return output[0];
   if (typeof output === 'string') return output;
-  // Otherwise poll the result URL
   const pollUrl = body.urls?.get;
   if (pollUrl) {
     for (let i = 0; i < 30; i++) {
@@ -157,7 +147,6 @@ async function cacheRemoteImage(
 }
 
 function gradientPlaceholder(prompt: string, dims: { width: number; height: number }): string {
-  // Deterministic color pair from prompt hash, so the same peek gets the same fallback gradient
   let h = 0;
   for (const c of prompt) h = (h * 31 + c.charCodeAt(0)) | 0;
   const h1 = ((h % 360) + 360) % 360;
@@ -175,9 +164,6 @@ function gradientPlaceholder(prompt: string, dims: { width: number; height: numb
       font-family="Georgia, serif" font-size="${Math.round(dims.height/20)}" fill="rgba(255,255,255,0.65)" font-style="italic">${label}</text>
   </svg>`;
 }
-
-// --- OG image (link preview) generation ---
-// Lightweight SVG composed server-side. Cached in DB+Blob.
 
 export async function generateOgImage(peekId: string): Promise<string | null> {
   const peek = await q1opt<any>(

@@ -11,10 +11,8 @@ describe('buildSystemBlocks', () => {
     expect(blocks).toHaveLength(3);
     expect(blocks[0]?.type).toBe('text');
     expect(blocks[0]?.text).toBe(STATIC_SYSTEM_PROMPT_TEXT);
-    // Common skills always present in block 2.
     expect(blocks[1]?.text).toContain('# Skill: copy-house-style');
     expect(blocks[1]?.text).toContain('# Skill: vibe-direction');
-    // Block 3 is the dynamic context.
     expect(blocks[2]?.text).toContain('# Context (per-turn)');
     expect(blocks[2]?.text).toContain('Curator: Frank');
     expect(blocks[2]?.text).toContain('Peek: p1');
@@ -65,8 +63,6 @@ describe('buildSystemBlocks', () => {
   });
 
   it('replaces the old static prompt with the trimmed base prompt', () => {
-    // Smoke test that we replaced the old prompt — the new base talks about
-    // "Mutate first, narrate second" rather than the tools-list dump.
     expect(STATIC_SYSTEM_PROMPT_TEXT).toContain('Mutate first, narrate second');
     expect(STATIC_SYSTEM_PROMPT_TEXT).toContain('The shape of the work');
     expect(STATIC_SYSTEM_PROMPT_TEXT).not.toContain('# Tools available');

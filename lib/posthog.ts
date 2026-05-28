@@ -1,4 +1,3 @@
-// Minimal server-side PostHog tracker. Free-tier safe and async — never blocks request.
 import { PostHog } from 'posthog-node';
 
 let _client: PostHog | null = null;

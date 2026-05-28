@@ -1,4 +1,3 @@
-// Tiny Resend wrapper. Uses raw fetch so we don't need their SDK.
 const RESEND_API = 'https://api.resend.com/emails';
 
 interface SendOpts {

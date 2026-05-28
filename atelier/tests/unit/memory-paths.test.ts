@@ -23,10 +23,6 @@ describe('memory validatePath', () => {
   });
 
   it('rejects parent-segment traversal', () => {
-    // /memories/../etc/passwd doesn't start with the user prefix, so the
-    // namespace check fires first; either parent_segment or
-    // outside_namespace is an acceptable rejection — both indicate the path
-    // was refused before any DB I/O.
     expect(() => validatePath(USER, '/memories/../etc/passwd')).toThrowError(
       /parent_segment|outside_namespace/,
     );
