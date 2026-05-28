@@ -49,6 +49,7 @@ registerTool<Input, Output>({
     },
     required: ['prompt'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
     const aspect: FalAspect = parsed.aspect ?? '16:9';

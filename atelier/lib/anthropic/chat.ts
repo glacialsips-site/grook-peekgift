@@ -1,21 +1,37 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic, assertAnthropicConfigured, DEFAULT_MODEL } from './client';
+import { consumeExtendedThinking } from './extended-thinking';
+import { dispatchMemoryCommand } from './memory/store';
 import { loadPeekStateJson } from './progress-block';
+import { getServerToolDescriptors } from './server-tools';
 import { getSystemPrompt, type SystemPromptOptions } from './system-prompt';
 import { getToolSchemas, runTool, type ToolContext } from './tools/index';
 import './tools/bootstrap';
 import { streamMessage, type StreamEvent } from './streaming';
 import { beginTurnCapture } from './observability';
+import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
+import { getPostHogServer } from '@/lib/analytics/facade';
 
 const MAX_TOOL_ITERATIONS = 10;
 const DEFAULT_MAX_TOKENS = 4096;
 
-export function withToolsCacheControl(tools: Anthropic.Tool[]): Anthropic.Tool[] {
+const log = logger.child({ component: 'anthropic/chat' });
+
+type AnyTool =
+  | Anthropic.Tool
+  | Anthropic.CodeExecutionTool20260120
+  | Anthropic.WebSearchTool20260209
+  | Anthropic.WebFetchTool20260209
+  | Anthropic.ToolSearchToolBm25_20251119
+  | Anthropic.MemoryTool20250818;
+
+export function withToolsCacheControl<T extends AnyTool>(tools: T[]): T[] {
   if (tools.length === 0) return tools;
   const lastIndex = tools.length - 1;
   return tools.map((tool, i) =>
     i === lastIndex
-      ? { ...tool, cache_control: { type: 'ephemeral', ttl: '1h' } }
+      ? ({ ...tool, cache_control: { type: 'ephemeral', ttl: '1h' } } as T)
       : tool,
   );
 }
@@ -64,7 +80,12 @@ export async function* chatTurn(
 
   const model = input.model ?? DEFAULT_MODEL;
   const maxTokens = input.maxTokens ?? DEFAULT_MAX_TOKENS;
-  const tools = withToolsCacheControl(getToolSchemas());
+  const clientTools = getToolSchemas();
+  const serverTools = getServerToolDescriptors();
+  const tools: AnyTool[] = withToolsCacheControl<AnyTool>([
+    ...serverTools,
+    ...clientTools,
+  ]);
   const baseOpts: ChatTurnSystemPromptOptions = input.systemPromptOptions ?? {};
   const signal = input.signal;
 
@@ -103,15 +124,29 @@ export async function* chatTurn(
         curatorName: baseOpts.curatorName ?? null,
         peekStateJson: dynamicPeekState,
         peekId: baseOpts.peekId ?? input.ctx.peekId,
+        curatorMemory: baseOpts.curatorMemory ?? null,
       });
+
+      // Extended thinking: if a prior iteration called
+      // `request_extended_thinking`, the flag is set for this sessionId.
+      // Consume it once for THIS iteration's messages.create call only.
+      const thinkingConsumed = consumeExtendedThinking(input.ctx.sessionId);
+      const thinkingBudget = env.EXTENDED_THINKING_BUDGET_TOKENS ?? 8000;
+      const thinkingParam: Anthropic.ThinkingConfigParam | undefined =
+        thinkingConsumed
+          ? { type: 'enabled', budget_tokens: thinkingBudget }
+          : input.thinking;
 
       const params: Anthropic.MessageStreamParams = {
         model,
         max_tokens: maxTokens,
         system,
         messages,
-        tools: tools.length > 0 ? tools : undefined,
-        ...(input.thinking ? { thinking: input.thinking } : {}),
+        tools:
+          tools.length > 0
+            ? (tools as Anthropic.MessageStreamParams['tools'])
+            : undefined,
+        ...(thinkingParam ? { thinking: thinkingParam } : {}),
       };
 
       let finalMessage: Anthropic.Message | undefined;
@@ -193,11 +228,58 @@ export async function* chatTurn(
         }
         let output: unknown;
         let isError = false;
+        // memory tool returns a string; everything else returns JSON.
+        // Track separately so we can pass the raw string content through
+        // the tool_result block as Anthropic expects.
+        let memoryResultString: string | undefined;
         try {
-          output = await runTool(call.name, call.input, input.ctx);
+          if (call.name === 'memory') {
+            if (!input.ctx.userId) {
+              // Anon — graceful: return a SHORT string per Memory protocol.
+              memoryResultString =
+                'Error: Memory requires sign-in. Use set_recipient_profile or peek metadata for transient state instead.';
+              output = { ok: false, error: 'memory_unauthorized' };
+            } else {
+              const cmd =
+                call.input as Anthropic.Beta.Messages.BetaMemoryTool20250818Command;
+              memoryResultString = await dispatchMemoryCommand(
+                { clerkUserId: input.ctx.userId },
+                cmd,
+              );
+              output = { ok: true, memory_response: memoryResultString };
+              // Telemetry: per-event, not aggregated. Emit directly to
+              // PostHog so we don't force a facade type change for every
+              // new event surface in this packet (memory.command,
+              // extended_thinking.requested, etc.).
+              try {
+                const ph = getPostHogServer();
+                if (ph) {
+                  ph.capture({
+                    distinctId: input.ctx.userId,
+                    event: 'memory_command',
+                    properties: {
+                      command: cmd.command,
+                      peek_id: input.ctx.peekId,
+                      session_id: input.ctx.sessionId,
+                      ok: !memoryResultString.startsWith('Error:'),
+                    },
+                  });
+                }
+              } catch (_phErr) {
+                // PostHog issues never break the chat loop.
+              }
+            }
+          } else {
+            output = await runTool(call.name, call.input, input.ctx);
+          }
         } catch (err) {
           isError = true;
-          output = { error: err instanceof Error ? err.message : String(err) };
+          const msg = err instanceof Error ? err.message : String(err);
+          log.warn('tool_handler_threw', { name: call.name, msg });
+          output = { error: msg };
+          if (call.name === 'memory') {
+            memoryResultString = `Error: ${msg}`;
+          }
         }
 
         await input.onToolResult?.(call.id, call.name, output);
@@ -205,7 +287,7 @@ export async function* chatTurn(
         const resultBlock: Anthropic.ToolResultBlockParam = {
           type: 'tool_result',
           tool_use_id: call.id,
-          content: JSON.stringify(output),
+          content: memoryResultString ?? JSON.stringify(output),
         };
         if (isError) resultBlock.is_error = true;
         toolResults.push(resultBlock);

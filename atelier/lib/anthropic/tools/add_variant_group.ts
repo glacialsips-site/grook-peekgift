@@ -39,6 +39,7 @@ registerTool<Input, Output>({
     },
     required: ['title', 'selection'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
 

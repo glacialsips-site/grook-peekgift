@@ -11,6 +11,7 @@ export interface ToolDefinition<Input = unknown, Output = unknown> {
   description: string;
   input_schema: Anthropic.Tool.InputSchema;
   handler: (input: Input, ctx: ToolContext) => Promise<Output>;
+  deferLoading?: boolean;
 }
 
 export const TOOL_REGISTRY: Map<string, ToolDefinition> = new Map();
@@ -26,11 +27,11 @@ export function registerTool<Input, Output>(
 
 export function getToolSchemas(): Anthropic.Tool[] {
   return Array.from(TOOL_REGISTRY.values()).map(
-    ({ name, description, input_schema }) => ({
-      name,
-      description,
-      input_schema,
-    }),
+    ({ name, description, input_schema, deferLoading }) => {
+      const t: Anthropic.Tool = { name, description, input_schema };
+      if (deferLoading) t.defer_loading = true;
+      return t;
+    },
   );
 }
 

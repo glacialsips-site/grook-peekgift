@@ -10,3 +10,4 @@ export * from './affiliate_revenue';
 export * from './chat_history';
 export * from './webhook_log';
 export * from './usage';
+export * from './curator_memory';

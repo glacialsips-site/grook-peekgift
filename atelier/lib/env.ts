@@ -62,6 +62,15 @@ const schema = z.object({
     .optional(),
 
   ADMIN_CLERK_USER_IDS: z.string().optional(),
+
+  WEB_SEARCH_MAX_USES: z.coerce.number().int().positive().optional(),
+  WEB_FETCH_MAX_USES: z.coerce.number().int().positive().optional(),
+  MEMORY_MAX_FILES_PER_CURATOR: z.coerce.number().int().positive().optional(),
+  MEMORY_MAX_FILE_KB: z.coerce.number().int().positive().optional(),
+  EXTENDED_THINKING_BUDGET_TOKENS: z.coerce.number().int().positive().optional(),
+
+  DEEPGRAM_API_KEY: z.string().optional(),
+  ELEVENLABS_API_KEY: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

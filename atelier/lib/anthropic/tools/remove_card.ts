@@ -26,6 +26,7 @@ registerTool<Input, Output>({
     },
     required: ['card_id'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
     await db

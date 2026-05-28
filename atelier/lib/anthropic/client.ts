@@ -14,6 +14,9 @@ if (!env.ANTHROPIC_API_KEY) {
 export const anthropic = new Anthropic({
   apiKey: env.ANTHROPIC_API_KEY ?? '',
   maxRetries: 3,
+  defaultHeaders: {
+    'anthropic-beta': 'files-api-2025-04-14',
+  },
 });
 
 export function assertAnthropicConfigured(): void {

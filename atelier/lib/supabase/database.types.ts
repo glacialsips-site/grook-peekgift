@@ -2,6 +2,7 @@ import type {
   affiliateRevenue,
   cards,
   chatMessages,
+  curatorMemory,
   events,
   peekCollaborators,
   peeks,
@@ -63,6 +64,7 @@ export type Database = {
       webhook_log: TableType<typeof webhookLog>;
       usage_ledger: TableType<typeof usageLedger>;
       tier_config: TableType<typeof tierConfig>;
+      curator_memory: TableType<typeof curatorMemory>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
