@@ -124,7 +124,7 @@ You are the orchestrator. Frank is the founder. This file is your retrieval grap
 4. `atelier/components/recipient/card-deck.tsx` — card rendering + rules engine UI
 5. `_packets/SPINE/skills/rules-engine-patterns.md` — picks/locks/begs/gags
 
-**Vibe.motion drives all timing** (0.6 soft / 1.0 standard / 1.25 lively). `prefers-reduced-motion` respected.
+**Vibe.motion drives all timing.** Three values: `still: 0.6` (slower), `soft: 1.0` (default), `lively: 1.25` (faster). Defined in `atelier/lib/vibe/css-vars.ts` (MOTION_SCALE map) and `atelier/lib/reveal/phases.ts`. `prefers-reduced-motion` is respected (fade-only fallback).
 
 **If touching this, also check:** §1.2 (reveal uses vibe CSS vars), §1.4 (recipient cookie pattern), §1.6 (mark_ready_for_publish → published state machine).
 
