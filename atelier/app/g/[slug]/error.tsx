@@ -29,10 +29,10 @@ export default function RecipientError({
           a moment.
         </p>
         <div className="flex gap-2">
-          <Button type="button" onClick={reset}>
+          <Button type="button" size="lg" onClick={reset}>
             Try again
           </Button>
-          <Button asChild variant="outline" type="button">
+          <Button asChild variant="outline" size="lg" type="button">
             <a href="/">Go home</a>
           </Button>
         </div>

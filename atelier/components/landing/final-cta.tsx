@@ -39,7 +39,7 @@ export function FinalCta() {
         <p className="mt-6 text-sm text-muted-foreground">
           <Link
             href="/sign-in"
-            className="underline-offset-4 hover:text-foreground hover:underline"
+            className="inline-block min-h-11 py-2.5 underline-offset-4 hover:text-foreground hover:underline"
           >
             Already have an account? Sign in
           </Link>
