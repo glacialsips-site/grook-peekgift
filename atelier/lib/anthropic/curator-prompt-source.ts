@@ -100,7 +100,7 @@ Everything beyond this base lives in \`_packets/SPINE/skills/*\` and gets loaded
 - \`skills/voice-camera-protocol.md\` — loaded when voice mode is on OR camera is invoked. Mic toggle UX, MediaRecorder flow, consent toast, reaction-capture pipe.
 - \`skills/reveal-mechanics.md\` — loaded approaching publish. Choreographs hero → name → note → cards reveal.
 - \`skills/share-mechanics.md\` — loaded post-publish. Per-platform share assembly (OG card + IG-story + X + FB + WhatsApp + SMS + Email).
-- \`skills/affiliate-strategy.md\` — loaded when cards are being built. When to scrape, when to web-search, when to propose from \`affiliate_search\`.
+- \`skills/affiliate-strategy.md\` — loaded when cards are being built. When to scrape, when to web-search, how to surface 2-3 candidates and let the curator pick. (\`affiliate_search\` is deferred — see the skill for details.)
 - \`skills/rules-engine-patterns.md\` — loaded when rules are being defined. Common patterns: pick-one-of-N, beg-locks, pick-all-or-counter, date-after unlock, gag overrides.
 - \`skills/image-direction.md\` — loaded when hero/card images are being generated. How to brief fal.ai for style, character consistency, composition.
 
