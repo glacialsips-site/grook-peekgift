@@ -1,0 +1,328 @@
+[
+  {
+    "kind": "step",
+    "step": "landing",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 2325,
+    "bodyPreview": "Skip to main content\n\nPEEK.GIFT\n\nGift giving, made real.\n\nYou build a page for someone you love. They pick. No more guessing, no more gift-card cop-outs, no more Amazon boxes that miss.\n\nMake one\nHow it works\n\nFree to build. $12 to publish ",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/landing--375x812.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "{\"ts\":\"2026-05-28T03:05:47.063Z\",\"level\":\"error\",\"msg\":\"build_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3377218611\"}"
+  },
+  {
+    "kind": "step",
+    "step": "build-anon",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/build",
+    "status": 500,
+    "title": "peek.gift",
+    "bodyChars": 142,
+    "bodyPreview": "Skip to main content\nBuild session hiccup.\n\nThe build surface tripped. Your draft is saved — retry in a beat.\n\nTry again\nHome\n\nref: 3377218611",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/build-anon--375x812.png"
+  },
+  {
+    "kind": "step",
+    "step": "signin",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/sign-in",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 174,
+    "bodyPreview": "Skip to main content\n\npeek.gift\n\nMake gift giving real again.\n\nWelcome back\n\nSign in to keep making peeks.\n\nContinue with Google\nor\nEmail\nContinue\nNew here? Create an account",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/signin--375x812.png"
+  },
+  {
+    "kind": "step",
+    "step": "signup",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/sign-up",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 229,
+    "bodyPreview": "Skip to main content\n\npeek.gift\n\nMake gift giving real again.\n\nMake it real\n\nCreate an account to start your first peek.\n\nContinue with Google\nor\nFirst name\nLast name\nEmail\nPassword\nCreate account\nAlready have an account? Sign in",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/signup--375x812.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "{\"ts\":\"2026-05-28T03:05:57.861Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-editorial-c248cd434497",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/g/c248cd434497",
+    "status": 500,
+    "title": "A Peek for Dorothy — 44th birthday · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-editorial-c248cd434497--375x812.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "{\"ts\":\"2026-05-28T03:06:01.189Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-playful-bf54d5549a2f",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/g/bf54d5549a2f",
+    "status": 500,
+    "title": "A Peek for Grant — just because I love you · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-playful-bf54d5549a2f--375x812.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "{\"ts\":\"2026-05-28T03:06:04.626Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-princess-52c72d59c026",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/g/52c72d59c026",
+    "status": 500,
+    "title": "A Peek for Maddie — 9th birthday · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-princess-52c72d59c026--375x812.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "375x812",
+    "msg": "{\"ts\":\"2026-05-28T03:06:08.049Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-toy-bdd1eaf056a2",
+    "vp": "375x812",
+    "url": "https://vnext.peek.gift/g/bdd1eaf056a2",
+    "status": 500,
+    "title": "A Peek for Lyndon — just because · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-toy-bdd1eaf056a2--375x812.png"
+  },
+  {
+    "kind": "step",
+    "step": "landing",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 2325,
+    "bodyPreview": "Skip to main content\n\nPEEK.GIFT\n\nGift giving, made real.\n\nYou build a page for someone you love. They pick. No more guessing, no more gift-card cop-outs, no more Amazon boxes that miss.\n\nMake one\nHow it works\n\nFree to build. $12 to publish ",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/landing--1280x800.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "{\"ts\":\"2026-05-28T03:06:15.362Z\",\"level\":\"error\",\"msg\":\"build_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3377218611\"}"
+  },
+  {
+    "kind": "step",
+    "step": "build-anon",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/build",
+    "status": 500,
+    "title": "peek.gift",
+    "bodyChars": 142,
+    "bodyPreview": "Skip to main content\nBuild session hiccup.\n\nThe build surface tripped. Your draft is saved — retry in a beat.\n\nTry again\nHome\n\nref: 3377218611",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/build-anon--1280x800.png"
+  },
+  {
+    "kind": "step",
+    "step": "signin",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/sign-in",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 174,
+    "bodyPreview": "Skip to main content\n\npeek.gift\n\nMake gift giving real again.\n\nWelcome back\n\nSign in to keep making peeks.\n\nContinue with Google\nor\nEmail\nContinue\nNew here? Create an account",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/signin--1280x800.png"
+  },
+  {
+    "kind": "step",
+    "step": "signup",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/sign-up",
+    "status": 200,
+    "title": "peek.gift",
+    "bodyChars": 229,
+    "bodyPreview": "Skip to main content\n\npeek.gift\n\nMake gift giving real again.\n\nMake it real\n\nCreate an account to start your first peek.\n\nContinue with Google\nor\nFirst name\nLast name\nEmail\nPassword\nCreate account\nAlready have an account? Sign in",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/signup--1280x800.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "{\"ts\":\"2026-05-28T03:06:24.454Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-editorial-c248cd434497",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/g/c248cd434497",
+    "status": 500,
+    "title": "A Peek for Dorothy — 44th birthday · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-editorial-c248cd434497--1280x800.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "{\"ts\":\"2026-05-28T03:06:27.889Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-playful-bf54d5549a2f",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/g/bf54d5549a2f",
+    "status": 500,
+    "title": "A Peek for Grant — just because I love you · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-playful-bf54d5549a2f--1280x800.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "{\"ts\":\"2026-05-28T03:06:31.483Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-princess-52c72d59c026",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/g/52c72d59c026",
+    "status": 500,
+    "title": "A Peek for Maddie — 9th birthday · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-princess-52c72d59c026--1280x800.png"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Failed to load resource: the server responded with a status of 500 ()"
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error."
+  },
+  {
+    "kind": "console.error",
+    "vp": "1280x800",
+    "msg": "{\"ts\":\"2026-05-28T03:06:34.964Z\",\"level\":\"error\",\"msg\":\"recipient_segment_error\",\"message\":\"An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.\",\"digest\":\"3668081153\"}"
+  },
+  {
+    "kind": "step",
+    "step": "peek-toy-bdd1eaf056a2",
+    "vp": "1280x800",
+    "url": "https://vnext.peek.gift/g/bdd1eaf056a2",
+    "status": 500,
+    "title": "A Peek for Lyndon — just because · peek.gift",
+    "bodyChars": 165,
+    "bodyPreview": "Skip to main content\nWe couldn't open this Peek.\n\nThe link works, but something hiccuped while loading it. Try again in a moment.\n\nTry again\nGo home\n\nref: 3668081153",
+    "file": "/home/user/grook-peekgift/.claude/worktrees/agent-ae45af1554e0f97d4/atelier/tests/e2e/screenshots/post-batch-deploy/peek-toy-bdd1eaf056a2--1280x800.png"
+  }
+]
