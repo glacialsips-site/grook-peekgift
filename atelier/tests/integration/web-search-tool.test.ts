@@ -324,11 +324,6 @@ describe('chat loop handles server_tool_use / web_search_tool_result blocks', ()
   });
 
   it('handles web_search unavailable error_code without crashing the chat loop', async () => {
-    // FRANK-ACTION: until web search is enabled at platform.claude.com →
-    // Settings → Privacy, Anthropic returns this error shape verbatim. The
-    // chat loop must NOT throw — the model should be free to text-reply
-    // ("I can't pull product info right now — got a link?") and the turn
-    // ends cleanly.
     await import('@/lib/anthropic/tools/bootstrap');
     const { chatTurn } = await import('@/lib/anthropic/chat');
 
@@ -384,8 +379,6 @@ describe('chat loop handles server_tool_use / web_search_tool_result blocks', ()
     expect(err.type).toBe('web_search_tool_result_error');
     expect(err.error_code).toBe('unavailable');
 
-    // Trailing graceful text from the model is preserved so the curator sees
-    // a clean fallback message in the chat surface.
     const trailingText = content.find((b) => b.type === 'text') as
       | Anthropic.TextBlock
       | undefined;

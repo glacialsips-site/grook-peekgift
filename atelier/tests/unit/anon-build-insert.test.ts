@@ -1,21 +1,3 @@
-/**
- * Regression test for the anonymous /build 500 bug.
- *
- * Before the fix, `app/build/page.tsx` called `ensureAnonSessionId()` which
- * invoked `cookies().set(...)` from within a Server Component. Next.js 16
- * forbids cookie writes during Server Component rendering, so the route threw
- * before reaching the Supabase insert. Result: every anon curator hitting
- * `/build` got a 500 (digest 3377218611). 0 of 26 production peeks had
- * `curator_id IS NULL`, confirming the insert path was completely broken.
- *
- * The fix moved cookie minting to `proxy.ts` middleware (which can write
- * cookies legally) and switched the SC to a read-only `readAnonSessionId()`.
- *
- * This test exercises the post-fix code path: simulate middleware having
- * already minted the anon-session cookie, render the Server Component, and
- * assert the anon peek insert succeeds and `redirect()` is called with the
- * new peek id.
- */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 interface CapturedInsert {

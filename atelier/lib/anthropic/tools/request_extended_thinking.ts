@@ -46,7 +46,6 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
-    // W09 from BUGS-WAVE2: structured invalid_input envelope.
     try {
       InputSchema.parse(input);
     } catch (err) {
