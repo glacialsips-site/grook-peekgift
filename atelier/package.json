@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx db/migrate.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "proof:render": "tsx scripts/render-vibe-proof.tsx"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

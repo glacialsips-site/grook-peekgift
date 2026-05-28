@@ -39,5 +39,37 @@ export default [
       '@typescript-eslint/consistent-type-imports': 'off',
       'no-console': 'off'
     }
+  },
+  {
+    // MOAT GUARDRAIL (STACK-LOCK #2): the slug renderer must paint ONLY from
+    // `var(--vibe-*)`. Ban literal color strings (hex / numeric rgb()/hsl())
+    // in renderer components at lint time. `hsl(var(--…))` is allowed — it
+    // carries no literal hue. The CSS module is covered by the companion
+    // lint-test `tests/unit/renderer-vars-only.test.ts`.
+    files: ['components/renderer/**/*.tsx', 'components/renderer/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+          message:
+            'Renderer must use var(--vibe-*) for color, not a hex literal (STACK-LOCK guardrail #2).'
+        },
+        {
+          selector:
+            "Literal[value=/\\b(?:rgb|rgba|hsl|hsla)\\(\\s*[0-9.]/]",
+          message:
+            'Renderer must use var(--vibe-*) for color, not a numeric rgb()/hsl() literal (STACK-LOCK guardrail #2).'
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]",
+          message:
+            'Renderer must use var(--vibe-*) for color, not a hex literal in a template string (STACK-LOCK guardrail #2).'
+        }
+      ]
+    }
   }
 ];
