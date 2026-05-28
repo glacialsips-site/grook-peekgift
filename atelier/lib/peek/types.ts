@@ -139,23 +139,16 @@ export type PeekDraft = {
   variantGroups: VariantGroup[];
 };
 
-export const DEFAULT_VIBE: Vibe = {
-  tone: 'warm, open, unhurried',
-  palette: {
-    bg: '#F7F4EE',
-    surface: '#ECE7DD',
-    ink: '#1F1B16',
-    accent: '#7C6A58',
-    accent2: '#C7B299',
-  },
-  mood_words: ['warm', 'open', 'unhurried'],
-  motion: 'soft',
-  font_pairing: { display: 'Fraunces', body: 'Inter' },
-  typography: { heading: 'serif', body: 'sans' },
-  density: 'cozy',
-  shape: 'soft',
-  mood: 'minimal',
-};
+// Vivid default vibe lives in `lib/vibe/defaults.ts` (the brand-new-peek
+// starting point — warm cream / deep indigo / saffron). Re-exported here so
+// every legacy `import { DEFAULT_VIBE } from '@/lib/peek/types'` callsite
+// keeps working.
+export {
+  DEFAULT_VIBE,
+  applyDefaultVibe,
+  isDefaultVibe,
+  makeVibe,
+} from '@/lib/vibe/defaults';
 
 export type ChatMessageImage = {
   url: string;
