@@ -5,7 +5,6 @@ import { getBytes } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
-// Returns the OG image bytes for a peek by slug. Generates lazily on miss.
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
   const peek = await q1opt<{ id: string }>(

@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 4% 38%;
+
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+
+  --radius: 0.75rem;
+
+  --peek-bg: 0 0% 100%;
+  --peek-surface: 240 4.8% 97%;
+  --peek-ink: 240 10% 3.9%;
+  --peek-accent: 24 95% 53%;
+  --peek-accent2: 280 65% 60%;
+
+  --peek-font-heading: var(--font-sans), system-ui, sans-serif;
+  --peek-font-body: var(--font-sans), system-ui, sans-serif;
+  --peek-radius: 12px;
+  --peek-radius-sm: 8px;
+  --peek-radius-lg: 16px;
+  --peek-space-1: 0.25rem;
+  --peek-space-2: 0.5rem;
+  --peek-space-3: 0.75rem;
+  --peek-space-4: 1rem;
+  --peek-space-5: 1.25rem;
+  --peek-space-6: 1.5rem;
+  --peek-space-8: 2rem;
+
+  --vibe-bg: 0 0% 100%;
+  --vibe-surface: 240 4.8% 97%;
+  --vibe-ink: 240 10% 3.9%;
+  --vibe-accent: 24 95% 53%;
+  --vibe-accent2: 280 65% 60%;
+  --vibe-muted: 240 4.8% 95.9%;
+  --vibe-type-display: var(--font-sans), system-ui, sans-serif;
+  --vibe-type-body: var(--font-sans), system-ui, sans-serif;
+  --vibe-type-mono: "JetBrains Mono", ui-monospace, monospace;
+  --vibe-radius-card: 12px;
+  --vibe-radius-button: 12px;
+  --vibe-space-base: 1rem;
+  --vibe-space-gap: 1;
+  --vibe-motion-scale: 1;
+
+  --state-error: 0 84% 55%;
+  --state-error-ink: 0 0% 100%;
+  --state-warning: 38 92% 50%;
+  --state-warning-ink: 38 35% 12%;
+  --state-success: 142 71% 38%;
+  --state-success-ink: 0 0% 100%;
+  --state-info: 215 90% 55%;
+  --state-info-ink: 0 0% 100%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 6% 72%;
+
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+
+  --peek-bg: 240 10% 3.9%;
+  --peek-surface: 240 6% 8%;
+  --peek-ink: 0 0% 98%;
+  --peek-accent: 24 95% 53%;
+  --peek-accent2: 280 65% 60%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-peek-bg: hsl(var(--peek-bg));
+  --color-peek-surface: hsl(var(--peek-surface));
+  --color-peek-ink: hsl(var(--peek-ink));
+  --color-peek-accent: hsl(var(--peek-accent));
+  --color-peek-accent2: hsl(var(--peek-accent2));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+}
+
+.peek-vibe {
+  font-family: var(--peek-font-body);
+}
+.peek-vibe h1,
+.peek-vibe h2,
+.peek-vibe h3,
+.peek-vibe .peek-heading {
+  font-family: var(--peek-font-heading);
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  :root {
+    font-size: 17px;
+  }
+  @media (min-width: 768px) {
+    :root {
+      font-size: 16px;
+    }
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  @media (min-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 0.875rem;
+    }
+  }
+  :where(button, a, input, textarea, select, [role='button']):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

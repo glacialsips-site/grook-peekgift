@@ -1,0 +1,323 @@
+# peek/share-mechanics
+
+Reference for how a peek travels from the moment a curator publishes it to the moment a recipient opens the link, and the moment a recipient (or curator) pushes the peek outward to social. This skill loads into Peek's context after publish (when `thread_phase === 'post-publish'`) so that Peek can route the curator to the right channel without having to be told twice. It is also the canonical reference for downstream packets that build the share-pack pipeline, the OG card renderer, the recipient reaction loop, and (Tier 2) the social-outbound adapter.
+
+For inventory cross-refs see `CAPABILITY_INVENTORY.md` §A12 (Batch API), §E11 (Inngest), §E1 (Resend), §E2 (Twilio), §F3 (MediaRecorder), §G11 (Ayrshare/Buffer). For component-state-of-the-world see `CONCEPT-INVENTORY.md` §3. For Frank's design intent on the share moment see `BRAIN-DUMP.md` "the site itself becomes the surprise."
+
+---
+
+## 1. The share-pack concept
+
+When a peek publishes — that is, when the curator confirms checkout and the Stripe `payment_intent.succeeded` webhook flips peek status to `published` — a single Inngest event fires (`peek.published`) that fans out share-pack generation. The fan-out invokes the Anthropic Batch API in a single batch with seven jobs in parallel:
+
+1. **OG card** (1200×630 PNG) — for unfurls in iMessage, WhatsApp, Slack, X, FB.
+2. **IG Story image** (1080×1920 PNG) — vertical, kinetic.
+3. **X / Twitter post** (1024×512 PNG + 280-char text body).
+4. **FB post** (1200×1200 square PNG + longer copy body).
+5. **WhatsApp message** (text-only string + URL; OG handles visual).
+6. **SMS / iMessage message** (text-only string + URL; OG handles visual).
+7. **Email body** (Resend React-Email template: subject + preheader + body + CTA).
+
+The Batch API is the right surface here because share-pack generation is bounded, parallel, latency-tolerant (we have ~minutes, not seconds, before the curator looks at the share sheet — the share sheet itself can render with placeholders, then swap in batch results as they land), and 50% cheaper per the published pricing. See `CAPABILITY_INVENTORY.md §A12`. The fan-out is wrapped in an Inngest function so retries, timeouts, and concurrency limits are policed there rather than rolled into the route handler. See `CAPABILITY_INVENTORY.md §E11`.
+
+Each variant is pre-composed with:
+
+- **Recipient first name** (defaults to "you" if not yet set per the existing `cinematic-reveal.tsx` fallback)
+- **Occasion noun** (birthday, anniversary, wedding, just-because, milestone-bday — drawn from the slug model)
+- **Hero thumbnail** (re-hosted Supabase Storage URL; never the original fal.ai URL — those expire; see packet 22 for the re-host pipeline)
+- **Peek URL** (`{APP_URL}/g/{slug}` — `APP_URL` is the only thing that changes at cutover per `CUTOVER.md`)
+- **Curator first name** (Clerk display name, never legal name, never billing name)
+
+Once all seven jobs land, the share-pack is persisted in a new table (proposed: `peek_share_packs`, keyed by `peek_id`, with one row per variant). The share-sheet UI (`atelier/components/build/share-sheet.tsx`) reads from this table — it already has placeholders for the OG image; the platform variants slot in below.
+
+Per the Curator Prompt, when a curator returns to `/build/{peek_id}` post-publish, Peek's mode shifts: don't build new stuff, show them the share sheet, offer `share_pack_generate` variants. The tool `share_pack_generate` (per `TOOL_MANIFEST.md` future spec) is what surfaces a specific variant on demand when the curator says "give me the Instagram one" — the share-pack is already generated; this tool just routes the right artifact into the chat surface.
+
+**Idempotency rule:** if `share_pack_generate` is called and the row already exists, return the existing artifact. Never regenerate. Generation is a one-shot at publish-time; on-demand calls just retrieve. (Variant regeneration is a Tier 2 power-curator feature behind an explicit "regenerate with a different vibe" affordance.)
+
+---
+
+## 2. Per-platform copy/visual specs
+
+Each platform demands different framing. The Batch API jobs each get a tailored prompt block; the output schema is fixed (image + alt + body text + CTA URL) but the prompt shape varies.
+
+### OG card — 1200×630
+
+The unfurl card. This is what appears when the recipient receives the URL in iMessage, WhatsApp, Slack, X, FB Messenger, Discord, Signal, or any modern messaging client that respects Open Graph metadata. **It is the bait.** The recipient sees this card before they tap; if it doesn't make them want to tap, the peek doesn't get opened.
+
+**Rules:**
+- Big hero image (the same one that's on the recipient page, cropped/recomposed for 1.91:1).
+- Recipient first name in display type, lower-third or centered depending on hero composition.
+- Occasion noun rendered in smaller weight ("birthday", "anniversary", "wedding").
+- **NO peek.gift branding visible anywhere on the card.** The curator's brand is the curator. Peek is the rails. If the recipient sees "peek.gift" before they tap, they know it's not just from the curator — that punctures the surprise. The product mantra: the site itself is the surprise.
+- Curator name OPTIONAL on the card. Default OFF for occasions where the surprise lands harder anonymous (princess-bday, just-because, romantic milestones); default ON for occasions where attribution is the point (wedding, retirement, condolence).
+- Existing implementation: `atelier/app/g/[slug]/opengraph-image.tsx` already renders an OG card. The share-pack pipeline should pull from there for the OG variant rather than duplicating logic; the only enhancement is per-variant cropping and occasion-aware composition.
+
+**Text length cap:** 30 characters for the recipient-name line; 20 chars for the occasion line. Longer names wrap to a smaller display size; the Batch API job should produce three composition candidates at 32px / 48px / 72px and pick the largest that fits.
+
+**Format:** PNG with transparency disabled (some unfurl renderers garble alpha). Quality 85 JPEG fallback if file size exceeds 1 MB. Hard cap 2 MB per Open Graph spec.
+
+### IG Story image — 1080×1920
+
+Vertical, full-bleed, kinetic. Instagram Stories autoplay for 5-7 seconds before the next story; the curator's audience scrolls fast. This card needs to stop them, make them tap-and-hold to slow it down, and tap to swipe to the peek.
+
+**Composition (top to bottom):**
+- Top third: hero image, cropped to 1080×640, soft gradient fade to vibe-bg at the bottom edge.
+- Middle third: recipient name in display type (Cinzel / Cormorant / Playfair per vibe), centered. Below the name in smaller weight: the occasion noun.
+- Lower third: a tap-cue ("open me" or "tap to see" or "swipe up" — occasion-aware) in vibe-accent color. For occasions where the surprise lands warmer (wedding, anniversary), use "open" not "tap to see." For loud occasions (bachelorette, milestone-bday), "TAP" in display caps is on-brand.
+- A single Lottie accent in the middle margin where it doesn't compete with the name. Princess-bday: a single sparkle that twinkles. Bachelorette: a single confetti pop. Wedding: a single petal drift. Defer Lottie integration to Tier 1 (see `CAPABILITY_INVENTORY.md §G15`); for v0 the IG variant is static.
+
+**Text length cap:** 20 characters for recipient name (IG cuts off harder than OG at this aspect); 12 chars for tap-cue.
+
+**Sharing flow:** the curator either downloads the PNG and posts it manually via the IG Stories upload flow, or — at Tier 2 — `share_pack_generate` posts directly via Ayrshare/Buffer (see §6).
+
+### X / Twitter post — 1024×512 image + 280-char text
+
+Punchy, occasion-aware. X rewards brevity and a clean image-text pair.
+
+**Image:** 1024×512, same hero crop as OG but recomposed wider. Recipient name + occasion in left-third, hero in right two-thirds. X cards are read left-to-right; the human-readable text MUST be in the first eye-track.
+
+**Text body** (the tweet itself, 280 chars max):
+- For warm occasions: "made a thing for [name]. [URL]"
+- For loud occasions: "[curator name] told me to keep it brief. happy birthday [name]. [URL]" — irreverent + occasion-aware.
+- For sentimental (anniversary, wedding): "5 years today. [URL]" — let the URL unfurl do the work.
+- Hashtag policy: NO hashtags. Hashtags read as marketing; we're going for personal. Exception: if the curator explicitly asks ("can you put #weddingseason in there?"), allow it but never default.
+- @-mentions: only if the recipient has a public X handle the curator provides. Never guess.
+
+**Length cap:** 200 chars target, 280 hard. The URL counts as ~23 chars on X (their auto-shortener). Leave room.
+
+### FB post — 1200×1200 square + longer copy
+
+Facebook skews older. Audience is parents, aunts, grandparents, college friends from before the internet was weird. Copy can run longer; the tone is more sentimental.
+
+**Image:** 1200×1200 square. Same hero crop as OG but at 1:1. Recipient name and occasion in lower-third overlay, lighter touch than IG Story.
+
+**Text body:** 300-600 chars. Three-sentence shape: opener (sets the moment), middle (one detail about the recipient — pulled from the curator's note if available, else from the occasion), CTA (the URL with one line of framing).
+
+**Example for milestone-bday:**
+> 50 trips around the sun for my best friend. Made you something nobody else can give. [URL]
+
+**Example for wedding:**
+> They asked us to share something instead of buying off a list. So we made this. [URL]
+
+FB Open Graph respects the OG card from the URL — so technically the in-post image and the unfurl are redundant. We surface both for control: the in-post image is what shows in the FB feed grid; the OG unfurl is what shows when someone clicks through to the post. Both should feel consistent but not identical.
+
+### WhatsApp / iMessage / SMS
+
+Text-only. The OG card does the visual lifting — both WhatsApp and iMessage render rich previews from URLs that include OG metadata.
+
+**Message body shape:**
+- Greeting (optional, per occasion): "hey" / "happy birthday" / "(no greeting)"
+- One line of framing: "made you something for your birthday" / "thought of you today"
+- The URL on its own line: `https://peek.gift/g/[slug]`
+
+**Length cap:** 160 chars target for SMS (single segment), 250 hard (two-segment penalty). WhatsApp and iMessage have no practical cap but should still be brief — the recipient reads on a lock-screen notification first.
+
+**Tone calibration:** matches occasion + curator voice. The Batch API job gets the occasion + curator's note (if set) + the recipient name; output is a single message string.
+
+**Existing implementation:** the share-sheet (`share-sheet.tsx` L98-109 `platformLinks()`) already generates the `sms:` / `https://wa.me/` intent URLs with the message body pre-encoded. The share-pack just replaces the boilerplate "I made a Peek for [name]" text with the variant the Batch API produced.
+
+**Note on intent URLs vs API send:** the share-sheet has TWO paths for SMS/email:
+1. Intent URL (`sms:?body=…`) — opens the user's native SMS app. No server involvement. Free, no Twilio cost.
+2. API send (`/api/share/send` → Twilio/Resend) — curator types recipient phone/email, server sends.
+
+Both are wired today. The share-pack body is the SAME text for both paths — the variant is whatever the Batch API produced. For SMS the API send path has a TODO per BUGS M04 (double-count); the share-pack pipeline should NOT introduce a new analytics fire for these — see §7.
+
+### Email — Resend template
+
+The email body is rendered by `lib/email/templates/peek-share-message.tsx` (existing React-Email template). The share-pack variant supplies:
+
+- **Subject line** (40-60 chars, occasion-aware)
+- **Preheader** (90-110 chars, the inbox preview snippet)
+- **Body text** (HTML-safe markdown, runs through the React-Email body slot)
+- **CTA button label** ("Open your Peek" / "Tap to see" / "See what they made for you")
+
+**Subject examples:**
+- Princess-bday (to parent): "I made something for Mia's birthday"
+- Wedding: "We made something for your wedding"
+- Just-because: "Thinking of you"
+- Milestone-bday: "Happy 50th, you absolute legend"
+
+**Preheader examples:**
+- "Open before the party so you have time to pick what you want."
+- "Tap when you've got a quiet minute — there's a personal note inside."
+
+**Body shape:** 2-4 sentences. Same framing rules as FB but slightly more formal because email tolerates it. The CTA button is the primary action; the URL appears once in the body as a fallback link for plaintext clients.
+
+---
+
+## 3. Share-channel suggestions by occasion
+
+The Curator Prompt instructs Peek to "make a move" — including suggesting how to send the link. Each occasion has a default channel mix that Peek proposes in the share sheet (and pre-highlights in the UI). These are defaults, not constraints; the curator can pick any combination.
+
+| Occasion | Default channels (in order of prominence) | Why |
+|---|---|---|
+| **Wedding** | Email + WhatsApp | Intimate, often international guests. Email preserves the moment in their inbox; WhatsApp is how families coordinate. |
+| **Bachelorette** | IG Story + group SMS | Loud, social, the whole point is the friend group sees it. IG Story for the public photo dump, group SMS for the in-jokes. |
+| **Milestone-bday** (40th/50th/60th) | FB + Email | Older skew, FB is still where this generation lives. Email for the relatives who don't FB. |
+| **Princess-bday** | WhatsApp/iMessage to parent + Email backup | Intimate family content. NEVER default to social channels — the recipient is a child, parents control the surface. See `occasion-templates/princess-bday.md` §"Share-pack defaults." |
+| **Just-because** | iMessage / WhatsApp (one-to-one) | The whole vibe is intimacy. One-to-one only, no broadcast. |
+| **Anniversary** | iMessage + Email | Romantic occasions skew one-to-one. Email as the keepsake; iMessage as the moment. |
+| **Graduation** | IG Story + Email + group SMS | Public pride + family inboxes + friend group. Wide net. |
+| **Holiday (Christmas/Hanukkah)** | Email + WhatsApp | Family-coordinated. Email for the elders, WhatsApp for the cousin chat. |
+| **Condolence** | Email only | Solemn. Never social. The share sheet should HIDE the social row entirely for condolence occasions. |
+| **Retirement** | FB + Email | Boomer-coded surface. |
+| **Baby shower** | WhatsApp + email + IG Story | Family + close friends + the "look what they got" social proof. |
+| **Teen birthday/grad** | iMessage + IG Story + group SMS | They live on phones. Email gets ignored. |
+
+The share-sheet UI should respect this via per-occasion presets — when Peek opens the share sheet for a condolence peek, the X / FB / IG row is hidden. When it opens for a bachelorette peek, IG Story is the lead button.
+
+Per the Curator Prompt §"After publish": Peek does not push social channels unprompted on intimate occasions. The defaults are silent unless the curator brings it up.
+
+---
+
+## 4. The recipient-side reaction capture loop
+
+When the recipient hits the peek URL, the cinematic reveal plays (see `reveal-mechanics.md`). On reveal completion, after the cards become interactive, a soft prompt surfaces:
+
+> "Record your reaction back to [curator first name]? (15 sec)"
+
+The prompt is a non-blocking sheet that slides up from the bottom on mobile and appears as a corner card on desktop. Two buttons: "Record" and "Maybe later." Maybe-later dismisses for the session; if the recipient comes back to the page (which they often will, to make picks), the prompt resurfaces ONCE more after a 30-second idle, then never again.
+
+**The capture flow:**
+
+1. Recipient taps Record. Browser requests camera+mic permission via MediaRecorder API (free; see `CAPABILITY_INVENTORY.md §F3`).
+2. Consent toast: "We'll send a 15-sec video back to [curator first name]. Heads up — they'll see and hear you." Explicit accept required.
+3. Live preview shows in a small floating window during capture.
+4. 15-second cap (hard stop). Visual countdown in the preview corner.
+5. Recipient can re-record or send.
+6. On send: blob uploads to Supabase Storage bucket `peek-v2-assets/reactions/{peek_id}/{recipient_session_id}.webm`. See `CAPABILITY_INVENTORY.md §D4`.
+7. Server generates a signed CDN URL (Supabase Storage signed URLs, 7-day expiry; refresh via cron if needed for longer retention).
+8. The signed URL gets written to `peeks.recipient_reaction_url` (proposed column; see schema additions below).
+9. Notification fires to the curator via Resend (transactional email) AND in-app notification (Realtime broadcast if curator is connected; queued for next dashboard view if not). The email contains the embedded reaction video using the React-Email video-poster pattern (most mail clients won't play inline; the email is a teaser, the dashboard is where the video plays).
+10. Reaction video becomes embedded in the post-publish curator dashboard at `/build/{peek_id}` — when the curator returns to view their peek, the reaction is the hero of that view, not the share sheet.
+
+**Schema additions** (cross-ref to a future migration packet):
+- `peeks.recipient_reaction_url` (text, nullable)
+- `peeks.recipient_reaction_uploaded_at` (timestamptz, nullable)
+- `peeks.recipient_reaction_consent_disabled` (boolean, default false) — curator can disable the prompt entirely from peek settings if the occasion is sensitive
+
+**Privacy rules:**
+- Explicit consent toast before capture. The recipient must accept; no implicit recording.
+- The recipient knows the curator will see and hear them. State it plainly.
+- Recipient can delete the reaction after sending (within 30 minutes) — link in the reveal-complete sheet.
+- Curator can disable the reaction prompt on peeks where it's inappropriate (condolence — default DISABLED; princess-bday with adult recipient i.e. parent — keep enabled).
+- Reactions are NEVER shared outside the curator dashboard. No re-sharing affordance for the curator on v0; that's a Tier 2 feature with explicit recipient re-consent required.
+
+**Tier 2 upgrade path:** longer reactions (30s, 60s, 2min) require migrating storage from Supabase Storage to a real video host — Mux / Cloudflare Stream / Bunny per `CAPABILITY_INVENTORY.md §F5`. Bunny is cheapest. Defer until usage data shows reactions are a sticky feature.
+
+---
+
+## 5. Sharing AS the recipient
+
+After the recipient makes picks, they often want to share the page outward — "look what they got me." This is a separate share affordance from the curator-side share-sheet; the recipient never sees the curator share-sheet at all. Instead, on the recipient page (`/g/[slug]`), after picks complete, a small "share this back" button appears in the corner.
+
+The share-back surface is intentionally minimal:
+- **Native share** (browser `navigator.share`) — invokes the OS-level share sheet. iOS / Android handle it natively; desktop falls back to copy-link.
+- **Copy link** as fallback.
+- That's it. No platform-specific buttons. The point is: if the recipient wants to share back, they share back. We don't push them.
+
+The shared URL is the SAME `/g/[slug]` URL. The OG card is the SAME OG card. Re-uses the existing infrastructure entirely.
+
+**Why intentionally minimal:** the curator's share moment is a curated funnel (six platform variants, per-occasion defaults, recipient name pre-filled). The recipient's share moment is an afterthought to the gift itself. We optimize for the curator's outbound, not the recipient's. If a recipient wants to post the page to their IG Story, they screenshot it — we don't need to build an IG Story variant for the recipient side.
+
+PostHog event: `recipient_share_initiated` (with `peek_id`, `share_method` of `native` / `copy`). Fires client-only.
+
+---
+
+## 6. Outbound social to curator's own channels (Tier 2)
+
+Per `CAPABILITY_INVENTORY.md §G11` and `CONCEPT-INVENTORY.md §3`, Ayrshare and Buffer are absent from the codebase today. Packet 27 was drafted as "Social outbound: Ayrshare/Buffer adapter + generated reels job" but never built.
+
+When this lands (Tier 2, behind feature flag `social_outbound_enabled`):
+
+**Adapter shape:**
+- `lib/social/ayrshare.ts` — wraps Ayrshare's POST `/api/post` endpoint. Supports IG Story image, IG feed post, Pinterest pin, TikTok (image carousel only; TikTok native posting from API is restricted — TikTok variant defaults to file download for manual post).
+- `lib/social/buffer.ts` — wraps Buffer's GraphQL queueing. Supports same surface as Ayrshare. Buffer is cheaper at scale ($29/mo vs $49/mo); Ayrshare has better TikTok/IG Story support.
+- Recommendation: pick one for v0. Lean Ayrshare for the IG Story support unless cost is the dealbreaker.
+
+**Tool: `share_to_social`** (proposed for `TOOL_MANIFEST.md` Tier 2):
+- Curator says "post this to my Instagram story" in chat.
+- Peek calls `share_to_social({ peek_id, platform: 'instagram_story', confirm: true })`.
+- Confirmation modal appears: "Posting to @[handle] on Instagram. Confirm?"
+- On confirm, tool posts via Ayrshare. Result returned to chat.
+
+**Hard rules:**
+- NEVER auto-post anywhere without explicit curator confirmation. The confirm step is non-skippable.
+- NEVER auto-post on publish. The share-pack is GENERATED on publish; outbound to socials is always curator-initiated.
+- Curator must connect the social account via Ayrshare's hosted OAuth flow before this surface is usable. Connection lives in curator settings page; one-time per platform.
+
+**Pinterest specifics:** Pinterest API allows direct pin creation. The pin image is the OG card (1200×630 reshaped for Pinterest 2:3 ratio — should be 1000×1500 ideally; pin-specific variant added to the share-pack batch if Pinterest connector active). Board: curator picks at post time or sets a default ("Gifts I made") in settings.
+
+**Outbound to creator's blog / Substack / newsletter:** Tier 3. RSS-style export of "peeks I've made" for power-curators with creator brands.
+
+---
+
+## 7. Share analytics
+
+PostHog events fire on every share interaction. The current implementation has BUGS M04 carried over: `share_initiated` fires BOTH client-side (in `share-sheet.tsx` L72-78) AND server-side (in `app/api/share/send/route.tsx` L64-70) for SMS/email — double-counting in PostHog. Other channels (copy, native, twitter, facebook, whatsapp, imessage, email-intent) fire client-only.
+
+**Resolution per BUGS M04:** pick one side. **Recommendation: client-only fire for all channels.** Rationale:
+- Consistency. Right now SMS/email are special-cased; all others fire client-only. Unifying to client-only removes the special case.
+- Client-side fire captures the user's intent (they clicked the button); server-side fire captures the side-effect outcome (the message actually sent). Different events. The current code conflates them by firing `share_initiated` on the server when the API send succeeds — but the user already initiated the share when they clicked submit. Move that server-side event to a distinct name (`share_send_completed`) or kill it.
+- Client-only fire works even when the API send is via intent URL (no server involvement). Server-side fire only works for the `/api/share/send` path. Client-only is the union.
+
+**Proposed event shape (post-fix):**
+
+| Event | Where fired | Properties | Why |
+|---|---|---|---|
+| `share_initiated` | Client | `peek_id`, `channel` (copy/native/twitter/facebook/whatsapp/imessage/email/sms/email-form), `occasion` | Curator clicked a share affordance |
+| `share_completed` | Client (after API confirms for sms/email; immediately for intent URLs) | `peek_id`, `channel`, `outcome` (sent/failed/cancelled) | The share attempt resolved |
+| `share_pack_generated` | Server (Inngest fn) | `peek_id`, `variants_generated` (count), `duration_ms` | Telemetry for the Batch API pipeline |
+| `recipient_share_initiated` | Client (recipient page) | `peek_id`, `share_method` (native/copy) | Recipient share-back |
+| `recipient_reaction_recorded` | Client (recipient page, after upload completes) | `peek_id`, `duration_sec` | Recipient sent a reaction video |
+| `curator_viewed_reaction` | Client (dashboard) | `peek_id` | Curator opened the reaction video |
+
+These map to the PostHog convention used throughout the rest of the app (snake_case, peek_id always present, user_id implicit from PostHog identify call).
+
+**Funnel of interest** (for the dashboard, post-launch):
+1. `peek_published` → `share_initiated` (any channel) → `share_completed` → recipient hits `/g/[slug]` → `cinematic_reveal_completed` → `recipient_reaction_recorded`
+
+Each step is an opportunity to instrument retention and recovery.
+
+---
+
+## 8. Anti-patterns
+
+Hard rules. These are not preferences; they are product-defining constraints. Worker packets that violate any of these are bugs.
+
+1. **Don't auto-post anywhere without explicit curator confirmation.** Tier 2 social outbound (Ayrshare) is always a tool call gated by a confirm modal. The Batch API generates the share-pack on publish, but it does NOT post anywhere. Generation ≠ distribution.
+
+2. **Don't generate share-pack if the peek hasn't been paid for yet.** The `peek.published` Inngest event fires only when `peeks.status = 'published'`, which is only set when the Stripe webhook (or test-coupon path) confirms payment. Workers building share-pack adjacent features MUST gate on `status === 'published'`. Pre-publish peeks have NO share-pack and should not appear in any share UI.
+
+3. **Don't ever include the curator's billing info in any share copy.** The Batch API prompt SHOULD NOT have access to billing-related context. The slug model passes recipient name, occasion, hero, note, cards, vibe — that's it. Stripe-side data stays Stripe-side.
+
+4. **Don't show peek.gift branding on the OG card or in-platform variants.** The curator is the sender. Peek is the rails. Branding the surface punctures the surprise. (The footer of the recipient page is exempt — there we have a tiny "made with peek.gift" link, but the OG / IG / X / FB variants are unbranded.)
+
+5. **Don't fire `share_initiated` from both client and server.** Pick one side (client). Per BUGS M04 resolution.
+
+6. **Don't push social channels unprompted on intimate occasions.** The share-sheet defaults respect occasion. Condolence hides social entirely. Princess-bday defaults to family-channel only.
+
+7. **Don't record recipient reactions without explicit consent.** Consent toast is non-skippable. Curator can disable. Reaction is never shared outside the curator dashboard without recipient re-consent.
+
+8. **Don't regenerate the share-pack on every dashboard load.** Generation is one-shot at publish. On-demand calls retrieve existing artifacts. Regeneration is a Tier 2 feature behind an explicit affordance.
+
+9. **Don't use original fal.ai URLs in the share-pack.** Those expire. Use the re-hosted Supabase Storage URLs only (packet 22 pipeline). The OG card and variants must reference stable URLs.
+
+10. **Don't generate platform variants for platforms the curator can't post to.** If Tier 2 social outbound is off (feature flag), still generate the variants — they're useful for manual download. But don't surface platform-specific buttons that pretend the curator can post directly when they can't.
+
+11. **Don't send the curator's reaction-notification email more than once per recipient session.** If the recipient records, deletes, re-records, deletes, re-records — the curator gets ONE email, when the recipient finally settles. Use a 5-minute debounce window. Subsequent reactions update the dashboard silently.
+
+12. **Don't let the share-sheet's intent URLs go through Twilio/Resend.** The `sms:` and `mailto:` URLs are NATIVE — they invoke the user's own SMS app and mail client. They cost us nothing. The `/api/share/send` path is the API-mediated path with Twilio/Resend costs. Both must coexist; the share-sheet UI presents them as parallel options and the user picks.
+
+---
+
+## Cross-references
+
+- Curator behavior post-publish: see `CURATOR_PROMPT.md` "After publish" section.
+- Inventory of what's wired vs net-new: see `CAPABILITY_INVENTORY.md` §A12 (Batch), §E11 (Inngest), §E1 (Resend), §E2 (Twilio), §F3 (MediaRecorder), §G11 (Ayrshare/Buffer).
+- What's actually in the code today: see `CONCEPT-INVENTORY.md` §3 (Social media).
+- Bugs that carry into this skill: BUGS M04 (double-count), plus Inngest already wired per packet 26.
+- Concept: see `CONCEPT-V2.md` §9 (Social media tie-in) and §10 (Success metric — checkout is the bookend; share-pack is the next moment after).
+- Brain dump: `BRAIN-DUMP.md` "the site itself becomes the surprise" + the social-media-aspect-deferred note.
+- Recipient reveal flow that feeds into reaction-capture: see `reveal-mechanics.md` §9.
+- Per-occasion overrides: see `occasion-templates/*.md` for share-channel defaults per occasion.

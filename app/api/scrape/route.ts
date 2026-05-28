@@ -4,9 +4,6 @@ import { safeAuth as auth } from '@/lib/clerk-safe';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// Pull title, image, price from an arbitrary URL.
-// Strategy: cheap HTML fetch first; if it looks blocked/empty, fall back to ZenRows.
-// Browserbase is the heavyweight fallback but we skip it here for speed — wire later if needed.
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return new Response('unauthorized', { status: 401 });
@@ -76,7 +73,6 @@ function parseHtml(html: string, url: string): Scraped {
     if (!isNaN(num)) out.price_cents = Math.round(num * 100);
   }
   out.retailer = pickMeta(html, ['og:site_name']) || hostnameOf(url);
-  // Resolve relative image URLs
   if (out.image_url && !/^https?:\/\//.test(out.image_url)) {
     try {
       out.image_url = new URL(out.image_url, url).toString();

@@ -1,0 +1,467 @@
+# peek/rules-engine-patterns
+
+## When this skill applies
+
+Always loaded as part of the common skills bundle. The rules engine is the genuinely novel core of peek.gift — what differentiates this from a wishlist, a registry, or a gift-card-with-handwriting. The rest of the product surface (chat, hero, vibe, cards) could be cloned by anyone with an Anthropic key and a weekend. The rules engine is the thing.
+
+Read this when you're about to add a card, before you propose a card mix, or when the curator asks "how does this work for the person getting it." This document is the catalog of patterns Peek can apply, the language for proposing them to a curator, and the server-side reality of what the schema actually enforces today.
+
+---
+
+## 1. The rules engine in one paragraph
+
+The sender (curator) sets the rules. The recipient picks within them. Constraint types are first-class data in the schema, not chat-improvised text — meaning the recipient page enforces them deterministically and the curator can author them precisely. The rule types currently in the schema:
+
+- **Variant group selection mode** (`variant_groups.selection`): `pick_one` (recipient picks exactly one of the group; later picks auto-swap out earlier ones), `pick_any` (recipient picks any subset independently), `pick_all` (the group moves as a bundle — picking any card auto-picks the siblings, un-picking removes the whole bundle).
+- **Card lock** (`cards.is_locked` + `cards.unlock_rule`): when `is_locked: true`, the recipient can't pick without satisfying `unlock_rule.kind`. Four kinds exist in the zod schema: `beg` (recipient writes a message), `requires_picks` (must have already picked specific cards), `date_after` (unlocks at an ISO timestamp), `event` (curator manually flips it). All four are validated by the server today; see §4.
+- **Taunt / gag** (`cards.is_taunt` + `cards.taunt_text`): the card renders but can't be picked. Pure decoration. The Ferrari. The "HA YEAH RIGHT."
+- **Value reveal** (`cards.reveal_value`): whether the recipient sees the price chip on the card.
+
+Sub-flags compose. A card can be `is_taunt: true` AND inside a variant group (it still renders, doesn't count toward the pick). A card can be `is_locked: true` AND `reveal_value: true` (price visible, lock visible — common for the "designer bag locked behind a beg" pattern).
+
+The curator never sees this schema vocabulary verbatim. Peek translates: "pick one from these three" / "she has to message you to unlock it" / "this one's just for laughs." The schema is the substrate; Peek is the interface.
+
+---
+
+## 2. The pattern catalog
+
+Concrete templates with names the curator can request, drawn from BRAIN-DUMP's voice and the schema's actual capability. When Peek wants to propose a rules setup, NAME the pattern. Pattern names give the curator a vocabulary; saying "shoes-dinners-ferrari" or "the escalator" is faster and stickier than describing the mechanic from scratch.
+
+### A. "3 shoes + 2 dinners + 1 ferrari"
+
+The canonical CONCEPT-V2 §6 example. Three product variants in a `pick_one` group ("Pick your sneaker"), two activity variants in a `pick_one` group ("Pick our dinner"), one standalone gag card ("the Ferrari, for laughs"). Recipient picks one shoe, one dinner, sees the Ferrari card and laughs (can't pick it; `is_taunt: true`).
+
+Use when: birthday for a peer, anniversary, "I want to give a real gift but also bust their chops." Default pattern for occasions that want a mix of practical + activity + humor.
+
+Schema:
+```
+variant_group A (selection=pick_one, title="Pick your sneaker")
+  card 1 (type=product, sneaker option 1)
+  card 2 (type=product, sneaker option 2)
+  card 3 (type=product, sneaker option 3)
+
+variant_group B (selection=pick_one, title="Pick our dinner")
+  card 4 (type=activity, restaurant option 1, proposed_date=TBD)
+  card 5 (type=activity, restaurant option 2, proposed_date=TBD)
+
+card 6 (type=aspirational, title="Ferrari 296 GTB", is_taunt=true, taunt_text="HA YEAH RIGHT")
+```
+
+Peek says: "Three sneakers as a pick-one, two dinners as a pick-one, Ferrari card for laughs. Three picks total — she lands on her favorite shoe, your favorite restaurant, and a punchline."
+
+### B. "Pick everything unless you spend a day with me"
+
+CONCEPT-V2 §6 second example. All cards default-unlocked (free), BUT — the entire set requires the recipient to opt into an "afternoon with the curator" activity card first. The mechanic: every product card is `is_locked: true` with `unlock_rule.kind: 'requires_picks'` and `card_ids: [activity_card_id]`. The activity card itself is unlocked and free.
+
+Use when: the relationship matters more than the stuff. Anniversary, parent-to-child, "I really just want time with you and these are the warm-up presents."
+
+Schema:
+```
+card 1 (type=activity, title="Spend the afternoon with me", is_locked=false)
+card 2 (type=product, title="The Olivia Mark vase", is_locked=true, unlock_rule={kind:'requires_picks', card_ids:[card1.id]})
+card 3 (type=product, title="The cashmere wrap", is_locked=true, unlock_rule={kind:'requires_picks', card_ids:[card1.id]})
+card 4 (type=product, title="The Le Creuset", is_locked=true, unlock_rule={kind:'requires_picks', card_ids:[card1.id]})
+```
+
+Recipient sees four cards. Three are locked with the prompt "unlocks when you pick the afternoon." She picks the afternoon → all three product cards unlock, free pickup. Or she doesn't, and the products stay decorative.
+
+Peek says: "Three things you can keep, but they're all locked behind a 'spend the afternoon with me' card. She picks the time-with-you card → everything else opens. If she skips it, the stuff stays sealed. Sound right?"
+
+### C. "Wedding registry but make it pick-or-counter-propose"
+
+For wedding peeks or any high-stakes activity-heavy occasion. Standard `pick_one` variant groups for product, BUT every activity card includes the counter-propose dialog (already exists in `components/recipient/activity-card.tsx:45-181` — recipient writes a `recipient_note` proposing a different time/place). The curator gets the counter-proposal in their notifications and approves or pushes back.
+
+Use when: high-coordination occasion, dates matter, recipient might want to negotiate venue/time, the gift IS the planning.
+
+Schema: nothing special — activity cards already support `proposed_date` + `location_hint` + recipient_note. Just compose normally and Peek's chat note flags the counter-propose UX so the curator knows it's possible.
+
+Peek says: "Setting up dinner at Carbone for the 14th. She can hit 'Counter-propose' on it if the date's wrong or she'd rather Lilia. You'll see it in your dashboard."
+
+### D. "The escalator"
+
+Three tiers visible to the recipient: cheap (no lock — free for the taking), medium (beg-lock — recipient writes a case to unlock), aspirational (date_after lock — unlocks at the anniversary date / wedding day / specific moment). The escalator is visible: the recipient sees what's coming, when it's coming, and what they have to do to unlock each tier.
+
+Use when: anniversaries (unlocks on the day-of), countdowns, occasions with a definite future moment. Builds anticipation. Recipient checks back over time as locks open.
+
+Schema:
+```
+card 1 (type=product, title="The candle", is_locked=false, value visible)
+card 2 (type=product, title="The cashmere", is_locked=false, value visible)
+
+card 3 (type=aspirational, title="A dinner at Per Se", is_locked=true,
+        unlock_rule={kind:'beg', beg_prompt:'Tell me what you want to talk about that night.'})
+
+card 4 (type=aspirational, title="The trip to Lisbon", is_locked=true,
+        unlock_rule={kind:'date_after', unlock_after:'2026-08-14T00:00:00Z'},
+        reveal_value=false)
+```
+
+The UI for `date_after` cards should show a countdown ("unlocks in 38 days") — this is currently ABSENT (per CONCEPT-INVENTORY §1 the `date_after` and `event` kinds have no UI hooks). Follow-up packet needed.
+
+Peek says: "Building an escalator: candle and cashmere are free, the Per Se dinner unlocks when she writes you why she wants it, and the Lisbon trip pops on your anniversary date. She can see all three tiers — the page tells her what unlocks when. Builds the lead-up."
+
+### E. "Surprise-with-roast"
+
+Three legit cards plus one embedded gag. The gag is small, mean-with-affection, recipient-specific. The taunt_text is the punchline — what the gag card says when the recipient hovers/taps it.
+
+Use when: the curator is busting chops as a love language. Bachelorette, milestone birthdays, peer-to-peer gifting, "I want her to laugh out loud."
+
+Schema:
+```
+card 1, 2, 3 (real cards, standard rules)
+card 4 (type=aspirational or product, title=specific to the joke,
+        is_taunt=true,
+        taunt_text="I would've gotten you the Birkin but you'd just lose it in a cab again.")
+```
+
+The taunt_text is the punchline. It's what reads when the recipient clicks the locked overlay. Make it specific to the recipient, not generic. Generic taunts (`taunt_text: "Ha not gonna happen!"`) land flat. Specific taunts (`taunt_text: "Tickets to Burning Man, sober this time, I'll believe it when I see it"`) land hard.
+
+Peek says: "Adding a gag card — 'a Birkin, except remember Lisbon when you left the Goyard in the Uber.' Reads as the punchline. Want it that mean or pull back?"
+
+### F. "Vintage tee chaos"
+
+The BRAIN-DUMP signature — "this vintage t-shirt has 4 options, I don't know which one you'd want, so I'm putting all 4 — pick whichever, or beg for two." Four colorways/variants in a `pick_one` variant group, plus a 5th HIDDEN beg-locked card representing "the second one" — locked behind a beg prompt, value = paying for both.
+
+Use when: real-product variants where the recipient is going to have a strong preference but the curator is willing to negotiate. T-shirts, sneaker colorways, candle scents.
+
+Schema:
+```
+variant_group (selection=pick_one, title="Pick your tee")
+  card 1 (type=product, title="vintage Stones tee — white", value $80)
+  card 2 (type=product, title="vintage Stones tee — black", value $80)
+  card 3 (type=product, title="vintage Stones tee — washed red", value $80)
+  card 4 (type=product, title="vintage Stones tee — yellow", value $80)
+
+card 5 (type=aspirational, title="Both of them",
+        is_locked=true,
+        unlock_rule={kind:'beg', beg_prompt:'Tell me which two and why two.'},
+        value_cents=16000, reveal_value=false)
+```
+
+Peek says: "Four colorways in a pick-one. Plus a hidden 'beg for two' card — she has to message you for it. You decide if she earns the second tee."
+
+### G. "The cheap-and-cheerful + one luxury"
+
+The MVP pattern for fast turn-around peeks. 2-3 free product cards, all `pick_one` or all standalone, plus one aspirational that's beg-locked. The recipient gets something for sure (cheap-and-cheerful) plus has the option to chase the luxury through the beg flow.
+
+Use when: lower budget, "I want her to walk away with something but also be tempted," "I have $200 but I want one of the options to be the $1000 shoe."
+
+Schema:
+```
+variant_group (selection=pick_one, title="One of these is yours")
+  card 1 (type=product, $60 candle)
+  card 2 (type=product, $60 throw blanket)
+  card 3 (type=product, $60 cookbook)
+
+card 4 (type=aspirational, title="The Loewe puzzle bag",
+        is_locked=true,
+        unlock_rule={kind:'beg', beg_prompt:'Tell me a time I was wrong about you.'},
+        reveal_value=false)
+```
+
+Peek says: "Three under-$100 pick-one — she gets one. Plus the Loewe locked behind a beg with a real prompt. Forces a moment. Want a different prompt or that lands?"
+
+### H. "All-of-these, no choice"
+
+A `pick_all` variant group: the recipient must take all cards in the group. Useful for launch kits, themed bundles, "this is a set, you don't get to pick favorites." Per the schema, this means picking any card in the group auto-picks the siblings.
+
+Use when: graduation launch kit, baby shower starter pack, "the entire set is the gift, not a menu."
+
+Schema:
+```
+variant_group (selection=pick_all, title="Your launch kit")
+  card 1 (type=product, AirPods Pro 2)
+  card 2 (type=product, the Cuyana leather portfolio)
+  card 3 (type=product, the Stanley carry-on)
+```
+
+Peek says: "Launch kit as a pick-all — AirPods, the portfolio, and the carry-on move together. She doesn't pick favorites; she gets the whole thing."
+
+### I. "Event-locked finale"
+
+One card held back until a specific moment the curator controls. `unlock_rule.kind: 'event'`. The card is locked until the curator manually flips it. UI: recipient sees the card faded with a teaser caption ("unlocks after the ceremony / after dinner / at midnight"). Curator flips it from their dashboard — UI for that flip is currently ABSENT (per CONCEPT-INVENTORY §1). Follow-up packet needed.
+
+Use when: wedding day reveal, surprise party, multi-moment gifts.
+
+Schema:
+```
+card 1, 2, 3 (free standard cards)
+card 4 (type=aspirational, title="The honeymoon trip",
+        is_locked=true,
+        unlock_rule={kind:'event'},
+        reveal_value=false)
+```
+
+Peek says: "Locking the honeymoon card behind an event flip. After the ceremony you tap your dashboard and it opens for her on her phone. Want the lock prompt to say 'unlocks after the I-do' or something else?"
+
+---
+
+## 3. How Peek proposes rules to the curator
+
+Peek doesn't ask "what rules do you want?" cold. That question puts the curator in front of a blank-page problem and burns the build velocity. Peek READS the cards already on the page + the occasion + the recipient signals, then PROPOSES a setup. The curator confirms, tweaks, or pushes back.
+
+### The proposal shape
+
+"Here's how I'd set it up: [pattern name] — [one-line description of the mechanic]. [Specific cards mentioned]. Sound right or want to mix it up?"
+
+### Examples
+
+- Curator just added 3 sneakers and 2 restaurant cards. Peek: "Setting up shoes-dinners-ferrari: three sneakers as pick-one, two restaurants as pick-one, and I'll drop a Ferrari card for the laugh. Three picks total. Lock in?"
+- Curator just added a candle, a throw blanket, and a Loewe bag. Peek: "Cheap-and-cheerful with one luxury: candle + blanket as standalone-free, Loewe locked behind a beg. What should the beg prompt say?"
+- Curator's been adding cards but hasn't talked about rules. Peek: "You've got a watch and three product cards on the page. Want the watch as the aspirational beg-lock, or do you want everything pickable as a free-for-all?"
+
+### What never to ask
+
+- "Do you want pick_one or pick_any?" — schema vocabulary, not human language.
+- "Should we lock anything?" — yes-or-no without context. Lead with a proposal.
+- "How many cards should the recipient be able to pick?" — derivative. Lead with the pattern, the count falls out.
+
+### When to push back
+
+If the curator proposes a rule that doesn't fit the occasion (see §8 Anti-patterns), Peek pushes back warmly:
+
+- Curator: "Beg-lock the dinner card."
+  Peek: "Begging for a dinner you're paying for is asking her to grovel for affection. Keep the dinner free; beg-lock the aspirational. Cool?"
+
+- Curator: "Make all the gag cards beg-lockable."
+  Peek: "If the gag's the joke, the lock kills the joke. Gag cards stay decorative. We can add a real card she has to beg for separately."
+
+The "fuck with you" principle from BRAIN-DUMP and §9 below: the rules engine exists to make picking FUN and CONNECTIVE. The gag is the bait, not the wall.
+
+---
+
+## 4. Server enforcement (current state)
+
+As of trunk `cbbab1d` (per BUGS.md "FIXED since prior compilation"), the rules engine is enforced server-side. Client-side bypass is no longer possible. What enforces what:
+
+### `app/api/pick/route.ts` (recipient pick endpoint)
+
+- **L85-87 origin gate**: rejects cross-origin POSTs (CSRF defense).
+- **L89-93 recipient session**: reads signed cookie via `readRecipientSessionFromCookies()`. The session signature is server-trusted; the body field is ignored. (B01 fix — was previously read from body, allowing impersonation.)
+- **L116-130 card lookup + ownership**: card exists, belongs to the peek in the request, and `is_taunt: false`. Taunt picks are blocked with `card_is_decorative`. (B02 fix — gag cards are server-enforced unpickable.)
+- **L132-169 lock enforcement**: when `is_locked: true`, dispatch on `unlock_rule.kind`:
+  - `beg` — requires non-empty `begMessage` in request body. Missing → `beg_message_required`.
+  - `requires_picks` — looks up the recipient's prior picks; missing any required `card_ids` → `unlock_requires_picks` + the missing IDs.
+  - `date_after` — parses `unlock_after` as ISO timestamp; if `Date.now() < after` → `unlock_too_early`.
+  - `event` — always blocks with `unlock_event_pending` until curator manually marks the event fired (UI for this is ABSENT — see §7).
+  - Any other `is_locked: true` with no recognized `kind` → `card_locked` (safe default).
+- **L171-180 peek published check**: peek must be `published`. (Picks on draft peeks blocked.)
+- **L182-201 variant group lookup**: pulls group selection mode + sibling IDs.
+- **L203-213 `pick_one` enforcement**: deletes the recipient's prior picks on sibling cards before inserting the new one. The swap is atomic from the recipient's perspective.
+- **L266-294 `pick_all` enforcement**: when picking ANY card in a `pick_all` group, server inserts picks for all siblings the recipient hasn't already picked. The bundle moves together.
+- **DELETE handler L317-406**: mirror logic. `pick_all` group → deleting one card deletes all sibling picks for that recipient. `pick_one` group → delete only the targeted card (the swap will re-establish on next pick).
+
+### `lib/anthropic/tools/mark_ready_for_publish.ts` (curator publish gate)
+
+- B16 fix (Wave 1.5): server-side precondition assertion. Curator can't publish without recipient set, hero, note, vibe, and ≥1 card. The chat tool can't short-circuit the gate. Idempotent — re-firing on an already-published peek is a no-op.
+
+### What server enforcement does NOT cover (still gaps)
+
+- **Curator-side rule edits**: there's no "edit rules" UI on the build surface. Curator can only set rules via AI chat tools. A dedicated rules editor would be a follow-up.
+- **`date_after` countdown UI**: server enforces the unlock timestamp; recipient UI shows nothing about it. Card just appears as generically locked. UX gap — recipient should see "unlocks in 38 days."
+- **`event` flip UI**: curator dashboard has no "fire event N" button. Server-side they're permanently locked until someone manually updates the row. UX gap.
+- **Unique pick constraint** (`(peek_id, card_id, recipient_signature)`): currently relies on the upsert flow in the route. No DB-level unique index. Mostly safe via the SELECT-then-UPDATE pattern but vulnerable to race conditions under heavy parallel picks. Not yet a real-world problem; lower priority follow-up.
+
+The taunt block (B02) and lock enforcement (B02 wave 1) are the two big ones — both wired. Server enforcement is real.
+
+---
+
+## 5. The beg flow
+
+When a recipient hits a beg-locked card, the flow:
+
+1. **Locked card renders.** `<AspirationalCard>` in `components/recipient/aspirational-card.tsx:43-128`. If `card.isLocked && card.unlockRule?.kind === 'beg'`, the card shows a "Make your case" button instead of the standard pick button. Lock overlay on the image with `unlockRule.beg_prompt` as the prompt copy.
+
+2. **Recipient taps "Make your case."** Opens `<BegSheet>` modal (`components/recipient/beg-sheet.tsx`). Textarea up to 1800 chars. Recipient writes the beg.
+
+3. **Submit fires `onSubmit(begMessage)` → `POST /api/pick`** with the begMessage in the body. The route validates the beg is non-empty for beg-locked cards (L134-138). Insert succeeds with `picks.beg_message` populated.
+
+4. **Curator notification fires.** `notifyCuratorOfPicksFireAndForget(...)` (L247-251 + L309-312) — sends an email digest to the curator with new picks (`lib/email/notify-curator-picks.ts`). The notification includes the beg message.
+
+5. **Curator reviews from build dashboard.** They see picks + beg messages. Currently, there's no explicit "approve beg" UI flow — the beg is informational. The recipient's pick succeeded server-side; they're holding the card. The curator's decision is whether to FULFILL it (manual today; Tier 2 future). When the curator approves, `picks.beg_approved_at` gets set to a timestamp via a curator-side action.
+
+### Open question (per BRAIN-DUMP open Q3): notification channel
+
+BRAIN-DUMP asks: live notification (push? email?) or digest? Recommendation:
+
+- **In-app notification** when curator opens `/build/[peekId]/manage` — list of new picks + begs since last visit. (Build-page-level toast for active sessions.)
+- **Email digest** daily for begs accumulated in the last 24h. Resend transactional, already wired (E1).
+- **NEVER push notification** — there's no app, and web push for an aspirational-gift product is overkill.
+- **NEVER SMS** — too intrusive for a "she made a case for a designer bag" moment. SMS is for the share-pack and the publish flow, not for begs.
+
+Implementation: in-app notification first (lowest effort), email digest second. Both gated behind a curator-preference field.
+
+### Beg prompt copy direction
+
+The curator sets `beg_prompt` per card. Default examples by occasion (Peek can propose; curator confirms):
+
+- Anniversary aspirational: "Tell me what you want from the next year." / "Write me something I've never heard you say." / "Pick a memory and tell me why it stuck."
+- Graduation aspirational: "Send me 3 things you're scared about for next year." / "Tell me one thing you can't tell anyone else."
+- Bachelorette aspirational: "Tell me the worst thing your fiancé has done." / "Make me laugh and you can have it."
+- Birthday peer aspirational: "Tell me what you're working on that nobody asks about." / "Roast me first and I'll think about it."
+
+The beg prompt is part of the gift. A generic "tell me why you want this" prompt is dead. A specific prompt — calibrated to the relationship and the moment — is the whole point.
+
+---
+
+## 6. Off-limits vs taunt (the schema gap)
+
+Per CONCEPT-INVENTORY §1: there's a conceptual distinction Frank's BRAIN-DUMP makes that the schema doesn't currently encode.
+
+### Taunt (currently in the schema)
+
+`is_taunt: true` → `<GagCard>` renders. Pure decoration. Cannot be picked. `taunt_text` is the displayed copy. Example: the Ferrari 296 GTB card with `taunt_text: "HA YEAH RIGHT."`. Recipient sees it, laughs, can't interact. It's a static joke baked into the page.
+
+### Off-limits (described in BRAIN-DUMP, ABSENT from schema)
+
+A card that LOOKS pickable — like a real product/activity — but when the recipient interacts with it, surfaces refusal copy. Example: a wedding peek where the curator includes "MY MAID OF HONOR DRESS" with off-limits copy "Pick literally anything else, this isn't a gift for you it's for me." The card SEEMS legit (no GagCard treatment), but the pick action triggers refusal.
+
+The distinction matters: taunt is static joke; off-limits is interactive joke. The recipient's surprise on hitting the off-limits is part of the bit.
+
+Currently the schema doesn't have a way to express this. The recipient UI either shows a `<GagCard>` (pure decoration) or a normal card (fully interactive). There's no third state.
+
+### Schema follow-up (proposed)
+
+Add `cards.refusal_text: text | null`. When set, the card renders as a normal card but `POST /api/pick` returns 400 with `card_is_off_limits` + the refusal copy, which the UI surfaces as a modal/toast. Different from taunt because the recipient actually tries to pick → gets the refusal as response, not a pre-disabled UI.
+
+This is a follow-up packet, not in scope of the current rules engine. Document it as a gap, propose to the curator only when the schema supports it. For now: if the curator wants "off-limits with refusal copy," tell them honestly — "the page can show that as a gag card (the recipient knows it's a joke from the start) but the 'pick it to find out' bit isn't built yet. Want the gag treatment for now?"
+
+---
+
+## 7. Unlock rules that aren't beg
+
+The schema supports four `unlock_rule.kind` values; only `beg` and `requires_picks` have full UI hooks today. `date_after` and `event` are server-enforced but UI-incomplete.
+
+### `date_after`
+
+**Semantics**: card unlocks at `unlock_rule.unlock_after` (ISO 8601 timestamp). Recipient can't pick before that moment.
+
+**Server**: enforced (`app/api/pick/route.ts:159-163`). Returns `unlock_too_early` if `Date.now() < Date.parse(unlock_after)`.
+
+**Recipient UI gap**: no countdown rendered. The card just appears as locked with a generic prompt. Recipient doesn't know WHEN it unlocks. UX-wise this is incomplete — the whole point of a date_after lock is anticipation.
+
+**Curator UI gap**: setting `unlock_after` via the AI tools works (the zod schema accepts it), but there's no curator-side UI to confirm/edit the unlock date. Visible only via the chat dialog.
+
+**Follow-up packet needed**: countdown UI on aspirational/product card for date_after locks. Show "unlocks in X days / X hours." Live tick. When unlock fires (Date.now() crosses unlock_after), the card transitions visually — unlock the lock overlay, swap to the pickable state, possibly emit a small celebration animation. PostHog feature flag gate the animation.
+
+**Pattern**: anniversary trip card unlocks on the anniversary date. Birthday surprise unlocks at midnight on the birthday. Wedding gift unlocks the morning of the wedding. All `kind: 'date_after'`.
+
+### `event`
+
+**Semantics**: card unlocks when the curator manually flips a flag. No timestamp, no recipient action — the curator controls the moment.
+
+**Server**: enforced (`app/api/pick/route.ts:164-165`). Currently always returns `unlock_event_pending`. There's no row-level "event fired" marker in the schema yet.
+
+**Curator UI gap**: no "fire event" button on the curator dashboard. The mechanic is server-ready but un-actionable.
+
+**Follow-up packet needed**: (a) schema column `cards.unlock_event_fired_at: timestamp | null`, (b) curator dashboard UI for flipping (one tap per card), (c) update the pick route to check this column before returning `unlock_event_pending`. The chat tool to flip is `unlock_event` — net-new in the manifest.
+
+**Pattern**: wedding day reveal. Surprise party moment. Multi-moment gifts where the curator is timing the release.
+
+### `beg` (full UI)
+
+Wired. See §5 above.
+
+### `requires_picks` (full UI on the recipient side, partial copy on the curator side)
+
+Wired server-side and UI-side. Recipient sees the card locked with a teaser like "unlocks when you pick X" (need to verify the actual lock-overlay copy — packet to confirm the recipient-facing string). The "pick everything unless you spend a day with me" pattern (§2.B) is the canonical use case.
+
+---
+
+## 8. Anti-patterns
+
+The rules engine becomes anti-product when used wrong. Peek pushes back on these:
+
+### Never set a rule the recipient can't satisfy
+
+A beg-locked card with no `beg_prompt` set, or a `requires_picks` lock pointing at a `card_ids` array that includes an `is_taunt: true` card (the recipient can never pick a taunt, so the requirement is permanently unsatisfiable). The zod schema doesn't currently validate against the taunt-in-requires_picks case — Peek must avoid composing it.
+
+### Never propose locks for occasions where they don't fit
+
+- **Condolences** — no locks, no taunts, no begs. The mechanic is too playful for a gift that's about presence and care. All cards should be free, the note carries the weight.
+- **Retirement** (especially older recipients) — locks can read as gatekeepy. Free cards with one optional beg-lock for an aspirational is the ceiling.
+- **Baby shower** — minimal locks. Beg-locks especially weird ("write me a poem to unlock the diaper service"). One `pick_one` variant group for product variants is plenty.
+- **Bereavement gifts** — same as condolences. Locks read as a test.
+
+When the curator proposes locks for these occasions, Peek pushes back:
+
+- Curator: "Beg-lock the casserole gift."
+  Peek: "Begging during grief isn't the move. Keeping the cards free — the note is what carries this one."
+
+### Never compose a rule the curator doesn't understand
+
+Peek narrates the rule in human terms after setting it. If Peek added a `requires_picks` chain with three layers and the curator says "wait what?" — Peek explains, ideally with a one-sentence "she has to pick X first, then Y, then she can pick Z" walk-through. Never leave the curator unclear on what they just authored.
+
+### Never set locks the curator hasn't approved
+
+Peek can PROPOSE a lock pattern. Peek does NOT silently add a beg-lock to a card and call it done. Every lock is a deliberate choice. The proposal-confirmation flow is non-negotiable here — the curator's "yeah do it" is the trigger for the actual tool call.
+
+### Always confirm before publish
+
+When the curator calls `mark_ready_for_publish`, Peek should narrate the rule setup once more in plain language: "Three sneakers as pick-one, two restaurants as pick-one, one Ferrari for laughs. Three picks total. Locking in — ready?" If the curator nods, fire. If they hesitate, walk through any specific cards they want to adjust.
+
+The publish gate is the last chance to catch a wrong lock. After publish, the recipient sees what's there.
+
+---
+
+## 9. The "fuck with you" principle
+
+From BRAIN-DUMP, paraphrased: the rules engine exists to make picking FUN and CONNECTIVE, not gatekeepy. The gag is the bait, not the wall. The beg is a moment, not a hostage situation.
+
+### What this looks like in practice
+
+- A `pick_one` between four sneakers is the curator saying "I know you well enough to narrow it to four; you finish the choice." That's connective.
+- A `pick_all` launch kit is the curator saying "you don't need to debate, here's everything." That's confident.
+- A beg-lock on a designer bag is the curator saying "convince me — let's have a moment." That's playful.
+- A `date_after` lock on an anniversary trip is the curator saying "I'm building up to this day with you." That's romantic.
+- A taunt Ferrari card is the curator saying "wouldn't it be funny if." That's love through teasing.
+
+All of these are FUN. None of them are gatekeepy.
+
+### What gatekeepy looks like (avoid)
+
+- Beg-locking the recipient's ONLY food option. "She has to beg me to eat dinner." Cruel. Push back.
+- Beg-locking every card on the page. "She has to write me a poem for everything." Exhausting. Push back.
+- `pick_one` between cards that aren't real alternatives. "Pick one: this candle OR a flight to Italy." That's not a choice; that's a trap. Push back.
+- Multi-layered `requires_picks` chains designed to maze the recipient ("pick A → unlock B → pick B → unlock C → pick C → unlock D"). Burning their goodwill. Push back unless the curator confirms it's the joke.
+
+### When to push back warmly
+
+The curator may not realize a setup reads gatekeepy. Peek's job is to read it on their behalf and flag:
+
+- Curator: "Beg-lock everything."
+  Peek: "Begging for every card turns this into a guilt trip. Want me to beg-lock just the aspirational and keep the rest free? That's where the moment lives."
+
+- Curator: "Pick-one between the candle and the trip to Italy."
+  Peek: "She'll pick the trip and feel weird about the candle. Want them both standalone, or do you want a pick-one between three real candles plus the trip as standalone?"
+
+The principle: **the recipient should feel like the curator built a fun puzzle for them, not a test.** The puzzle solves to "I picked something I love and felt seen." The test solves to "I performed for a present."
+
+---
+
+## 10. Cross-references
+
+- `affiliate-strategy.md` — affiliate-source cards become rules-engine subjects. The "escalator" pattern often pulls free + beg + date_after from `affiliate_search` for the bottom two tiers and curator-specified for the top.
+- `vibe-direction.md` — locks and taunts re-skin per vibe. Princess-bday locks should never use harsh "DENIED" copy; teen-grad can.
+- `image-direction.md` — locked card images should still look great. The lock overlay obscures part of the image; don't pick a face-heavy hero for a beg-lock.
+- `share-mechanics.md` — share-pack copy for a locked-card peek should hint at "there's something locked, you'll see when you open it." Tease the mechanic without spoiling.
+- `CONCEPT-V2.md` §6 — the rules engine concept.
+- `CONCEPT-INVENTORY.md` §1 — current PARTIAL status: schema/tools/UI/server-enforcement state.
+- `BUGS.md` B01/B02/B16 — closed in Wave 1 / Wave 1.5. Server enforcement is real.
+- `BRAIN-DUMP.md` "Card types" + "The rules engine" — Frank's voice on what these patterns are FOR.
+- `app/api/pick/route.ts` — current server enforcement reference.
+- `db/schema/cards.ts` — the schema source of truth for `UnlockRule`, `is_taunt`, `is_locked`, `variant_groups`.
+- `components/recipient/{aspirational-card,beg-sheet,card-deck,gag-card,product-card,activity-card,pick-button}.tsx` — recipient UI surfaces.
+
+---
+
+## TL;DR for Peek
+
+- Set rules by proposing patterns NAMED ("shoes-dinners-ferrari," "the escalator," "pick everything unless"). Don't ask "pick_one or pick_any?" in human conversation.
+- Compose patterns from: variant_groups (pick_one / pick_any / pick_all), locks (beg / requires_picks / date_after / event), taunts (is_taunt: true).
+- Server enforces all four lock kinds + taunt blocks + variant group selection. You can't be sloppy on the client; the recipient page is bulletproof.
+- Beg flow: recipient writes message → curator gets in-app notification + email digest. Approval happens in curator dashboard. No SMS, no push.
+- `date_after` countdown UI and `event` curator-flip UI are gaps — follow-up packets needed before those locks are recipient-meaningful.
+- Off-limits with refusal copy is described in BRAIN-DUMP but ABSENT in schema. Use taunt as a substitute for now; propose the schema add as a follow-up.
+- The "fuck with you" principle: gags are bait, not walls. Begs are moments, not tests. Locks make picking fun, not gatekeepy. Push back warmly on cruel setups.
+- Always confirm the rule setup before publish — last chance to catch a wrong lock.

@@ -1,12 +1,7 @@
-// Tool definitions + implementations that Peek (Claude) uses to mutate the draft as the chat unfolds.
-// Each tool has an Anthropic schema and a server-side implementation.
-
 import { q, q1 } from './db';
 import { VIBE_PRESETS } from './themes';
 import { generateHero, generateOgImage } from './imagegen';
 import type { CardType } from './types';
-
-// --- Tool schemas (sent to Anthropic) ---
 
 export const PEEK_TOOLS = [
   {
@@ -160,8 +155,6 @@ export const PEEK_TOOLS = [
   }
 ] as const;
 
-// --- Implementations ---
-
 export interface ToolContext {
   peek_id: string;
   clerk_user_id: string;
@@ -189,7 +182,6 @@ export async function runTool(name: string, input: any, ctx: ToolContext): Promi
       if (input.palette) vibe.palette = { ...(vibe.palette || {}), ...input.palette };
       if (input.mood_words) vibe.mood_words = input.mood_words;
       await q(`UPDATE peeks SET vibe = $1 WHERE id = $2`, [JSON.stringify(vibe), ctx.peek_id]);
-      // Pre-generate OG image in the background for the share screen
       generateOgImage(ctx.peek_id).catch(() => {});
       return { ok: true, vibe };
     }

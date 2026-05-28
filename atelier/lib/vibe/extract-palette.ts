@@ -1,0 +1,99 @@
+import 'server-only';
+import { Vibrant } from 'node-vibrant/node';
+import { logger } from '@/lib/logger';
+import { assessPaletteQuality } from './palette-quality';
+
+const log = logger.child({ component: 'vibe/extract-palette' });
+
+export interface ExtractedPalette {
+  bg: string;
+  surface: string;
+  ink: string;
+  accent: string;
+  accent2: string;
+}
+
+const DEFAULT_PALETTE: ExtractedPalette = {
+  bg: '#F4EFE6',
+  surface: '#E8DFCF',
+  ink: '#23201D',
+  accent: '#B86E4A',
+  accent2: '#6C8EAD',
+};
+
+const FETCH_TIMEOUT_MS = 10_000;
+const MAX_BYTES = 12 * 1024 * 1024;
+
+export async function extractPalette(
+  imageUrl: string,
+): Promise<ExtractedPalette | null> {
+  try {
+    const buffer = await fetchImageBuffer(imageUrl);
+    if (!buffer) {
+      log.info('palette_extract_rejected', {
+        imageUrl,
+        reason: 'fetch_failed',
+      });
+      return null;
+    }
+
+    const swatches = await Vibrant.from(buffer).getPalette();
+
+    const candidate: ExtractedPalette = {
+      bg:
+        swatches.LightMuted?.hex ??
+        swatches.LightVibrant?.hex ??
+        DEFAULT_PALETTE.bg,
+      surface:
+        swatches.Muted?.hex ?? swatches.LightMuted?.hex ?? DEFAULT_PALETTE.surface,
+      ink:
+        swatches.DarkMuted?.hex ??
+        swatches.DarkVibrant?.hex ??
+        DEFAULT_PALETTE.ink,
+      accent:
+        swatches.Vibrant?.hex ??
+        swatches.DarkVibrant?.hex ??
+        DEFAULT_PALETTE.accent,
+      accent2:
+        swatches.LightVibrant?.hex ??
+        swatches.Vibrant?.hex ??
+        DEFAULT_PALETTE.accent2,
+    };
+
+    const quality = assessPaletteQuality(candidate);
+    if (!quality.ok) {
+      log.info('palette_extract_rejected', {
+        imageUrl,
+        reason: quality.reason,
+        palette: candidate,
+      });
+      return null;
+    }
+
+    return candidate;
+  } catch (err) {
+    log.warn('extractPalette failed', {
+      imageUrl,
+      err: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
+}
+
+async function fetchImageBuffer(imageUrl: string): Promise<Buffer | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(imageUrl, { signal: controller.signal });
+    if (!res.ok) return null;
+    const contentLength = res.headers.get('content-length');
+    if (contentLength && Number(contentLength) > MAX_BYTES) {
+      return null;
+    }
+    const ab = await res.arrayBuffer();
+    if (ab.byteLength > MAX_BYTES) return null;
+    return Buffer.from(ab);
+  } finally {
+    clearTimeout(timeout);
+  }
+}

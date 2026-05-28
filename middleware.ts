@@ -21,15 +21,12 @@ const protectedClerk = clerkMiddleware(async (auth, req) => {
   if (!isPublic(req)) await auth.protect();
 });
 
-// Wrap in a try/catch so a Clerk-side error (invalid key, unauthorized origin,
-// API down) doesn't bring the whole site down — public pages still render.
 export default async function middleware(req: NextRequest) {
   if (!hasRealClerkSecret) return NextResponse.next();
   try {
     return await (protectedClerk as any)(req);
   } catch (e: any) {
     console.error('[clerk-middleware]', e?.message || e);
-    // For public routes, just continue. For protected, redirect to sign-in.
     if (isPublic(req)) return NextResponse.next();
     const url = new URL('/sign-in', req.url);
     return NextResponse.redirect(url);

@@ -36,7 +36,6 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
     return { byGroup, standalone };
   }, [cards]);
 
-  // Auto-advance after curator interaction on door tap
   useEffect(() => {
     if (phase === 'note' && !peek.note_md) {
       const t = setTimeout(() => setPhase('cards'), 600);
@@ -88,20 +87,16 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
     <main className="stage min-h-dvh vibe-mesh relative overflow-x-hidden" style={style}>
       {celebrating && <Confetti color={(peek.vibe as any)?.palette?.accent || '#ff5a3c'} />}
 
-      {/* PHASE 1: Door — tap to open */}
       {phase === 'door' && (
         <DoorPhase peek={peek} onOpen={() => setPhase(peek.note_md ? 'note' : 'cards')} />
       )}
 
-      {/* PHASE 2: Note + hero pan */}
       {phase === 'note' && peek.note_md && (
         <NotePhase peek={peek} onContinue={() => setPhase('cards')} />
       )}
 
-      {/* PHASE 3: Cards reveal */}
       {phase === 'cards' && (
         <div ref={cardsRef} className="min-h-dvh">
-          {/* Sticky compact hero */}
           <div className="relative">
             {peek.hero_image_url ? (
               <div
@@ -119,7 +114,6 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
             </div>
           </div>
 
-          {/* Note (re-anchored small) */}
           {peek.note_md && (
             <div className="max-w-2xl mx-auto px-5 pt-6">
               <div className="surface rounded-2xl p-5 shadow-sm">
@@ -149,7 +143,6 @@ export default function RecipientView({ peek, cards, variantGroups, pickedCardId
         </div>
       )}
 
-      {/* PICK MODAL */}
       {openCard && (
         <div className="fixed inset-0 z-40 bg-black/70 flex items-end sm:items-center justify-center p-3 backdrop-blur-sm">
           <div className="stage w-full max-w-md rounded-3xl overflow-hidden surface animate-rise">

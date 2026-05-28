@@ -1,6 +1,5 @@
 import type { Vibe } from './types';
 
-// Hand-tuned vibe presets. The chat picks one (or composes a custom palette in `vibe`).
 export const VIBE_PRESETS: Record<string, Vibe> = {
   playful: {
     tone: 'playful',
@@ -45,7 +44,6 @@ export function vibeToCssVars(vibe: Vibe | undefined): React.CSSProperties {
   const v = vibe?.palette ? vibe : DEFAULT_VIBE;
   const p = v.palette!;
   return {
-    // typed as CSSProperties via assertion below
     ['--peek-bg' as any]: p.bg,
     ['--peek-surface' as any]: p.surface,
     ['--peek-ink' as any]: p.ink,

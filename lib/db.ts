@@ -1,7 +1,3 @@
-// Direct Postgres via the Supabase pooler. No service-role key needed — we have the
-// full DATABASE_URL with the postgres user. Scoped to the peek_v2 schema via SET
-// search_path. All queries go through this module.
-
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 let _pool: Pool | null = null;
@@ -17,8 +13,6 @@ function pool(): Pool {
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 6_000
   });
-  // On each new client, lock the search path to our isolated schema so unqualified
-  // table names resolve to peek_v2.<table>.
   _pool.on('connect', async (client) => {
     try {
       await client.query('SET search_path TO peek_v2, public');
@@ -29,7 +23,6 @@ function pool(): Pool {
   return _pool;
 }
 
-// Generic query helper that returns just rows (the most common shape).
 export async function q<T extends QueryResultRow = any>(
   text: string,
   params: any[] = []
@@ -38,7 +31,6 @@ export async function q<T extends QueryResultRow = any>(
   return res.rows;
 }
 
-// Single-row query — throws if not exactly one row. Use `q1opt` for nullable.
 export async function q1<T extends QueryResultRow = any>(
   text: string,
   params: any[] = []
@@ -58,7 +50,6 @@ export async function q1opt<T extends QueryResultRow = any>(
   return rows[0] ?? null;
 }
 
-// Transaction wrapper.
 export async function tx<T>(fn: (c: PoolClient) => Promise<T>): Promise<T> {
   const client = await pool().connect();
   try {
