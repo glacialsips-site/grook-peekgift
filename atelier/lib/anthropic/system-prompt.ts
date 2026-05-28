@@ -290,8 +290,10 @@ function buildBlock4(opts: SystemPromptOptions): string {
  *
  * `commonSkillsText` and `occasionSkillText` in `opts` override the
  * defaults (allows the chat route to pre-build or skip skill bundles).
- * When absent, Block 2 and Block 3 are computed from the bundled skill
- * modules under `lib/anthropic/skills/`.
+ * When the field is `undefined` or `null`, Block 2 / Block 3 are computed
+ * from the bundled skill modules under `lib/anthropic/skills/`. An empty
+ * or whitespace-only string is treated as an explicit suppression — the
+ * block is omitted entirely (freeing its cache breakpoint slot).
  */
 export function buildSystemBlocks(
   opts: SystemPromptOptions = {},
@@ -305,24 +307,22 @@ export function buildSystemBlocks(
     cache_control: CACHE_MARKER,
   });
 
-  // Block 2 — common skills
-  const commonOverride = opts.commonSkillsText?.trim();
   const commonText =
-    commonOverride && commonOverride.length > 0
-      ? commonOverride
-      : defaultCommonSkillsText();
-  blocks.push({
-    type: 'text',
-    text: commonText,
-    cache_control: CACHE_MARKER,
-  });
+    opts.commonSkillsText == null
+      ? defaultCommonSkillsText()
+      : opts.commonSkillsText.trim() || null;
+  if (commonText) {
+    blocks.push({
+      type: 'text',
+      text: commonText,
+      cache_control: CACHE_MARKER,
+    });
+  }
 
-  // Block 3 — conditional skills (may be absent)
-  const conditionalOverride = opts.occasionSkillText?.trim();
   const conditionalText =
-    conditionalOverride && conditionalOverride.length > 0
-      ? conditionalOverride
-      : defaultConditionalSkillsText(opts);
+    opts.occasionSkillText == null
+      ? defaultConditionalSkillsText(opts)
+      : opts.occasionSkillText.trim() || null;
   if (conditionalText) {
     blocks.push({
       type: 'text',
