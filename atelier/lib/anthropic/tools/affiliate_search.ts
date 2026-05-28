@@ -49,7 +49,9 @@ const InputSchema = z
   .strict();
 type Input = z.infer<typeof InputSchema>;
 
-type Output = { ok: false; error: 'not_implemented_yet'; user_message: string };
+type Output =
+  | { ok: false; error: 'not_implemented_yet'; user_message: string }
+  | { ok: false; error: 'invalid_input'; detail: string };
 
 // Gate: hide entirely when no vendor is configured. The model never sees
 // the tool in its toolset, so it can't call it. When keys arrive, restart
@@ -95,7 +97,17 @@ if (env.SKIMLINKS_PUBLISHER_ID || env.SOVRN_API_KEY) {
     },
     deferLoading: true,
     handler: async (input): Promise<Output> => {
-      const parsed = InputSchema.parse(input);
+      // W09 from BUGS-WAVE2: structured invalid_input envelope.
+      let parsed: Input;
+      try {
+        parsed = InputSchema.parse(input);
+      } catch (err) {
+        return {
+          ok: false,
+          error: 'invalid_input',
+          detail: err instanceof Error ? err.message : String(err),
+        };
+      }
       log.info('affiliate_search_called_pre_vendor_integration', {
         query: parsed.query,
       });

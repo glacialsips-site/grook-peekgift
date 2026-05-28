@@ -3,21 +3,53 @@
 // + clears the flag at the top of iteration N+1, flipping `thinking: { enabled }`
 // on the messages.create call for that single iteration.
 //
-// In-memory Map is fine because chatTurn runs entirely server-side for the
-// lifetime of one SSE stream — single Node process, single event loop.
-// Process boundaries reset the flag, which is the desired behavior (no
-// stale thinking budgets carry across cold starts).
+// W07 from BUGS-WAVE2: the flag was a bare `Map<sessionId, true>` with delete
+// only on `consume`. Sessions that requested ext-thinking but never consumed
+// (abort mid-stream, upstream error, network failure) leaked forever. The
+// leak is small (one boolean per session) but unbounded in long-lived Node
+// processes.
+//
+// Fix: each flag carries an expiry timestamp; a sweep on every access drops
+// stale entries. TTL is short (60s) — the flag is supposed to be consumed
+// on the NEXT iteration of the same SSE stream, always within seconds.
+// Multi-instance Netlify is a known caveat: if the SSE stream sticks to a
+// different instance, the flag never consumes regardless of TTL (sticky-
+// session not guaranteed). Move to Upstash if that actually bites — out of
+// Wave 2 scope.
 
-const FLAGS = new Map<string, true>();
+interface FlagEntry {
+  expiresAt: number;
+}
+
+const FLAGS = new Map<string, FlagEntry>();
+const FLAG_TTL_MS = 60_000;
+
+function sweep(now: number): void {
+  for (const [key, entry] of FLAGS) {
+    if (entry.expiresAt <= now) {
+      FLAGS.delete(key);
+    }
+  }
+}
 
 export function requestExtendedThinking(sessionId: string): void {
-  FLAGS.set(sessionId, true);
+  const now = Date.now();
+  sweep(now);
+  FLAGS.set(sessionId, { expiresAt: now + FLAG_TTL_MS });
 }
 
 export function consumeExtendedThinking(sessionId: string): boolean {
-  if (FLAGS.has(sessionId)) {
-    FLAGS.delete(sessionId);
-    return true;
-  }
-  return false;
+  const now = Date.now();
+  sweep(now);
+  const entry = FLAGS.get(sessionId);
+  if (!entry) return false;
+  FLAGS.delete(sessionId);
+  // Defense-in-depth: sweep above already deleted expired entries, but a
+  // double-check guards the few microseconds between sweep and get.
+  return entry.expiresAt > now;
+}
+
+// Testing hook — call between unit tests to reset state.
+export function _resetExtendedThinkingFlags(): void {
+  FLAGS.clear();
 }
