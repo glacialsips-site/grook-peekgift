@@ -5,11 +5,17 @@ import '@/lib/anthropic/tools/bootstrap';
 import { moderateInput, type ModerationResult } from '@/lib/anthropic/moderation';
 import { getCurrentUser, getUserId } from '@/lib/auth/server';
 import {
+  ANON_TURN_CAP,
   anonymousTurnCount,
   anonymousTurnExceeded,
   assertPeekAccess,
   incrementAnonymousTurn,
 } from '@/lib/chat/session';
+import { classifyOccasionToTemplate } from '@/lib/anthropic/classify-occasion';
+import type {
+  OccasionType,
+  ThreadPhase,
+} from '@/lib/anthropic/system-prompt';
 import {
   appendChatMessage,
   loadChatHistory,
@@ -327,6 +333,9 @@ export async function POST(req: NextRequest): Promise<Response> {
       if (!curatorName?.trim()) curatorName = 'the curator';
 
       let peekSummary: string | null = null;
+      let occasionType: OccasionType | null = null;
+      let threadPhase: ThreadPhase = 'intro';
+      let cardsPhase = false;
       try {
         const snap = await loadPeekSnapshot(peekId);
         if (snap) {
@@ -339,6 +348,23 @@ export async function POST(req: NextRequest): Promise<Response> {
           } else {
             peekSummary = 'new peek (no recipient yet)';
           }
+          occasionType = classifyOccasionToTemplate(occasion);
+          cardsPhase = cardCount > 0;
+          // Coarse phase inference from peek state. A finer-grained
+          // classifier can override later.
+          const hasHero = !!snap.peek.heroImageUrl;
+          const hasNote = !!snap.peek.noteMd?.trim();
+          if (snap.peek.status === 'published' || snap.peek.status === 'claimed') {
+            threadPhase = 'post-publish';
+          } else if (hasHero && hasNote && cardCount >= 1) {
+            threadPhase = 'pre-publish';
+          } else if (cardCount >= 1) {
+            threadPhase = 'assembling';
+          } else if (recipient) {
+            threadPhase = 'collecting';
+          } else {
+            threadPhase = 'intro';
+          }
         } else {
           peekSummary = 'new peek (no recipient yet)';
         }
@@ -347,13 +373,32 @@ export async function POST(req: NextRequest): Promise<Response> {
         log.warn('peek_summary_load_failed', { peekId, message });
       }
 
+      let anonymousTurnsRemaining: number | null = null;
+      if (!userId) {
+        try {
+          const used = await anonymousTurnCount(sessionId, ip);
+          anonymousTurnsRemaining = Math.max(0, ANON_TURN_CAP - used);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          log.warn('anonymousTurnCount_failed', { sessionId, message });
+        }
+      }
+
       try {
         const turn = chatTurn({
           ctx: { peekId, userId, sessionId },
           history: initialHistory,
           userMessage: userContent,
           model: chosenModel,
-          systemPromptOptions: { curatorName, peekSummary },
+          systemPromptOptions: {
+            curatorName,
+            peekSummary,
+            peekId,
+            occasionType,
+            threadPhase,
+            cardsPhase,
+            anonymousTurnsRemaining,
+          },
           signal: req.signal,
           onToolResult: async (id, _name, output) => {
             safeEnqueue({ kind: 'tool_result', id, output });

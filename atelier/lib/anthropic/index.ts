@@ -11,10 +11,16 @@ export {
 } from './client';
 
 export {
+  buildSystemBlocks,
+  buildSystemPrompt,
   getSystemPrompt,
   STATIC_SYSTEM_PROMPT_TEXT,
+  type OccasionType,
   type SystemPromptOptions,
+  type ThreadPhase,
 } from './system-prompt';
+
+export { classifyOccasionToTemplate } from './classify-occasion';
 
 export {
   TOOL_REGISTRY,
