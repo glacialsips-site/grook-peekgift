@@ -11,7 +11,8 @@ export function GagCard({ card }: Props) {
     <motion.div
       layout
       whileHover={{ rotate: -1 }}
-      className="relative overflow-hidden rounded-2xl border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))]/70 shadow-sm"
+      className="relative overflow-hidden border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))]/70 shadow-sm"
+      style={{ borderRadius: 'var(--peek-radius-lg)' }}
       role="figure"
       aria-label={`Gag card: ${card.tauntText ?? card.title}`}
     >
@@ -22,14 +23,20 @@ export function GagCard({ card }: Props) {
           style={{ backgroundImage: cssUrl(card.imageUrl) }}
         >
           <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--peek-ink))]/15 p-4 text-center">
-            <p className="font-serif text-2xl italic text-[hsl(var(--peek-ink))] drop-shadow sm:text-3xl">
+            <p
+              className="text-2xl italic text-[hsl(var(--peek-ink))] drop-shadow sm:text-3xl"
+              style={{ fontFamily: 'var(--peek-font-heading)' }}
+            >
               “{card.tauntText ?? card.title}”
             </p>
           </div>
         </div>
       ) : (
         <div className="flex h-40 items-center justify-center p-6 text-center sm:h-48">
-          <p className="font-serif text-2xl italic text-[hsl(var(--peek-ink))]/85 sm:text-3xl">
+          <p
+            className="text-2xl italic text-[hsl(var(--peek-ink))]/85 sm:text-3xl"
+            style={{ fontFamily: 'var(--peek-font-heading)' }}
+          >
             “{card.tauntText ?? card.title}”
           </p>
         </div>

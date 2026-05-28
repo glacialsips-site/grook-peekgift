@@ -44,9 +44,10 @@ export function AspirationalCard({
       <motion.div
         layout
         className={cn(
-          'relative overflow-hidden rounded-2xl border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))] shadow-md',
+          'relative overflow-hidden border border-[hsl(var(--peek-accent))]/30 bg-[hsl(var(--peek-surface))] shadow-md',
           isPicked && 'ring-2 ring-[hsl(var(--peek-accent))]/60',
         )}
+        style={{ borderRadius: 'var(--peek-radius-lg)' }}
       >
         {card.imageUrl ? (
           <div
@@ -77,7 +78,12 @@ export function AspirationalCard({
         )}
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-semibold leading-tight">{card.title}</h3>
+            <h3
+              className="text-lg font-semibold leading-tight"
+              style={{ fontFamily: 'var(--peek-font-heading)' }}
+            >
+              {card.title}
+            </h3>
             {card.isLocked ? (
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(var(--peek-accent))]/15 px-2 py-0.5 text-xs font-medium text-[hsl(var(--peek-accent))]">
                 <Lock className="h-3 w-3" aria-hidden="true" />
