@@ -32,20 +32,26 @@ function sweep(now: number): void {
   }
 }
 
-export function requestExtendedThinking(sessionId: string): void {
-  const now = Date.now();
-  sweep(now);
-  FLAGS.set(sessionId, { expiresAt: now + FLAG_TTL_MS });
+// C05 from BUGS-CHAT-LOOP: compose sessionId + optional turnId so two
+// parallel turns from the same session can't steal each other's flags.
+// Legacy callers passing just sessionId still work.
+function flagKey(sessionId: string, turnId?: string): string {
+  return turnId ? `${sessionId}:${turnId}` : sessionId;
 }
 
-export function consumeExtendedThinking(sessionId: string): boolean {
+export function requestExtendedThinking(sessionId: string, turnId?: string): void {
   const now = Date.now();
   sweep(now);
-  const entry = FLAGS.get(sessionId);
+  FLAGS.set(flagKey(sessionId, turnId), { expiresAt: now + FLAG_TTL_MS });
+}
+
+export function consumeExtendedThinking(sessionId: string, turnId?: string): boolean {
+  const now = Date.now();
+  sweep(now);
+  const key = flagKey(sessionId, turnId);
+  const entry = FLAGS.get(key);
   if (!entry) return false;
-  FLAGS.delete(sessionId);
-  // Defense-in-depth: sweep above already deleted expired entries, but a
-  // double-check guards the few microseconds between sweep and get.
+  FLAGS.delete(key);
   return entry.expiresAt > now;
 }
 

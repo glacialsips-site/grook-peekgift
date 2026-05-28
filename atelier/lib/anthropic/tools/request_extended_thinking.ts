@@ -56,9 +56,7 @@ registerTool<Input, Output>({
         detail: err instanceof Error ? err.message : String(err),
       };
     }
-    // Voice mode is signaled via session metadata in a later packet (43);
-    // for now we trust the model's prompt-level guardrail.
-    requestExtendedThinking(ctx.sessionId);
+    requestExtendedThinking(ctx.sessionId, ctx.turnId);
     return {
       ok: true,
       budget_tokens: env.EXTENDED_THINKING_BUDGET_TOKENS ?? 8000,

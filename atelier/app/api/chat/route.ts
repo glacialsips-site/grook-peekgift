@@ -57,6 +57,46 @@ function isUpstream5xx(err: unknown): boolean {
   return typeof status === 'number' && status >= 500 && status < 600;
 }
 
+function isUpstreamError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  if (isUpstream5xx(err)) return true;
+  const e = err as {
+    code?: string;
+    cause?: { code?: string };
+    message?: string;
+  };
+  const code = e.code ?? e.cause?.code;
+  if (typeof code === 'string') {
+    if (
+      code.startsWith('ECONN') ||
+      code === 'ETIMEDOUT' ||
+      code === 'EAI_AGAIN' ||
+      code.startsWith('UND_ERR_')
+    ) {
+      return true;
+    }
+  }
+  const msg = typeof e.message === 'string' ? e.message.toLowerCase() : '';
+  return (
+    msg.includes('socket hang up') ||
+    msg.includes('fetch failed') ||
+    msg.includes('network request failed') ||
+    msg.includes('terminated')
+  );
+}
+
+function stripAttachmentGuidanceFromContent(
+  content: Anthropic.MessageParam['content'],
+): Anthropic.MessageParam['content'] {
+  if (!Array.isArray(content)) return content;
+  return content.filter((block) => {
+    if (!block || typeof block !== 'object') return true;
+    const b = block as { type?: string; text?: string };
+    if (b.type !== 'text' || typeof b.text !== 'string') return true;
+    return !b.text.startsWith('[system] The curator just attached');
+  }) as Anthropic.MessageParam['content'];
+}
+
 function isUpstream4xx(err: unknown): boolean {
   const status = getErrStatus(err);
   return typeof status === 'number' && status >= 400 && status < 500;
@@ -154,8 +194,10 @@ export async function POST(req: NextRequest): Promise<Response> {
     const anonVerdict = await enforceRateLimit(limiters.chatAnon(), anonRlKey);
     if (!anonVerdict.ok) return rateLimitResponse(anonVerdict);
 
-    const count = await anonymousTurnCount(sessionId, ip);
-    if (anonymousTurnExceeded(count)) {
+    // C03 from BUGS-CHAT-LOOP: increment first, check post-increment. Closes
+    // the TOCTOU race where two parallel anon turns both pass a stale count.
+    const nextCount = await incrementAnonymousTurn(sessionId, ip);
+    if (anonymousTurnExceeded(nextCount)) {
       const signupMessage =
         "You're at the trial limit. Sign up to keep building — your peek will be saved.";
       const sseBody =
@@ -171,19 +213,16 @@ export async function POST(req: NextRequest): Promise<Response> {
         },
       });
     }
-    await incrementAnonymousTurn(sessionId, ip);
   }
 
   let initialHistory: Anthropic.MessageParam[] = history as Anthropic.MessageParam[];
   if (initialHistory.length === 0) {
     try {
       const persisted = await loadChatHistory(peekId);
-      // B11-redux (server leg): tool_result rows are persisted as their own
-      // role='tool_result' rows. Anthropic's API requires them as user-turn
-      // content blocks immediately after the assistant tool_use. Re-shape
-      // them as user-role messages here so the replay path matches what the
-      // client-side toApiHistory() does in chat-pane.tsx.
-      initialHistory = persisted
+      // tool_result rows are persisted with role='tool_result' for analytics
+      // (B11-redux); the Anthropic API expects them as user-turn content
+      // blocks immediately after the assistant tool_use. Re-shape on load.
+      const reshaped: Anthropic.MessageParam[] = persisted
         .filter((row) =>
           row.role === 'user' ||
           row.role === 'assistant' ||
@@ -191,8 +230,18 @@ export async function POST(req: NextRequest): Promise<Response> {
         )
         .map((row) => ({
           role: row.role === 'tool_result' ? 'user' : row.role,
-          content: row.content as Anthropic.MessageParam['content'],
+          content: stripAttachmentGuidanceFromContent(
+            row.content as Anthropic.MessageParam['content'],
+          ),
         }));
+      // C01 from BUGS-CHAT-LOOP: drop a trailing dangling user row. A turn
+      // that aborted mid-stream persisted the user message but never landed
+      // an assistant message; replaying it would put two consecutive
+      // user-role messages back-to-back and Anthropic 400s.
+      while (reshaped.length > 0 && reshaped[reshaped.length - 1]?.role === 'user') {
+        reshaped.pop();
+      }
+      initialHistory = reshaped;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       log.error('loadChatHistory failed', { peekId, message });
@@ -678,6 +727,7 @@ export async function POST(req: NextRequest): Promise<Response> {
               log.warn('stream_error', {
                 peekId,
                 message: classified.internal_message,
+                upstream: isUpstreamError(event.error),
                 upstream_5xx: isUpstream5xx(event.error),
                 upstream_4xx: isUpstream4xx(event.error),
               });
@@ -735,6 +785,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           peekId,
           sessionId,
           message: classified.internal_message,
+          upstream: isUpstreamError(err),
           upstream_5xx: isUpstream5xx(err),
           upstream_4xx: isUpstream4xx(err),
         });
