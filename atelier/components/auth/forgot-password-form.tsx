@@ -7,6 +7,7 @@ import type { SetActiveNavigate } from '@clerk/shared/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { mutedTextStyle, vibeTokens } from '@/lib/vibe/component-styles';
 import { FormError } from './form-error';
 import { parseClerkError } from './clerk-error';
 
@@ -144,8 +145,12 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={onSubmitReset} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        We sent a 6-digit code to <span className="font-medium text-foreground">{step.email}</span>.
+      <p className="text-sm" style={mutedTextStyle()}>
+        We sent a 6-digit code to{' '}
+        <span className="font-medium" style={{ color: vibeTokens.ink }}>
+          {step.email}
+        </span>
+        .
       </p>
       <div className="space-y-1.5">
         <Label htmlFor="code">Code</Label>

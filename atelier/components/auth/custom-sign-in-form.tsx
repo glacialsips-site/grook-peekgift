@@ -13,6 +13,7 @@ import type {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { mutedTextStyle, vibeTokens } from '@/lib/vibe/component-styles';
 import { OAuthButton } from './oauth-button';
 import { FormError } from './form-error';
 import { parseClerkError } from './clerk-error';
@@ -237,10 +238,19 @@ export function CustomSignInForm() {
           onClick={() => handleOAuth('oauth_google')}
           disabled={busy}
         />
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
+        <div
+          className="flex items-center gap-3 text-xs"
+          style={mutedTextStyle()}
+        >
+          <span
+            className="h-px flex-1"
+            style={{ backgroundColor: vibeTokens.border }}
+          />
           <span>or</span>
-          <span className="h-px flex-1 bg-border" />
+          <span
+            className="h-px flex-1"
+            style={{ backgroundColor: vibeTokens.border }}
+          />
         </div>
         <form onSubmit={onSubmitEmail} className="space-y-4">
           <div className="space-y-1.5">
@@ -280,7 +290,8 @@ export function CustomSignInForm() {
             type="email"
             value={step.email}
             readOnly
-            className="h-11 bg-muted"
+            className="h-11"
+            style={{ backgroundColor: vibeTokens.surfaceMuted }}
           />
         </div>
         <div className="space-y-1.5">
@@ -288,7 +299,8 @@ export function CustomSignInForm() {
             <Label htmlFor="password">Password</Label>
             <Link
               href="/forgot-password"
-              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+              className="text-xs underline-offset-4 hover:underline"
+              style={mutedTextStyle()}
             >
               Forgot password?
             </Link>
@@ -317,7 +329,8 @@ export function CustomSignInForm() {
             type="button"
             onClick={onSwitchToEmailCode}
             disabled={busy}
-            className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
+            className="text-sm underline-offset-4 hover:underline disabled:opacity-50"
+            style={mutedTextStyle()}
           >
             Send me a code instead
           </button>
@@ -329,8 +342,15 @@ export function CustomSignInForm() {
   if (step.kind === 'email_code_sent') {
     return (
       <form onSubmit={onSubmitEmailCode} className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          We sent a 6-digit code to <span className="font-medium text-foreground">{step.email}</span>.
+        <p className="text-sm" style={mutedTextStyle()}>
+          We sent a 6-digit code to{' '}
+          <span
+            className="font-medium"
+            style={{ color: vibeTokens.ink }}
+          >
+            {step.email}
+          </span>
+          .
         </p>
         <div className="space-y-1.5">
           <Label htmlFor="code">Code</Label>
@@ -361,7 +381,8 @@ export function CustomSignInForm() {
             type="button"
             onClick={onResendEmailCode}
             disabled={busy}
-            className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
+            className="text-sm underline-offset-4 hover:underline disabled:opacity-50"
+            style={mutedTextStyle()}
           >
             Didn't get it? Resend.
           </button>
@@ -372,7 +393,7 @@ export function CustomSignInForm() {
 
   return (
     <form onSubmit={onSubmit2fa} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm" style={mutedTextStyle()}>
         {step.strategy === 'totp'
           ? 'Enter the 6-digit code from your authenticator app.'
           : step.strategy === 'phone_code'

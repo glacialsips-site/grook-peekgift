@@ -43,6 +43,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  cardStyle,
+  chipStyle,
+  headingStyle,
+  mutedTextStyle,
+  quickShareTileStyle,
+  vibeTokens,
+} from '@/lib/vibe/component-styles';
 
 type Props = {
   peekId: string;
@@ -241,25 +249,35 @@ export function ShareSheet({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8">
       <header className="flex flex-col gap-2">
-        <p className="text-sm uppercase tracking-widest text-muted-foreground">
+        <p
+          className="text-sm uppercase tracking-widest"
+          style={mutedTextStyle()}
+        >
           published
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1
+          className="text-3xl font-semibold tracking-tight md:text-4xl"
+          style={headingStyle()}
+        >
           {recipientName
             ? `${recipientName}'s Peek is live.`
             : 'Your Peek is live.'}
         </h1>
-        <p className="text-muted-foreground">
+        <p style={mutedTextStyle()}>
           Now spread it. The link is yours. Share it however {recipientName?.split(' ')[0] ?? 'they'} will
           actually open it.
         </p>
       </header>
 
       <section
-        className="overflow-hidden rounded-2xl border border-border bg-card"
+        className="overflow-hidden"
+        style={cardStyle()}
         aria-label="Share link"
       >
-        <div className="relative aspect-[1200/630] w-full bg-muted">
+        <div
+          className="relative aspect-[1200/630] w-full"
+          style={{ backgroundColor: vibeTokens.surfaceMuted }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={ogImageUrl}
@@ -268,12 +286,24 @@ export function ShareSheet({
           />
         </div>
         <div className="flex flex-col gap-3 p-4">
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+          <div
+            className="flex items-center gap-2 px-3 py-2"
+            style={{
+              borderRadius: vibeTokens.radiusButton,
+              border: `1px solid ${vibeTokens.border}`,
+              backgroundColor: 'hsl(var(--vibe-muted, var(--muted)) / 0.4)',
+            }}
+          >
             <Link2
-              className="h-4 w-4 shrink-0 text-muted-foreground"
+              className="h-4 w-4 shrink-0"
+              style={{ color: vibeTokens.inkSoft }}
               aria-hidden="true"
             />
-            <span className="flex-1 truncate text-sm" aria-label="Share URL">
+            <span
+              className="flex-1 truncate text-sm"
+              style={{ color: vibeTokens.ink, fontFamily: vibeTokens.fontMono }}
+              aria-label="Share URL"
+            >
               {shareUrl}
             </span>
             <Button
@@ -308,7 +338,8 @@ export function ShareSheet({
       <section className="flex flex-col gap-3" aria-labelledby="quick-share-heading">
         <h2
           id="quick-share-heading"
-          className="text-sm font-medium uppercase tracking-widest text-muted-foreground"
+          className="text-sm font-medium uppercase tracking-widest"
+          style={mutedTextStyle()}
         >
           Quick share
         </h2>
@@ -316,7 +347,8 @@ export function ShareSheet({
           <a
             href={links.sms}
             onClick={() => trackShare(peekId, 'imessage')}
-            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 p-3 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={quickShareTileStyle()}
             aria-label="Share via iMessage"
           >
             <MessageCircle className="h-5 w-5" aria-hidden="true" />
@@ -327,7 +359,8 @@ export function ShareSheet({
             onClick={() => trackShare(peekId, 'whatsapp')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 p-3 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={quickShareTileStyle()}
             aria-label="Share via WhatsApp"
           >
             <MessageCircle className="h-5 w-5" aria-hidden="true" />
@@ -338,7 +371,8 @@ export function ShareSheet({
             onClick={() => trackShare(peekId, 'twitter')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 p-3 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={quickShareTileStyle()}
             aria-label="Share on X"
           >
             <XIcon className="h-5 w-5" />
@@ -349,7 +383,8 @@ export function ShareSheet({
             onClick={() => trackShare(peekId, 'facebook')}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 p-3 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={quickShareTileStyle()}
             aria-label="Share on Facebook"
           >
             <FacebookIcon className="h-5 w-5" />
@@ -358,7 +393,8 @@ export function ShareSheet({
           <a
             href={links.email}
             onClick={() => trackShare(peekId, 'email')}
-            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card p-3 text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 p-3 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2"
+            style={quickShareTileStyle()}
             aria-label="Share via email"
           >
             <Mail className="h-5 w-5" aria-hidden="true" />
@@ -370,7 +406,8 @@ export function ShareSheet({
       <section className="flex flex-col gap-3" aria-labelledby="send-heading">
         <h2
           id="send-heading"
-          className="text-sm font-medium uppercase tracking-widest text-muted-foreground"
+          className="text-sm font-medium uppercase tracking-widest"
+          style={mutedTextStyle()}
         >
           Send it for me
         </h2>
@@ -382,17 +419,19 @@ export function ShareSheet({
           <div
             role="radiogroup"
             aria-label="Send via"
-            className="inline-flex w-full rounded-full border border-border bg-muted/30 p-1"
+            className="inline-flex w-full p-1"
+            style={{
+              borderRadius: vibeTokens.radiusPill,
+              border: `1px solid ${vibeTokens.border}`,
+              backgroundColor: 'hsl(var(--vibe-muted, var(--muted)) / 0.4)',
+            }}
           >
             <button
               type="button"
               role="radio"
               onClick={() => setChannel('sms')}
-              className={`min-h-11 flex-1 rounded-full px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                channel === 'sms'
-                  ? 'bg-background shadow'
-                  : 'text-muted-foreground'
-              }`}
+              className="min-h-11 flex-1 px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2"
+              style={chipStyle(channel === 'sms')}
               aria-checked={channel === 'sms'}
             >
               Text
@@ -401,11 +440,8 @@ export function ShareSheet({
               type="button"
               role="radio"
               onClick={() => setChannel('email')}
-              className={`min-h-11 flex-1 rounded-full px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                channel === 'email'
-                  ? 'bg-background shadow'
-                  : 'text-muted-foreground'
-              }`}
+              className="min-h-11 flex-1 px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2"
+              style={chipStyle(channel === 'email')}
               aria-checked={channel === 'email'}
             >
               Email
@@ -454,8 +490,9 @@ export function ShareSheet({
         </form>
       </section>
 
-      <p className="text-xs text-muted-foreground">
-        slug: <span className="font-mono">{slug}</span>
+      <p className="text-xs" style={mutedTextStyle()}>
+        slug:{' '}
+        <span style={{ fontFamily: vibeTokens.fontMono }}>{slug}</span>
       </p>
     </div>
   );

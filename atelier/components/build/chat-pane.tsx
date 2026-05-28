@@ -18,6 +18,12 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import {
+  bubbleStyle,
+  mutedTextStyle,
+  shellStyle,
+  vibeTokens,
+} from '@/lib/vibe/component-styles';
 import type {
   ChatMessage,
   PeekDraft,
@@ -604,10 +610,11 @@ export function ChatPane({
 
   return (
     <section
-      className={cn(
-        'flex h-full min-h-0 flex-col border-r border-border bg-background',
-        className,
-      )}
+      className={cn('flex h-full min-h-0 flex-col', className)}
+      style={{
+        ...shellStyle(),
+        borderRight: `1px solid ${vibeTokens.border}`,
+      }}
       aria-label="Build chat"
     >
       <ScrollArea className="flex-1 min-h-0">
@@ -632,9 +639,11 @@ export function ChatPane({
 
       <form
         onSubmit={onSubmit}
-        className="relative z-30 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85"
+        className="relative z-30 backdrop-blur"
         style={{
           paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--chat-bottom-offset, 0px))',
+          borderTop: `1px solid ${vibeTokens.border}`,
+          backgroundColor: 'hsl(var(--vibe-bg, var(--background)) / 0.92)',
         }}
         aria-label="Send a message"
       >
@@ -778,7 +787,13 @@ function dispatchEvent(
 
 function ImageChip({ src, onRemove }: { src: string; onRemove: () => void }) {
   return (
-    <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
+    <div
+      className="relative h-16 w-16 overflow-hidden"
+      style={{
+        borderRadius: vibeTokens.radiusButton,
+        border: `1px solid ${vibeTokens.border}`,
+      }}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
@@ -788,7 +803,12 @@ function ImageChip({ src, onRemove }: { src: string; onRemove: () => void }) {
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-0.5 top-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-background/90 p-0.5 text-foreground/80 backdrop-blur hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="absolute right-0.5 top-0.5 inline-flex h-6 w-6 items-center justify-center p-0.5 backdrop-blur focus-visible:outline-none focus-visible:ring-2"
+        style={{
+          backgroundColor: 'hsl(var(--vibe-bg, var(--background)) / 0.9)',
+          color: vibeTokens.inkSoft,
+          borderRadius: vibeTokens.radiusPill,
+        }}
         aria-label="Remove attached image"
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -803,10 +823,20 @@ function EmptyChatHint() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center"
+      className="flex flex-col items-center gap-3 px-6 py-10 text-center"
+      style={{
+        borderRadius: vibeTokens.radiusCard,
+        border: `1px dashed ${vibeTokens.borderStrong}`,
+        backgroundColor: 'hsl(var(--vibe-muted, var(--muted)) / 0.45)',
+        fontFamily: vibeTokens.fontBody,
+      }}
     >
-      <Sparkles className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-      <p className="text-base text-muted-foreground">
+      <Sparkles
+        className="h-6 w-6"
+        style={{ color: vibeTokens.accent }}
+        aria-hidden="true"
+      />
+      <p className="text-base" style={mutedTextStyle()}>
         We&apos;ll go back and forth. Tell me who it&apos;s for and I&apos;ll start
         building — you can drop links, screenshots, or just describe.
       </p>
@@ -859,7 +889,11 @@ function MessageBubble({
                 key={img.url}
                 src={img.url}
                 alt={img.alt ?? 'Attached image'}
-                className="max-h-48 w-auto rounded-lg border border-border object-cover"
+                className="max-h-48 w-auto object-cover"
+                style={{
+                  borderRadius: vibeTokens.radiusButton,
+                  border: `1px solid ${vibeTokens.border}`,
+                }}
               />
             ))}
           </div>
@@ -867,12 +901,8 @@ function MessageBubble({
         {message.content ||
         (!isUser && message.role === 'assistant' && message.streaming) ? (
           <div
-            className={cn(
-              'whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm leading-relaxed',
-              isUser
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-foreground',
-            )}
+            className="whitespace-pre-wrap px-3.5 py-2 text-sm leading-relaxed"
+            style={bubbleStyle(isUser ? 'user' : 'assistant')}
           >
             {message.content}
             {!isUser && message.role === 'assistant' && message.streaming ? (
@@ -898,23 +928,36 @@ function MessageBubble({
 }
 
 function ToolCallPill({ call }: { call: ToolCallEvent }) {
+  const isError = call.status === 'error';
   return (
     <motion.span
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.15 }}
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs text-muted-foreground',
-        call.status === 'error' && 'border-destructive text-destructive',
-      )}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs"
+      style={{
+        borderRadius: vibeTokens.radiusPill,
+        border: `1px solid ${isError ? vibeTokens.error : vibeTokens.border}`,
+        backgroundColor: isError
+          ? 'hsl(var(--state-error) / 0.12)'
+          : 'hsl(var(--vibe-muted, var(--muted)) / 0.55)',
+        color: isError ? vibeTokens.error : vibeTokens.inkSoft,
+        fontFamily: vibeTokens.fontBody,
+      }}
     >
       <span
         className={cn(
           'h-1.5 w-1.5 rounded-full',
-          call.status === 'pending' && 'animate-pulse bg-muted-foreground',
-          call.status === 'done' && 'bg-emerald-500',
-          call.status === 'error' && 'bg-destructive',
+          call.status === 'pending' && 'animate-pulse',
         )}
+        style={{
+          backgroundColor:
+            call.status === 'pending'
+              ? vibeTokens.inkSoft
+              : call.status === 'done'
+                ? vibeTokens.success
+                : vibeTokens.error,
+        }}
         aria-hidden
       />
       Peek {humanizeToolName(call.name).toLowerCase()}
@@ -926,7 +969,8 @@ function TypingCursor() {
   return (
     <motion.span
       aria-hidden
-      className="ml-0.5 inline-block h-3 w-1 translate-y-[1px] bg-current"
+      className="ml-0.5 inline-block h-3 w-1 translate-y-[1px]"
+      style={{ backgroundColor: 'currentColor' }}
       animate={{ opacity: [1, 0.2, 1] }}
       transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
     />
