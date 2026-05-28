@@ -30,8 +30,6 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input): Promise<Output> => {
-    // W09 from BUGS-WAVE2: surface invalid input as a structured envelope
-    // so the model recovers gracefully instead of seeing a raw Zod string.
     try {
       InputSchema.parse(input);
     } catch (err) {

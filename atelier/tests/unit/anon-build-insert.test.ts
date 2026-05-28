@@ -9,8 +9,6 @@ const captured: { inserts: CapturedInsert[] } = { inserts: [] };
 
 const ANON_COOKIE = 'middleware-minted-session-uuid';
 
-// Track which cookie name was requested so the test fails loudly if the SC
-// calls `.set(...)` (which is illegal in Next 16 SC contexts).
 const cookieSets: unknown[] = [];
 
 vi.mock('next/headers', () => ({
@@ -100,8 +98,6 @@ describe('anon /build SC insert path', () => {
 
     const { default: BuildLandingPage } = await import('@/app/build/page');
 
-    // The SC calls `redirect()` on success, which throws NEXT_REDIRECT —
-    // a normal Next.js control-flow throw, not a real error.
     await expect(BuildLandingPage()).rejects.toThrow('NEXT_REDIRECT');
 
     expect(captured.inserts).toHaveLength(1);
@@ -115,8 +111,6 @@ describe('anon /build SC insert path', () => {
 
     expect(redirectMock).toHaveBeenCalledWith('/build/peek-uuid-123');
 
-    // Cardinal rule: the SC must NEVER attempt a cookies.set() — that's what
-    // caused the original 500. If this assertion fails, the regression returned.
     expect(cookieSets).toHaveLength(0);
   });
 
