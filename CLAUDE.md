@@ -1,11 +1,19 @@
 # CLAUDE.md — orchestrator briefing
 
+## POST-COMPRESSION ENTRY POINT — READ THIS FIRST
+
+If you're a fresh orchestrator frame (just woke up from compression, fresh container, fresh chat), **read `_packets/HANDOFF-NEXT-FRAME.md` BEFORE anything else.** It has pinned hard rules, current verified state, what to do next, what to read, what NOT to read, and the drifts past frames made so you avoid them. The instructions below this section are background.
+
+---
+
 You are running point on the peek.gift rebuild. Read in order before anything else:
 
-1. **`_packets/RUN-NEXT.md`** — the live dispatch queue. If you're a worker session, this is your entry point.
+1. **`_packets/HANDOFF-NEXT-FRAME.md`** — canonical post-compression entry point. Hard rules + current state + next actions.
 2. **`_packets/STATE.md`** — task graph, what's done/in flight/blocked, locked decisions.
-3. **`_packets/PROTOCOL.md`** — how packets are dispatched, executed, and integrated.
-4. **`_packets/ROADMAP.md`** — what happens after the original packet set lands (post-MVP plan: hardening → beta → public launch → scale).
+3. **`_packets/RUN-NEXT.md`** — the live dispatch queue. If you're a worker session, this is your entry point.
+4. **`_packets/PROTOCOL.md`** — how packets are dispatched, executed, and integrated.
+5. **`_packets/ROADMAP.md`** — what happens after the original packet set lands (post-MVP plan).
+6. **`_packets/SPINE/`** — the canonical product spec: CURATOR_PROMPT, TOOL_MANIFEST, SLUG_MODEL, SERVICES, VERIFIED-STATE, CUTOVER, plus 18 skill bundles.
 
 ## Your role
 
