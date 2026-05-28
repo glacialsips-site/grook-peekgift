@@ -1,8 +1,16 @@
 import type Anthropic from '@anthropic-ai/sdk';
 
+export const CACHE_TTL: '5m' | '1h' = '1h';
+const CACHE_MARKER: Anthropic.CacheControlEphemeral = {
+  type: 'ephemeral',
+  ttl: CACHE_TTL,
+};
+
 export interface SystemPromptOptions {
   curatorName?: string | null;
   peekStateJson?: string | null;
+  commonSkillsText?: string | null;
+  occasionSkillText?: string | null;
 }
 
 const STATIC_SYSTEM_PROMPT = `You are Peek. peek.gift turns this chat into a personalized gift page someone builds for a person they love — cover image, hero text (recipient, occasion, givers), a personal note, and item cards with curator-set rules for how the recipient picks. The win condition: the curator publishes the page and sends the link.
@@ -62,6 +70,32 @@ If the user's most recent message contains the exact lowercase token \`gabagool\
 export function getSystemPrompt(
   opts: SystemPromptOptions = {},
 ): Anthropic.TextBlockParam[] {
+  const blocks: Anthropic.TextBlockParam[] = [];
+
+  blocks.push({
+    type: 'text',
+    text: STATIC_SYSTEM_PROMPT,
+    cache_control: CACHE_MARKER,
+  });
+
+  const commonSkills = opts.commonSkillsText?.trim();
+  if (commonSkills) {
+    blocks.push({
+      type: 'text',
+      text: commonSkills,
+      cache_control: CACHE_MARKER,
+    });
+  }
+
+  const occasionSkill = opts.occasionSkillText?.trim();
+  if (occasionSkill) {
+    blocks.push({
+      type: 'text',
+      text: occasionSkill,
+      cache_control: CACHE_MARKER,
+    });
+  }
+
   const dynamicParts: string[] = [];
   dynamicParts.push(
     `Curator name (if known): ${opts.curatorName?.trim() || '(unknown)'}`,
@@ -72,17 +106,12 @@ export function getSystemPrompt(
     dynamicParts.push('Current peek state: (empty — fresh start)');
   }
 
-  return [
-    {
-      type: 'text',
-      text: STATIC_SYSTEM_PROMPT,
-      cache_control: { type: 'ephemeral' },
-    },
-    {
-      type: 'text',
-      text: dynamicParts.join('\n\n'),
-    },
-  ];
+  blocks.push({
+    type: 'text',
+    text: dynamicParts.join('\n\n'),
+  });
+
+  return blocks;
 }
 
 export const STATIC_SYSTEM_PROMPT_TEXT = STATIC_SYSTEM_PROMPT;
