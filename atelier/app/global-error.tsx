@@ -69,7 +69,8 @@ export default function GlobalError({
               type="button"
               onClick={reset}
               style={{
-                padding: '10px 16px',
+                minHeight: 44,
+                padding: '12px 20px',
                 background: '#ff7a59',
                 color: '#0b0a14',
                 border: 'none',
@@ -84,7 +85,10 @@ export default function GlobalError({
             <a
               href="/"
               style={{
-                padding: '10px 16px',
+                minHeight: 44,
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '12px 20px',
                 background: 'transparent',
                 color: '#fbf7ee',
                 border: '1px solid rgba(251, 247, 238, 0.2)',

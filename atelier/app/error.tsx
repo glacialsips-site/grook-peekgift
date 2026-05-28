@@ -31,10 +31,10 @@ export default function SegmentError({
           We hit a snag rendering this page. It&apos;s already on our radar.
         </p>
         <div className="flex gap-2">
-          <Button type="button" onClick={reset}>
+          <Button type="button" size="lg" onClick={reset}>
             Try again
           </Button>
-          <Button asChild variant="outline" type="button">
+          <Button asChild variant="outline" size="lg" type="button">
             <a href="/">Home</a>
           </Button>
         </div>

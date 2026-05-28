@@ -13,7 +13,7 @@ export default function Page() {
           New here?{' '}
           <Link
             href="/sign-up"
-            className="text-foreground underline-offset-4 hover:underline"
+            className="inline-block min-h-11 py-2.5 text-foreground underline-offset-4 hover:underline"
           >
             Create an account
           </Link>

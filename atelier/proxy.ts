@@ -18,6 +18,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/inngest(.*)',     // Inngest signs every invocation
   '/monitoring(.*)',      // Sentry tunnel route — bypass ad-blockers
   '/styles-test(.*)',     // local-only verification harness for the styles engine
+  '/mobile-audit(.*)',    // local-only mobile-audit fixture pages (page guards production with 404)
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

@@ -13,7 +13,7 @@ export default function Page() {
           Already have an account?{' '}
           <Link
             href="/sign-in"
-            className="text-foreground underline-offset-4 hover:underline"
+            className="inline-block min-h-11 py-2.5 text-foreground underline-offset-4 hover:underline"
           >
             Sign in
           </Link>
