@@ -214,7 +214,25 @@ function stripAttachmentGuidance(text: string): string {
 function toApiHistory(initial: InitialChatMessage[]): ApiHistoryEntry[] {
   const out: ApiHistoryEntry[] = [];
   for (const row of initial) {
-    if (row.role === 'tool_result') continue;
+    // Keep ALL rows — including tool_result. Anthropic's API requires
+    // assistant tool_use blocks to be IMMEDIATELY followed by user
+    // tool_result blocks. Stripping tool_result rows causes 400s like
+    // "tool_use ids were found without tool_result blocks immediately
+    // after" (BUGS B11 redux — Wave 1 fix was in outgoing path, not
+    // here in the history-replay path).
+    //
+    // The `tool_result` role rows persisted in `chat_messages` are
+    // re-injected as user-turn content blocks. The chat route's
+    // `chatTurn` accepts the history as-is and pairs tool_use →
+    // tool_result correctly.
+    if (row.role === 'tool_result') {
+      // tool_result rows in our DB are stored as their own row with
+      // role='tool_result' for analytics. The API expects them as
+      // user-role content blocks containing {type:'tool_result',...}.
+      // Re-shape on the way out.
+      out.push({ role: 'user', content: row.content });
+      continue;
+    }
     out.push({ role: row.role, content: row.content });
   }
   return out;
