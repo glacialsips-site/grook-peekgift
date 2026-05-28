@@ -31,6 +31,7 @@ registerTool<Input, Output>({
     },
     required: ['card_ids'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
     const cardIds = parsed.card_ids.filter((id): id is string => Boolean(id));

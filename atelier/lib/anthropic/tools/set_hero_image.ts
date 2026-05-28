@@ -44,6 +44,7 @@ registerTool<Input, Output>({
     },
     required: ['image_url', 'source'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
     const [row] = await db

@@ -42,6 +42,7 @@ registerTool<Input, Output>({
     },
     required: ['url'],
   },
+  deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
     const parsed = InputSchema.parse(input);
     const wrapped = wrapAffiliateLink(

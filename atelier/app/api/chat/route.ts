@@ -26,6 +26,10 @@ import {
 import { getClientIp } from '@/lib/security/client-ip';
 import { isOriginAllowed, originRejectionResponse } from '@/lib/security/origin';
 import { loadPeekSnapshot } from '@/lib/peek/snapshot';
+import { db } from '@/db/client';
+import { peeks } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { getSupabaseService } from '@/lib/supabase/service';
 
 const log = logger.child({ component: 'api/chat' });
 
@@ -178,6 +182,74 @@ export async function POST(req: NextRequest): Promise<Response> {
       source: { type: 'url', url: a.url },
     }));
     userContent.unshift({ type: 'text', text: guidance }, ...imageBlocks);
+  }
+
+  // Files API: drain peeks.metadata.active_attached_file_ids[] into the next
+  // user-turn content. The attach_files_api_ref tool records intent; we
+  // inject ONCE per attach call. Audio falls back to a text mention (the
+  // current Anthropic Files API doesn't accept audio refs in content blocks).
+  try {
+    const [row] = await db
+      .select({ metadata: peeks.metadata })
+      .from(peeks)
+      .where(eq(peeks.id, peekId));
+    const meta = (row?.metadata as Record<string, unknown> | undefined) ?? {};
+    const active = Array.isArray(meta['active_attached_file_ids'])
+      ? (meta['active_attached_file_ids'] as string[])
+      : [];
+    const uploaded = Array.isArray(meta['uploaded_files'])
+      ? (meta['uploaded_files'] as Array<{
+          file_id?: string;
+          mime?: string;
+          original_name?: string;
+        }>)
+      : [];
+    if (active.length > 0) {
+      const fileBlocks: Anthropic.ContentBlockParam[] = active.flatMap((fid) => {
+        const entry = uploaded.find((u) => u.file_id === fid);
+        if (!entry) return [];
+        // Files API file_id sources are part of the Beta surface; the
+        // chat client carries the `anthropic-beta: files-api-2025-04-14`
+        // header globally (see lib/anthropic/client.ts) so the API
+        // accepts these refs. The non-beta TS union doesn't include
+        // file_id sources, so cast through unknown.
+        if (entry.mime?.startsWith('image/')) {
+          return [
+            {
+              type: 'image',
+              source: { type: 'file', file_id: fid },
+            } as unknown as Anthropic.ContentBlockParam,
+          ];
+        }
+        if (entry.mime === 'application/pdf') {
+          return [
+            {
+              type: 'document',
+              source: { type: 'file', file_id: fid },
+            } as unknown as Anthropic.ContentBlockParam,
+          ];
+        }
+        return [
+          {
+            type: 'text',
+            text: `[audio file attached: ${entry.original_name ?? '(unnamed)'} (file_id: ${fid})]`,
+          },
+        ];
+      });
+      if (fileBlocks.length > 0) {
+        userContent.unshift(...fileBlocks);
+      }
+      await db
+        .update(peeks)
+        .set({
+          metadata: { ...meta, active_attached_file_ids: [] },
+          updatedAt: new Date(),
+        })
+        .where(eq(peeks.id, peekId));
+    }
+  } catch (err) {
+    const m = err instanceof Error ? err.message : String(err);
+    log.warn('attached_file_injection_failed', { peekId, message: m });
   }
 
   if (userContent.length === 0) {
@@ -347,13 +419,65 @@ export async function POST(req: NextRequest): Promise<Response> {
         log.warn('peek_summary_load_failed', { peekId, message });
       }
 
+      // Curator durable memory: load profile.md + all kv/*.json entries
+      // from peek_v2.curator_memory and stringify them into the dynamic
+      // system-prompt block. Signed-in only; anon curators skip entirely.
+      let curatorMemory: string | null = null;
+      if (userId) {
+        try {
+          const sb = getSupabaseService();
+          const { data: rows } = await sb
+            .from('curator_memory')
+            .select('path, content')
+            .eq('clerk_user_id', userId)
+            .order('updated_at', { ascending: false })
+            .limit(50);
+          if (rows && rows.length > 0) {
+            const profilePath = `/memories/${userId}/profile.md`;
+            const kvPrefix = `/memories/${userId}/kv/`;
+            const profile = rows.find((r) => r.path === profilePath);
+            const kv = rows.filter((r) => r.path.startsWith(kvPrefix));
+            const parts: string[] = [];
+            if (profile?.content) {
+              parts.push(`Curator profile:\n${profile.content}`);
+            }
+            if (kv.length > 0) {
+              const kvPairs = kv
+                .map((r) => {
+                  try {
+                    const parsed = JSON.parse(r.content ?? '') as {
+                      value: unknown;
+                    };
+                    const key = r.path
+                      .replace(kvPrefix, '')
+                      .replace(/\.json$/, '');
+                    return `- ${key}: ${JSON.stringify(parsed.value)}`;
+                  } catch {
+                    return null;
+                  }
+                })
+                .filter((s): s is string => s !== null);
+              if (kvPairs.length > 0) {
+                parts.push(`Curator facts:\n${kvPairs.join('\n')}`);
+              }
+            }
+            if (parts.length > 0) {
+              curatorMemory = parts.join('\n\n');
+            }
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          log.warn('curator_memory_load_failed', { userId, message });
+        }
+      }
+
       try {
         const turn = chatTurn({
           ctx: { peekId, userId, sessionId },
           history: initialHistory,
           userMessage: userContent,
           model: chosenModel,
-          systemPromptOptions: { curatorName, peekSummary },
+          systemPromptOptions: { curatorName, peekSummary, curatorMemory },
           signal: req.signal,
           onToolResult: async (id, _name, output) => {
             safeEnqueue({ kind: 'tool_result', id, output });
