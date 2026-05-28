@@ -1,5 +1,78 @@
 # STATE — live build status
 
+## Wave of 2026-05-28 — 8 parallel subs landed (A-H) + BUGS-WAVE2 fixes
+
+Today's session shipped a wide parallel wave on top of the SPINE/CURATOR_PROMPT/packet 40-41 substrate. `claude/bold-ride-Li5zK` and `atelier-integration` are caught up to head; trunk is `17cd407` (BUGS-WAVE2 W01-W05 fix).
+
+### 8 parallel subs (A-H) landed today
+
+The subagent fleet pushed 8 independent worktrees, each targeting an orthogonal slice of the post-SPINE backlog. All merged into `claude/bold-ride-Li5zK`. Per-sub notes live in their own commits; the integrated trunk is what counts here.
+
+### BUGS-WAVE2 BLOCKs fixed (W01-W05) — commit `17cd407`
+
+5 BLOCK-severity findings from `audit/bugs-wave2` resolved in a single shot:
+- **W01** — added `extended-cache-ttl-2025-04-11` beta header to `lib/anthropic/client.ts` so the 1h cache TTL stops silently downgrading.
+- **W02** — `max_tokens` now scales above `thinking.budget_tokens` when extended thinking is on (prevents 400 every ext-thinking turn).
+- **W03** — fixed `affiliate_search` tool description to say `web_search` (not the hallucinated `web_search_tool_bm25`).
+- **W04** — default model swapped from `claude-opus-4-7` back to `claude-sonnet-4-6`. Opus stays as opt-in override. Avoids ~5× cost burn on every curator turn + matches the SPINE.
+- **W05** — `propose_checkout` tool description no longer leaks the `THISISTHEONE` test coupon. Generic input slot only.
+
+W06-W18 (MAJOR-severity) carry over to a follow-up wave; not blocking deploy.
+
+### New keyed services this session
+
+- **PostHog** — org `peekgift`, project `434015`, `NEXT_PUBLIC_POSTHOG_KEY` + `NEXT_PUBLIC_POSTHOG_HOST` set on Netlify. CSP `connect-src` already includes `https://*.posthog.com`. 🟢 LIVE.
+- **Upstash Redis** — `https://probable-lemur-138225.upstash.io` + `UPSTASH_REDIS_REST_TOKEN` set on Netlify. Unblocks rate-limit + webhook idempotency (BUGS M22 + B15). 🟢 LIVE.
+- **FAL_KEY** — fal.ai key set on Netlify. Image gen via `lib/image-gen/fal.ts` works on next deploy. 🟢 LIVE.
+
+### Stripe webhook URL updated
+
+Webhook `we_1Tb7PhCEKPUsVee1Jz6Kcxkb` repointed to `https://vnext.peek.gift/api/stripe/webhook` (was `peek-gift-vnext.netlify.app/api/stripe/webhook` — primary URL drift fix per URL-AUDIT.md). Now subscribed to **12 events**:
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+- `checkout.session.expired`
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `charge.refunded`
+- `charge.dispute.created`
+- `invoice.paid`
+- `invoice.payment_failed`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+Signing secret in Netlify `STRIPE_WEBHOOK_SECRET` (production + previews + dev + branch contexts, secret). Legacy webhook `we_1TRbB2CEKPUsVee1Qh084LCz` → `peek.gift/api/payment-webhook` left untouched (legacy site still consumes it until cutover).
+
+### Big remaining bugs (parallel subs are fixing right now)
+
+| Bug | What breaks | Fix in flight |
+|---|---|---|
+| Anonymous `/build` 500 | Anon chat path crashes before first SSE event reaches client. | Parallel sub on it. |
+| `/api/webhooks/skimlinks` 500 | Skimlinks webhook route crashes on every payload (sig validator or schema drift). | Parallel sub on it. |
+| `mark_ready_for_publish` state machine | Tool fires but `peeks.ready_for_publish` doesn't always flip; publish CTA renders inconsistently. | Parallel sub on it. |
+| Bland styling | Vibe engine wires CSS vars but visual punch is missing — washed-out palette, no contrast. | Parallel sub on it. |
+
+These are not blocking trunk green; they're behavioral bugs that ship in the next merge wave. STATE will be updated again once they land.
+
+### Frank-action items (parked until he's back)
+
+See `_packets/SPINE/FRANK-TODO.md` for the canonical checklist. Highlights:
+- Anthropic Console → Settings → Privacy → enable Web Search
+- Stripe Dashboard → Products → `prod_UZzXnuYuX4ud15` → set `tax_code = txcd_10103001`
+- Sentry: create project, send DSN + auth token
+- Twilio / Inngest / Deepgram / ElevenLabs / Skimlinks / Sovrn signups (signup prompts in `SPINE/SERVICES.md`)
+
+### Netlify site hygiene
+
+Frank gave blank check on the 3 unused sandboxes:
+- `peekgift-v9k-modular-sandbox` (`2ded0f9d-47d6-4f22-8e03-4ac9acba0f86`)
+- `peekgift-v1-sandbox` (`740fbbe2-2577-4f1b-8613-7e0812a629dd`)
+- `grook-peekgift` (`e20f2cd9-47e4-4d06-bd90-b9757acbe88c2`)
+
+**Cannot delete via MCP** — `netlify-project-services-updater` exposes only `update-visitor-access-controls`, `update-forms`, `manage-form-submissions`, `update-project-name`, `manage-env-vars`, `create-new-project`. No delete-project operation. Flagged in `FRANK-TODO.md` for manual dashboard deletion.
+
+---
+
 ## SPINE/ trim (2026-05-28)
 
 Frank's directive: "all killer no filler." Stripped speculative bloat from `SPINE/CAPABILITY_INVENTORY.md` + `SPINE/SERVICES.md`. Moved everything Frank isn't actively building toward into new `SPINE/IDEAS-LATER.md` — preserves the thinking, removes the drag on every dispatch decision.

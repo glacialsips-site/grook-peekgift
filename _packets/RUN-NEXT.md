@@ -2,6 +2,46 @@
 
 _Owner: orchestrator updates this file after every batch lands. Worker session reads it and dispatches subagents._
 
+## Current focus (2026-05-28)
+
+The spine is now shipping in **waves of parallel subs**, not pre-drafted numbered packets. Packets 42-50 from the original Tier 0 plan may not be needed in their original form — the SPINE substrate (CURATOR_PROMPT, skills loader, packet 40 caching, packet 41 Anthropic surface) is mostly live, and remaining work is bug-shaped or polish-shaped, not net-new feature packets.
+
+### In-flight subs (parallel right now)
+
+| Sub | What it's fixing |
+|---|---|
+| anon-build-500 | Anonymous `/build` route crashes before any SSE event reaches client. |
+| skimlinks-webhook-500 | `/api/webhooks/skimlinks` returns 500 on every payload — sig validator or schema drift. |
+| mark-ready-state-machine | `mark_ready_for_publish` tool fires but `peeks.ready_for_publish` doesn't always flip; publish CTA renders inconsistently. |
+| bland-styling | Vibe engine wires CSS vars but visual punch is missing — washed-out palette, no contrast on recipient + preview surfaces. |
+
+When these return, integration is one merge each into `claude/bold-ride-Li5zK` → forward-merge into `atelier-integration`.
+
+### BUGS-WAVE2 follow-ups (not yet assigned)
+
+W01-W05 BLOCKs landed in `17cd407`. W06-W18 MAJORs (see `_packets/BUGS-WAVE2.md`) are next-batch candidates:
+- W06 `expires_at` enforcement on curator memory
+- W07 in-memory FLAGS Map TTL eviction
+- W08 server-side `loadChatHistory` preserves `tool_result` rows (B11-redux completeness)
+- W09 wrap stub `InputSchema.parse` calls in try/catch
+- W10 compute `rulesPhase` / `imageGenerationPhase` / `voiceMode` from peek snapshot (unlocks ~85KB of dead conditional skills)
+- W11-W18 — see BUGS-WAVE2 for the rest
+
+These can dispatch as a parallel batch once the in-flight subs land.
+
+### Blocked on Frank-actions (canonical list lives in `_packets/SPINE/FRANK-TODO.md`)
+
+- **Sentry** — DSN + auth token from Frank's `peekgift` org. Errors silently log to console until keyed.
+- **Anthropic Console → Privacy → Web Search** — unlocks `web_search` server tool + `affiliate_search` fallback.
+- **Twilio** — SMS share / WhatsApp share. Voice STT is Deepgram — separate.
+- **Inngest** — `peek-gift-vnext` app signup. All 3 background jobs silently no-op without keys.
+- **Deepgram + ElevenLabs (or Cartesia)** — voice mode mic hidden until both keyed.
+- **Stripe Dashboard** — set `tax_code = txcd_10103001` on `prod_UZzXnuYuX4ud15` (currently general `txcd_10000000`). Minor.
+- **Skimlinks / Sovrn** — demoted from Tier 0 per Frank ("we don't have affiliates right now"). Apply when affiliates matter.
+- **Netlify dashboard** — delete 3 unused sandbox sites (no MCP delete-project op): `peekgift-v9k-modular-sandbox`, `peekgift-v1-sandbox`, `grook-peekgift`.
+
+---
+
 ## How the worker session uses this file
 
 You (cc-on-web worker) are the single point of contact for the user. Each "go" or "dispatch" command means:
