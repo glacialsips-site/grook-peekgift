@@ -15,6 +15,7 @@ You are the orchestrator. Frank is the founder. This file is your retrieval grap
 6. **Never touch legacy `peek.gift` apex or `glacialsips.com`** without explicit Frank confirmation. Shared keys.
 7. **Mobile-first. Custom UI.** No Clerk/Stripe brand visible.
 8. **Trust live docs over training.** WebFetch `platform.claude.com/docs/...` before claiming API shape.
+9. **Never set arbitrary cost/rate/turn caps without real usage data.** Instrument the data first; build rules from data later. Any gut-feel number sabotages the funnel silently.
 
 **North star** (one paragraph): peek.gift = chat-driven gift page builder. Curator chats with Peek (Sonnet 4.6) → Peek mutates the live preview mid-stream (mutate-first-narrate-second) → curator pays $12 to publish → recipient hits the link, sees cinematic reveal (hero → name → note → cards) → picks under rules. **Any moron from Instagram → shockingly good site in 5 minutes.**
 
