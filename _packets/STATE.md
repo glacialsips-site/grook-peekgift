@@ -1,5 +1,28 @@
 # STATE — live build status
 
+## SPINE/ trim (2026-05-28)
+
+Frank's directive: "all killer no filler." Stripped speculative bloat from `SPINE/CAPABILITY_INVENTORY.md` + `SPINE/SERVICES.md`. Moved everything Frank isn't actively building toward into new `SPINE/IDEAS-LATER.md` — preserves the thinking, removes the drag on every dispatch decision.
+
+**What got trimmed:**
+- Travel APIs (Viator, OpenTable, Booking, Expedia, Airbnb, TripAdvisor, GetYourGuide, Ticketmaster, SeatGeek, StubHub)
+- Major-retailer direct affiliates (Amazon, Apple, Walmart, Target, eBay)
+- Music/video integrations (Spotify, Apple Music, TMDB, YouTube oEmbed, Pinterest, Instagram, Canva)
+- Real-time voice/video hosting (LiveKit/Daily, Mux/Cloudflare/Bunny)
+- Code Execution, Resend Audiences, Ayrshare/Buffer, Tolt/Rewardful
+- Stripe Connect / Subscriptions / Invoices / Identity
+- Lottiefiles, Mapbox, Browserbase, Twilio extras
+
+**Key status updates baked into the trim:**
+- Upstash Redis — 🔴 → 🟢 LIVE (`https://probable-lemur-138225.upstash.io` keyed this session)
+- PostHog — 🟡 → 🟢 LIVE (org `peekgift`, project `434015`)
+- fal.ai — keyed this session
+- Skimlinks / Sovrn — demoted from Tier 0 per Frank ("we don't have affiliates right now")
+
+**Still in flight (no change):** Tier 0 dispatch packets 40-50, prompt caching, Anthropic surface expansion (Memory + Files API + Web Search + Extended Thinking), voice (Deepgram + ElevenLabs), camera (MediaRecorder), Stripe surface expansion (Link + Apple/Google Pay + Klarna + Address Element), Clerk surface (Passkeys + magic link + OAuth), Realtime live preview, share-pack batch gen, Tailwind demotion, custom card geometry. See updated `SPINE/CAPABILITY_INVENTORY.md §H` for the full Tier 0 list.
+
+---
+
 ## SPINE/ landed (2026-05-27)
 
 The orchestration spine — canonical artifacts that hold the product architecture across sessions — is in `_packets/SPINE/`. Read `_packets/SPINE/README.md` first for ordering.
