@@ -31,10 +31,19 @@ type Props = {
   onUnpick: (cardId: string) => Promise<boolean>;
 };
 
+/**
+ * Per-card deal-in stagger (seconds) keyed by vibe.motion.
+ *
+ * Base cadence is 100ms (the magazine-cover-opening reveal cards-phase target,
+ * see `_packets/SPINE/skills/reveal-mechanics.md` §3) multiplied by the vibe
+ * motion scale (still 0.6x, soft 1x, lively 1.25x). Matches the cinematic
+ * teaser strip stagger so the deck below picks up where the reveal teaser
+ * leaves off without a perceptible seam.
+ */
 const MOTION_STAGGER: Record<VibeMotion, number> = {
-  still: 0.08,
-  soft: 0.14,
-  lively: 0.22,
+  still: 0.06,
+  soft: 0.1,
+  lively: 0.125,
 };
 
 export function CardDeck({
@@ -152,13 +161,19 @@ type SubProps = {
 };
 
 function SingleCard(props: SubProps) {
-  const { index, revealed, stagger } = props;
+  const { card, index, revealed, stagger } = props;
   const delay = revealed ? 0 : Math.min(index * stagger, 1.6);
+  // Slight per-card tilt on entry — seeded by card id + index so variant-group
+  // members fan distinctly from one another while staying deterministic. Lands
+  // at rotate: 0. Variant group members share the parent's staggerChildren so
+  // they appear together as a fan, per skill §3.
+  const seed = (card.id ? card.id.charCodeAt(0) : index) + index;
+  const enterRotate = ((seed % 5) - 2) * 1.4; // -2.8 .. +2.8 deg
   return (
     <motion.article
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: 22, rotate: enterRotate }}
+      animate={{ opacity: 1, y: 0, rotate: 0 }}
+      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
       layout
     >
       <CardRenderer {...props} />
