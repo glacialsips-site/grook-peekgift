@@ -25,7 +25,18 @@ async function logWebhook(payload: Record<string, unknown>, success: boolean) {
 
 export async function POST(req: Request) {
   const secret = env.CLERK_WEBHOOK_SIGNING_SECRET;
-  if (!secret) return new Response('webhook not configured', { status: 500 });
+  if (!secret) {
+    // No signing secret configured: gracefully no-op so unkeyed deliveries
+    // don't pile up as failed retries on Clerk's side. Log so we notice if
+    // events arrive before the integration is provisioned.
+    log.warn('webhook_unconfigured', {
+      reason: 'CLERK_WEBHOOK_SIGNING_SECRET unset',
+    });
+    return Response.json(
+      { received: true, skipped: 'service_not_configured' },
+      { status: 200 },
+    );
+  }
 
   const headerPayload = await headers();
   const svix_id = headerPayload.get('svix-id');

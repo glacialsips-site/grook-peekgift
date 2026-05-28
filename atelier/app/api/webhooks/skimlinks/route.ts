@@ -5,6 +5,9 @@ import { env } from '@/lib/env';
 import { parseClickCustomId } from '@/lib/affiliate/wrap';
 import { getSupabaseService } from '@/lib/supabase/service';
 import { checkIdempotency } from '@/lib/security/idempotency';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'api/webhooks/skimlinks' });
 
 export const runtime = 'nodejs';
 
@@ -42,7 +45,16 @@ function toRawPayload(evt: SkimlinksEvent): Record<string, unknown> {
 export async function POST(req: NextRequest) {
   const secret = env.SKIMLINKS_WEBHOOK_SECRET;
   if (!secret) {
-    return new Response('not configured', { status: 500 });
+    // No secret configured: gracefully no-op so unkeyed deliveries don't pile
+    // up as failed retries on Skimlinks' side. Log so we know if events arrive
+    // before the integration is provisioned.
+    log.warn('webhook_unconfigured', {
+      reason: 'SKIMLINKS_WEBHOOK_SECRET unset',
+    });
+    return Response.json(
+      { received: true, skipped: 'service_not_configured' },
+      { status: 200 },
+    );
   }
   const sig = req.headers.get('x-skimlinks-signature');
   if (!sig) {
