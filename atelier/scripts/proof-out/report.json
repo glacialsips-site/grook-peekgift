@@ -1,0 +1,70 @@
+[
+  {
+    "key": "princess",
+    "label": "Princess 6th Birthday",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#ffecff",
+      "surface": "#ffdbfa",
+      "ink": "#281027",
+      "inkMuted": "#6d4a6a",
+      "accent": "#b37300",
+      "onAccent": "#121212",
+      "accent2": "#008aad"
+    },
+    "contrast": {
+      "inkOnBg": 15.66,
+      "inkOnSurface": 14.05,
+      "inkMutedOnBg": 6.59,
+      "onAccentOnAccent": 4.79,
+      "accentOnBg": 3.48
+    },
+    "passes": true
+  },
+  {
+    "key": "bachelor",
+    "label": "Bachelor Party",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#070e21",
+      "surface": "#0f1b38",
+      "ink": "#ddefff",
+      "inkMuted": "#97abd5",
+      "accent": "#d58600",
+      "onAccent": "#000000",
+      "accent2": "#fa7d00"
+    },
+    "contrast": {
+      "inkOnBg": 16.33,
+      "inkOnSurface": 14.48,
+      "inkMutedOnBg": 8.32,
+      "onAccentOnAccent": 7.24,
+      "accentOnBg": 6.62
+    },
+    "passes": true
+  },
+  {
+    "key": "luxe",
+    "label": "Luxe Jewelry",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#38312f",
+      "surface": "#4a403c",
+      "ink": "#eee1dd",
+      "inkMuted": "#b6a7a2",
+      "accent": "#b98c7d",
+      "onAccent": "#000000"
+    },
+    "contrast": {
+      "inkOnBg": 9.98,
+      "inkOnSurface": 7.87,
+      "inkMutedOnBg": 5.48,
+      "onAccentOnAccent": 7.11,
+      "accentOnBg": 4.31
+    },
+    "passes": true
+  }
+]
