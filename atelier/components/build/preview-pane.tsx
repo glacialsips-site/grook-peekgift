@@ -51,10 +51,13 @@ function isPeekEmpty(draft: PeekDraft): boolean {
   if (p.noteMd && p.noteMd.trim().length > 0) return false;
   if (draft.cards.length > 0) return false;
   if (draft.variantGroups.length > 0) return false;
+  // DEFAULT_VIBE ships with palette+mood already populated, so we can't use
+  // those fields as a proxy for "evolved vibe". A non-empty
+  // `signal_source_history` is the truth: the vibe engine appends an entry
+  // every time a real curator/system signal updates a dial.
   const v = p.vibe ?? {};
-  if (v.palette || v.mood || (v.mood_words && v.mood_words.length > 0)) {
-    return false;
-  }
+  const evolved = (v.signal_source_history ?? []).length > 0;
+  if (evolved) return false;
   return true;
 }
 
@@ -120,10 +123,12 @@ export function PreviewPane({
 
   return (
     <section
-      className={cn(
-        'relative flex h-full min-h-0 flex-col bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]',
-        className,
-      )}
+      className={cn('relative flex h-full min-h-0 flex-col', className)}
+      style={{
+        backgroundColor: 'hsl(var(--peek-bg))',
+        color: 'hsl(var(--peek-ink))',
+        fontFamily: 'var(--peek-font-body)',
+      }}
       aria-label="Peek preview"
     >
       <DraftRender draft={draft} viewAs={viewAs} />
@@ -184,7 +189,14 @@ function DraftRender({
 
   return (
     <PeekVibeProvider vibe={providerVibe}>
-      <div className="relative flex h-full min-h-0 flex-col overflow-y-auto bg-[hsl(var(--peek-bg))] text-[hsl(var(--peek-ink))]">
+      <div
+        className="relative flex h-full min-h-0 flex-col overflow-y-auto"
+        style={{
+          backgroundColor: 'hsl(var(--peek-bg))',
+          color: 'hsl(var(--peek-ink))',
+          fontFamily: 'var(--peek-font-body)',
+        }}
+      >
         {budgetTally &&
         (budgetTally.sum > 0 || budgetTally.budget != null) ? (
           <BudgetBadge sum={budgetTally.sum} budget={budgetTally.budget} />
@@ -203,12 +215,15 @@ function DraftRender({
           {draft.peek.noteMd ? (
             <article
               className={cn(
-                'prose prose-sm max-w-none text-[hsl(var(--peek-ink))]',
+                'prose prose-sm max-w-none',
                 'prose-headings:text-[hsl(var(--peek-ink))]',
                 'prose-strong:text-[hsl(var(--peek-ink))]',
                 'prose-a:text-[hsl(var(--peek-accent))]',
               )}
-              style={{ fontFamily: 'var(--peek-font-body)' }}
+              style={{
+                color: 'hsl(var(--peek-ink))',
+                fontFamily: 'var(--peek-font-body)',
+              }}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {draft.peek.noteMd}
@@ -220,9 +235,14 @@ function DraftRender({
             </EmptyHint>
           )}
 
-          <Separator className="bg-[hsl(var(--peek-ink))]/10" />
+          <Separator
+            style={{ backgroundColor: 'hsl(var(--peek-ink) / 0.12)' }}
+          />
 
-          <div className="flex flex-col gap-6">
+          <div
+            className="flex flex-col"
+            style={{ gap: 'var(--peek-space-6)' }}
+          >
             {ungrouped.length === 0 && orderedGroups.length === 0 ? (
               <EmptyHint>No cards yet — keep chatting.</EmptyHint>
             ) : null}
@@ -270,12 +290,16 @@ function BudgetBadge({
   return (
     <div className="pointer-events-none absolute right-3 top-3 z-30">
       <span
-        className={cn(
-          'pointer-events-auto inline-flex items-center gap-1.5 rounded-full border bg-background/95 px-3 py-1.5 text-[11px] font-semibold shadow-md backdrop-blur',
-          over
-            ? 'border-red-500/30 text-red-600 dark:text-red-400'
-            : 'border-[hsl(var(--peek-ink))]/15 text-[hsl(var(--peek-ink))]/75',
-        )}
+        className="pointer-events-auto inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-semibold shadow-md backdrop-blur"
+        style={{
+          borderRadius: 'var(--vibe-radius-button, 9999px)',
+          backgroundColor: 'hsl(var(--peek-bg) / 0.92)',
+          fontFamily: 'var(--peek-font-body)',
+          borderColor: over
+            ? 'rgb(239 68 68 / 0.4)'
+            : 'hsl(var(--peek-ink) / 0.18)',
+          color: over ? 'rgb(220 38 38)' : 'hsl(var(--peek-ink) / 0.78)',
+        }}
         title={
           over ? 'Proposed value exceeds budget' : 'Curator-only budget tally'
         }
@@ -291,7 +315,9 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
   const givers = peek.giverNames ?? [];
   const hasGivers = givers.length > 0;
   const display = peek.vibe?.font_pairing?.display;
-  const headingFont = display ?? 'var(--peek-font-heading)';
+  const headingFont = display
+    ? `"${display}", var(--peek-font-heading)`
+    : 'var(--peek-font-heading)';
 
   if (peek.heroImageUrl) {
     return (
@@ -314,7 +340,7 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
+                'linear-gradient(to top, hsl(var(--peek-ink) / 0.78) 0%, hsl(var(--peek-ink) / 0.22) 45%, transparent 70%)',
             }}
           />
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 px-6 pb-6 sm:pb-8">
@@ -322,8 +348,11 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
-              className="text-4xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-5xl"
-              style={{ fontFamily: headingFont }}
+              className="text-4xl font-semibold tracking-tight drop-shadow-lg sm:text-5xl"
+              style={{
+                fontFamily: headingFont,
+                color: 'hsl(var(--peek-bg))',
+              }}
             >
               {name}
             </motion.h1>
@@ -332,8 +361,11 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
-                className="text-base text-white/85 drop-shadow sm:text-lg"
-                style={{ fontFamily: headingFont }}
+                className="text-base drop-shadow sm:text-lg"
+                style={{
+                  fontFamily: headingFont,
+                  color: 'hsl(var(--peek-bg) / 0.92)',
+                }}
               >
                 {peek.occasion}
               </motion.p>
@@ -342,7 +374,8 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55, ease: 'easeOut' }}
-                className="text-xs uppercase tracking-widest text-white/75 drop-shadow"
+                className="text-xs uppercase tracking-widest drop-shadow"
+                style={{ color: 'hsl(var(--peek-bg) / 0.82)' }}
               >
                 {peek.relationship}
               </motion.p>
@@ -352,13 +385,17 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.7, ease: 'easeOut' }}
-                className="text-xs uppercase tracking-widest text-white/75 drop-shadow"
+                className="text-xs uppercase tracking-widest drop-shadow"
+                style={{ color: 'hsl(var(--peek-bg) / 0.82)' }}
               >
                 from {givers.join(', ')}
               </motion.p>
             ) : null}
             {!peek.occasion && !hasGivers && !peek.relationship ? (
-              <p className="text-sm text-white/60 drop-shadow">
+              <p
+                className="text-sm drop-shadow"
+                style={{ color: 'hsl(var(--peek-bg) / 0.7)' }}
+              >
                 Who is this for?
               </p>
             ) : null}
@@ -371,17 +408,24 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
   return (
     <header className="relative w-full overflow-hidden">
       <motion.div
-        className="relative flex h-[36vh] min-h-[220px] w-full flex-col items-start justify-end bg-gradient-to-br from-[hsl(var(--peek-accent))]/55 via-[hsl(var(--peek-accent2))]/40 to-[hsl(var(--peek-surface))] px-6 pb-6 sm:h-[44vh]"
+        className="relative flex h-[36vh] min-h-[220px] w-full flex-col items-start justify-end px-6 pb-6 sm:h-[44vh]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
+        style={{
+          background:
+            'linear-gradient(135deg, hsl(var(--peek-accent) / 0.55) 0%, hsl(var(--peek-accent2) / 0.42) 45%, hsl(var(--peek-surface)) 100%)',
+        }}
       >
         <motion.h1
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
-          className="text-4xl font-semibold tracking-tight text-[hsl(var(--peek-ink))] sm:text-5xl"
-          style={{ fontFamily: headingFont }}
+          className="text-4xl font-semibold tracking-tight sm:text-5xl"
+          style={{
+            fontFamily: headingFont,
+            color: 'hsl(var(--peek-ink))',
+          }}
         >
           {name}
         </motion.h1>
@@ -390,8 +434,11 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.45 }}
-            className="mt-1 text-base text-[hsl(var(--peek-ink))]/75 sm:text-lg"
-            style={{ fontFamily: headingFont }}
+            className="mt-1 text-base sm:text-lg"
+            style={{
+              fontFamily: headingFont,
+              color: 'hsl(var(--peek-ink) / 0.78)',
+            }}
           >
             {peek.occasion}
           </motion.p>
@@ -400,7 +447,8 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.55, delay: 0.5 }}
-            className="mt-1 text-xs uppercase tracking-widest text-[hsl(var(--peek-ink))]/60"
+            className="mt-1 text-xs uppercase tracking-widest"
+            style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
           >
             {peek.relationship}
           </motion.p>
@@ -410,13 +458,17 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.55, delay: 0.6 }}
-            className="mt-1 text-xs uppercase tracking-widest text-[hsl(var(--peek-ink))]/60"
+            className="mt-1 text-xs uppercase tracking-widest"
+            style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
           >
             from {givers.join(', ')}
           </motion.p>
         ) : null}
         {!peek.occasion && !hasGivers && !peek.relationship ? (
-          <p className="mt-1 text-sm text-[hsl(var(--peek-ink))]/45">
+          <p
+            className="mt-1 text-sm"
+            style={{ color: 'hsl(var(--peek-ink) / 0.48)' }}
+          >
             Who is this for?
           </p>
         ) : null}
@@ -428,7 +480,14 @@ function PreviewHero({ peek }: { peek: PeekDraft['peek'] }) {
 function EmptyHint({ children }: { children: React.ReactNode }) {
   return (
     <motion.p
-      className="rounded-lg border border-dashed border-[hsl(var(--peek-ink))]/15 bg-[hsl(var(--peek-surface))]/40 px-4 py-3 text-center text-xs text-[hsl(var(--peek-ink))]/50"
+      className="border border-dashed px-4 py-3 text-center text-xs"
+      style={{
+        borderRadius: 'var(--vibe-radius-card)',
+        borderColor: 'hsl(var(--peek-ink) / 0.18)',
+        backgroundColor: 'hsl(var(--peek-surface) / 0.5)',
+        color: 'hsl(var(--peek-ink) / 0.55)',
+        fontFamily: 'var(--peek-font-body)',
+      }}
       animate={{ opacity: [0.6, 1, 0.6] }}
       transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
     >
@@ -466,8 +525,12 @@ function CardItem({
         delay: Math.min(index * 0.04, 0.3),
         ease: 'easeOut',
       }}
-      className="relative flex flex-col overflow-hidden border border-[hsl(var(--peek-ink))]/10 bg-[hsl(var(--peek-surface))] shadow-sm"
-      style={{ borderRadius: 'var(--peek-radius-lg)' }}
+      className="relative flex flex-col overflow-hidden border shadow-sm"
+      style={{
+        borderRadius: 'var(--vibe-radius-card, var(--peek-radius-lg))',
+        borderColor: 'hsl(var(--peek-ink) / 0.12)',
+        backgroundColor: 'hsl(var(--peek-surface))',
+      }}
     >
       {card.imageUrl ? (
         <div
@@ -488,22 +551,39 @@ function CardItem({
         <TextOnlyHero card={card} compact={compact} />
       )}
 
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
+      <div
+        className="flex flex-1 flex-col p-4"
+        style={{ gap: 'var(--peek-space-2)' }}
+      >
         <div className="flex items-start justify-between gap-3">
           <h3
             className="text-base font-medium leading-tight"
-            style={{ fontFamily: 'var(--peek-font-heading)' }}
+            style={{
+              fontFamily: 'var(--peek-font-heading)',
+              color: 'hsl(var(--peek-ink))',
+            }}
           >
             {card.title}
           </h3>
           {price ? (
             <span
               className={cn(
-                'shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
-                priceIsHidden
-                  ? 'border border-dashed border-[hsl(var(--peek-accent))]/40 text-[hsl(var(--peek-accent))]/70'
-                  : 'bg-[hsl(var(--peek-accent))]/10 text-[hsl(var(--peek-accent))]',
+                'shrink-0 px-2 py-0.5 text-xs font-medium',
+                priceIsHidden ? 'border border-dashed' : '',
               )}
+              style={{
+                borderRadius: 'var(--vibe-radius-button, 9999px)',
+                fontFamily: 'var(--peek-font-body)',
+                borderColor: priceIsHidden
+                  ? 'hsl(var(--peek-accent) / 0.45)'
+                  : undefined,
+                backgroundColor: priceIsHidden
+                  ? undefined
+                  : 'hsl(var(--peek-accent) / 0.12)',
+                color: priceIsHidden
+                  ? 'hsl(var(--peek-accent) / 0.75)'
+                  : 'hsl(var(--peek-accent))',
+              }}
               title={priceIsHidden ? 'Hidden from recipient' : undefined}
             >
               {price}
@@ -511,12 +591,21 @@ function CardItem({
           ) : null}
         </div>
         {card.description ? (
-          <p className="text-sm text-[hsl(var(--peek-ink))]/70">
+          <p
+            className="text-sm"
+            style={{
+              color: 'hsl(var(--peek-ink) / 0.72)',
+              fontFamily: 'var(--peek-font-body)',
+            }}
+          >
             {card.description}
           </p>
         ) : null}
         {card.locationHint ? (
-          <p className="mt-1 inline-flex items-center gap-1 text-xs text-[hsl(var(--peek-ink))]/50">
+          <p
+            className="mt-1 inline-flex items-center gap-1 text-xs"
+            style={{ color: 'hsl(var(--peek-ink) / 0.55)' }}
+          >
             <MapPin className="h-3 w-3" aria-hidden="true" />
             {card.locationHint}
           </p>
@@ -544,19 +633,23 @@ function TextOnlyHero({ card, compact }: { card: Card; compact?: boolean }) {
       )}
       style={{
         background:
-          'linear-gradient(135deg, hsl(var(--peek-accent) / 0.18) 0%, hsl(var(--peek-accent2) / 0.14) 100%)',
+          'linear-gradient(135deg, hsl(var(--peek-accent) / 0.22) 0%, hsl(var(--peek-accent2) / 0.18) 100%)',
       }}
     >
-      <div className="pointer-events-none absolute -right-3 -top-3 opacity-40">
+      <div className="pointer-events-none absolute -right-3 -top-3 opacity-50">
         <Icon
-          className="h-16 w-16 text-[hsl(var(--peek-accent))]/60"
+          className="h-16 w-16"
           aria-hidden="true"
+          style={{ color: 'hsl(var(--peek-accent) / 0.62)' }}
         />
       </div>
       <div className="flex flex-col gap-1 p-4">
         <span
-          className="text-[10px] uppercase tracking-widest text-[hsl(var(--peek-accent))]/85"
-          style={{ fontFamily: 'var(--peek-font-heading)' }}
+          className="text-[10px] uppercase tracking-widest"
+          style={{
+            fontFamily: 'var(--peek-font-heading)',
+            color: 'hsl(var(--peek-accent) / 0.88)',
+          }}
         >
           {card.type}
         </span>
@@ -572,12 +665,22 @@ function TextOnlyHero({ card, compact }: { card: Card; compact?: boolean }) {
 function LockOverlay({ card }: { card: Card }) {
   const prompt = card.unlockRule?.beg_prompt ?? 'ask first';
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--peek-bg))]/80 text-center backdrop-blur-sm">
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center backdrop-blur-sm"
+      style={{ backgroundColor: 'hsl(var(--peek-bg) / 0.82)' }}
+    >
       <Lock
-        className="h-5 w-5 text-[hsl(var(--peek-ink))]/60"
+        className="h-5 w-5"
         aria-hidden="true"
+        style={{ color: 'hsl(var(--peek-ink) / 0.62)' }}
       />
-      <p className="px-4 text-sm font-medium text-[hsl(var(--peek-ink))]/80">
+      <p
+        className="px-4 text-sm font-medium"
+        style={{
+          color: 'hsl(var(--peek-ink) / 0.82)',
+          fontFamily: 'var(--peek-font-body)',
+        }}
+      >
         {prompt}
       </p>
     </div>
@@ -586,10 +689,16 @@ function LockOverlay({ card }: { card: Card }) {
 
 function TauntOverlay({ text }: { text: string }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--peek-ink))]/10 p-4 text-center">
+    <div
+      className="absolute inset-0 flex items-center justify-center p-4 text-center"
+      style={{ backgroundColor: 'hsl(var(--peek-ink) / 0.12)' }}
+    >
       <p
-        className="text-xl italic text-[hsl(var(--peek-ink))] drop-shadow-sm sm:text-2xl"
-        style={{ fontFamily: 'var(--peek-font-heading)' }}
+        className="text-xl italic drop-shadow-sm sm:text-2xl"
+        style={{
+          fontFamily: 'var(--peek-font-heading)',
+          color: 'hsl(var(--peek-ink))',
+        }}
       >
         “{text}”
       </p>
