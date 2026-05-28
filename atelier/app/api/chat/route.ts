@@ -42,11 +42,44 @@ const log = logger.child({ component: 'api/chat' });
 const FRIENDLY_UPSTREAM_MSG =
   "We're having trouble connecting to the AI. Give it a moment and try again.";
 
-function isUpstream5xx(err: unknown): boolean {
+const FRIENDLY_HICCUP_MSG =
+  "Something hiccupped on our end. Refresh and try again — your peek is saved.";
+
+function getErrStatus(err: unknown): number | undefined {
   const status =
     (err as { status?: number }).status ??
     (err as { statusCode?: number }).statusCode;
+  return typeof status === 'number' ? status : undefined;
+}
+
+function isUpstream5xx(err: unknown): boolean {
+  const status = getErrStatus(err);
   return typeof status === 'number' && status >= 500 && status < 600;
+}
+
+function isUpstream4xx(err: unknown): boolean {
+  const status = getErrStatus(err);
+  return typeof status === 'number' && status >= 400 && status < 500;
+}
+
+export function classifyUpstreamError(err: unknown): {
+  user_message: string;
+  internal_message: string;
+} {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (isUpstream5xx(err)) {
+    return { user_message: FRIENDLY_UPSTREAM_MSG, internal_message: raw };
+  }
+  if (isUpstream4xx(err)) {
+    return { user_message: FRIENDLY_HICCUP_MSG, internal_message: raw };
+  }
+  if (/tool_use ids were found|tool_result blocks immediately|messages\.\d+\.content/i.test(raw)) {
+    return { user_message: FRIENDLY_HICCUP_MSG, internal_message: raw };
+  }
+  if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
+    return { user_message: FRIENDLY_HICCUP_MSG, internal_message: raw };
+  }
+  return { user_message: raw, internal_message: raw };
 }
 
 export const runtime = 'nodejs';
@@ -641,15 +674,16 @@ export async function POST(req: NextRequest): Promise<Response> {
               break;
             }
             case 'error': {
-              const upstream = isUpstream5xx(event.error);
+              const classified = classifyUpstreamError(event.error);
               log.warn('stream_error', {
                 peekId,
-                message: event.error.message,
-                upstream_5xx: upstream,
+                message: classified.internal_message,
+                upstream_5xx: isUpstream5xx(event.error),
+                upstream_4xx: isUpstream4xx(event.error),
               });
               safeEnqueue({
                 kind: 'error',
-                message: upstream ? FRIENDLY_UPSTREAM_MSG : event.error.message,
+                message: classified.user_message,
               });
               break;
             }
@@ -696,17 +730,17 @@ export async function POST(req: NextRequest): Promise<Response> {
           },
         });
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        const upstream5xx = isUpstream5xx(err);
+        const classified = classifyUpstreamError(err);
         log.error('turn failed', {
           peekId,
           sessionId,
-          message,
-          upstream_5xx: upstream5xx,
+          message: classified.internal_message,
+          upstream_5xx: isUpstream5xx(err),
+          upstream_4xx: isUpstream4xx(err),
         });
         safeEnqueue({
           kind: 'error',
-          message: upstream5xx ? FRIENDLY_UPSTREAM_MSG : message,
+          message: classified.user_message,
         });
       } finally {
         safeClose();
