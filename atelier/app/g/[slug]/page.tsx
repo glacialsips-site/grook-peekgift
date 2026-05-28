@@ -4,10 +4,7 @@ import { getSupabaseService } from '@/lib/supabase/service';
 import type { DbRow } from '@/lib/supabase/database.types';
 import { RecipientView } from '@/components/recipient/recipient-view';
 import { AlmostReady } from '@/components/recipient/almost-ready';
-import {
-  GuestSecretMissingError,
-  ensureRecipientSessionCookie,
-} from '@/lib/security/recipient';
+import { readRecipientSessionFromCookies } from '@/lib/security/recipient';
 import { logger } from '@/lib/logger';
 
 const log = logger.child({ component: 'g/[slug]/page' });
@@ -148,20 +145,17 @@ export default async function RecipientPage({
   if (!peekRes.data) notFound();
   const peek = toPeek(peekRes.data);
 
-  let session: { sessionId: string; signature: string };
-  try {
-    session = await ensureRecipientSessionCookie();
-  } catch (err) {
-    if (err instanceof GuestSecretMissingError) {
-      throw new Error('service_unavailable: GUEST_CLAIM_TOKEN_SECRET missing');
-    }
-    throw err;
-  }
-
   if (peek.status !== 'published' && peek.status !== 'claimed') {
     return <AlmostReady peek={peek} />;
   }
 
+  const session = await readRecipientSessionFromCookies();
+  if (!session) {
+    log.error('recipient_session_cookie_missing', { slug });
+    throw new Error(
+      'recipient_session_cookie_missing — middleware did not mint one',
+    );
+  }
   const recipientSignature = session.signature;
 
   const [cardsRes, groupsRes, picksRes] = await Promise.all([
