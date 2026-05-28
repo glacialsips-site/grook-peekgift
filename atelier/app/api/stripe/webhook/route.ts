@@ -155,12 +155,19 @@ async function markPeekPaymentFailed(args: {
 }
 
 export async function POST(req: NextRequest): Promise<Response> {
+  if (!env.STRIPE_WEBHOOK_SECRET) {
+    // No webhook secret configured: gracefully no-op so unkeyed deliveries
+    // don't pile up as failed retries on Stripe's side. Log so we notice if
+    // events arrive before the integration is provisioned.
+    log.warn('webhook_unconfigured', { reason: 'STRIPE_WEBHOOK_SECRET unset' });
+    return Response.json(
+      { received: true, skipped: 'service_not_configured' },
+      { status: 200 },
+    );
+  }
   const signature = req.headers.get('stripe-signature');
   if (!signature) {
     return new Response('missing signature', { status: 400 });
-  }
-  if (!env.STRIPE_WEBHOOK_SECRET) {
-    return new Response('webhook not configured', { status: 500 });
   }
 
   const rawBody = await req.text();

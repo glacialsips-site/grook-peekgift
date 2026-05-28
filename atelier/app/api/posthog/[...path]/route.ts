@@ -1,4 +1,7 @@
 import type { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'api/posthog' });
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -8,6 +11,20 @@ const PH_HOST =
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
+}
+
+function isConfigured(): boolean {
+  return Boolean(process.env['NEXT_PUBLIC_POSTHOG_KEY']);
+}
+
+function unconfiguredResponse(): Response {
+  log.warn('proxy_unconfigured', {
+    reason: 'NEXT_PUBLIC_POSTHOG_KEY unset',
+  });
+  return Response.json(
+    { received: true, skipped: 'service_not_configured' },
+    { status: 200 },
+  );
 }
 
 // Headers we forward to PostHog. Everything else (including hop-by-hop
@@ -102,6 +119,7 @@ export async function GET(
   req: NextRequest,
   ctx: RouteContext,
 ): Promise<Response> {
+  if (!isConfigured()) return unconfiguredResponse();
   return proxy(req, ctx);
 }
 
@@ -109,6 +127,7 @@ export async function POST(
   req: NextRequest,
   ctx: RouteContext,
 ): Promise<Response> {
+  if (!isConfigured()) return unconfiguredResponse();
   return proxy(req, ctx);
 }
 
