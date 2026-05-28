@@ -47,6 +47,8 @@ Why it wins on principle, not just score: the moat is *AI-invents-the-vibe-at-ru
 - Legacy peek.gift = working checkout reference.
 - Existing `lib/usage` (metering) + `lib/vibe/css-vars.ts` (the moat seed — already emits `--vibe-*`) → extend, don't reinvent.
 
-## Prototype evidence (code on these branches, re-addable via `git worktree add`)
+## Prototype evidence + durability note
+
+⚠️ `worktree-agent-*` branches are NOT durable — the tooling churns/recycles them (the dg-css-vars `a83faa05` source was already lost this way; its CSS-vars approach is preserved in the production renderer). **Only `claude/bold-ride-Li5zK` (pushed to origin) is durable — milestones get merged there immediately.** The slug renderer (spine's heart) is MERGED + verified (typecheck clean, 209 tests, 3-vibe SSR proof). Branches below are reference-only, possibly stale:
 
 dg-css-vars `worktree-agent-a83faa0570c20e62c` · dg-panda `…a6e07c7c` · dg-vanilla-extract `…a2500a33` · dg-stylex `…a1caeea5` · build-actor `…a62ae6d6` · backend-arch `…a9fff542` · product-graph `…abcba516` · meter-spec `…aa1a7609` · grammar-spec `…a2ee8486`
