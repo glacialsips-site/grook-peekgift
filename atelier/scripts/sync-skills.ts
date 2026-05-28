@@ -1,16 +1,9 @@
 #!/usr/bin/env tsx
-/**
- * sync-skills.ts — copy skill markdown bundles from _packets/SPINE/skills/
- * into atelier/lib/anthropic/skills/ so they are bundled by Next at build time.
- *
- * The TS modules export the raw markdown content as a string. We do this
- * (rather than fs.readFileSync at runtime) because Next bundles server code
- * and the _packets/ directory lives OUTSIDE the atelier root — it will not
- * be available in the deployed Lambda/edge environment.
- *
- * Re-run any time the canonical skill files change:
- *   npx tsx scripts/sync-skills.ts
- */
+// Mirror _packets/SPINE/skills/*.md into atelier/lib/anthropic/skills/*.ts so
+// Next bundles them — the source dir is outside the atelier root and is not
+// available in the deployed Lambda/edge runtime.
+//
+// Re-run on every canonical skill change: `npx tsx scripts/sync-skills.ts`.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 

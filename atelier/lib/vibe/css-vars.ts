@@ -1,26 +1,3 @@
-/**
- * Vibe → CSS custom-property bridge.
- *
- * The Vibe object (see `db/schema/peeks.ts`) is the page's central nervous
- * system. This module is the single place that converts the seven dials into
- * the CSS variables consumed by the preview pane, the recipient `/g/[slug]`
- * surface, and any other vibe-aware components.
- *
- * Output keys are emitted in BOTH naming conventions:
- *
- *   - `--peek-*` — the legacy variable names already wired into the existing
- *     surfaces. Keeping these means we don't have to touch every CSS literal
- *     in the codebase at once.
- *   - `--vibe-*` — the canonical names from `_packets/SPINE/skills/vibe-direction.md`.
- *     New components and the eventual Vibe primitives (VibeText, VibeCard, …)
- *     should consume these.
- *
- * Palette values are stored as hex in the DB but the legacy templates
- * (e.g. `0 0% 100%`) are also accepted. We normalize to an HSL TRIPLE
- * (`H S% L%`) so consumers can render with `hsl(var(--peek-bg))` and still
- * compose alpha (`hsl(var(--peek-bg) / 0.5)`).
- */
-
 import type {
   Vibe,
   VibeBodyFont,
@@ -47,11 +24,6 @@ const BODY_FONT_VAR: Record<VibeBodyFont, string> = {
   mono: '"JetBrains Mono", ui-monospace, monospace',
 };
 
-/**
- * Per-density spacing scale. The 1x baseline is "cozy"; "compact" tightens
- * vertical rhythm for hyperactive peeks (gag-heavy birthdays, teen-grad)
- * and "breathable" opens it up for sentimental occasions (weddings, 80th).
- */
 const DENSITY_SPACE: Record<VibeDensity, Record<string, string>> = {
   compact: {
     '--peek-space-1': '0.125rem',
@@ -112,22 +84,12 @@ const SHAPE_RADIUS: Record<VibeShape, Record<string, string>> = {
   },
 };
 
-/**
- * Motion-scale multiplier applied to framer-motion durations. Lower = stiller,
- * higher = bouncier. Used by the cinematic reveal sequence and component-level
- * micro-animations on the recipient surface.
- */
 const MOTION_SCALE: Record<VibeMotion, string> = {
   still: '0.6',
   soft: '1',
   lively: '1.25',
 };
 
-/**
- * Mood → texture treatment. Consumed by mood-aware backdrops (grain overlay,
- * confetti SVG, gradient wash). Stored as a flag so components can conditionally
- * mount the right embellishments.
- */
 const MOOD_TEXTURE: Record<VibeMood, Record<string, string>> = {
   minimal: { '--vibe-mood-grain': '0', '--vibe-mood-overlay': '0' },
   rich: { '--vibe-mood-grain': '0.04', '--vibe-mood-overlay': '0.08' },
@@ -208,7 +170,6 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
   const out: VibeCssVars = {};
   if (!vibe) return out;
 
-  // ── Palette ────────────────────────────────────────────────────────────
   const bg = paletteValueAsHslTriple(vibe.palette?.bg);
   const surface = paletteValueAsHslTriple(vibe.palette?.surface);
   const ink = paletteValueAsHslTriple(vibe.palette?.ink);
@@ -221,7 +182,7 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
   if (surface) {
     out['--peek-surface'] = surface;
     out['--vibe-surface'] = surface;
-    out['--vibe-muted'] = surface; // alias per spec
+    out['--vibe-muted'] = surface;
   }
   if (ink) {
     out['--peek-ink'] = ink;
@@ -236,10 +197,7 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
     out['--vibe-accent2'] = accent2;
   }
 
-  // ── Typography ─────────────────────────────────────────────────────────
-  // `font_pairing` (concrete font-family strings) wins over `typography`
-  // (semantic categories) when both are present, because it's the explicit
-  // curator/template choice.
+  // font_pairing wins over typography when both are present (explicit choice).
   const heading = vibe.typography?.heading;
   const body = vibe.typography?.body;
   if (heading) {
@@ -250,7 +208,7 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
     out['--peek-font-body'] = BODY_FONT_VAR[body];
     out['--vibe-type-body'] = BODY_FONT_VAR[body];
   }
-  // Mono is always available for joke/gag card overrides regardless of body dial.
+  // Mono is always emitted so joke/gag cards can opt-in regardless of body dial.
   out['--vibe-type-mono'] = BODY_FONT_VAR.mono;
 
   if (vibe.font_pairing?.display) {
@@ -264,23 +222,19 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
     out['--vibe-type-body'] = v;
   }
 
-  // ── Density ────────────────────────────────────────────────────────────
   if (vibe.density) {
     Object.assign(out, DENSITY_SPACE[vibe.density]);
   }
 
-  // ── Shape ──────────────────────────────────────────────────────────────
   if (vibe.shape) {
     Object.assign(out, SHAPE_RADIUS[vibe.shape]);
   }
 
-  // ── Motion ─────────────────────────────────────────────────────────────
   if (vibe.motion) {
     out['--vibe-motion-scale'] = MOTION_SCALE[vibe.motion];
     out['--peek-motion-scale'] = MOTION_SCALE[vibe.motion];
   }
 
-  // ── Mood ───────────────────────────────────────────────────────────────
   if (vibe.mood) {
     Object.assign(out, MOOD_TEXTURE[vibe.mood]);
   }
@@ -288,11 +242,7 @@ export function vibeCss(vibe: Vibe | null | undefined): VibeCssVars {
   return out;
 }
 
-/**
- * Convenience helper: read the motion-scale multiplier as a number so it can
- * be passed directly to framer-motion `transition` props. Mirrors the value
- * emitted as `--vibe-motion-scale`.
- */
+/** Motion-scale as a number for framer-motion. Mirrors `--vibe-motion-scale`. */
 export function motionScale(motion: VibeMotion | undefined): number {
   if (!motion) return 1;
   return Number(MOTION_SCALE[motion]);

@@ -2,14 +2,6 @@ import { expect, test, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Mobile-first audit suite. Drives a Chromium at iPhone-class viewports
-// against the local dev server, captures screenshots, and flags layout
-// issues (horizontal scroll, tap-target sizes, off-screen content).
-//
-// Output:
-//   - atelier/tests/e2e/screenshots/mobile/<route>--<viewport>.png
-//   - atelier/tests/e2e/screenshots/mobile/findings.json (machine-readable)
-
 type Viewport = { width: number; height: number; label: string };
 
 const VIEWPORTS: Viewport[] = [
@@ -52,7 +44,6 @@ async function captureAudit(
   ensureDir();
   await page.setViewportSize({ width: vp.width, height: vp.height });
   await page.goto(routePath, { waitUntil: 'domcontentloaded' });
-  // Settle: wait for fonts + any client-side effect
   await page.waitForLoadState('networkidle').catch(() => undefined);
   await page.waitForTimeout(400);
 
@@ -60,7 +51,6 @@ async function captureAudit(
   const screenshotPath = path.join(SCREENSHOT_DIR, screenshotName);
   await page.screenshot({ path: screenshotPath, fullPage: false });
 
-  // Check for horizontal scroll
   const hasHorizScroll = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
   });
@@ -78,7 +68,6 @@ async function captureAudit(
     });
   }
 
-  // Check tap targets: <button>, <a>, [role="button"], input[type=submit]
   const smallTargets = await page.evaluate(() => {
     const sel =
       'button, a[href], [role="button"], input[type="submit"], input[type="button"]';
@@ -86,14 +75,11 @@ async function captureAudit(
     const out: { tag: string; text: string; w: number; h: number; visible: boolean }[] = [];
     for (const el of nodes) {
       const rect = el.getBoundingClientRect();
-      // Skip hidden / zero-size
       if (rect.width === 0 || rect.height === 0) continue;
       const style = getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden') continue;
       if ((style.pointerEvents ?? '') === 'none') continue;
-      // Skip sr-only utilities (visually-hidden skip links etc.). Tailwind's
-      // sr-only sets width:1px / height:1px and absolute positioning — those
-      // are intentionally tiny and not real tap targets.
+      // Skip sr-only utilities (Tailwind sets 1px box + clip-rect/clip-path).
       if (
         (rect.width <= 1 && rect.height <= 1) ||
         (style.position === 'absolute' &&
@@ -128,8 +114,6 @@ async function captureAudit(
     });
   }
 
-  // Check key content is on screen: any element with very large negative
-  // offset or right-of-viewport that has visible text content
   const offscreen = await page.evaluate(() => {
     const out: { tag: string; text: string; x: number; w: number }[] = [];
     const nodes = Array.from(
@@ -149,7 +133,6 @@ async function captureAudit(
         });
       }
     }
-    // Dedupe by text
     const seen = new Set<string>();
     return out.filter((o) => {
       const k = `${o.tag}:${o.text}`;
@@ -186,7 +169,6 @@ test.describe('Mobile-first audit', () => {
         });
         const page = await ctx.newPage();
         await captureAudit(page, route.name, route.path, vp);
-        // Sanity: page rendered
         await expect(page.locator('body')).toBeVisible();
         await ctx.close();
       });

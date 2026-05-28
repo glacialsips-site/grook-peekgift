@@ -1,18 +1,3 @@
-/**
- * Phase math for the cinematic recipient reveal.
- *
- * Magazine-cover-opening choreography — see `_packets/SPINE/skills/reveal-mechanics.md`
- * for the design spec. This module is the deterministic, framework-free core: given
- * a peek shape + vibe.motion, produce the per-phase timing budget the React
- * component schedules against. Lives outside the React tree so the snapshot test can
- * exercise it without spinning up a renderer.
- *
- * Phase order (load-bearing):
- *   hero → name → occasion → note → cards → done
- *
- * Each phase's start time cascades from the previous phase's start + duration + gap.
- * `vibe.motion` is a uniform duration multiplier (still 0.6x, soft 1.0x, lively 1.25x).
- */
 import type { VibeMotion } from '@/lib/peek/types';
 
 export type RevealPhase =
@@ -38,7 +23,7 @@ export const MOTION_SCALE: Record<VibeMotion, number> = {
   lively: 1.25,
 };
 
-// Base durations at soft (1x). Magazine-cover-opening tuned per skill §3.
+// Base durations at soft (1x); MOTION_SCALE multiplies them.
 const HERO_BASE_MS = 1800;
 const NAME_FADE_BASE_MS = 900;
 const OCCASION_BASE_MS = 400;
@@ -49,7 +34,6 @@ const CARD_STAGGER_BASE_MS = 100;
 const CARDS_TEASER_FLOOR_MS = 400;
 const REVEAL_CARDS_CAP = 6;
 
-// Typewriter pacing.
 const NAME_TYPEWRITER_MS_PER_CHAR = 50;
 const NAME_TYPEWRITER_MAX_CHARS = 20;
 const NOTE_WORD_MS = 80;
@@ -92,16 +76,9 @@ export type PhasePlan = {
 };
 
 /**
- * Pure phase planner. Mirrors the BUGS-B17-closed math from packet 14:
- *
- *   nameStart    = heroStart + heroDuration + gap
- *   occasionStart = nameStart + nameDuration + gap
- *   noteStart    = occasionStart + occasionDuration + gap
- *   cardsStart   = noteStart + noteDuration + gap
- *   totalMs      = cardsStart + max(cardStagger * min(cardCount, 6), 400)
- *
- * Adds an explicit `occasion` phase between name and note (skill §2 enhancement).
- * `vibe.motion` is the uniform multiplier on durations and stagger.
+ * Pure phase planner. Phase order: hero → name → occasion → note → cards → done.
+ * Each phase's start cascades from prev start + duration + gap.
+ * `motion` multiplies all durations and the stagger.
  */
 export function planPhases(input: PhasePlanInput): PhasePlan {
   const {
@@ -115,11 +92,9 @@ export function planPhases(input: PhasePlanInput): PhasePlan {
   const scale = MOTION_SCALE[motion];
   const gap = Math.round(GAP_BASE_MS * scale);
 
-  // Hero — slow lighting-up, 1.10 → 1.00 zoom, blur out.
   const heroDuration = Math.round(HERO_BASE_MS * scale);
   const heroStart = 0;
 
-  // Name — typewriter for short names, fade for long names.
   const isTypewriter = nameLength > 0 && nameLength <= NAME_TYPEWRITER_MAX_CHARS;
   const nameStyle = isTypewriter ? 'typewriter' : 'fade';
   const msPerChar = Math.round(NAME_TYPEWRITER_MS_PER_CHAR * scale);
@@ -128,14 +103,12 @@ export function planPhases(input: PhasePlanInput): PhasePlan {
     : Math.round(NAME_FADE_BASE_MS * scale);
   const nameStart = heroStart + heroDuration + gap;
 
-  // Occasion — short fade-up subtitle, only if present.
   const occasionVisible = hasOccasion;
   const occasionDuration = occasionVisible
     ? Math.round(OCCASION_BASE_MS * scale)
     : 0;
   const occasionStart = nameStart + nameDuration + gap;
 
-  // Note — word-by-word for short notes, line-batched for long.
   const noteVisible = hasNote && noteWordCount > 0;
   const noteStyle: 'word' | 'line' =
     noteWordCount > NOTE_BATCH_THRESHOLD_WORDS ? 'line' : 'word';
@@ -157,7 +130,6 @@ export function planPhases(input: PhasePlanInput): PhasePlan {
     ? occasionStart + occasionDuration + gap
     : occasionStart;
 
-  // Cards — dealt-in stagger. Cap visible-in-reveal at 6 per skill §8.12.
   const visibleCardCount = Math.max(
     0,
     Math.min(cardCount, REVEAL_CARDS_CAP),
@@ -204,13 +176,11 @@ export function planPhases(input: PhasePlanInput): PhasePlan {
 }
 
 /**
- * Split a free-form string into "words" for the word-by-word reveal. We preserve
- * leading whitespace within each token so the rendered text reads the same as the
- * source string when the spans are joined. Empty tokens are dropped.
+ * Tokenize a string into words. Each token retains its trailing whitespace so
+ * joining the spans renders identical to the source text.
  */
 export function tokenizeWords(text: string): string[] {
   if (!text) return [];
-  // Match word + trailing whitespace. The final word in a string may lack trailing space.
   const re = /\S+\s*/g;
   const out: string[] = [];
   let m: RegExpExecArray | null;
@@ -220,10 +190,7 @@ export function tokenizeWords(text: string): string[] {
   return out;
 }
 
-/**
- * Determine the current phase for a given elapsed time. Used by both the React
- * scheduler and the snapshot test; centralising avoids drift.
- */
+/** Current phase for a given elapsed time. Shared by the React scheduler and tests. */
 export function phaseAtElapsed(plan: PhasePlan, elapsedMs: number): RevealPhase {
   if (elapsedMs >= plan.totalMs) return 'done';
   if (elapsedMs >= plan.cards.startMs) return 'cards';

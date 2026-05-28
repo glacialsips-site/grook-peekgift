@@ -23,9 +23,8 @@ const isPublicRoute = createRouteMatcher([
   '/mobile-audit(.*)',    // local-only mobile-audit fixture pages (page guards production with 404)
 ]);
 
-// Routes where an anonymous-session cookie must be present so Server Components
-// can attribute peek rows to a guest curator. Server Components can READ cookies
-// in Next 16 but cannot WRITE them — we mint the cookie here instead.
+// Server Components can read but not write cookies in Next 16; mint the
+// anon-session cookie in middleware so SCs can attribute guest peek rows.
 const requiresAnonSessionCookie = createRouteMatcher([
   '/build(.*)',
   '/api/chat(.*)',
@@ -45,8 +44,7 @@ export default clerkMiddleware(async (auth, req) => {
   const existing = req.cookies.get(ANON_SESSION_COOKIE)?.value;
   if (existing && existing.length > 0) return;
 
-  // Mint the cookie now so downstream Server Components see it on this request
-  // AND it persists for follow-up requests.
+  // Set on req for SCs in THIS request; set on response so it persists.
   const fresh = randomUUID();
   req.cookies.set(ANON_SESSION_COOKIE, fresh);
   const response = NextResponse.next({ request: req });

@@ -46,7 +46,6 @@ registerTool<Input, Output>({
   },
   deferLoading: true,
   handler: async (input, ctx): Promise<Output> => {
-    // W09 from BUGS-WAVE2: structured invalid_input envelope.
     try {
       InputSchema.parse(input);
     } catch (err) {
@@ -56,8 +55,7 @@ registerTool<Input, Output>({
         detail: err instanceof Error ? err.message : String(err),
       };
     }
-    // Voice mode is signaled via session metadata in a later packet (43);
-    // for now we trust the model's prompt-level guardrail.
+    // No server-side voice-mode check yet; relies on the prompt-level guardrail.
     requestExtendedThinking(ctx.sessionId);
     return {
       ok: true,

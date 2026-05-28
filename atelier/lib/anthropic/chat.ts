@@ -127,9 +127,8 @@ export async function* chatTurn(
         curatorMemory: baseOpts.curatorMemory ?? null,
       });
 
-      // Extended thinking: if a prior iteration called
-      // `request_extended_thinking`, the flag is set for this sessionId.
-      // Consume it once for THIS iteration's messages.create call only.
+      // request_extended_thinking sets a sessionId-keyed flag in a prior
+      // iteration; consume it for THIS iteration's messages.create only.
       const thinkingConsumed = consumeExtendedThinking(input.ctx.sessionId);
       const thinkingBudget = env.EXTENDED_THINKING_BUDGET_TOKENS ?? 8000;
       const thinkingParam: Anthropic.ThinkingConfigParam | undefined =
@@ -137,9 +136,7 @@ export async function* chatTurn(
           ? { type: 'enabled', budget_tokens: thinkingBudget }
           : input.thinking;
 
-      // W02 from BUGS-WAVE2: max_tokens must be > thinking.budget_tokens or
-      // the API 400s. When thinking is active, bump max_tokens to budget +
-      // generous output headroom.
+      // Anthropic 400s when max_tokens <= thinking.budget_tokens.
       const effectiveMaxTokens =
         thinkingParam?.type === 'enabled'
           ? Math.max(maxTokens, thinkingParam.budget_tokens + 4096)
@@ -236,9 +233,7 @@ export async function* chatTurn(
         }
         let output: unknown;
         let isError = false;
-        // memory tool returns a string; everything else returns JSON.
-        // Track separately so we can pass the raw string content through
-        // the tool_result block as Anthropic expects.
+        // memory returns a string per protocol; all other tools return JSON.
         let memoryResultString: string | undefined;
         try {
           if (call.name === 'memory') {
@@ -255,10 +250,6 @@ export async function* chatTurn(
                 cmd,
               );
               output = { ok: true, memory_response: memoryResultString };
-              // Telemetry: per-event, not aggregated. Emit directly to
-              // PostHog so we don't force a facade type change for every
-              // new event surface in this packet (memory.command,
-              // extended_thinking.requested, etc.).
               try {
                 const ph = getPostHogServer();
                 if (ph) {

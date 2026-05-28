@@ -233,7 +233,6 @@ export function CinematicReveal({
 
   if (reduce) return null;
 
-  // Hero-phase visuals: 1.10 → 1.00 scale, blur 4px → 0, saturate 0.55 → 1.
   const heroSeconds = plan.hero.durationMs / 1000;
   const showOverlay = !revealed;
   const heroExpanded = phase !== 'hero';
@@ -267,7 +266,6 @@ export function CinematicReveal({
             }
           }}
         >
-          {/* Hero backdrop — magazine cover coming into focus. */}
           <motion.div
             className="pointer-events-none absolute inset-0"
             initial={{
@@ -303,7 +301,6 @@ export function CinematicReveal({
             aria-hidden="true"
           />
 
-          {/* Vibe accent wash to deepen the lighting effect when no hero image. */}
           {!peek.heroImageUrl ? (
             <motion.div
               aria-hidden="true"
@@ -318,7 +315,6 @@ export function CinematicReveal({
             />
           ) : null}
 
-          {/* Stage: name + occasion + note + card teaser. */}
           <div className="relative z-10 flex w-full flex-col items-center px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)]">
             <div className="flex w-full max-w-2xl flex-col items-center gap-3 text-center">
               <AnimatePresence>
@@ -437,7 +433,6 @@ export function CinematicReveal({
               </AnimatePresence>
             </div>
 
-            {/* Card teaser strip — slim deal-in hint that mirrors the deck below. */}
             <AnimatePresence>
               {showCardsTeaser && plan.cards.visibleCount > 0 ? (
                 <motion.div
@@ -493,7 +488,6 @@ export function CinematicReveal({
   );
 }
 
-/** Chunk a flat list of word-tokens into roughly-equal lines for long notes. */
 function chunkWordsToLines(words: string[], perLine: number): string[][] {
   const out: string[][] = [];
   for (let i = 0; i < words.length; i += perLine) {

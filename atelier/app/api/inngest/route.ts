@@ -25,10 +25,8 @@ function unconfiguredResponse(): Response {
 }
 
 function isConfigured(): boolean {
-  // Inngest needs either the event key (for sending events) or signing key (for
-  // receiving its sync/invoke calls). If neither is set, we have no integration
-  // to drive, so refuse to engage the serve handler — which would otherwise
-  // throw on missing signing key when Inngest cloud probes the endpoint.
+  // Without at least one key, the serve handler throws when Inngest cloud
+  // probes the endpoint. Refuse to engage instead.
   return Boolean(env.INNGEST_EVENT_KEY ?? env.INNGEST_SIGNING_KEY);
 }
 

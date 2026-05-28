@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { registerTool } from './index';
 
-/**
- * Trivial health-check tool. Proves the registry round-trips end-to-end:
- * the model can call it, our dispatcher invokes the handler, the result
- * comes back as a `tool_result` block.
- */
 const PingInputSchema = z.object({}).strict();
 type PingInput = z.infer<typeof PingInputSchema>;
 

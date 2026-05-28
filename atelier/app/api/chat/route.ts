@@ -145,11 +145,9 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (initialHistory.length === 0) {
     try {
       const persisted = await loadChatHistory(peekId);
-      // B11-redux (server leg): tool_result rows are persisted as their own
-      // role='tool_result' rows. Anthropic's API requires them as user-turn
-      // content blocks immediately after the assistant tool_use. Re-shape
-      // them as user-role messages here so the replay path matches what the
-      // client-side toApiHistory() does in chat-pane.tsx.
+      // tool_result rows are persisted as their own role='tool_result' rows;
+      // the Anthropic API requires them as user-turn content blocks
+      // immediately after the assistant tool_use.
       initialHistory = persisted
         .filter((row) =>
           row.role === 'user' ||
@@ -196,10 +194,9 @@ export async function POST(req: NextRequest): Promise<Response> {
     userContent.unshift({ type: 'text', text: guidance }, ...imageBlocks);
   }
 
-  // Files API: drain peeks.metadata.active_attached_file_ids[] into the next
-  // user-turn content. The attach_files_api_ref tool records intent; we
-  // inject ONCE per attach call. Audio falls back to a text mention (the
-  // current Anthropic Files API doesn't accept audio refs in content blocks).
+  // Drain peeks.metadata.active_attached_file_ids[] once per attach call.
+  // Audio falls back to a text mention — the Anthropic Files API doesn't
+  // accept audio refs in content blocks today.
   try {
     const [row] = await db
       .select({ metadata: peeks.metadata })
@@ -220,11 +217,9 @@ export async function POST(req: NextRequest): Promise<Response> {
       const fileBlocks: Anthropic.ContentBlockParam[] = active.flatMap((fid) => {
         const entry = uploaded.find((u) => u.file_id === fid);
         if (!entry) return [];
-        // Files API file_id sources are part of the Beta surface; the
-        // chat client carries the `anthropic-beta: files-api-2025-04-14`
-        // header globally (see lib/anthropic/client.ts) so the API
-        // accepts these refs. The non-beta TS union doesn't include
-        // file_id sources, so cast through unknown.
+        // file_id sources are Beta-surface; the global anthropic-beta
+        // header (lib/anthropic/client.ts) gates them. TS union is non-beta,
+        // hence the cast.
         if (entry.mime?.startsWith('image/')) {
           return [
             {
@@ -428,8 +423,6 @@ export async function POST(req: NextRequest): Promise<Response> {
           }
           occasionType = classifyOccasionToTemplate(occasion);
           cardsPhase = cardCount > 0;
-          // Coarse phase inference from peek state. A finer-grained
-          // classifier can override later.
           const hasHero = !!snap.peek.heroImageUrl;
           const hasNote = !!snap.peek.noteMd?.trim();
           if (snap.peek.status === 'published' || snap.peek.status === 'claimed') {
@@ -462,9 +455,6 @@ export async function POST(req: NextRequest): Promise<Response> {
         }
       }
 
-      // Curator durable memory: load profile.md + all kv/*.json entries
-      // from peek_v2.curator_memory and stringify them into the dynamic
-      // system-prompt block. Signed-in only; anon curators skip entirely.
       let curatorMemory: string | null = null;
       if (userId) {
         try {
@@ -486,10 +476,9 @@ export async function POST(req: NextRequest): Promise<Response> {
             }
             if (kv.length > 0) {
               const nowMs = Date.now();
-              // W06 from BUGS-WAVE2: enforce expires_at on KV entries
-              // (set_curator_memory writes `{value, expires_at, set_at}`).
-              // Without this filter, stale entries persist forever and bleed
-              // into the system prompt of every future peek.
+              // Drop expired KV entries — set_curator_memory writes
+              // `{value, expires_at, set_at}`; without this filter stale
+              // entries would bleed into every future peek's prompt.
               const kvPairs = kv
                 .map((r) => {
                   try {

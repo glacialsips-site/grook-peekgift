@@ -1,7 +1,3 @@
-/**
- * Public surface of the Anthropic integration. Most callers should import
- * from `@/lib/anthropic` rather than reaching into sub-modules.
- */
 export {
   anthropic,
   assertAnthropicConfigured,

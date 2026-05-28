@@ -5,19 +5,10 @@ import { registerTool } from './index';
 
 const log = logger.child({ component: 'tool/affiliate_search' });
 
-// Affiliate catalog search. Vendor: Skimlinks Merchant API (primary) +
-// Sovrn Commerce API (fallback).
-//
-// Current state: neither SKIMLINKS_PUBLISHER_ID nor SOVRN_API_KEY are set
-// in the vNext environment. When BOTH are unset, this module short-circuits
-// and skips `registerTool` entirely — Peek's tool list won't include
-// `affiliate_search` at all, so the model can't try to call it and get a
-// confusing "service_not_configured" error. The previous fallback (returning
-// a structured "use web_search instead" hint) was causing Peek to loop on
-// the tool. Better to hide it until the keys land (packet 42).
-//
-// When SKIMLINKS / SOVRN keys arrive, this handler switches to live catalog
-// calls. Leave the file in place so registration is a single env-var flip.
+// Hidden from the model's toolset until at least one of
+// SKIMLINKS_PUBLISHER_ID / SOVRN_API_KEY is configured. Without this gate the
+// model loops calling affiliate_search and getting a confusing
+// "service_not_configured" envelope.
 
 const CategoryEnum = z.enum([
   'apparel',
@@ -53,9 +44,6 @@ type Output =
   | { ok: false; error: 'not_implemented_yet'; user_message: string }
   | { ok: false; error: 'invalid_input'; detail: string };
 
-// Gate: hide entirely when no vendor is configured. The model never sees
-// the tool in its toolset, so it can't call it. When keys arrive, restart
-// the server and the tool reappears in the schemas.
 if (env.SKIMLINKS_PUBLISHER_ID || env.SOVRN_API_KEY) {
   registerTool<Input, Output>({
     name: 'affiliate_search',
@@ -97,7 +85,6 @@ if (env.SKIMLINKS_PUBLISHER_ID || env.SOVRN_API_KEY) {
     },
     deferLoading: true,
     handler: async (input): Promise<Output> => {
-      // W09 from BUGS-WAVE2: structured invalid_input envelope.
       let parsed: Input;
       try {
         parsed = InputSchema.parse(input);
@@ -111,7 +98,6 @@ if (env.SKIMLINKS_PUBLISHER_ID || env.SOVRN_API_KEY) {
       log.info('affiliate_search_called_pre_vendor_integration', {
         query: parsed.query,
       });
-      // Keys are configured but the live integration ships in packet 42.
       return {
         ok: false,
         error: 'not_implemented_yet',

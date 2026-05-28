@@ -148,8 +148,7 @@ export async function browserbaseScrape(
         timeoutMs: 5_000,
       });
     } catch (err) {
-      // session cleanup is fire-and-forget; logging the failure here is enough
-      // to debug a leaking session without retrying (cost > benefit for cleanup).
+      // Session cleanup is best-effort — retrying isn't worth it for cleanup.
       log.debug('session_cleanup_failed', {
         session_id: session.id,
         err: err instanceof Error ? err.message : String(err),

@@ -78,13 +78,9 @@ registerTool<Input, Output>({
         path,
         file_text: payload,
       });
-      // W15 from BUGS-WAVE2: the memory `create` handler uses .upsert() —
-      // it never returns an "exists" error. The realistic Error: paths are
-      // `File too large` and `Memory file limit reached`. Delete + recreate
-      // doesn't help either case (size won't shrink; deleting the path
-      // doesn't free quota above the limit unless it's the same row, which
-      // upsert just overwrote anyway). Surface the original message so the
-      // model can pick what to GC.
+      // `create` is implemented via upsert: only meaningful errors are
+      // "File too large" / "Memory file limit reached". Surface verbatim so
+      // the model can pick what to GC — delete-then-recreate won't help either.
       if (typeof result === 'string' && result.startsWith('Error:')) {
         return {
           ok: false,

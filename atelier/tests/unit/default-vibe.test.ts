@@ -7,20 +7,9 @@ import {
 } from '@/lib/vibe/defaults';
 import { vibeCss } from '@/lib/vibe/css-vars';
 
-/**
- * Snapshot the CSS-var bundle the preview pane will actually render when a
- * brand-new peek (no chat yet) loads. The packet brief: "a blank peek looks
- * ALIVE." That means the var bundle must encode distinct visual choices —
- * not generic Tailwind grey-on-white.
- *
- * We snapshot the var record (not a DOM render — vitest runs in `node`).
- * This is the bridge between the dial set and the on-page treatment, so
- * if the default ever regresses to neutral, this test fails.
- */
-
-const BLAND_BASELINE_BG = '0 0% 100%'; // pure white — generic SaaS
-const BLAND_BASELINE_INK = '240 10% 4%'; // near-black — generic SaaS
-const TAILWIND_DEFAULT_RADIUS_PX = ['0px', '2px', '4px']; // tailwind default rounded variants
+const BLAND_BASELINE_BG = '0 0% 100%';
+const BLAND_BASELINE_INK = '240 10% 4%';
+const TAILWIND_DEFAULT_RADIUS_PX = ['0px', '2px', '4px'];
 
 describe('DEFAULT_VIBE — vivid baseline', () => {
   it('locks the seven dials to opinionated values', () => {
@@ -58,7 +47,6 @@ describe('DEFAULT_VIBE → vibeCss snapshot', () => {
   const vars = vibeCss(DEFAULT_VIBE);
 
   it('emits all seven dials into the CSS bundle', () => {
-    // Palette — every channel populated
     expect(vars['--peek-bg']).toBeDefined();
     expect(vars['--peek-surface']).toBeDefined();
     expect(vars['--peek-ink']).toBeDefined();
@@ -68,73 +56,54 @@ describe('DEFAULT_VIBE → vibeCss snapshot', () => {
     expect(vars['--vibe-ink']).toBeDefined();
     expect(vars['--vibe-accent']).toBeDefined();
 
-    // Typography — serif display + sans body + always-on mono
     expect(vars['--peek-font-heading']).toBeDefined();
     expect(vars['--peek-font-body']).toBeDefined();
     expect(vars['--vibe-type-display']).toContain('Fraunces');
     expect(vars['--vibe-type-body']).toContain('Inter');
     expect(vars['--vibe-type-mono']).toBeDefined();
 
-    // Density — breathable scale
     expect(vars['--vibe-space-base']).toBe('1.5rem');
     expect(vars['--vibe-space-gap']).toBe('1.5');
 
-    // Shape — soft (16px card radius)
     expect(vars['--vibe-radius-card']).toBe('16px');
     expect(vars['--vibe-radius-button']).toBe('12px');
 
-    // Motion — standard 1x
     expect(vars['--vibe-motion-scale']).toBe('1');
 
-    // Mood — rich emits grain + overlay
     expect(vars['--vibe-mood-grain']).toBe('0.04');
     expect(vars['--vibe-mood-overlay']).toBe('0.08');
   });
 
   it('does NOT collapse to the bland Tailwind baseline', () => {
-    // The default vibe must be visually distinct from "white bg + near-black
-    // text + tiny rounded corners + system fonts."
     expect(vars['--peek-bg']).not.toBe(BLAND_BASELINE_BG);
     expect(vars['--peek-ink']).not.toBe(BLAND_BASELINE_INK);
     expect(TAILWIND_DEFAULT_RADIUS_PX).not.toContain(vars['--vibe-radius-card']);
 
-    // The display heading must reference an actual serif family, not the
-    // generic system stack the dim-default used to fall back to.
     expect(vars['--peek-font-heading']).toMatch(/Fraunces|serif/);
     expect(vars['--peek-font-body']).toMatch(/Inter/);
   });
 
   it('emits the exact warm-cream / deep-indigo / saffron palette', () => {
-    // hexToHslTriple is deterministic — these are the literal outputs of
-    // converting the DEFAULT_VIBE hex palette. If the conversion changes
-    // OR the source palette drifts, this test catches both.
     expect(vars['--peek-bg']).toMatch(/^\d+ \d+% \d+%$/);
     expect(vars['--peek-ink']).toMatch(/^\d+ \d+% \d+%$/);
     expect(vars['--peek-accent']).toMatch(/^\d+ \d+% \d+%$/);
 
-    // Sanity: bg lightness should be cream-bright (≥ 85%), ink should be
-    // dark (≤ 25%), accent should be saturated mid (saffron ~36° hue).
     const [bgH, bgS, bgL] = parseHsl(vars['--peek-bg']!);
     const [, , inkL] = parseHsl(vars['--peek-ink']!);
     const [accentH, accentS] = parseHsl(vars['--peek-accent']!);
 
     expect(bgL).toBeGreaterThanOrEqual(85);
     expect(inkL).toBeLessThanOrEqual(25);
-    expect(accentS).toBeGreaterThanOrEqual(40); // saturated, not greige
-    // Saffron hue is in the orange/amber 30-50° range
+    expect(accentS).toBeGreaterThanOrEqual(40);
     expect(accentH).toBeGreaterThanOrEqual(20);
     expect(accentH).toBeLessThanOrEqual(60);
-    // Cream bg sits in the warm-yellow hue band, not blue/grey
     expect(bgH).toBeGreaterThanOrEqual(20);
     expect(bgH).toBeLessThanOrEqual(80);
-    // Saturation moderate — yellow cream rather than greige
     expect(bgS).toBeLessThanOrEqual(80);
     expect(bgS).toBeGreaterThanOrEqual(40);
   });
 
   it('snapshot — the bundle preview-pane consumes', () => {
-    // Pin every var the preview pane reads. If any of these change, the
-    // visual will visibly shift; force the reviewer to acknowledge.
     expect({
       '--peek-bg': vars['--peek-bg'],
       '--peek-surface': vars['--peek-surface'],
@@ -199,7 +168,6 @@ describe('applyDefaultVibe', () => {
     expect(merged.palette?.bg).toBe('#000000');
     expect(merged.mood).toBe('whimsical');
     expect(merged.shape).toBe('pillowy');
-    // Untouched dials fall back to default
     expect(merged.density).toBe(DEFAULT_VIBE.density);
     expect(merged.font_pairing).toEqual(DEFAULT_VIBE.font_pairing);
   });

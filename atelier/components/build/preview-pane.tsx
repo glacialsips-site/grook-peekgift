@@ -51,10 +51,8 @@ function isPeekEmpty(draft: PeekDraft): boolean {
   if (p.noteMd && p.noteMd.trim().length > 0) return false;
   if (draft.cards.length > 0) return false;
   if (draft.variantGroups.length > 0) return false;
-  // DEFAULT_VIBE ships with palette+mood already populated, so we can't use
-  // those fields as a proxy for "evolved vibe". A non-empty
-  // `signal_source_history` is the truth: the vibe engine appends an entry
-  // every time a real curator/system signal updates a dial.
+  // DEFAULT_VIBE already populates palette+mood; signal_source_history is
+  // the only reliable proxy for "the vibe engine has run."
   const v = p.vibe ?? {};
   const evolved = (v.signal_source_history ?? []).length > 0;
   if (evolved) return false;

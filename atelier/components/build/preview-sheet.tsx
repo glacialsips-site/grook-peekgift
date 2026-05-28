@@ -26,11 +26,8 @@ const PEEK_HEIGHT = 84;
 
 export function PreviewSheet({ draft, className }: Props) {
   const reduce = useReducedMotion();
-  // Default to 'closed' so the chat input is reachable on first paint —
-  // expansion is one tap on the peek handle. Half/full open via tap or
-  // upward swipe (BUGS.md, CONCEPT-V2.md §2 "chat first, swipe up to
-  // expand preview"). Previously defaulted to 'half', which buried the
-  // chat input under the sheet on every mobile landing.
+  // 'closed' on first paint keeps the chat input reachable; tap or swipe up
+  // expands. 'half' as a default buried the input on mobile.
   const [snap, setSnap] = useState<Snap>('closed');
   const [viewportH, setViewportH] = useState<number>(0);
   const [dragging, setDragging] = useState(false);

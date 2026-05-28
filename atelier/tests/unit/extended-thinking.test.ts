@@ -5,7 +5,7 @@ import {
   _resetExtendedThinkingFlags,
 } from '@/lib/anthropic/extended-thinking';
 
-describe('extended-thinking flag (W07 from BUGS-WAVE2)', () => {
+describe('extended-thinking flag', () => {
   beforeEach(() => {
     _resetExtendedThinkingFlags();
     vi.useFakeTimers();
@@ -33,7 +33,6 @@ describe('extended-thinking flag (W07 from BUGS-WAVE2)', () => {
 
   it('evicts the flag after the TTL window (sweep on access)', () => {
     requestExtendedThinking('sess-leak');
-    // Jump past the 60s TTL.
     vi.advanceTimersByTime(61_000);
     expect(consumeExtendedThinking('sess-leak')).toBe(false);
   });
@@ -47,9 +46,7 @@ describe('extended-thinking flag (W07 from BUGS-WAVE2)', () => {
   it('sweeps stale flags from OTHER sessions on a new request', () => {
     requestExtendedThinking('sess-stale');
     vi.advanceTimersByTime(61_000);
-    // Now request on a different session — the sweep should drop sess-stale.
     requestExtendedThinking('sess-other');
-    // sess-stale should NOT be consumable; sess-other should.
     expect(consumeExtendedThinking('sess-stale')).toBe(false);
     expect(consumeExtendedThinking('sess-other')).toBe(true);
   });

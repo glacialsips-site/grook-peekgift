@@ -1,12 +1,7 @@
-// Path validation + namespacing for the Anthropic Memory tool's virtual
-// filesystem. Every file lives under /memories/<clerk_user_id>/... — the
-// handler enforces this via validatePath() before any DB read/write so a
-// malicious or hallucinated tool_use input can't cross user boundaries.
-//
-// Defense-in-depth pairs with the table's CHECK constraints
-// (curator_memory_path_format_chk + curator_memory_no_traversal_chk in
-// migration 0013): app-layer guard for fast structured errors that the model
-// can recover from, DB-layer guard as a hard backstop.
+// Every memory file must live under /memories/<clerk_user_id>/...
+// validatePath() enforces this at the app layer for structured errors the
+// model can recover from; CHECK constraints in migration 0013 are the
+// hard backstop against cross-tenant writes.
 
 export function prefixForUser(clerkUserId: string): string {
   return `/memories/${clerkUserId}/`;
@@ -16,19 +11,17 @@ export function validatePath(clerkUserId: string, raw: unknown): string {
   if (typeof raw !== 'string' || raw.length === 0) {
     throw new Error('memory_invalid_path: empty');
   }
-  // Reject URL-encoded traversal up front (case-insensitive on hex digits).
+  // %2e %2f %5c — block URL-encoded path traversal.
   const lc = raw.toLowerCase();
   if (lc.includes('%2e') || lc.includes('%2f') || lc.includes('%5c')) {
     throw new Error('memory_invalid_path: encoded_traversal');
   }
-  // Collapse double-slashes + strip trailing slash for comparison only.
   const normalized = raw.replace(/\/+/g, '/');
   const expected = prefixForUser(clerkUserId);
-  const expectedNoTrailing = expected.replace(/\/$/, ''); // /memories/<user>
+  const expectedNoTrailing = expected.replace(/\/$/, '');
 
-  // Anthropic's Memory tool calls `view` on /memories (root) — interpret
-  // that as a request to list THIS user's namespace root, not the
-  // multi-tenant root. Same for /memories/<user> without trailing slash.
+  // Anthropic's Memory tool calls `view` on /memories — treat that and
+  // /memories/<user> (no trailing slash) as this user's namespace root.
   if (normalized === '/memories' || normalized === '/memories/') {
     return expected;
   }

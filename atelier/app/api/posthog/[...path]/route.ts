@@ -27,8 +27,6 @@ function unconfiguredResponse(): Response {
   );
 }
 
-// Headers we forward to PostHog. Everything else (including hop-by-hop
-// headers per RFC 7230 and Authorization variants) is dropped.
 const FORWARD_HEADERS = new Set([
   'content-type',
   'user-agent',
@@ -39,9 +37,8 @@ const FORWARD_HEADERS = new Set([
   'cookie',
 ]);
 
-// Resolve the real client IP from the incoming edge request. PostHog parses
-// `x-forwarded-for` as the canonical source; we normalize to a single value
-// so its parser doesn't pick the Netlify edge node by accident.
+// PostHog parses x-forwarded-for as the canonical client IP; normalize to a
+// single value or its parser picks the Netlify edge node by accident.
 function resolveClientIp(req: NextRequest): string | null {
   const cf = req.headers.get('cf-connecting-ip');
   if (cf) return cf.trim();
@@ -98,8 +95,8 @@ async function proxy(req: NextRequest, ctx: RouteContext): Promise<Response> {
   const cacheControl = res.headers.get('cache-control');
   if (cacheControl) resHeaders.set('cache-control', cacheControl);
 
-  // Preserve PostHog's Set-Cookie headers (session-replay handshake). Use
-  // getSetCookie() if available so multiple cookies aren't collapsed.
+  // Preserve PostHog's Set-Cookie headers (session-replay handshake).
+  // getSetCookie() keeps multiple cookies from being collapsed.
   const setCookieFn = (
     res.headers as Headers & { getSetCookie?: () => string[] }
   ).getSetCookie;

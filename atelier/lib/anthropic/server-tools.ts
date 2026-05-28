@@ -1,20 +1,9 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { env } from '@/lib/env';
 
-// Anthropic-side / hybrid tool descriptors. None of these are dispatched via
-// our client-tool registry — they're shipped alongside the client tools in
-// the messages.create `tools` array so Anthropic knows to execute them
-// (web_search, web_fetch, code_execution, tool_search) or to expect our
-// special-case dispatch for `memory_20250818` (handled inline in chat.ts).
-//
-// The Memory descriptor lives here too because it's an Anthropic-routed
-// tool (the model calls it like a server tool) even though WE own the
-// storage on the other side. Keeping it in `getServerToolDescriptors`
-// concentrates the "tools the chat loop should pre-stage alongside the
-// client registry" set into one place.
-//
-// All four search/fetch/exec/tool_search descriptors carry the standard
-// 2026-02 versions per the verified Anthropic spec at packet-write time.
+// Tools Anthropic executes server-side, shipped alongside our client-tool
+// registry in messages.create.tools. Memory is hybrid: Anthropic-routed but
+// dispatched inline in chat.ts to our storage handlers.
 
 export function getServerToolDescriptors(): Array<
   | Anthropic.CodeExecutionTool20260120

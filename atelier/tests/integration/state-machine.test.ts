@@ -1,21 +1,3 @@
-// Full state-machine test: draft -> ready_for_publish -> published.
-//
-// Drives the chain end-to-end against an in-memory peek row plus stubs of
-// the Drizzle and supabase service clients:
-//   1. Insert a draft peek with all required fields.
-//   2. Call `mark_ready_for_publish` → status flips to `ready_for_publish`,
-//      metadata.markedReadyAt stamped, peek_marked_ready event tracked.
-//   3. Simulate `checkout.session.completed` (and the equivalent
-//      `payment_intent.succeeded`) via the same internal `publishPeek` helper
-//      that the Stripe webhook uses → status flips to `published`,
-//      share_url + published_at populated.
-//
-// We mock the DB/supabase boundary because the tool reaches into Drizzle and
-// the webhook reaches through `@supabase/supabase-js`; both surfaces must be
-// stubbed for unit-level testing. The fakes are simple enough to be
-// transparent — they store the row in memory and respond to the exact query
-// shapes the production code uses.
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type PeekRow = {
@@ -96,8 +78,6 @@ function mapDrizzleUpdateValuesToWire(
   return out;
 }
 
-// Track the SET clause the production code passes so we can introspect
-// metadata.markedReadyAt and the status flip from tests.
 let lastUpdate: { set: Record<string, unknown>; matched: boolean } | null = null;
 
 vi.mock('@/db/client', () => {
@@ -140,15 +120,12 @@ vi.mock('@/db/client', () => {
   const update = (_table: unknown) => ({
     set: (setClause: Record<string, unknown>) => ({
       where: (_predicate: unknown) => {
-        // Allow the SET clause to flip status only when the peek is currently
-        // 'draft' (mirrors the tool's `eq(peeks.status, 'draft')` predicate).
+        // Mirror the tool's `eq(peeks.status, 'draft')` predicate.
         const matched = world.peek.status === 'draft';
         lastUpdate = { set: setClause, matched };
         if (matched) {
           const patch = mapDrizzleUpdateValuesToWire(setClause);
-          // metadata SQL is a Drizzle SQL chunk; resolve markedReadyAt manually
-          // because we don't execute real SQL. The tool calls jsonb_set(...,
-          // markedReadyAt, nowIso, true) — emulate.
+          // metadata arrives as a Drizzle SQL chunk; emulate jsonb_set here.
           if (
             patch.metadata &&
             typeof patch.metadata === 'object' &&
@@ -193,9 +170,6 @@ vi.mock('@/lib/analytics/facade', () => ({
   shutdownAnalytics: vi.fn(),
 }));
 
-// Supabase service mock for the webhook helper. It only needs to support the
-// exact call shape `from('peeks').select(...).eq('id', x).maybeSingle()` and
-// `from('peeks').update(...).eq('id', x)` and event inserts.
 vi.mock('@/lib/supabase/service', () => {
   return {
     getSupabaseService: () => ({
@@ -347,7 +321,6 @@ describe('full state machine: draft -> ready_for_publish -> published', () => {
     expect(out.missing).toContain('recipient_name');
     expect(out.missing).toContain('hero_image');
 
-    // Status must NOT have flipped.
     expect(world.peek.status).toBe('draft');
     expect(
       world.trackedEvents.find((e) => e.name === 'peek_marked_ready'),
@@ -396,7 +369,6 @@ describe('full state machine: draft -> ready_for_publish -> published', () => {
   });
 
   it('stripe webhook publishes a ready_for_publish peek on checkout.session.completed', async () => {
-    // Flip to ready first via the tool (canonical entry into ready state).
     await import('@/lib/anthropic/tools/bootstrap');
     const { runTool } = await import('@/lib/anthropic/tools/index');
     await runTool(
@@ -406,9 +378,6 @@ describe('full state machine: draft -> ready_for_publish -> published', () => {
     );
     expect(world.peek.status).toBe('ready_for_publish');
 
-    // Build the checkout.session.completed event and inject via the webhook
-    // route's verified-event handler. We bypass the signature check by
-    // mocking constructEvent.
     const session = {
       id: 'cs_test_123',
       payment_intent: 'pi_test_456',
