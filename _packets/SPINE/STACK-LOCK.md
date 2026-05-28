@@ -18,7 +18,7 @@ Why it wins on principle, not just score: the moat is *AI-invents-the-vibe-at-ru
 | Shell | Next.js 16 App Router + React 19. Recipient page SSR/RSC (OG/unfurl/fast-paint); build surface = client island. | — |
 | **Styling / moat** | **Plain CSS custom properties + CSS Modules. Tailwind DEAD.** Zod `VibeSpec` (10-dim, OKLCH, auto-repair, SAFE_DEFAULT) → `--vibe-*` on wrapper → pure RSC components read vars. Structure = finite enum of layout variants (`data-*` selects skeleton); paint = infinite runtime values. | dg-css-vars 9/10; grammar-spec |
 | Design grammar | Variety = combinatorics of legal tokens, never free-form. Hero ×5 / story ×5 / product-set ×6 / divider ×4 / CTA ×4. OKLCH palette physically can't emit failing contrast. | grammar-spec (`grammar.ts`, tsc-clean) |
-| Chat-loop compute | **Netlify Edge Functions** (Deno, SSE long-stream, upstream-wait-free). NOT standard Node fns. | backend-arch; verified 26s Netlify cap |
+| Chat-loop compute | **Netlify Edge Functions** (Deno, SSE long-stream, upstream-wait-free). NOT standard Node fns. **VERIFIED GO** — SDK runs on Deno (zero `node:` deps), loop is network-bound, bursts <0.04ms. | backend-arch + edge-loop-verify |
 | Infra | **Stay Netlify + Supabase. No Cloudflare/Durable Objects for v1.** A peek is single-client streaming + reactive state, not a distributed actor. DO is a later optimization only if true real-time multi-client collab becomes hard-required. | backend-arch keystone flip |
 | Collab | Relay contribution → **no CRDT / no Yjs.** | backend-arch |
 | Mobile | **PWA, not native.** Non-negotiables: shell sized to `visualViewport` (never `100vh`); never animate under a live backdrop-blur (suspend during diff-mark). | build-actor GO |
@@ -37,7 +37,7 @@ Why it wins on principle, not just score: the moat is *AI-invents-the-vibe-at-ru
 
 1. **Test the Zod validation gate hard** — it's the *only* never-broken guarantee at runtime.
 2. **ESLint rule:** components use only `var(--…)`, never literal colors (the one safety the compiler libs gave that we're forgoing).
-3. **Verify the Anthropic agentic loop runs on Netlify Edge/Deno** within the per-burst CPU model; fallback = dedicated Node compute (Fly).
+3. **Anthropic loop on Edge/Deno: VERIFIED GO.** Hard build rule for the chat-loop phase: cap tool-result payloads to ≤~200 items (paginate catalog/scrape tools) to stay under 50ms-CPU/burst; flush headers before the first model call (beats the 40s header timeout, then runs indefinitely); persist turn-state to Supabase + SSE keep-alives so a dropped client can resume. Fallback to Node/Fly only if a tool needs >50ms *synchronous* CPU that can't be paginated.
 4. **Retest mobile** (keyboard + blur FPS) on a physical iPhone + mid-Android before locking the build-actor approach (current data is throttled-emulation).
 
 ## Knowledge kept (from salvage — branches survive, code re-checkoutable)
