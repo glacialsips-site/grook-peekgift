@@ -21,9 +21,20 @@ export function validatePath(clerkUserId: string, raw: unknown): string {
   if (lc.includes('%2e') || lc.includes('%2f') || lc.includes('%5c')) {
     throw new Error('memory_invalid_path: encoded_traversal');
   }
-  // Collapse double-slashes, normalize.
+  // Collapse double-slashes + strip trailing slash for comparison only.
   const normalized = raw.replace(/\/+/g, '/');
   const expected = prefixForUser(clerkUserId);
+  const expectedNoTrailing = expected.replace(/\/$/, ''); // /memories/<user>
+
+  // Anthropic's Memory tool calls `view` on /memories (root) — interpret
+  // that as a request to list THIS user's namespace root, not the
+  // multi-tenant root. Same for /memories/<user> without trailing slash.
+  if (normalized === '/memories' || normalized === '/memories/') {
+    return expected;
+  }
+  if (normalized === expectedNoTrailing) {
+    return expected;
+  }
   if (!normalized.startsWith(expected)) {
     throw new Error(
       `memory_invalid_path: outside_namespace (got ${normalized}, expected prefix ${expected})`,
