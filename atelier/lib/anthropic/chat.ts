@@ -99,8 +99,10 @@ export async function* chatTurn(
           : resolvedPeekState;
 
       const system = getSystemPrompt({
+        ...baseOpts,
         curatorName: baseOpts.curatorName ?? null,
         peekStateJson: dynamicPeekState,
+        peekId: baseOpts.peekId ?? input.ctx.peekId,
       });
 
       const params: Anthropic.MessageStreamParams = {
