@@ -15,6 +15,8 @@ const isPublicRoute = createRouteMatcher([
   '/sso-callback(.*)',
   '/g/(.*)',              // recipient pages — public by design
   '/build(.*)',           // anon curators allowed; chat route enforces deferred auth wall
+  '/spine(.*)',           // spine FAFO thread — stubbed auth, no Clerk session
+  '/api/spine(.*)',       // spine edge chat + publish — self-contained, no Clerk
   '/api/chat(.*)',        // anon turn cap + tier throttle enforced inside the route
   '/api/upload(.*)',      // anon uploads validated via peek-anon-session cookie + assertPeekAccess
   '/api/webhooks/(.*)',   // signed webhooks
