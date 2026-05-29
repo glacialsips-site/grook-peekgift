@@ -29,3 +29,18 @@ export {
   sectionSchema,
   generationVibeSchema,
 } from './schema';
+export {
+  OCCASIONS,
+  VIBE_PRESETS,
+  OCCASION_VIBES,
+  pickPreset,
+  remix,
+  remixAll,
+  axesFromBrief,
+  type OccasionKey,
+  type OccasionDescriptor,
+  type VibeFamily,
+  type VibeKey,
+  type VibePreset,
+  type RemixAxis,
+} from './presets';
