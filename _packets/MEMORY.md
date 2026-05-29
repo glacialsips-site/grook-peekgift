@@ -204,10 +204,12 @@ If you NEED a stale doc for context, read it skeptically and treat STACK-LOCK + 
 
 ### Spawn a sub correctly (Hercules's own subs, for research/parallel probes that don't need durability)
 
+**ALWAYS pass `isolation: "worktree"` — without it, subs share the orchestrator's working tree and a sub's `git checkout` can shift the orchestrator's branch out from under you.** (Hit this once: 6 subs without isolation pulled the orchestrator onto a sub's research branch mid-flight. Fixed by force-pushing the merge commits to bold-ride explicitly.)
+
 ```
 Agent({
   description: "<3-5 word task>",
-  isolation: "worktree",
+  isolation: "worktree",   // ← never omit
   subagent_type: "general-purpose",
   model: "opus",  // or sonnet for mechanical work
   prompt: `<brief>. Worktree branches are transient — produce a self-contained report.
