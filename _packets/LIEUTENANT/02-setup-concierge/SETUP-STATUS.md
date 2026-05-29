@@ -7,6 +7,14 @@ Single source of truth for what's keyed. Status: ✅ set & verified / ⏳ pendin
 
 _Last updated: 2026-05-29_
 
+## ⚠️ Leak event — 2026-05-29 (rotation REQUIRED)
+
+Two live credentials were pasted into the concierge chat (wrong-chat mixup; meant for an unrelated glennaaronsonrealty deploy). Values never reassembled or stored here. Both must be revoked:
+- `78d2…` — Netlify **admin** Personal Access Token (account-wide access to ALL sites incl. legacy peek-gift). Revoke: Netlify → User settings → Applications → Personal access tokens.
+- `3ba3…` — fal.ai key. Revoke: fal.ai dashboard → keys.
+
+Consequence: if `3ba3…` is the peek.gift `FAL_KEY`, it's burned → regenerate before wiring (folds into item ① below).
+
 ## Immediate queue
 
 | Service | Env var(s) | Status | Where it lives | How verified | Updated |
