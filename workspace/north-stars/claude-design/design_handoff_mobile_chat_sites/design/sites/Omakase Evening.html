@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>HANABI · おまかせ · An Evening, Entrusted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --washi:#F3F0E7;
+    --washi2:#ECE7DA;
+    --paper:#F8F6EF;
+    --sumi:#1C1B17;
+    --sumi2:#3B392F;
+    --stone:#7B756A;
+    --stone2:#A39C8E;
+    --seal:#B23A2E;
+    --indigo:#2C3A47;
+    --line:rgba(28,27,23,0.14);
+    --min:"Shippori Mincho",serif;
+    --sans:"Zen Kaku Gothic New",system-ui,sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--washi);color:var(--sumi);font-family:var(--sans);
+    font-weight:400;font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;border:none;cursor:pointer;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 40px;}
+  .min{font-family:var(--min);}
+  .eyebrow{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--seal);}
+  .vlabel{writing-mode:vertical-rl;text-orientation:upright;font-family:var(--min);letter-spacing:.3em;}
+
+  .btn{display:inline-flex;align-items:center;gap:14px;padding:16px 34px;
+    font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.28em;text-transform:uppercase;
+    background:var(--sumi);color:var(--washi);border:1px solid var(--sumi);
+    transition:background .4s ease,color .4s ease,letter-spacing .4s ease;}
+  .btn:hover{background:transparent;color:var(--sumi);letter-spacing:.34em;}
+  .btn--seal{background:var(--seal);border-color:var(--seal);color:#fff;}
+  .btn--seal:hover{background:transparent;color:var(--seal);}
+  .btn--ghost{background:transparent;color:var(--sumi);border-color:var(--line);}
+  .btn--ghost:hover{border-color:var(--sumi);}
+
+  /* hanko seal */
+  .seal{display:inline-grid;place-items:center;width:58px;height:58px;border-radius:8px;
+    border:2px solid var(--seal);color:var(--seal);font-family:var(--min);font-weight:700;font-size:24px;
+    line-height:1;letter-spacing:0;}
+
+  /* ── NAV ── */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(243,240,231,.86);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:76px;}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo .mk{font-family:var(--min);font-weight:700;font-size:26px;color:var(--seal);}
+  .logo b{font-family:var(--min);font-weight:600;font-size:20px;letter-spacing:.34em;padding-left:.34em;}
+  .nav-links{display:flex;gap:40px;}
+  .nav-links a{font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--stone);transition:color .3s ease;}
+  .nav-links a:hover{color:var(--sumi);}
+
+  /* ── HERO ── */
+  .hero{position:relative;padding:90px 0 110px;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:60px;align-items:center;}
+  .hero .jp{font-family:var(--min);font-weight:500;font-size:clamp(64px,12vw,148px);line-height:.95;letter-spacing:.04em;margin:0;}
+  .hero h1{font-family:var(--min);font-weight:400;font-style:italic;font-size:clamp(26px,3.4vw,40px);
+    line-height:1.2;margin:26px 0 0;color:var(--sumi2);letter-spacing:.01em;}
+  .hero p.lede{font-size:15px;line-height:2;color:var(--stone);margin:28px 0 0;max-width:40ch;font-weight:300;}
+  .hero .meta{display:flex;gap:0;margin:38px 0 0;border-top:1px solid var(--line);}
+  .hero .meta .c{padding:18px 26px 0 0;margin-right:26px;border-right:1px solid var(--line);}
+  .hero .meta .c:last-child{border-right:none;}
+  .hero .meta .k{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--stone2);}
+  .hero .meta .v{font-family:var(--min);font-size:19px;margin-top:6px;}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap;margin:36px 0 0;}
+  .hero-aside{position:relative;display:flex;justify-content:center;}
+  .hero-photo{position:relative;width:100%;max-width:300px;aspect-ratio:3/4.4;overflow:hidden;
+    background:linear-gradient(160deg,#E7E1D2,#CFC8B6);}
+  .hero-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.1) contrast(1.02);}
+  .hero-aside .vdate{position:absolute;top:0;right:-34px;color:var(--stone);font-size:14px;letter-spacing:.2em;}
+  .hero-aside .seal-fl{position:absolute;bottom:-22px;left:-22px;background:var(--washi);}
+
+  /* ── RULE LINE ── */
+  .band{background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .proverb{text-align:center;padding:54px 0;}
+  .proverb .jp{font-family:var(--min);font-size:clamp(22px,3vw,32px);letter-spacing:.08em;}
+  .proverb .en{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--stone);margin-top:14px;}
+
+  /* ── SECTION ── */
+  .sec{padding:104px 0;}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:60px;}
+  .sec-head .l .eyebrow{display:block;margin-bottom:14px;}
+  .sec-head .l h2{font-family:var(--min);font-weight:600;font-size:clamp(32px,4.6vw,52px);line-height:1;margin:0;letter-spacing:.02em;}
+  .sec-head .l h2 .jp{color:var(--seal);font-weight:500;margin-right:14px;}
+  .sec-head .r{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone);text-align:right;white-space:nowrap;}
+
+  /* ── SEQUENCE (courses) ── */
+  .courses{max-width:840px;margin:0 auto;}
+  .course{display:grid;grid-template-columns:64px 1fr auto;gap:32px;align-items:baseline;
+    padding:30px 0;border-bottom:1px solid var(--line);}
+  .course:first-child{border-top:1px solid var(--line);}
+  .course .no{font-family:var(--min);font-size:30px;color:var(--seal);font-weight:500;line-height:1;}
+  .course .nm{font-family:var(--min);font-size:24px;font-weight:600;line-height:1.2;}
+  .course .nm .en{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone);margin-top:6px;}
+  .course .ds{font-size:14px;color:var(--stone);font-weight:300;margin:10px 0 0;max-width:46ch;line-height:1.8;}
+  .course .pace{font-family:var(--min);font-size:14px;color:var(--stone2);font-style:italic;white-space:nowrap;}
+
+  /* ── OMIYAGE (gifts) ── */
+  .feature{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);background:var(--paper);margin-bottom:50px;}
+  .feature .art{position:relative;min-height:380px;background:linear-gradient(160deg,#E2DCCC,#C9C1AF);overflow:hidden;}
+  .feature .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(.15);}
+  .feature .copy{padding:clamp(34px,4.5vw,64px);display:flex;flex-direction:column;justify-content:center;}
+  .feature .copy .eyebrow{color:var(--seal);}
+  .feature .copy h3{font-family:var(--min);font-weight:600;font-size:clamp(26px,3.4vw,40px);line-height:1.12;margin:16px 0 0;}
+  .feature .copy h3 .jp{color:var(--seal);}
+  .feature .copy p{font-size:14.5px;color:var(--stone);font-weight:300;margin:18px 0 0;max-width:40ch;line-height:1.9;}
+  .feature .copy .price{font-family:var(--min);font-size:19px;margin:22px 0 0;font-style:italic;}
+
+  .gifts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .gift{background:var(--washi);padding:0;display:flex;flex-direction:column;transition:background .4s ease;}
+  .gift:hover{background:var(--paper);}
+  .gift .pic{aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;}
+  .gift .pic .glyph{width:46%;height:46%;color:var(--sumi2);}
+  .gift .body{padding:20px 22px 24px;}
+  .gift .maker{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--seal);}
+  .gift .nm{font-family:var(--min);font-size:19px;font-weight:600;margin:8px 0 0;line-height:1.2;}
+  .gift .nm .en{display:block;font-family:var(--sans);font-weight:400;font-size:12px;color:var(--stone);letter-spacing:.04em;margin-top:3px;}
+  .gift .pr{font-family:var(--min);font-size:15px;font-style:italic;color:var(--stone);margin-top:14px;}
+
+  /* ── RESERVE ── */
+  .reserve{position:relative;text-align:center;padding:30px 0;}
+  .reserve .jp{font-family:var(--min);font-weight:500;font-size:clamp(40px,6vw,68px);letter-spacing:.06em;}
+  .reserve h2{font-family:var(--min);font-weight:400;font-style:italic;font-size:clamp(20px,2.6vw,28px);color:var(--sumi2);margin:14px 0 0;}
+  .reserve p{font-size:14px;color:var(--stone);font-weight:300;margin:18px auto 0;max-width:46ch;}
+  .reserve form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:34px 0 0;}
+  .reserve input{padding:15px 22px;background:transparent;border:1px solid var(--line);color:var(--sumi);
+    font-family:var(--sans);font-size:14px;min-width:260px;text-align:center;letter-spacing:.04em;}
+  .reserve input:focus{outline:none;border-color:var(--seal);}
+  .reserve small{display:block;margin-top:22px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone2);}
+
+  /* ── FOOTER ── */
+  footer{background:var(--sumi);color:var(--washi);padding:80px 0 50px;}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;flex-wrap:wrap;}
+  footer .logo .mk{color:#E0897E;}footer .logo b{color:var(--washi);}
+  footer .addr{font-size:13px;line-height:2;color:var(--stone2);font-weight:300;}
+  footer .seal{border-color:#E0897E;color:#E0897E;}
+  footer .fine{margin-top:50px;padding-top:24px;border-top:1px solid rgba(243,240,231,.14);
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);}
+
+  /* ── MOBILE COMPONENTS ── */
+  .hamburger{display:none;width:46px;height:46px;place-items:center;color:var(--sumi);background:transparent;cursor:pointer;}
+  .hamburger span{position:relative;width:22px;height:1.5px;background:currentColor;display:block;transition:background .3s ease;}
+  .hamburger span::before,.hamburger span::after{content:"";position:absolute;left:0;width:22px;height:1.5px;background:currentColor;transition:transform .3s ease;}
+  .hamburger span::before{top:-7px;}
+  .hamburger span::after{top:7px;}
+  body.menu-open .hamburger span{background:transparent;}
+  body.menu-open .hamburger span::before{transform:translateY(7px) rotate(45deg);}
+  body.menu-open .hamburger span::after{transform:translateY(-7px) rotate(-45deg);}
+
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(28,27,23,.42);opacity:0;visibility:hidden;transition:opacity .45s ease,visibility .45s ease;}
+  .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(82vw,340px);background:var(--washi);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .5s cubic-bezier(.3,.8,.2,1);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 26px) 30px calc(var(--safe-b) + 30px);box-shadow:-30px 0 90px rgba(28,27,23,.18);}
+  .mobile-menu .mm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;}
+  .mobile-menu .mm-brand{display:flex;align-items:center;gap:10px;font-family:var(--min);font-weight:600;font-size:20px;letter-spacing:.2em;}
+  .mobile-menu .mm-brand .mk{color:var(--seal);font-weight:700;}
+  .mm-close{width:46px;height:46px;display:grid;place-items:center;background:transparent;cursor:pointer;color:var(--seal);margin-right:-8px;}
+  .mobile-menu nav{display:flex;flex-direction:column;}
+  .mobile-menu nav a{font-family:var(--min);font-weight:600;font-size:26px;color:var(--sumi);padding:18px 0;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;opacity:0;transform:translateX(14px);transition:opacity .5s ease,transform .5s ease;}
+  .mobile-menu nav a .ix{font-family:var(--min);font-size:15px;color:var(--seal);}
+  body.menu-open .mobile-menu nav a{opacity:1;transform:none;}
+  body.menu-open .mobile-menu nav a:nth-child(1){transition-delay:.1s;}
+  body.menu-open .mobile-menu nav a:nth-child(2){transition-delay:.18s;}
+  body.menu-open .mobile-menu nav a:nth-child(3){transition-delay:.26s;}
+  .mobile-menu .mm-foot{margin-top:auto;padding-top:24px;}
+  .mobile-menu .mm-foot .eyebrow{display:block;margin-bottom:8px;}
+  .mobile-menu .mm-foot p{font-size:13px;color:var(--stone);margin:0;font-weight:300;line-height:1.9;}
+  body.menu-open{overflow:hidden;}
+  body.menu-open .scrim{opacity:1;visibility:visible;}
+  body.menu-open .mobile-menu{transform:none;}
+
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:16px;padding:13px 24px calc(13px + var(--safe-b));background:rgba(243,240,231,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);transform:translateY(160%);transition:transform .5s cubic-bezier(.3,.8,.2,1);}
+  .mobile-bar.show{transform:none;}
+  .mobile-bar .mb-meta{flex:1;min-width:0;}
+  .mobile-bar .mb-meta .k{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--stone2);}
+  .mobile-bar .mb-meta .v{font-family:var(--min);font-size:17px;color:var(--sumi);line-height:1.2;margin-top:2px;}
+  .mobile-bar .btn{flex:0 0 auto;padding:13px 24px;}
+
+  .sheet-scrim{position:fixed;inset:0;z-index:90;background:rgba(28,27,23,.46);opacity:0;visibility:hidden;transition:opacity .45s ease,visibility .45s ease;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:91;background:var(--paper);transform:translateY(101%);transition:transform .5s cubic-bezier(.3,.85,.2,1);padding:10px 30px calc(34px + var(--safe-b));max-height:92vh;overflow-y:auto;box-shadow:0 -30px 90px rgba(28,27,23,.22);}
+  body.sheet-open{overflow:hidden;}
+  body.sheet-open .sheet-scrim{opacity:1;visibility:visible;}
+  body.sheet-open .sheet{transform:none;}
+  .sheet .grab{width:42px;height:3px;background:var(--line);margin:8px auto 22px;}
+  .sheet .sh-pic{position:relative;width:100%;aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);}
+  .sheet .sh-pic .glyph{width:30%;height:30%;color:var(--sumi2);}
+  .sheet .sh-maker{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--seal);margin-top:22px;}
+  .sheet .sh-name{font-family:var(--min);font-weight:600;font-size:26px;color:var(--sumi);margin-top:8px;line-height:1.3;}
+  .sheet .sh-name .en{display:block;font-family:var(--sans);font-weight:400;font-size:12.5px;letter-spacing:.06em;color:var(--stone);margin-top:4px;}
+  .sheet .sh-price{font-family:var(--min);font-style:italic;font-size:19px;color:var(--stone);margin-top:18px;}
+  .sheet .sh-cta{display:flex;gap:14px;margin-top:28px;}
+  .sheet .sh-cta .btn{flex:1;justify-content:center;}
+
+  .gift{position:relative;}
+  .gift .res-badge{position:absolute;top:12px;right:12px;z-index:3;display:none;align-items:center;gap:6px;font-family:var(--min);font-size:11px;letter-spacing:.06em;color:var(--seal);background:var(--washi);border:1px solid var(--seal);padding:4px 10px;}
+  .gift.reserved .res-badge{display:inline-flex;}
+  .gift.reserved{opacity:.6;}
+
+  @media (max-width:880px){
+    .wrap{padding:0 26px;}
+    .hero-grid{grid-template-columns:1fr;gap:50px;}
+    .hero-aside{order:-1;justify-content:flex-start;}
+    .feature{grid-template-columns:1fr;}
+    .feature .art{min-height:240px;}
+    .gifts{grid-template-columns:repeat(2,1fr);}
+    .nav-links{display:none;}
+    .hamburger{display:grid;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 22px;}
+    .hero{padding:56px 0 72px;}
+    .hero .jp{font-size:clamp(56px,18vw,96px);}
+    .hero .meta{flex-wrap:wrap;gap:0;}
+    .hero-cta{flex-direction:column;}
+    .hero-cta .btn{width:100%;justify-content:center;}
+    .hero-aside .vdate{right:auto;left:calc(100% - 18px);}
+    .sec{padding:72px 0;}
+    .sec-head{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:40px;}
+    .sec-head .r{text-align:left;}
+    .course{grid-template-columns:40px 1fr;gap:16px;}
+    .course .pace{grid-column:2;margin-top:4px;}
+    /* omiyage → quiet horizontal scroll */
+    .gifts{display:flex;grid-template-columns:none;gap:1px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;border:1px solid var(--line);}
+    .gifts::-webkit-scrollbar{display:none;}
+    .gift{flex:0 0 62%;max-width:230px;scroll-snap-align:start;border-right:1px solid var(--line);cursor:pointer;}
+    .reserve form{flex-direction:column;align-items:stretch;}
+    .reserve input{min-width:0;width:100%;}
+    .reserve form .btn{width:100%;justify-content:center;}
+    .mobile-bar{display:flex;}
+  }
+  @media (max-width:520px){
+    .wrap{padding:0 20px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.12s!important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="scrim" data-close-menu></div>
+<aside class="mobile-menu" aria-label="Menu">
+  <div class="mm-top">
+    <span class="mm-brand"><span class="mk">花</span> HANABI</span>
+    <button class="mm-close" data-close-menu aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  </div>
+  <nav>
+    <a href="#sequence" data-close-menu>The Menu <span class="ix">献立</span></a>
+    <a href="#omiyage" data-close-menu>Omiyage <span class="ix">お土産</span></a>
+    <a href="#reserve" data-close-menu>Reserve <span class="ix">予約</span></a>
+  </nav>
+  <div class="mm-foot">
+    <span class="eyebrow">By Reservation Only</span>
+    <p>3-12 Higashiyama, Kyoto<br/>One seating · 6:30 PM</p>
+  </div>
+</aside>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <button class="hamburger" data-open-menu aria-label="Open menu"><span></span></button>
+    <a class="logo" href="#top"><span class="mk">花</span><b>HANABI</b></a>
+    <nav class="nav-links">
+      <a href="#sequence">The Menu</a>
+      <a href="#omiyage">Omiyage</a>
+      <a href="#reserve">Reserve</a>
+    </nav>
+    <a class="btn btn--ghost" href="#reserve" style="padding:11px 22px">Reserve</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Omakase · One Seating Nightly</span>
+      <p class="jp" style="margin-top:18px">おまかせ</p>
+      <h1>An evening, entrusted.</h1>
+      <p class="lede">Ten seats at the cypress counter. No menu — only what the morning market offered, served one piece at a time, from the chef's hands to yours.</p>
+      <div class="meta">
+        <div class="c"><div class="k">Seating</div><div class="v min">6:30 PM</div></div>
+        <div class="c"><div class="k">Counter</div><div class="v min">Ten seats</div></div>
+        <div class="c"><div class="k">Courses</div><div class="v min">十七 · 17</div></div>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn--seal" href="#reserve">Reserve a seat</a>
+        <a class="btn btn--ghost" href="#sequence">See the progression</a>
+      </div>
+    </div>
+    <div class="hero-aside">
+      <div class="vdate vlabel">三月 二十一日</div>
+      <div class="hero-photo">
+        <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=700&q=80&auto=format&fit=crop" alt="Omakase counter" onerror="this.style.display='none'"/>
+      </div>
+      <span class="seal seal-fl">花火</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROVERB -->
+<div class="band">
+  <div class="wrap proverb">
+    <div class="jp">一期一会</div>
+    <div class="en">Ichi-go ichi-e · one time, one meeting</div>
+  </div>
+</div>
+
+<!-- SEQUENCE -->
+<section class="sec" id="sequence">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="l"><span class="eyebrow">The Progression</span><h2 class="min"><span class="jp">献立</span>The Menu</h2></div>
+      <div class="r">Served at the chef's pace<br/>± two hours</div>
+    </div>
+    <div class="courses">
+      <div class="course"><div class="no min">一</div><div><div class="nm min">先付<span class="en">Sakizuke · the opening</span></div><div class="ds">Chilled silken tofu, dashi jelly, a whisper of yuzu to wake the palate.</div></div><div class="pace min">6:30</div></div>
+      <div class="course"><div class="no min">二</div><div><div class="nm min">お造り<span class="en">Otsukuri · sashimi</span></div><div class="ds">Three cuts from the morning market — laid plainly, dressed only in sea salt and citrus.</div></div><div class="pace min">6:50</div></div>
+      <div class="course"><div class="no min">三</div><div><div class="nm min">椀物<span class="en">Wanmono · the clear soup</span></div><div class="ds">A single dumpling adrift in a clarified dashi, the quietest course of the night.</div></div><div class="pace min">7:15</div></div>
+      <div class="course"><div class="no min">四</div><div><div class="nm min">握り<span class="en">Nigiri · the first flight</span></div><div class="ds">Eight pieces, brushed with nikiri, set down one at a time. Eat at once, with the hands.</div></div><div class="pace min">7:40</div></div>
+      <div class="course"><div class="no min">五</div><div><div class="nm min">焼物<span class="en">Yakimono · the grill</span></div><div class="ds">Charcoal-grilled fish of the day, skin lacquered and crisp.</div></div><div class="pace min">8:20</div></div>
+      <div class="course"><div class="no min">六</div><div><div class="nm min">握り<span class="en">Nigiri · the second flight</span></div><div class="ds">The richer pieces — toro, uni, anago warm from the simmer.</div></div><div class="pace min">8:40</div></div>
+      <div class="course"><div class="no min">七</div><div><div class="nm min">甘味<span class="en">Kanmi · the sweet</span></div><div class="ds">Tamago like castella, and a small bowl of seasonal fruit to close.</div></div><div class="pace min">9:10</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- OMIYAGE -->
+<section class="sec band" id="omiyage">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="l"><span class="eyebrow">Parting Gifts</span><h2 class="min"><span class="jp">お土産</span>Omiyage</h2></div>
+      <div class="r">Curated from our makers<br/>carried home with you</div>
+    </div>
+
+    <div class="feature">
+      <div class="art">
+        <img src="https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=900&q=80&auto=format&fit=crop" alt="Tea ceremony" onerror="this.style.display='none'"/>
+      </div>
+      <div class="copy">
+        <span class="eyebrow">The Experience</span>
+        <h3 class="min"><span class="jp">茶の湯</span><br/>A Private Tea Ceremony</h3>
+        <p>Before the meal, a quiet half-hour in the tatami room — matcha whisked by a tea master, a single flower, a single scroll. The stillness before the feast.</p>
+        <div class="price">¥18,000 · for two guests</div>
+        <div style="margin-top:26px"><a class="btn btn--seal" href="#reserve">Add to your evening</a></div>
+      </div>
+    </div>
+
+    <div class="gifts">
+      <div class="gift">
+        <div class="pic" style="background:#EDE8DA"><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M22 44h36c0 16-10 24-18 24s-18-8-18-24z" stroke="currentColor" stroke-width="2"/><path d="M58 48c10-4 14 10 4 14" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M30 40c0-8 4-10 4-18M40 40c0-8 4-10 4-18M50 40c0-8 4-10 4-18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="maker">Kyoto · Asahi-yaki</div><div class="nm min">茶碗<span class="en">Tea Bowl</span></div><div class="pr">¥9,800</div></div>
+      </div>
+      <div class="gift">
+        <div class="pic" style="background:#E8E2D2"><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="34" y="14" width="12" height="40" rx="2" fill="currentColor"/><path d="M40 54l-14 12h28L40 54z" fill="currentColor"/><path d="M46 16l16 6-16 6z" fill="currentColor"/></svg></div>
+        <div class="body"><div class="maker">Sakai · Forged</div><div class="nm min">包丁<span class="en">Petty Knife</span></div><div class="pr">¥24,000</div></div>
+      </div>
+      <div class="gift">
+        <div class="pic" style="background:#EDE8DA"><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="30" y="16" width="20" height="48" rx="3" stroke="currentColor" stroke-width="2"/><path d="M30 30h20" stroke="currentColor" stroke-width="2"/><circle cx="40" cy="46" r="6" stroke="currentColor" stroke-width="2"/></svg></div>
+        <div class="body"><div class="maker">Niigata · Junmai</div><div class="nm min">日本酒<span class="en">Sake</span></div><div class="pr">¥6,400</div></div>
+      </div>
+      <div class="gift">
+        <div class="pic" style="background:#E8E2D2"><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M40 16v44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M40 22c-6 4-6 10 0 14M40 32c6 4 6 10 0 14" stroke="currentColor" stroke-width="1.6"/><path d="M34 64h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="maker">Awaji · Incense</div><div class="nm min">お香<span class="en">Incense</span></div><div class="pr">¥3,200</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVE -->
+<section class="sec" id="reserve">
+  <div class="wrap reserve">
+    <span class="eyebrow">By Reservation Only</span>
+    <div class="jp" style="margin-top:16px">ご予約</div>
+    <h2>Reserve your seat at the counter.</h2>
+    <p>Ten seats, one seating. Leave your name and we will send the confirmation and the few things to know before you arrive.</p>
+    <form onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').textContent='ありがとうございました — confirmed';">
+      <input type="email" placeholder="your email" required/>
+      <button class="btn btn--seal" type="submit">Request a seat</button>
+    </form>
+    <small>13-min walk from Higashiyama · counter seating only</small>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <a class="logo" href="#top" style="display:flex;align-items:center;gap:14px"><span class="mk min" style="font-size:26px">花</span><b class="min">HANABI</b></a>
+      <div class="addr" style="margin-top:18px">3-12 Higashiyama, Kyoto<br/>Tuesday – Sunday · one seating<br/>+81 75 000 0000</div>
+    </div>
+    <span class="seal">花火</span>
+  </div>
+  <div class="wrap"><div class="fine">花火 Hanabi · Omakase · Est. 平成 元年</div></div>
+</footer>
+
+<!-- MOBILE STICKY BAR -->
+<div class="mobile-bar" aria-hidden="true">
+  <div class="mb-meta"><div class="k">One seating · Ten seats</div><div class="v min">ご予約</div></div>
+  <a class="btn btn--seal" href="#reserve">Reserve</a>
+</div>
+
+<!-- OMIYAGE BOTTOM SHEET -->
+<div class="sheet-scrim" data-close-sheet></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-label="Omiyage detail">
+  <div class="grab"></div>
+  <div class="sh-pic"><span class="glyph"></span></div>
+  <div class="sh-maker"></div>
+  <div class="sh-name min"></div>
+  <div class="sh-price"></div>
+  <div class="sh-cta">
+    <button class="btn btn--ghost" data-close-sheet>Close</button>
+    <button class="btn btn--seal sh-reserve">Reserve this omiyage</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var body = document.body;
+  function openMenu(){ body.classList.add('menu-open'); }
+  function closeMenu(){ body.classList.remove('menu-open'); }
+  document.querySelectorAll('[data-open-menu]').forEach(function(el){ el.addEventListener('click', openMenu); });
+  document.querySelectorAll('[data-close-menu]').forEach(function(el){ el.addEventListener('click', closeMenu); });
+
+  var sheet = document.querySelector('.sheet');
+  var shPic = sheet.querySelector('.sh-pic');
+  var shGlyph = sheet.querySelector('.glyph');
+  var shMaker = sheet.querySelector('.sh-maker');
+  var shName = sheet.querySelector('.sh-name');
+  var shPrice = sheet.querySelector('.sh-price');
+  var shReserve = sheet.querySelector('.sh-reserve');
+  var current = null;
+
+  function openSheet(card){
+    current = card;
+    shPic.style.background = card.querySelector('.pic').style.background;
+    shGlyph.innerHTML = card.querySelector('.glyph').innerHTML;
+    shGlyph.setAttribute('viewBox','0 0 80 80');
+    shMaker.textContent = card.querySelector('.maker').textContent;
+    shName.innerHTML = card.querySelector('.nm').innerHTML;
+    shPrice.textContent = card.querySelector('.pr').textContent;
+    var reserved = card.classList.contains('reserved');
+    shReserve.textContent = reserved ? 'Reserved 【予約済】' : 'Reserve this omiyage';
+    shReserve.disabled = reserved;
+    body.classList.add('sheet-open');
+  }
+  function closeSheet(){ body.classList.remove('sheet-open'); }
+
+  document.querySelectorAll('.gifts .gift').forEach(function(card){
+    var badge = document.createElement('span');
+    badge.className = 'res-badge';
+    badge.textContent = '予約済';
+    card.appendChild(badge);
+    card.addEventListener('click', function(){ openSheet(card); });
+  });
+  document.querySelectorAll('[data-close-sheet]').forEach(function(el){ el.addEventListener('click', closeSheet); });
+  shReserve.addEventListener('click', function(){
+    if(!current) return;
+    current.classList.add('reserved');
+    shReserve.textContent = 'Reserved — thank you';
+    shReserve.disabled = true;
+    setTimeout(closeSheet, 1000);
+  });
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeMenu(); closeSheet(); } });
+
+  var bar = document.querySelector('.mobile-bar');
+  var heroEl = document.getElementById('top');
+  if('IntersectionObserver' in window && heroEl){
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ bar.classList.toggle('show', !en.isIntersecting); });
+    }, {rootMargin:'-45% 0px 0px 0px'}).observe(heroEl);
+  }
+})();
+</script>
+
+<script>
+/* deep-link state hook for showcase canvas: ?cc=menu | sheet | bar */
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get('cc');
+    if(!p) return;
+    var run = function(){
+      var b = document.body;
+      if(p==='menu'){ b.classList.add('menu-open'); }
+      else if(p==='sheet'){ var c=document.querySelector('.grid .card, .gifts .gift, .loot .item, .lots .lot, .payload .cargo, .goodies .goody'); if(c) c.click(); }
+      else if(p==='bar'){ var bar=document.querySelector('.mobile-bar'); if(bar) bar.classList.add('show'); window.scrollTo(0, Math.round(window.innerHeight*0.92)); }
+    };
+    setTimeout(run, 120);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

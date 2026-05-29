@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Mobile Chat · The sites, in the hand · Claude</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet"/>
+  <style>
+    html, body { margin: 0; padding: 0; background: #1A1518; font-family: -apple-system, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    button { font: inherit; border: none; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"><div style="position:fixed;inset:0;display:grid;place-items:center;color:#9a8f88;font:500 13px/1.5 -apple-system,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase">Loading the gallery…</div></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="chat-shared.jsx"></script>
+  <script type="text/babel" src="chat-keyboard.jsx"></script>
+  <script type="text/babel" src="chat-live.jsx"></script>
+  <script type="text/babel" src="chat-live-docked.jsx"></script>
+
+  <script type="text/babel">
+    // ── The real one-pagers, rendered live inside the phone ──
+    // Staggered loader — every phone loads (independent of pan position), but
+    // a few at a time so the page paints instantly and fills in, rather than
+    // 25 iframes hitting the network at once (which blanked the canvas).
+    let __loadOrder = 0;
+    function SiteFrame({ file }) {
+      const [src, setSrc] = React.useState(null);
+      React.useEffect(() => {
+        const i = __loadOrder++;
+        const t = setTimeout(() => setSrc(encodeURI(file)), 120 + i * 200);
+        return () => clearTimeout(t);
+      }, [file]);
+      return (
+        <iframe
+          src={src || undefined}
+          title={file}
+          scrolling="no"
+          style={{
+            width: '100%', height: '100%', border: 'none', display: 'block',
+            background: '#F2F2F7', pointerEvents: 'none',
+          }}
+        />
+      );
+    }
+
+    function Stage({ site, children }) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <IOSDevice backdrop={<SiteFrame file={site}/>}>{children}</IOSDevice>
+        </div>
+      );
+    }
+
+    // ── Bare phone (no chat overlay) for documenting mobile states ──
+    function StageBare({ site, cc }) {
+      const f = cc ? site + '?cc=' + cc : site;
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <IOSDevice backdrop={<SiteFrame file={f}/>} />
+        </div>
+      );
+    }
+
+    // ── Keyboard-up chat with a custom conversation (mirrors LiveChat) ──
+    function SmokeFilm() {
+      const grad = 'linear-gradient(180deg, transparent 0%, transparent 18%, rgba(14,8,5,0.30) 38%, rgba(14,8,5,0.55) 70%, rgba(14,8,5,0.62) 100%)';
+      return (
+        <>
+          <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: grad }}/>
+          <div aria-hidden style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            backdropFilter: 'blur(22px) saturate(140%)', WebkitBackdropFilter: 'blur(22px) saturate(140%)',
+            maskImage: 'linear-gradient(180deg, transparent 0%, transparent 12%, #000 38%, #000 100%)',
+            WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, transparent 12%, #000 38%, #000 100%)',
+          }}/>
+        </>
+      );
+    }
+
+    function LiveChatOver({ children }) {
+      const ref = React.useRef(null);
+      React.useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; }, []);
+      return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <LiveHeader/>
+          <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+            <SmokeFilm/>
+            <div ref={ref} style={{
+              position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden',
+              paddingTop: 60, paddingBottom: 8,
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.15) 30px, rgba(0,0,0,0.55) 90px, #000 150px)',
+              maskImage: 'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.15) 30px, rgba(0,0,0,0.55) 90px, #000 150px)',
+            }}>
+              {children}
+            </div>
+          </div>
+          <LiveInput/>
+          <ChatKeyboard/>
+        </div>
+      );
+    }
+
+    // ── Tailored conversations for the keyboard-up shots ──
+    const SpaceConvo = (
+      <>
+        <LClaudeMsg>What're we launching?</LClaudeMsg>
+        <LUserMsg>A space-mission birthday invite. Starfield, orbiting planets, a flight-plan itinerary.</LUserMsg>
+        <LClaudeMsg>
+          Lift-off. Starfield's generating, two orbit rings circle the crew
+          porthole, and the flight plan marches down a dashed trajectory.
+          Want a live mission clock in the nav?
+        </LClaudeMsg>
+        <LUserMsg>Yes — count up from ignition.</LUserMsg>
+        <LClaudeMsg>Ticking. T-plus and climbing. Pinged the telemetry strip too.</LClaudeMsg>
+      </>
+    );
+    const NoirConvo = (
+      <>
+        <LClaudeMsg>What's the vibe?</LClaudeMsg>
+        <LUserMsg>Atlantic City bachelor weekend. High-roller, black and gold, casino felt.</LUserMsg>
+        <LClaudeMsg>
+          Dealt. Art-deco rays behind the hero, playing-card suits, and the
+          itinerary's built as perforated boarding-pass stubs. Headline gift
+          is a VIP helicopter to AC.
+        </LClaudeMsg>
+        <LUserMsg>Make the red suits neon.</LUserMsg>
+        <LClaudeMsg>Done — the hearts and diamonds glow now.</LClaudeMsg>
+      </>
+    );
+    const DiscoConvo = (
+      <>
+        <LClaudeMsg>What're we throwing?</LClaudeMsg>
+        <LUserMsg>Linda's 50th — full 70s disco. Mirror ball, vinyl, the works.</LUserMsg>
+        <LClaudeMsg>
+          Boogie engaged. Mirror ball's spinning, the hero photo sits in a
+          rotating vinyl, and the itinerary's a record tracklist — Side A,
+          Side B.
+        </LClaudeMsg>
+        <LUserMsg>Add a roller-disco as the big gift.</LUserMsg>
+        <LClaudeMsg>Slotted it in as the featured experience.</LClaudeMsg>
+      </>
+    );
+    const CyberConvo = (
+      <>
+        <LClaudeMsg>What're we promoting?</LClaudeMsg>
+        <LUserMsg>A warehouse rave. Y2K cyber — neon, glitch, the works. Make it loud.</LUserMsg>
+        <LClaudeMsg>
+          Plugged in. Holographic glitch title, scanline overlay, and a
+          perspective grid floor scrolling under the hero. Lineup reads like
+          a set list across four rooms.
+        </LClaudeMsg>
+        <LUserMsg>Headline gift should be a VIP skybox.</LUserMsg>
+        <LClaudeMsg>Done — neon-badged, backstage pass included.</LClaudeMsg>
+      </>
+    );
+
+    const SITES = [
+      { id: 'heritage', file: 'HEMLOCK - Field Collection.html', label: 'A · HEMLOCK', sub: 'Earthy heritage outfitter' },
+      { id: 'princess', file: 'Princess Party.html',             label: 'B · Princess Party', sub: 'Pastel fairytale invite' },
+      { id: 'noir',     file: 'Bachelor Party.html',             label: 'C · The Last Ride', sub: 'High-roller Atlantic City' },
+      { id: 'disco',    file: 'Disco Birthday.html',             label: 'D · Boogie Wonderland', sub: '70s disco, vinyl tracklist' },
+      { id: 'gala',     file: 'Charity Gala.html',               label: 'E · The Lumière Gala', sub: 'Editorial black-tie, animated' },
+      { id: 'space',    file: 'Space Mission Party.html',        label: 'F · Mission: Cosmo', sub: 'Retro mission control' },
+      { id: 'rad',      file: 'Totally Rad Bash.html',           label: 'G · Totally Rad Bash', sub: 'Memphis maximalism' },
+      { id: 'omakase',  file: 'Omakase Evening.html',            label: 'H · HANABI Omakase', sub: 'Zen Japanese, calm negative space' },
+      { id: 'cyber',    file: 'Cyber Rave.html',                 label: 'I · AFTERGLOW', sub: 'Y2K cyber-rave, neon glitch' },
+      { id: 'garden',   file: 'Garden Party.html',              label: 'J · Garden Party', sub: 'Botanical, soft & organic' },
+    ];
+
+    function App() {
+      return (
+        <DesignCanvas>
+          <DCSection
+            id="revealed"
+            title="The sites, in the hand"
+            subtitle="Each one-pager rendered live inside the phone — keyboard dismissed, chat collapsed to its dock pill, so the real product shows through whole.">
+            {SITES.map(s => (
+              <DCArtboard key={s.id} id={s.id} label={s.label} sublabel={s.sub} width={442} height={914}>
+                <Stage site={s.file}><LiveChatDocked/></Stage>
+              </DCArtboard>
+            ))}
+          </DCSection>
+
+          <DCSection
+            id="building"
+            title="Mid-build · chatting over the live preview"
+            subtitle="Keyboard up — Claude working over the page it's building. The feathered ink-wash keeps every message legible against the moodier backdrops.">
+            <DCArtboard id="space-up" label="F · Mission: Cosmo" sublabel="Art-directing the launch" width={442} height={914}>
+              <Stage site="Space Mission Party.html"><LiveChatOver>{SpaceConvo}</LiveChatOver></Stage>
+            </DCArtboard>
+            <DCArtboard id="noir-up" label="C · The Last Ride" sublabel="Dialing in the high-roller look" width={442} height={914}>
+              <Stage site="Bachelor Party.html"><LiveChatOver>{NoirConvo}</LiveChatOver></Stage>
+            </DCArtboard>
+            <DCArtboard id="disco-up" label="D · Boogie Wonderland" sublabel="Getting down to the details" width={442} height={914}>
+              <Stage site="Disco Birthday.html"><LiveChatOver>{DiscoConvo}</LiveChatOver></Stage>
+            </DCArtboard>
+            <DCArtboard id="cyber-up" label="I · AFTERGLOW" sublabel="Cranking the neon" width={442} height={914}>
+              <Stage site="Cyber Rave.html"><LiveChatOver>{CyberConvo}</LiveChatOver></Stage>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection
+            id="m-nav"
+            title="Mobile system · the slide-in menu"
+            subtitle="Tap the hamburger → a themed slide-in panel with scrim, staggered links, and safe-area padding. Held open here across four directions — every design themes the same pattern to its own palette and type.">
+            <DCArtboard id="nav-hemlock" label="A · HEMLOCK" sublabel="Menu open" width={442} height={914}><StageBare site="HEMLOCK - Field Collection.html" cc="menu"/></DCArtboard>
+            <DCArtboard id="nav-disco" label="D · Boogie Wonderland" sublabel="Menu open" width={442} height={914}><StageBare site="Disco Birthday.html" cc="menu"/></DCArtboard>
+            <DCArtboard id="nav-garden" label="J · Garden Party" sublabel="Menu open" width={442} height={914}><StageBare site="Garden Party.html" cc="menu"/></DCArtboard>
+            <DCArtboard id="nav-omakase" label="H · HANABI" sublabel="Menu open" width={442} height={914}><StageBare site="Omakase Evening.html" cc="menu"/></DCArtboard>
+          </DCSection>
+
+          <DCSection
+            id="m-sheet"
+            title="Mobile system · tap-to-open detail sheet"
+            subtitle="Tapping any product / gift / lot raises a bottom sheet with full detail and one primary action — add-to-bag, claim-a-gift (so guests don't double up), register-to-bid, send-aboard. Every hover interaction has a tap equivalent.">
+            <DCArtboard id="sheet-hemlock" label="A · HEMLOCK" sublabel="Add to bag" width={442} height={914}><StageBare site="HEMLOCK - Field Collection.html" cc="sheet"/></DCArtboard>
+            <DCArtboard id="sheet-noir" label="C · The Last Ride" sublabel="Claim the loot" width={442} height={914}><StageBare site="Bachelor Party.html" cc="sheet"/></DCArtboard>
+            <DCArtboard id="sheet-gala" label="E · The Lumière Gala" sublabel="Register to bid" width={442} height={914}><StageBare site="Charity Gala.html" cc="sheet"/></DCArtboard>
+            <DCArtboard id="sheet-space" label="F · Mission: Cosmo" sublabel="Send aboard" width={442} height={914}><StageBare site="Space Mission Party.html" cc="sheet"/></DCArtboard>
+          </DCSection>
+
+          <DCSection
+            id="m-bar"
+            title="Mobile system · the sticky action bar"
+            subtitle="A scroll-aware bar rises once you leave the hero — the always-present primary CTA, tuned per occasion (Shop / RSVP / Reserve). Shown here in its revealed state.">
+            <DCArtboard id="bar-hemlock" label="A · HEMLOCK" sublabel="Shop now" width={442} height={914}><StageBare site="HEMLOCK - Field Collection.html" cc="bar"/></DCArtboard>
+            <DCArtboard id="bar-princess" label="B · Princess Party" sublabel="RSVP" width={442} height={914}><StageBare site="Princess Party.html" cc="bar"/></DCArtboard>
+            <DCArtboard id="bar-rad" label="G · Totally Rad Bash" sublabel="Are you in?!" width={442} height={914}><StageBare site="Totally Rad Bash.html" cc="bar"/></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

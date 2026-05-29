@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>HEMLOCK · The Field Collection · MMXXVI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --ink:#181412;
+    --cream:#F2EBDD;
+    --paper:#FBF6EC;
+    --muted:#6B5E50;
+    --copper:#A86B3E;
+    --sage:#5A6B4F;
+    --pine:#1E2620;
+    --line:rgba(24,20,18,0.16);
+    --line-soft:rgba(24,20,18,0.10);
+    --serif:"Source Serif 4","Iowan Old Style",Georgia,serif;
+    --sans:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;font-size:16px;line-height:1.5;
+    -webkit-tap-highlight-color:transparent;}
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;border:none;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--copper);}
+  .serif{font-family:var(--serif);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 22px;border-radius:0;
+    font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+    background:var(--ink);color:var(--cream);transition:background .25s ease,transform .15s ease;
+    min-height:48px;}
+  .btn:hover{background:var(--pine);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0) scale(.985);}
+  .btn--cream{background:var(--cream);color:var(--ink);}
+  .btn--cream:hover{background:#fff;}
+  .btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);}
+  .btn--ghost:hover{background:var(--ink);color:var(--cream);box-shadow:none;}
+  .btn svg{transition:transform .25s ease;}
+  .btn:hover svg{transform:translateX(3px);}
+
+  /* NAV */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(242,235,221,0.82);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:0.5px solid var(--line-soft);
+    padding-top:var(--safe-t);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:66px;gap:12px;}
+  .nav-left{display:flex;align-items:center;gap:8px;flex:1;}
+  .nav-links{display:flex;gap:30px;align-items:center;}
+  .nav-links a{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:color .2s ease;position:relative;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;height:1.5px;width:0;background:var(--copper);transition:width .25s ease;}
+  .nav-links a:hover::after{width:100%;}
+  .brand{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:.34em;padding-left:.34em;}
+  .nav-right{display:flex;gap:8px;align-items:center;flex:1;justify-content:flex-end;}
+  .icon-btn{width:44px;height:44px;border-radius:999px;background:transparent;display:grid;place-items:center;color:var(--ink);transition:background .2s ease;cursor:pointer;}
+  .icon-btn:active{background:rgba(24,20,18,0.10);}
+  .cart-dot{position:relative;}
+  .cart-dot b{position:absolute;top:5px;right:5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--copper);color:#fff;font-size:9.5px;font-weight:700;display:grid;place-items:center;border:1.5px solid var(--cream);transition:transform .25s cubic-bezier(.3,1.4,.5,1);}
+  .cart-dot b.bump{transform:scale(1.45);}
+  /* hamburger — hidden on desktop */
+  .hamburger{display:none;width:44px;height:44px;place-items:center;color:var(--ink);background:transparent;cursor:pointer;border-radius:999px;}
+  .hamburger:active{background:rgba(24,20,18,0.10);}
+  .hamburger span{position:relative;width:20px;height:2px;background:currentColor;border-radius:2px;transition:transform .3s ease,opacity .2s ease;display:block;}
+  .hamburger span::before,.hamburger span::after{content:"";position:absolute;left:0;width:20px;height:2px;background:currentColor;border-radius:2px;transition:transform .3s ease;}
+  .hamburger span::before{top:-6px;}
+  .hamburger span::after{top:6px;}
+
+  /* MOBILE MENU (slide-in) */
+  .scrim{position:fixed;inset:0;z-index:60;background:rgba(18,12,8,0.5);backdrop-filter:blur(2px);
+    opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease;}
+  .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:61;width:min(82vw,360px);
+    background:var(--paper);transform:translateX(100%);transition:transform .4s cubic-bezier(.3,.8,.2,1);
+    display:flex;flex-direction:column;padding:calc(var(--safe-t) + 22px) 26px calc(var(--safe-b) + 26px);
+    box-shadow:-30px 0 80px rgba(20,12,6,.3);}
+  .mobile-menu .mm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;}
+  .mobile-menu .mm-brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.3em;padding-left:.3em;}
+  .mm-close{width:44px;height:44px;display:grid;place-items:center;background:transparent;cursor:pointer;color:var(--ink);margin-right:-10px;}
+  .mobile-menu nav{display:flex;flex-direction:column;}
+  .mobile-menu nav a{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.01em;
+    padding:15px 0;border-bottom:0.5px solid var(--line-soft);color:var(--ink);display:flex;align-items:center;justify-content:space-between;
+    opacity:0;transform:translateX(16px);transition:opacity .4s ease,transform .4s ease;}
+  .mobile-menu nav a .ix{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--copper);}
+  body.menu-open .mobile-menu nav a{opacity:1;transform:none;}
+  body.menu-open .mobile-menu nav a:nth-child(1){transition-delay:.08s;}
+  body.menu-open .mobile-menu nav a:nth-child(2){transition-delay:.14s;}
+  body.menu-open .mobile-menu nav a:nth-child(3){transition-delay:.2s;}
+  body.menu-open .mobile-menu nav a:nth-child(4){transition-delay:.26s;}
+  body.menu-open .mobile-menu nav a:nth-child(5){transition-delay:.32s;}
+  .mobile-menu .mm-foot{margin-top:auto;padding-top:24px;}
+  .mobile-menu .mm-foot .eyebrow{display:block;margin-bottom:8px;}
+  .mobile-menu .mm-foot p{font-size:13px;color:var(--muted);line-height:1.6;margin:0;}
+  body.menu-open{overflow:hidden;}
+  body.menu-open .scrim{opacity:1;visibility:visible;}
+  body.menu-open .mobile-menu{transform:none;}
+  body.menu-open .hamburger span{background:transparent;}
+  body.menu-open .hamburger span::before{transform:translateY(6px) rotate(45deg);}
+  body.menu-open .hamburger span::after{transform:translateY(-6px) rotate(-45deg);}
+
+  /* HERO */
+  .hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;}
+  .hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center 32%;}
+  .hero-grad{position:absolute;inset:0;background:
+    linear-gradient(180deg,rgba(20,14,10,.42) 0%,transparent 30%,rgba(10,8,5,.55) 72%,rgba(8,7,5,.9) 100%),
+    linear-gradient(90deg,rgba(18,10,5,.5) 0%,transparent 50%);}
+  .hero-noise{position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' seed='8'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+  .hero-inner{position:relative;color:#fff;padding-bottom:96px;}
+  .hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(48px,8vw,104px);line-height:.92;letter-spacing:-.02em;margin:18px 0 0;max-width:11ch;}
+  .hero h1 em{font-style:italic;font-weight:500;}
+  .hero p{margin:22px 0 0;max-width:42ch;font-size:17px;line-height:1.55;color:rgba(255,255,255,.84);}
+  .hero-cta{margin-top:30px;display:flex;gap:14px;flex-wrap:wrap;}
+  .hero-meta{position:absolute;top:34px;right:0;text-align:right;color:rgba(255,255,255,.7);font-size:11px;letter-spacing:.22em;text-transform:uppercase;line-height:1.9;}
+
+  /* MARQUEE */
+  .strip{background:var(--ink);color:var(--cream);overflow:hidden;}
+  .strip-track{display:flex;gap:56px;padding:16px 0;white-space:nowrap;animation:marquee 32s linear infinite;}
+  .strip-track span{font-family:var(--serif);font-size:15px;font-style:italic;display:inline-flex;align-items:center;gap:56px;color:rgba(242,235,221,.85);}
+  .strip-track span::after{content:"✦";font-style:normal;color:var(--copper);}
+  @keyframes marquee{to{transform:translateX(-50%);}}
+
+  /* SECTION SHELL */
+  section{scroll-margin-top:80px;}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:74px 0 30px;border-bottom:0.5px solid var(--line);margin-bottom:38px;}
+  .sec-head .ttl{font-family:var(--serif);font-weight:500;letter-spacing:-.015em;font-size:clamp(30px,4.4vw,46px);line-height:1;margin:8px 0 0;}
+  .sec-head .meta{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap;}
+  .sec-head .swipe-hint{display:none;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px 22px;}
+
+  /* PRODUCT CARD */
+  .card{display:flex;flex-direction:column;gap:12px;cursor:pointer;}
+  .card .ph{position:relative;aspect-ratio:4/5;border-radius:8px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.18);transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease;}
+  .card:hover .ph{transform:translateY(-4px);box-shadow:0 18px 40px rgba(40,26,12,.16);}
+  .card:active .ph{transform:scale(.98);}
+  .card .ph::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 62% 36%,rgba(255,255,255,.16) 0%,transparent 44%);}
+  .card .ph .sheen{position:absolute;inset:0;opacity:.16;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+  .badge{position:absolute;top:10px;right:10px;z-index:2;background:#fff;color:var(--ink);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 8px;}
+  .card .add{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:rgba(251,246,236,.94);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(6px);opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease;cursor:pointer;min-height:44px;}
+  .card:hover .add{opacity:1;transform:translateY(0);}
+  .card .add:active{background:#fff;transform:scale(.97);}
+  .card .row{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:600;}
+  .card .sub{font-size:13px;color:var(--muted);margin-top:-6px;}
+  .swatches{display:flex;gap:5px;margin-top:2px;}
+  .swatches i{width:13px;height:13px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+
+  /* EDITORIAL SPLIT */
+  .editorial{display:grid;grid-template-columns:1.05fr .95fr;gap:0;margin:96px 0;border:0.5px solid var(--line);overflow:hidden;background:var(--paper);}
+  .editorial .photo{position:relative;min-height:520px;background:var(--pine);}
+  .editorial .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .editorial .copy{padding:clamp(34px,5vw,72px);display:flex;flex-direction:column;justify-content:center;}
+  .editorial h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,3.6vw,42px);line-height:1.08;letter-spacing:-.015em;margin:16px 0 0;}
+  .editorial p{font-size:16px;line-height:1.7;color:var(--muted);margin:20px 0 0;max-width:46ch;}
+  .editorial .stats{display:flex;gap:40px;margin:34px 0 0;}
+  .editorial .stats .n{font-family:var(--serif);font-size:34px;line-height:1;}
+  .editorial .stats small{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px;}
+
+  /* BANDS */
+  .band{background:var(--paper);border-top:0.5px solid var(--line);border-bottom:0.5px solid var(--line);}
+
+  /* VALUES */
+  .values{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+  .value{padding:54px 38px;border-left:0.5px solid var(--line);}
+  .value:first-child{border-left:none;}
+  .value .vi{width:44px;height:44px;color:var(--copper);}
+  .value h3{font-family:var(--serif);font-weight:500;font-size:23px;margin:22px 0 0;letter-spacing:-.01em;}
+  .value p{font-size:15px;line-height:1.65;color:var(--muted);margin:12px 0 0;}
+
+  /* NEWSLETTER */
+  .signup{position:relative;background:var(--pine);color:var(--cream);overflow:hidden;padding:clamp(60px,8vw,110px) 0;}
+  .signup .glow{position:absolute;top:-120px;right:-60px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(201,122,62,.4) 0%,transparent 70%);filter:blur(10px);}
+  .signup-inner{position:relative;max-width:680px;}
+  .signup h2{font-family:var(--serif);font-weight:500;font-size:clamp(32px,4.6vw,52px);line-height:1.02;letter-spacing:-.02em;margin:18px 0 0;}
+  .signup p{color:rgba(242,235,221,.74);font-size:16px;margin:18px 0 0;max-width:48ch;}
+  .signup form{display:flex;gap:10px;margin:34px 0 0;max-width:480px;flex-wrap:wrap;}
+  .signup input{flex:1;min-width:220px;padding:15px 18px;background:rgba(242,235,221,.08);border:0.5px solid rgba(242,235,221,.28);color:var(--cream);font-size:16px;font-family:var(--sans);min-height:50px;}
+  .signup input::placeholder{color:rgba(242,235,221,.5);}
+  .signup input:focus{outline:none;border-color:var(--copper);background:rgba(242,235,221,.12);}
+
+  /* FOOTER */
+  footer{background:var(--ink);color:var(--cream);padding:72px 0 40px;}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;padding-bottom:54px;border-bottom:0.5px solid rgba(242,235,221,.14);}
+  .foot-grid .brand{font-size:26px;color:var(--cream);}
+  .foot-grid p{color:rgba(242,235,221,.6);font-size:14px;line-height:1.7;margin:18px 0 0;max-width:34ch;}
+  .foot-col h4{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(242,235,221,.5);margin:0 0 18px;}
+  .foot-col a{display:block;font-size:14px;color:rgba(242,235,221,.82);padding:6px 0;transition:color .2s ease;}
+  .foot-col a:hover{color:var(--copper);}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;flex-wrap:wrap;gap:14px;font-size:12px;color:rgba(242,235,221,.5);letter-spacing:.04em;}
+
+  /* MOBILE STICKY ACTION BAR */
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:none;align-items:center;gap:12px;
+    padding:12px 18px calc(12px + var(--safe-b));
+    background:rgba(251,246,236,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-top:0.5px solid var(--line);
+    transform:translateY(140%);transition:transform .45s cubic-bezier(.3,.8,.2,1);}
+  .mobile-bar.show{transform:none;}
+  .mobile-bar .mb-meta{flex:1;min-width:0;}
+  .mobile-bar .mb-meta .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+  .mobile-bar .mb-meta .v{font-family:var(--serif);font-size:16px;line-height:1.1;margin-top:1px;}
+  .mobile-bar .btn{flex:0 0 auto;padding:13px 22px;}
+
+  /* PRODUCT BOTTOM SHEET */
+  .sheet-scrim{position:fixed;inset:0;z-index:70;background:rgba(18,12,8,.55);
+    opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;background:var(--paper);
+    border-radius:22px 22px 0 0;transform:translateY(101%);transition:transform .45s cubic-bezier(.3,.85,.2,1);
+    padding:10px 22px calc(26px + var(--safe-b));max-height:92vh;overflow-y:auto;
+    box-shadow:0 -30px 80px rgba(20,12,6,.35);}
+  body.sheet-open{overflow:hidden;}
+  body.sheet-open .sheet-scrim{opacity:1;visibility:visible;}
+  body.sheet-open .sheet{transform:none;}
+  .sheet .grab{width:44px;height:5px;border-radius:999px;background:var(--line);margin:6px auto 18px;}
+  .sheet .sh-img{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.2);}
+  .sheet .sh-img .sheen{position:absolute;inset:0;opacity:.16;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+  .sheet .sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-top:22px;}
+  .sheet .sh-name{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.05;}
+  .sheet .sh-price{font-family:var(--serif);font-size:22px;white-space:nowrap;}
+  .sheet .sh-sub{font-size:14px;color:var(--muted);margin-top:6px;}
+  .sheet .sh-swatch-label{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px;}
+  .sheet .sh-swatches{display:flex;gap:10px;}
+  .sheet .sh-swatches i{width:30px;height:30px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;}
+  .sheet .sh-swatches i.sel{box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 2px var(--paper),0 0 0 4px var(--ink);}
+  .sheet .sh-desc{font-size:14.5px;line-height:1.7;color:var(--muted);margin:24px 0 0;}
+  .sheet .sh-cta{display:flex;gap:12px;margin-top:26px;}
+  .sheet .sh-cta .btn{flex:1;}
+
+  /* ─────────── MOBILE ─────────── */
+  @media (max-width:760px){
+    .nav-links{display:none;}
+    .hamburger{display:grid;}
+    .nav-inner{height:60px;}
+    .brand{font-size:19px;letter-spacing:.28em;}
+    .nav-left,.nav-right{flex:0 0 auto;}
+    .nav-inner{justify-content:space-between;}
+    .nav-left{order:1;}
+    .brand{order:2;position:absolute;left:50%;transform:translateX(-50%);}
+    .nav-right{order:3;}
+    header.nav .nav-inner{position:relative;}
+
+    .hero{min-height:92vh;}
+    .hero-inner{padding-bottom:118px;}
+    .hero h1{font-size:clamp(46px,15vw,72px);}
+    .hero p{font-size:16px;}
+    .hero-cta{margin-top:26px;}
+    .hero-cta .btn{flex:1;}
+    .hero-meta{display:none;}
+
+    .sec-head{padding:54px 0 18px;margin-bottom:22px;align-items:center;}
+    .sec-head .meta{display:none;}
+    .sec-head .swipe-hint{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;}
+    .sec-head .swipe-hint svg{width:22px;height:10px;}
+
+    /* category → horizontal snap carousel with edge peek */
+    .grid{display:flex;grid-template-columns:none;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;
+      margin:0 -20px;padding:4px 20px 4px;scroll-padding-left:20px;}
+    .grid::-webkit-scrollbar{display:none;}
+    .card{flex:0 0 70%;max-width:280px;scroll-snap-align:start;gap:10px;}
+    .card:last-child{margin-right:6px;}
+    .card .add{opacity:1;transform:none;position:static;margin-top:2px;background:transparent;
+      box-shadow:inset 0 0 0 1px var(--line);backdrop-filter:none;border-radius:0;}
+    .card .add:active{background:var(--ink);color:var(--cream);box-shadow:none;}
+
+    .editorial{grid-template-columns:1fr;margin:60px 0;}
+    .editorial .photo{min-height:300px;}
+    .editorial .copy{padding:38px 26px 42px;}
+    .editorial .stats{gap:26px;}
+    .editorial .stats .n{font-size:28px;}
+
+    .values{grid-template-columns:1fr;}
+    .value{padding:40px 26px;border-left:none;border-top:0.5px solid var(--line);}
+    .value:first-child{border-top:none;}
+
+    .signup form{flex-direction:column;}
+    .signup input{min-width:0;width:100%;}
+    .signup form .btn{width:100%;}
+
+    .foot-grid{grid-template-columns:1fr 1fr;gap:30px 20px;}
+    .foot-grid>div:first-child{grid-column:1 / -1;}
+    .foot-bottom{flex-direction:column;align-items:flex-start;gap:8px;}
+
+    .mobile-bar{display:flex;}
+  }
+  @media (max-width:380px){
+    .wrap{padding:0 18px;}
+    .grid{margin:0 -18px;padding:4px 18px;scroll-padding-left:18px;}
+    .card{flex-basis:76%;}
+    .hero h1{font-size:clamp(42px,14vw,60px);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;transition-duration:.08s!important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- SCRIM + MOBILE MENU -->
+<div class="scrim" data-close-menu></div>
+<aside class="mobile-menu" aria-label="Menu">
+  <div class="mm-top">
+    <span class="mm-brand">HEMLOCK</span>
+    <button class="mm-close" data-close-menu aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  </div>
+  <nav>
+    <a href="#drop" data-close-menu>The Drop <span class="ix">01</span></a>
+    <a href="#carry" data-close-menu>Carry <span class="ix">02</span></a>
+    <a href="#field" data-close-menu>Field <span class="ix">03</span></a>
+    <a href="#camp" data-close-menu>Camp <span class="ix">04</span></a>
+    <a href="#story" data-close-menu>Story <span class="ix">05</span></a>
+  </nav>
+  <div class="mm-foot">
+    <span class="eyebrow">Hemlock Supply Co.</span>
+    <p>Field-tested in the Cascades.<br/>Finished by hand in Portland, Oregon.</p>
+  </div>
+</aside>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="nav-left">
+      <button class="hamburger" data-open-menu aria-label="Open menu"><span></span></button>
+      <nav class="nav-links">
+        <a href="#drop">The Drop</a>
+        <a href="#carry">Carry</a>
+        <a href="#field">Field</a>
+        <a href="#camp">Camp</a>
+        <a href="#story">Story</a>
+      </nav>
+    </div>
+    <div class="brand">HEMLOCK</div>
+    <div class="nav-right">
+      <button class="icon-btn" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+      <button class="icon-btn cart-dot" aria-label="Cart"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 7h14l-1.4 10a2 2 0 0 1-2 1.7H8.4a2 2 0 0 1-2-1.7L5 7zM8.5 7V5.4a3.5 3.5 0 0 1 7 0V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b data-cart>3</b></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80&auto=format&fit=crop" alt="Misty ridgeline at dawn" onerror="this.style.display='none'"/></div>
+  <div class="hero-grad"></div>
+  <div class="hero-noise"></div>
+  <div class="wrap hero-inner">
+    <div class="hero-meta">EST. PORTLAND OR<br/>LAT 45.5°N · 122.6°W<br/>SS / MMXXVI</div>
+    <div class="eyebrow" style="color:rgba(255,255,255,.86)">The Field Collection · MMXXVI</div>
+    <h1>Built for<br/><em>early miles.</em></h1>
+    <p>Quietly engineered gear for the long way home — tested in the Cascades, finished by hand in Oregon.</p>
+    <div class="hero-cta">
+      <a class="btn btn--cream" href="#drop">Shop the collection<svg width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M1 5h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost" href="#story" style="color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)">Our story</a>
+    </div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-track">
+    <span>Field-tested in the Cascades</span><span>Finished by hand in Oregon</span><span>Lifetime repair guarantee</span><span>Carbon-neutral shipping</span>
+    <span>Field-tested in the Cascades</span><span>Finished by hand in Oregon</span><span>Lifetime repair guarantee</span><span>Carbon-neutral shipping</span>
+  </div>
+</div>
+
+<section id="drop" class="wrap">
+  <div class="sec-head">
+    <div><div class="eyebrow">New · This Week</div><h2 class="ttl serif">The Drop</h2></div>
+    <div class="meta">04 pieces · Spring MMXXVI</div>
+    <div class="swipe-hint">Swipe<svg viewBox="0 0 22 10" fill="none"><path d="M1 5h18m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  </div>
+  <div class="grid">
+    <article class="card" data-name="Trail Pack 28" data-price="$245" data-sub="Cordura · slate" data-grad="linear-gradient(160deg,#2A3528,#1A1612)" data-swatches="#2A3528,#1A1612,#5A6B4F" data-desc="A 28-litre weekender in 500-denier Cordura with a roll-top closure, padded laptop sleeve, and a lifetime-guaranteed YKK zip. Built to ride out a Pacific Northwest winter.">
+      <div class="ph" style="background:linear-gradient(160deg,#2A3528,#1A1612)"><span class="sheen"></span><button class="add">Add to bag</button></div>
+      <div class="row"><span>Trail Pack 28</span><span>$245</span></div><div class="sub">Cordura · slate</div><div class="swatches"><i style="background:#2A3528"></i><i style="background:#1A1612"></i><i style="background:#5A6B4F"></i></div>
+    </article>
+    <article class="card" data-name="Vacuum Bottle" data-price="$48" data-sub="24oz · brushed" data-grad="linear-gradient(160deg,#A8957D,#6B5E50)" data-swatches="#A8957D,#6B5E50,#181412" data-desc="Double-walled 18/8 steel keeps coffee hot for twelve hours and meltwater cold for twenty-four. Brushed finish, powder-coated cap, dishwasher-safe.">
+      <div class="ph" style="background:linear-gradient(160deg,#A8957D,#6B5E50)"><span class="sheen"></span><button class="add">Add to bag</button></div>
+      <div class="row"><span>Vacuum Bottle</span><span>$48</span></div><div class="sub">24oz · brushed</div><div class="swatches"><i style="background:#A8957D"></i><i style="background:#6B5E50"></i><i style="background:#181412"></i></div>
+    </article>
+    <article class="card" data-name="Wool Throw" data-price="$185" data-sub="merino · rust" data-grad="linear-gradient(160deg,#B5704A,#7A3F1F)" data-swatches="#B5704A,#7A3F1F,#5A6B4F" data-desc="A heavyweight merino throw woven in a small New England mill. Naturally temperature-regulating, gets softer with every wash. The one you'll fight over at camp.">
+      <div class="ph" style="background:linear-gradient(160deg,#B5704A,#7A3F1F)"><span class="sheen"></span><span class="badge">NEW</span><button class="add">Add to bag</button></div>
+      <div class="row"><span>Wool Throw</span><span>$185</span></div><div class="sub">merino · rust</div><div class="swatches"><i style="background:#B5704A"></i><i style="background:#7A3F1F"></i><i style="background:#5A6B4F"></i></div>
+    </article>
+    <article class="card" data-name="Linen Tee" data-price="$68" data-sub="washed · stone" data-grad="linear-gradient(160deg,#D4C8B3,#A89878)" data-swatches="#D4C8B3,#A89878,#3A4B5A" data-desc="A garment-washed European linen tee with a relaxed body and a sewn hem that won't curl. Breathes in August, layers in October.">
+      <div class="ph" style="background:linear-gradient(160deg,#D4C8B3,#A89878)"><span class="sheen"></span><button class="add">Add to bag</button></div>
+      <div class="row"><span>Linen Tee</span><span>$68</span></div><div class="sub">washed · stone</div><div class="swatches"><i style="background:#D4C8B3"></i><i style="background:#A89878"></i><i style="background:#3A4B5A"></i></div>
+    </article>
+  </div>
+</section>
+
+<section id="story" class="wrap">
+  <div class="editorial">
+    <div class="photo"><img src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=1000&q=80&auto=format&fit=crop" alt="Hiker on a forest trail" onerror="this.style.display='none'"/></div>
+    <div class="copy">
+      <div class="eyebrow">The Workshop</div>
+      <h2>Made slowly,<br/>so it lasts a lifetime.</h2>
+      <p>Every Hemlock piece begins on a cutting table in Southeast Portland. We use waxed cottons, full-grain leather, and recycled ripstop — materials that earn their patina rather than wear out. When something breaks, we fix it. Free, for as long as you own it.</p>
+      <div class="stats">
+        <div><div class="n serif">14</div><small>Years in trade</small></div>
+        <div><div class="n serif">100%</div><small>Repaired free</small></div>
+        <div><div class="n serif">OR</div><small>Hand finished</small></div>
+      </div>
+      <div style="margin-top:34px"><a class="btn btn--ghost" href="#">Read the journal<svg width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M1 5h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<section id="carry" class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Bags</div><h2 class="ttl serif">The Carry</h2></div><div class="meta">04 pieces</div><div class="swipe-hint">Swipe<svg viewBox="0 0 22 10" fill="none"><path d="M1 5h18m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+  <div class="grid">
+    <article class="card" data-name="Field Tote" data-price="$128" data-sub="waxed · tobacco" data-grad="linear-gradient(160deg,#7A4A2C,#3F2515)" data-swatches="#7A4A2C,#3F2515" data-desc="Waxed canvas tote with a leather base and rolled-rope handles. Develops a personal patina; re-waxable forever.">
+      <div class="ph" style="background:linear-gradient(160deg,#7A4A2C,#3F2515)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Field Tote</span><span>$128</span></div><div class="sub">waxed · tobacco</div><div class="swatches"><i style="background:#7A4A2C"></i><i style="background:#3F2515"></i></div>
+    </article>
+    <article class="card" data-name="Daypack 18" data-price="$165" data-sub="ripstop · slate" data-grad="linear-gradient(160deg,#3A4B5A,#1A2230)" data-swatches="#3A4B5A,#1A2230,#2A3528" data-desc="An 18-litre everyday pack in recycled ripstop, with a padded sleeve, key leash, and a magnetic top buckle you can work one-handed.">
+      <div class="ph" style="background:linear-gradient(160deg,#3A4B5A,#1A2230)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Daypack 18</span><span>$165</span></div><div class="sub">ripstop · slate</div><div class="swatches"><i style="background:#3A4B5A"></i><i style="background:#1A2230"></i><i style="background:#2A3528"></i></div>
+    </article>
+    <article class="card" data-name="Sling" data-price="$88" data-sub="500D · black" data-grad="linear-gradient(160deg,#1F1A14,#0F0C08)" data-swatches="#1F1A14,#3A4B5A" data-desc="A low-profile crossbody sling that swings around for transit-card access without coming off your shoulder. Fits a tablet, a paperback, the essentials.">
+      <div class="ph" style="background:linear-gradient(160deg,#1F1A14,#0F0C08)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Sling</span><span>$88</span></div><div class="sub">500D · black</div><div class="swatches"><i style="background:#1F1A14"></i><i style="background:#3A4B5A"></i></div>
+    </article>
+    <article class="card" data-name="Cardholder" data-price="$42" data-sub="oiled · espresso" data-grad="linear-gradient(160deg,#5C3A1F,#2E1A0E)" data-swatches="#5C3A1F,#2E1A0E" data-desc="Four-pocket cardholder cut from a single piece of oiled full-grain leather, saddle-stitched by hand. Slim enough for a front pocket.">
+      <div class="ph" style="background:linear-gradient(160deg,#5C3A1F,#2E1A0E)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Cardholder</span><span>$42</span></div><div class="sub">oiled · espresso</div><div class="swatches"><i style="background:#5C3A1F"></i><i style="background:#2E1A0E"></i></div>
+    </article>
+  </div>
+</section>
+
+<section id="field" class="band">
+  <div class="wrap">
+    <div class="sec-head"><div><div class="eyebrow">Layers</div><h2 class="ttl serif">The Field</h2></div><div class="meta">04 pieces</div><div class="swipe-hint">Swipe<svg viewBox="0 0 22 10" fill="none"><path d="M1 5h18m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+    <div class="grid">
+      <article class="card" data-name="Field Sweater" data-price="$245" data-sub="merino · briar" data-grad="linear-gradient(160deg,#5C5040,#2E2618)" data-swatches="#5C5040,#2E2618,#5A6B4F" data-desc="A chunky 5-gauge merino crew knit in a Scottish mill, with reinforced elbows and a ribbed storm collar. Warm enough to skip a jacket.">
+        <div class="ph" style="background:linear-gradient(160deg,#5C5040,#2E2618)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Field Sweater</span><span>$245</span></div><div class="sub">merino · briar</div><div class="swatches"><i style="background:#5C5040"></i><i style="background:#2E2618"></i><i style="background:#5A6B4F"></i></div>
+      </article>
+      <article class="card" data-name="Camp Vest" data-price="$185" data-sub="down · olive" data-grad="linear-gradient(160deg,#5A6B4F,#2E3825)" data-swatches="#5A6B4F,#2E3825,#7A3F1F" data-desc="Responsibly-sourced 700-fill down in a recycled ripstop shell, packable into its own chest pocket. The layer that lives in your bag.">
+        <div class="ph" style="background:linear-gradient(160deg,#5A6B4F,#2E3825)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Camp Vest</span><span>$185</span></div><div class="sub">down · olive</div><div class="swatches"><i style="background:#5A6B4F"></i><i style="background:#2E3825"></i><i style="background:#7A3F1F"></i></div>
+      </article>
+      <article class="card" data-name="Linen Overshirt" data-price="$158" data-sub="washed · bone" data-grad="linear-gradient(160deg,#D4C8B3,#8A7E68)" data-swatches="#D4C8B3,#8A7E68" data-desc="A shirt-jacket in heavyweight washed linen, with a double chest pocket and corozo buttons. Wear it open over a tee or buttoned against the wind.">
+        <div class="ph" style="background:linear-gradient(160deg,#D4C8B3,#8A7E68)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Linen Overshirt</span><span>$158</span></div><div class="sub">washed · bone</div><div class="swatches"><i style="background:#D4C8B3"></i><i style="background:#8A7E68"></i></div>
+      </article>
+      <article class="card" data-name="Wool Trouser" data-price="$215" data-sub="flannel · ink" data-grad="linear-gradient(160deg,#3A3530,#1E1A15)" data-swatches="#3A3530,#1E1A15" data-desc="A relaxed wool-flannel trouser with a hidden waist gusset and a tapered ankle. Tailored enough for town, warm enough for the cabin.">
+        <div class="ph" style="background:linear-gradient(160deg,#3A3530,#1E1A15)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Wool Trouser</span><span>$215</span></div><div class="sub">flannel · ink</div><div class="swatches"><i style="background:#3A3530"></i><i style="background:#1E1A15"></i></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="camp" class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Kitchen · Tools</div><h2 class="ttl serif">The Camp</h2></div><div class="meta">04 pieces</div><div class="swipe-hint">Swipe<svg viewBox="0 0 22 10" fill="none"><path d="M1 5h18m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+  <div class="grid">
+    <article class="card" data-name="Enamel Mug" data-price="$24" data-sub="speckled · sand" data-grad="linear-gradient(160deg,#9A8B72,#5E5040)" data-swatches="#9A8B72,#5E5040,#7A3F1F" data-desc="A 12oz speckled-enamel camp mug over a steel core — chip-resistant, flame-safe, and stackable. The first thing into the pack.">
+      <div class="ph" style="background:linear-gradient(160deg,#9A8B72,#5E5040)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Enamel Mug</span><span>$24</span></div><div class="sub">speckled · sand</div><div class="swatches"><i style="background:#9A8B72"></i><i style="background:#5E5040"></i><i style="background:#7A3F1F"></i></div>
+    </article>
+    <article class="card" data-name="Pour-over Kettle" data-price="$98" data-sub="steel · brushed" data-grad="linear-gradient(160deg,#8A8480,#3F3A36)" data-swatches="#8A8480,#3F3A36" data-desc="A gooseneck pour-over kettle in brushed steel with a heat-isolated handle and a precise spout. Camp coffee, done properly.">
+      <div class="ph" style="background:linear-gradient(160deg,#8A8480,#3F3A36)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Pour-over Kettle</span><span>$98</span></div><div class="sub">steel · brushed</div><div class="swatches"><i style="background:#8A8480"></i><i style="background:#3F3A36"></i></div>
+    </article>
+    <article class="card" data-name="Pocket Knife" data-price="$76" data-sub="walnut · brass" data-grad="linear-gradient(160deg,#7A5638,#3A2615)" data-swatches="#7A5638,#3A2615" data-desc="A slip-joint folder with walnut scales, brass bolsters, and a Sandvik steel blade that takes a wicked edge. Built to outlive you.">
+      <div class="ph" style="background:linear-gradient(160deg,#7A5638,#3A2615)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Pocket Knife</span><span>$76</span></div><div class="sub">walnut · brass</div><div class="swatches"><i style="background:#7A5638"></i><i style="background:#3A2615"></i></div>
+    </article>
+    <article class="card" data-name="Trail Axe" data-price="$145" data-sub="hickory · forged" data-grad="linear-gradient(160deg,#5C3A1F,#1E120A)" data-swatches="#5C3A1F,#1E120A" data-desc="A hand-forged Swedish head on an American hickory handle, with an oil-tanned leather sheath. For kindling, not heroics.">
+      <div class="ph" style="background:linear-gradient(160deg,#5C3A1F,#1E120A)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Trail Axe</span><span>$145</span></div><div class="sub">hickory · forged</div><div class="swatches"><i style="background:#5C3A1F"></i><i style="background:#1E120A"></i></div>
+    </article>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="values">
+      <div class="value">
+        <svg class="vi" viewBox="0 0 48 48" fill="none"><path d="M24 6L8 40h32L24 6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 40l8-14 8 14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <h3>Tested in the Cascades</h3>
+        <p>Prototypes spend a full season on the trail before they ever reach the line. If it can't take a Pacific Northwest winter, it doesn't get made.</p>
+      </div>
+      <div class="value">
+        <svg class="vi" viewBox="0 0 48 48" fill="none"><path d="M10 38c6-4 8-12 8-20 0 0 6 4 6 12 0-6 4-14 12-18 0 12-4 26-18 26-4 0-8 0-8 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <h3>Finished by hand in Oregon</h3>
+        <p>Cut, sewn, and inspected at our Southeast Portland workshop. Each piece carries the initials of the maker who finished it.</p>
+      </div>
+      <div class="value">
+        <svg class="vi" viewBox="0 0 48 48" fill="none"><path d="M24 8a16 16 0 1 0 16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M24 16v8l6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M34 8l6 6-6 2 0-8z" fill="currentColor"/></svg>
+        <h3>Repaired free, for life</h3>
+        <p>Snapped a strap or worn through a seam? Send it back. We'll mend it and return it — no receipt, no expiry, no charge.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="restock" class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Back in Stock</div><h2 class="ttl serif">The Restocks</h2></div><div class="meta">Replenished this week</div><div class="swipe-hint">Swipe<svg viewBox="0 0 22 10" fill="none"><path d="M1 5h18m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+  <div class="grid">
+    <article class="card" data-name="Heavyweight Hoodie" data-price="$148" data-sub="loopback · pine" data-grad="linear-gradient(160deg,#3A3530,#1E1A15)" data-swatches="#3A3530,#5A6B4F" data-desc="A 14oz loopback cotton hoodie with a double-lined hood and a kangaroo pocket. The weight of a good blanket.">
+      <div class="ph" style="background:linear-gradient(160deg,#3A3530,#1E1A15)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Heavyweight Hoodie</span><span>$148</span></div><div class="sub">loopback · pine</div><div class="swatches"><i style="background:#3A3530"></i><i style="background:#5A6B4F"></i></div>
+    </article>
+    <article class="card" data-name="Camp Mug" data-price="$24" data-sub="enamel · sand" data-grad="linear-gradient(160deg,#9A8B72,#5E5040)" data-swatches="#9A8B72,#5E5040" data-desc="Back by demand — the speckled-enamel 12oz mug, restocked in sand. Flame-safe, chip-resistant, stackable.">
+      <div class="ph" style="background:linear-gradient(160deg,#9A8B72,#5E5040)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Camp Mug</span><span>$24</span></div><div class="sub">enamel · sand</div><div class="swatches"><i style="background:#9A8B72"></i><i style="background:#5E5040"></i></div>
+    </article>
+    <article class="card" data-name="Wool Beanie" data-price="$42" data-sub="ribbed · rust" data-grad="linear-gradient(160deg,#7A3F1F,#3A1F0E)" data-swatches="#7A3F1F,#3A1F0E" data-desc="A ribbed lambswool beanie with a folded cuff, knit in Donegal. Warm without the itch.">
+      <div class="ph" style="background:linear-gradient(160deg,#7A3F1F,#3A1F0E)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Wool Beanie</span><span>$42</span></div><div class="sub">ribbed · rust</div><div class="swatches"><i style="background:#7A3F1F"></i><i style="background:#3A1F0E"></i></div>
+    </article>
+    <article class="card" data-name="Quilted Liner" data-price="$185" data-sub="recycled · sage" data-grad="linear-gradient(160deg,#5A6B4F,#3A4533)" data-swatches="#5A6B4F,#3A4533" data-desc="A diamond-quilted liner jacket with snap cuffs, wearable alone or zipped into the field shell. Recycled insulation throughout.">
+      <div class="ph" style="background:linear-gradient(160deg,#5A6B4F,#3A4533)"><span class="sheen"></span><button class="add">Add to bag</button></div><div class="row"><span>Quilted Liner</span><span>$185</span></div><div class="sub">recycled · sage</div><div class="swatches"><i style="background:#5A6B4F"></i><i style="background:#3A4533"></i></div>
+    </article>
+  </div>
+</section>
+
+<section class="signup">
+  <div class="glow"></div>
+  <div class="wrap signup-inner">
+    <div class="eyebrow" style="color:#D89A66">The Dispatch</div>
+    <h2>First miles,<br/>first dibs.</h2>
+    <p>Join the dispatch for early access to drops, field notes from the workshop, and the occasional repair tip. No noise — about one letter a month.</p>
+    <form onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').textContent='Welcome aboard ✦';">
+      <input type="email" placeholder="you@trailhead.com" required/>
+      <button class="btn btn--cream" type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="brand">HEMLOCK</div>
+        <p>Quietly engineered field gear, tested in the Cascades and finished by hand in Southeast Portland, Oregon.</p>
+      </div>
+      <div class="foot-col"><h4>Shop</h4><a href="#drop">The Drop</a><a href="#carry">Carry</a><a href="#field">Field</a><a href="#camp">Camp</a><a href="#restock">Restocks</a></div>
+      <div class="foot-col"><h4>Company</h4><a href="#story">Our Story</a><a href="#">The Workshop</a><a href="#">Journal</a><a href="#">Repairs</a></div>
+      <div class="foot-col"><h4>Support</h4><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Lifetime Guarantee</a><a href="#">Contact</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© MMXXVI Hemlock Supply Co. · Portland, Oregon</span>
+      <span>Field-tested · Hand-finished · Built to be repaired</span>
+    </div>
+  </div>
+</footer>
+
+<!-- MOBILE STICKY ACTION BAR -->
+<div class="mobile-bar" aria-hidden="true">
+  <div class="mb-meta"><div class="k">The Field Collection</div><div class="v serif">Spring MMXXVI</div></div>
+  <a class="btn" href="#drop">Shop now</a>
+</div>
+
+<!-- PRODUCT BOTTOM SHEET -->
+<div class="sheet-scrim" data-close-sheet></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-label="Product detail">
+  <div class="grab"></div>
+  <div class="sh-img"><span class="sheen"></span></div>
+  <div class="sh-head">
+    <div><div class="sh-name serif"></div><div class="sh-sub"></div></div>
+    <div class="sh-price serif"></div>
+  </div>
+  <div class="sh-swatch-label">Colourway</div>
+  <div class="sh-swatches"></div>
+  <div class="sh-desc"></div>
+  <div class="sh-cta">
+    <button class="btn btn--ghost" data-close-sheet>Close</button>
+    <button class="btn sh-add">Add to bag</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var body = document.body;
+
+  /* ── slide-in menu ── */
+  function openMenu(){ body.classList.add('menu-open'); }
+  function closeMenu(){ body.classList.remove('menu-open'); }
+  document.querySelectorAll('[data-open-menu]').forEach(function(el){ el.addEventListener('click', openMenu); });
+  document.querySelectorAll('[data-close-menu]').forEach(function(el){ el.addEventListener('click', closeMenu); });
+
+  /* ── cart counter ── */
+  var cartEls = document.querySelectorAll('[data-cart]');
+  var count = 3;
+  function bag(){
+    count++;
+    cartEls.forEach(function(b){
+      b.textContent = count;
+      b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
+    });
+  }
+  document.querySelectorAll('.card .add').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      bag();
+      var t = btn.textContent; btn.textContent = 'Added ✓';
+      setTimeout(function(){ btn.textContent = t; }, 1100);
+    });
+  });
+
+  /* ── product bottom sheet ── */
+  var sheet = document.querySelector('.sheet');
+  var shImg = sheet.querySelector('.sh-img');
+  var shName = sheet.querySelector('.sh-name');
+  var shSub = sheet.querySelector('.sh-sub');
+  var shPrice = sheet.querySelector('.sh-price');
+  var shSwatches = sheet.querySelector('.sh-swatches');
+  var shDesc = sheet.querySelector('.sh-desc');
+
+  function openSheet(card){
+    shImg.style.background = card.dataset.grad;
+    shName.textContent = card.dataset.name;
+    shSub.textContent = card.dataset.sub;
+    shPrice.textContent = card.dataset.price;
+    shDesc.textContent = card.dataset.desc;
+    shSwatches.innerHTML = '';
+    (card.dataset.swatches||'').split(',').forEach(function(c,i){
+      var s = document.createElement('i');
+      s.style.background = c.trim();
+      if(i===0) s.classList.add('sel');
+      s.addEventListener('click', function(){
+        shSwatches.querySelectorAll('i').forEach(function(x){ x.classList.remove('sel'); });
+        s.classList.add('sel');
+      });
+      shSwatches.appendChild(s);
+    });
+    body.classList.add('sheet-open');
+  }
+  function closeSheet(){ body.classList.remove('sheet-open'); }
+  document.querySelectorAll('.card').forEach(function(card){
+    card.addEventListener('click', function(e){
+      if(e.target.closest('.add')) return;
+      openSheet(card);
+    });
+  });
+  document.querySelectorAll('[data-close-sheet]').forEach(function(el){ el.addEventListener('click', closeSheet); });
+  sheet.querySelector('.sh-add').addEventListener('click', function(){
+    bag();
+    var b = sheet.querySelector('.sh-add'); var t = b.textContent;
+    b.textContent = 'Added to bag ✓';
+    setTimeout(function(){ b.textContent = t; closeSheet(); }, 900);
+  });
+
+  /* ── esc closes overlays ── */
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){ closeMenu(); closeSheet(); }
+  });
+
+  /* ── scroll-aware sticky bar (reveal after hero) ── */
+  var bar = document.querySelector('.mobile-bar');
+  var hero = document.querySelector('.hero');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ bar.classList.toggle('show', !en.isIntersecting); });
+    }, {rootMargin:'-40% 0px 0px 0px'}).observe(hero);
+  }
+})();
+</script>
+
+<script>
+/* deep-link state hook for showcase canvas: ?cc=menu | sheet | bar */
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get('cc');
+    if(!p) return;
+    var run = function(){
+      var b = document.body;
+      if(p==='menu'){ b.classList.add('menu-open'); }
+      else if(p==='sheet'){ var c=document.querySelector('.grid .card, .gifts .gift, .loot .item, .lots .lot, .payload .cargo, .goodies .goody'); if(c) c.click(); }
+      else if(p==='bar'){ var bar=document.querySelector('.mobile-bar'); if(bar) bar.classList.add('show'); window.scrollTo(0, Math.round(window.innerHeight*0.92)); }
+    };
+    setTimeout(run, 120);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
