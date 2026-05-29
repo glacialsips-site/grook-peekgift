@@ -66,5 +66,163 @@
       "accentOnBg": 4.31
     },
     "passes": true
+  },
+  {
+    "key": "cottage-warm",
+    "label": "Cottage Warm — Housewarming",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#fff0ed",
+      "surface": "#fee0dd",
+      "ink": "#281413",
+      "inkMuted": "#6c504d",
+      "accent": "#b96922",
+      "onAccent": "#121212",
+      "accent2": "#a25477"
+    },
+    "contrast": {
+      "inkOnBg": 15.79,
+      "inkOnSurface": 14.1,
+      "inkMutedOnBg": 6.55,
+      "onAccentOnAccent": 4.56,
+      "accentOnBg": 3.71
+    },
+    "passes": true
+  },
+  {
+    "key": "chalk-line",
+    "label": "Chalk Line — Sympathy",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#383130",
+      "surface": "#4a3f3e",
+      "ink": "#efe1df",
+      "inkMuted": "#b6a7a5",
+      "accent": "#bb8a86",
+      "onAccent": "#000000"
+    },
+    "contrast": {
+      "inkOnBg": 10,
+      "inkOnSurface": 7.97,
+      "inkMutedOnBg": 5.49,
+      "onAccentOnAccent": 7.09,
+      "accentOnBg": 4.3
+    },
+    "passes": true
+  },
+  {
+    "key": "velvet-rope",
+    "label": "Velvet Rope — Milestone",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#140e0c",
+      "surface": "#241a18",
+      "ink": "#f8ebe8",
+      "inkMuted": "#b6a7a3",
+      "accent": "#ba8c7f",
+      "onAccent": "#000000"
+    },
+    "contrast": {
+      "inkOnBg": 16.43,
+      "inkOnSurface": 14.6,
+      "inkMutedOnBg": 8.24,
+      "onAccentOnAccent": 7.15,
+      "accentOnBg": 6.51
+    },
+    "passes": true
+  },
+  {
+    "key": "zine-punk",
+    "label": "Zine Punk — Teen Birthday",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#ffedff",
+      "surface": "#fadcff",
+      "ink": "#26112a",
+      "inkMuted": "#694c6f",
+      "accent": "#099c00",
+      "onAccent": "#121212",
+      "accent2": "#7b7700"
+    },
+    "contrast": {
+      "inkOnBg": 15.73,
+      "inkOnSurface": 14,
+      "inkMutedOnBg": 6.57,
+      "onAccentOnAccent": 5.14,
+      "accentOnBg": 3.26
+    },
+    "passes": true
+  },
+  {
+    "key": "gummy-bear",
+    "label": "Gummy Bear — Baby Arrival",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#e4fafb",
+      "surface": "#cfeff1",
+      "ink": "#041f20",
+      "inkMuted": "#3d5f61",
+      "accent": "#b85c8b",
+      "onAccent": "#000000",
+      "accent2": "#a45c30"
+    },
+    "contrast": {
+      "inkOnBg": 15.85,
+      "inkOnSurface": 14.13,
+      "inkMutedOnBg": 6.44,
+      "onAccentOnAccent": 4.94,
+      "accentOnBg": 3.92
+    },
+    "passes": true
+  },
+  {
+    "key": "dusk-poem",
+    "label": "Dusk Poem — Engagement",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#36303c",
+      "surface": "#483e50",
+      "ink": "#ebdff5",
+      "inkMuted": "#b2a4be",
+      "accent": "#ce76af",
+      "onAccent": "#000000",
+      "accent2": "#949de9"
+    },
+    "contrast": {
+      "inkOnBg": 9.97,
+      "inkOnSurface": 7.89,
+      "inkMutedOnBg": 5.44,
+      "onAccentOnAccent": 6.83,
+      "accentOnBg": 4.16
+    },
+    "passes": true
+  },
+  {
+    "key": "concrete-poet",
+    "label": "Concrete Poet — Brutalist",
+    "repairsApplied": 0,
+    "usedSafeDefaultVibe": false,
+    "paletteHex": {
+      "bg": "#2d3437",
+      "surface": "#3a4448",
+      "ink": "#dae7ec",
+      "inkMuted": "#9faeb3",
+      "accent": "#6ea1b2",
+      "onAccent": "#000000"
+    },
+    "contrast": {
+      "inkOnBg": 10.03,
+      "inkOnSurface": 7.91,
+      "inkMutedOnBg": 5.54,
+      "onAccentOnAccent": 7.4,
+      "accentOnBg": 4.47
+    },
+    "passes": true
   }
 ]

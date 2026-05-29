@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>peek.gift proof — Velvet Rope — Milestone</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+/*
+ * SLUG RENDERER — structural skeletons.
+ * =====================================
+ *
+ * The MOAT's substrate: plain CSS Modules. STRUCTURE lives here (layout,
+ * grid tracks, flow), selected by `[data-variant]` / `[data-*]` enums. PAINT
+ * is 100% runtime: every color / font / size / radius / shadow reads a
+ * `var(--vibe-*)` custom property set on the page wrapper (SSR, zero flash).
+ *
+ * HARD RULE (enforced by tests/unit/renderer-vars-only.test.ts + ESLint):
+ * this file and the renderer components contain NO literal colors. The only
+ * place a color exists is `var(--vibe-*)`. The same skeleton renders a Vegas
+ * poster or a cream invite purely because the vars differ.
+ *
+ * Ported layout logic: prototypes/dg-panda/src/recipes.ts (hero + productCardSet).
+ */
+
+/* ── Page wrapper ────────────────────────────────────────────────────────── */
+
+.page {
+  min-height: 100dvh;
+  background-color: hsl(var(--vibe-bg));
+  color: hsl(var(--vibe-ink));
+  font-family: var(--vibe-type-body);
+  font-size: var(--vibe-scale-body);
+  line-height: var(--vibe-leading-body);
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+/* Optional wash + grain overlays. Sit BEHIND ink (z-index), capped opacity
+   upstream so they can never reduce text contrast. */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 120% at 50% 0%,
+    hsl(var(--vibe-accent) / var(--vibe-wash)) 0%,
+    transparent 60%
+  );
+}
+.page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--vibe-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.headingDisplay {
+  font-family: var(--vibe-type-display);
+  text-transform: var(--vibe-display-case);
+  letter-spacing: var(--vibe-tracking-display);
+  line-height: 0.98;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.eyebrow {
+  font-family: var(--vibe-type-body);
+  font-size: var(--vibe-scale-eyebrow);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: hsl(var(--vibe-accent));
+  margin: 0;
+}
+
+.bodyText {
+  font-family: var(--vibe-type-body);
+  color: hsl(var(--vibe-ink-muted));
+  max-width: var(--vibe-measure);
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * HERO — ≥3 layout variants (full-bleed-image / centered-type / split /
+ * stacked-card / minimal-mark)
+ * ════════════════════════════════════════════════════════════════════════ */
+
+.hero {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+  overflow: hidden;
+  padding-inline: var(--vibe-gutter);
+  padding-block: var(--vibe-section-y);
+  color: hsl(var(--vibe-ink));
+  gap: var(--vibe-stack);
+}
+
+.heroInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+  max-width: var(--vibe-measure);
+}
+
+.heroTitle {
+  font-size: var(--vibe-scale-display);
+}
+
+.heroMedia {
+  background-color: hsl(var(--vibe-surface));
+  background-size: cover;
+  background-position: center;
+}
+
+/* full-bleed-image: image fills, content anchored bottom, scrim for legibility */
+.hero[data-variant='full-bleed-image'] {
+  min-height: min(90vh, 760px);
+  align-content: end;
+}
+.hero[data-variant='full-bleed-image'] .heroMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+/* scrim — uses ink (which is contrast-safe) at fixed alpha; not a literal color */
+.hero[data-variant='full-bleed-image'] .heroScrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    hsl(var(--vibe-bg) / 0.92) 0%,
+    hsl(var(--vibe-bg) / 0.45) 45%,
+    transparent 100%
+  );
+}
+
+/* centered-type: poster, type-forward, small media chip */
+.hero[data-variant='centered-type'] {
+  place-items: center;
+  text-align: center;
+  min-height: min(80vh, 680px);
+}
+.hero[data-variant='centered-type'] .heroInner {
+  align-items: center;
+}
+.hero[data-variant='centered-type'] .heroMedia {
+  width: clamp(80px, 18vw, 180px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: var(--vibe-stack);
+}
+
+/* split: type one side, image the other */
+.hero[data-variant='split'] {
+  align-items: center;
+}
+.hero[data-variant='split'] .heroMedia {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--vibe-radius-card);
+  overflow: hidden;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .hero[data-variant='split'] {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--vibe-gutter);
+  }
+}
+
+/* stacked-card: framed image in a card above the title (gift-y / kid) */
+.hero[data-variant='stacked-card'] {
+  place-items: center;
+  text-align: center;
+  min-height: min(85vh, 720px);
+}
+.hero[data-variant='stacked-card'] .heroInner {
+  align-items: center;
+}
+.hero[data-variant='stacked-card'] .heroMedia {
+  width: min(100%, 460px);
+  aspect-ratio: 4 / 3;
+  border-radius: var(--vibe-radius-card);
+  overflow: hidden;
+  margin-bottom: var(--vibe-stack);
+  box-shadow: var(--vibe-shadow-float);
+  border: var(--vibe-border-width) solid hsl(var(--vibe-ink) / 0.12);
+}
+
+/* minimal-mark: tiny wordmark + lots of space (luxury / condolence) */
+.hero[data-variant='minimal-mark'] {
+  place-items: center;
+  text-align: center;
+  min-height: min(70vh, 560px);
+}
+.hero[data-variant='minimal-mark'] .heroInner {
+  align-items: center;
+  gap: calc(var(--vibe-stack) * 2);
+}
+.hero[data-variant='minimal-mark'] .heroMedia {
+  display: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * SECTION (generic content wrapper) + STORY variants
+ * ════════════════════════════════════════════════════════════════════════ */
+
+.section {
+  padding-inline: var(--vibe-gutter);
+  padding-block: var(--vibe-section-y);
+  color: hsl(var(--vibe-ink));
+}
+.section[data-tone='surface'] {
+  background-color: hsl(var(--vibe-surface));
+}
+.section[data-tone='inverted'] {
+  background-color: hsl(var(--vibe-ink));
+  color: hsl(var(--vibe-bg));
+}
+
+.sectionHeading {
+  font-family: var(--vibe-type-display);
+  font-size: var(--vibe-scale-h2);
+  text-transform: var(--vibe-display-case);
+  letter-spacing: var(--vibe-tracking-display);
+  line-height: 1;
+  margin: 0 0 var(--vibe-gutter) 0;
+  text-wrap: balance;
+}
+
+.storyBody {
+  max-width: var(--vibe-measure);
+  font-size: var(--vibe-scale-body);
+  color: hsl(var(--vibe-ink-muted));
+}
+
+/* prose: measure-constrained paragraph */
+.story[data-variant='prose'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+}
+
+/* pull-quote: oversized editorial quote */
+.story[data-variant='pull-quote'] .storyBody {
+  font-family: var(--vibe-type-display);
+  font-size: var(--vibe-scale-h2);
+  line-height: 1.15;
+  color: hsl(var(--vibe-ink));
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+/* banner: short punchy full-width line */
+.story[data-variant='banner'] {
+  text-align: center;
+}
+.story[data-variant='banner'] .storyBody {
+  font-family: var(--vibe-type-display);
+  font-size: var(--vibe-scale-h2);
+  color: hsl(var(--vibe-ink));
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* two-up: text + image side by side */
+.story[data-variant='two-up'] {
+  display: grid;
+  gap: var(--vibe-gutter);
+  align-items: center;
+}
+.story[data-variant='two-up'] .storyMedia {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--vibe-radius-card);
+  background-color: hsl(var(--vibe-surface));
+  background-size: cover;
+  background-position: center;
+}
+@media (min-width: 768px) {
+  .story[data-variant='two-up'] {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* timeline: ordered beats */
+.story[data-variant='timeline'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+}
+.story[data-variant='timeline'] .timelineBeat {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--vibe-stack);
+  align-items: start;
+}
+.story[data-variant='timeline'] .timelineDot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--vibe-accent));
+  margin-top: 0.4em;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * PRODUCT-CARD-SET — the commercial heart. ≥4 presentations:
+ *   editorial-full-bleed | tight-grid | horizontal-scroll | collage-masonry
+ *   (+ list, single-hero-product)
+ * Ported + extended from prototypes/dg-panda/src/recipes.ts productCardSet.
+ * ════════════════════════════════════════════════════════════════════════ */
+
+.cardSet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+}
+
+.cardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  background-color: hsl(var(--vibe-surface));
+  color: hsl(var(--vibe-ink));
+  border-radius: var(--vibe-radius-card);
+  box-shadow: var(--vibe-shadow-card);
+  overflow: hidden;
+  border: var(--vibe-border-width) solid hsl(var(--vibe-ink) / 0.14);
+  display: flex;
+  flex-direction: column;
+  min-height: 44px; /* MIN_TOUCH_TARGET invariant baseline */
+}
+
+.cardMedia {
+  aspect-ratio: 4 / 3;
+  background-color: hsl(var(--vibe-surface));
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+/* placeholder wash when no image — accent-tinted, still contrast-safe */
+.cardMedia[data-placeholder='true'] {
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--vibe-accent) / 0.32),
+    hsl(var(--vibe-surface))
+  );
+}
+
+.cardBody {
+  padding: var(--vibe-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.cardTitle {
+  font-family: var(--vibe-type-display);
+  font-size: var(--vibe-scale-card-title);
+  text-transform: var(--vibe-display-case);
+  letter-spacing: var(--vibe-tracking-display);
+  line-height: 1.08;
+  margin: 0;
+}
+
+.cardPrice {
+  font-family: var(--vibe-type-body);
+  color: hsl(var(--vibe-accent));
+  font-weight: 600;
+  margin: 0;
+}
+
+.cardCaption {
+  font-family: var(--vibe-type-body);
+  color: hsl(var(--vibe-ink-muted));
+  font-size: var(--vibe-scale-caption);
+  margin: 0;
+}
+
+.cardTag {
+  align-self: flex-start;
+  font-size: var(--vibe-scale-caption);
+  font-family: var(--vibe-type-body);
+  color: hsl(var(--vibe-on-accent));
+  background-color: hsl(var(--vibe-accent));
+  border-radius: var(--vibe-radius-button);
+  padding: 0.15em 0.6em;
+}
+
+/* editorial-full-bleed: one card per row, large image, magazine */
+.cardSet[data-variant='editorial-full-bleed'] .cardList {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--vibe-section-y) * 0.6);
+}
+.cardSet[data-variant='editorial-full-bleed'] .card {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+  border-radius: 0;
+}
+.cardSet[data-variant='editorial-full-bleed'] .cardMedia {
+  border-radius: var(--vibe-radius-card);
+}
+.cardSet[data-variant='editorial-full-bleed'] .cardBody {
+  justify-content: center;
+  padding-inline: 0;
+}
+.cardSet[data-variant='editorial-full-bleed'] .cardTitle {
+  font-size: var(--vibe-scale-h2);
+}
+@media (min-width: 768px) {
+  .cardSet[data-variant='editorial-full-bleed'] .card {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--vibe-gutter);
+  }
+  .cardSet[data-variant='editorial-full-bleed'] .cardMedia {
+    aspect-ratio: 3 / 4;
+  }
+  /* alternate image side every other card for editorial rhythm */
+  .cardSet[data-variant='editorial-full-bleed'] .card:nth-child(even) .cardMedia {
+    order: 2;
+  }
+}
+
+/* tight-grid: 2–3 col uniform grid */
+.cardSet[data-variant='tight-grid'] .cardList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--vibe-gutter);
+}
+.cardSet[data-variant='tight-grid'] .cardMedia {
+  aspect-ratio: 1;
+}
+@media (min-width: 768px) {
+  .cardSet[data-variant='tight-grid'] .cardList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* horizontal-scroll: swipeable snap rail */
+.cardSet[data-variant='horizontal-scroll'] .cardList {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  gap: var(--vibe-gutter);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--vibe-stack);
+  scrollbar-width: none;
+  /* let the rail bleed to the gutter edge */
+  margin-inline: calc(var(--vibe-gutter) * -1);
+  padding-inline: var(--vibe-gutter);
+}
+.cardSet[data-variant='horizontal-scroll'] .cardList::-webkit-scrollbar {
+  display: none;
+}
+.cardSet[data-variant='horizontal-scroll'] .card {
+  scroll-snap-align: start;
+}
+.cardSet[data-variant='horizontal-scroll'] .cardMedia {
+  aspect-ratio: 3 / 4;
+}
+@media (min-width: 768px) {
+  .cardSet[data-variant='horizontal-scroll'] .cardList {
+    grid-auto-columns: 32%;
+  }
+}
+
+/* collage-masonry: asymmetric grid spans */
+.cardSet[data-variant='collage-masonry'] .cardList {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: minmax(64px, auto);
+  gap: var(--vibe-gutter);
+}
+.cardSet[data-variant='collage-masonry'] .card:nth-child(3n + 1) {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+.cardSet[data-variant='collage-masonry'] .card:nth-child(3n + 2) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.cardSet[data-variant='collage-masonry'] .card:nth-child(3n) {
+  grid-column: span 3;
+}
+.cardSet[data-variant='collage-masonry'] .cardMedia {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 120px;
+  flex: 1;
+}
+
+/* list: compact rows w/ thumbnail */
+.cardSet[data-variant='list'] .cardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+}
+.cardSet[data-variant='list'] .card {
+  flex-direction: row;
+  align-items: center;
+}
+.cardSet[data-variant='list'] .cardMedia {
+  aspect-ratio: 1;
+  width: clamp(72px, 22vw, 120px);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* single-hero-product: ONE card, cinematic */
+.cardSet[data-variant='single-hero-product'] .cardList {
+  display: block;
+}
+.cardSet[data-variant='single-hero-product'] .card {
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+.cardSet[data-variant='single-hero-product'] .cardMedia {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--vibe-radius-card);
+  box-shadow: var(--vibe-shadow-float);
+}
+.cardSet[data-variant='single-hero-product'] .cardBody {
+  align-items: center;
+  text-align: center;
+  padding-inline: 0;
+}
+.cardSet[data-variant='single-hero-product'] .cardTitle {
+  font-size: var(--vibe-scale-h2);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * CTA + DIVIDER + FOOTER
+ * ════════════════════════════════════════════════════════════════════════ */
+
+.cta {
+  padding-inline: var(--vibe-gutter);
+  padding-block: var(--vibe-section-y);
+  display: flex;
+  flex-direction: column;
+  gap: var(--vibe-stack);
+  align-items: center;
+  text-align: center;
+}
+.cta[data-variant='banner-bar'] {
+  background-color: hsl(var(--vibe-accent));
+  color: hsl(var(--vibe-on-accent));
+}
+.cta[data-variant='inline-link'] {
+  padding-block: var(--vibe-stack);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* MIN_TOUCH_TARGET invariant */
+  padding: 0.7em 1.6em;
+  border-radius: var(--vibe-radius-button);
+  background-color: hsl(var(--vibe-accent));
+  color: hsl(var(--vibe-on-accent));
+  font-family: var(--vibe-type-body);
+  font-weight: 600;
+  border: var(--vibe-border-width) solid hsl(var(--vibe-accent));
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform calc(140ms * var(--vibe-motion-scale)) var(--vibe-ease),
+    box-shadow calc(140ms * var(--vibe-motion-scale)) var(--vibe-ease);
+}
+.button:hover {
+  transform: translateY(-2px);
+}
+.button[data-emphasis='outline'] {
+  background-color: transparent;
+  color: hsl(var(--vibe-ink));
+  border-color: hsl(var(--vibe-ink) / 0.4);
+}
+.buttonLink {
+  background: transparent;
+  border: none;
+  color: hsl(var(--vibe-accent));
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  min-height: 44px;
+  font-family: var(--vibe-type-body);
+  font-weight: 600;
+}
+
+.divider {
+  padding-inline: var(--vibe-gutter);
+}
+.divider[data-variant='rule'] {
+  padding-block: var(--vibe-section-y);
+}
+.divider[data-variant='rule'] hr {
+  border: none;
+  border-top: var(--vibe-border-width, 1px) solid hsl(var(--vibe-ink) / 0.18);
+  margin: 0;
+}
+.divider[data-variant='whitespace'] {
+  padding-block: var(--vibe-section-y);
+}
+.divider[data-variant='label'] {
+  padding-block: var(--vibe-stack);
+  text-align: center;
+}
+.divider[data-variant='label'] span {
+  font-family: var(--vibe-type-body);
+  font-size: var(--vibe-scale-eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--vibe-ink-muted));
+}
+.divider[data-variant='motif'] {
+  padding-block: var(--vibe-stack);
+  text-align: center;
+  color: hsl(var(--vibe-accent));
+}
+
+.footer {
+  padding-inline: var(--vibe-gutter);
+  padding-block: var(--vibe-section-y);
+  text-align: center;
+  color: hsl(var(--vibe-ink-muted));
+  font-family: var(--vibe-type-body);
+  font-size: var(--vibe-scale-caption);
+}
+.footer[data-variant='signature'] {
+  font-family: var(--vibe-type-display);
+  font-size: var(--vibe-scale-body);
+  color: hsl(var(--vibe-ink));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
+</style>
+</head>
+<body data-proof-vibe="velvet-rope">
+<div class="page" style="--vibe-bg:15 25% 6%;--vibe-surface:10 20% 12%;--vibe-muted:10 20% 12%;--vibe-ink:11 53% 94%;--vibe-ink-muted:13 12% 68%;--vibe-accent:13 30% 61%;--vibe-on-accent:0 0% 0%;--vibe-accent-ink:0 0% 0%;--vibe-type-display:&quot;Fraunces&quot;, &quot;Playfair Display&quot;, Georgia, serif;--vibe-type-body:&quot;Fraunces&quot;, &quot;Playfair Display&quot;, Georgia, serif;--vibe-type-mono:&quot;JetBrains Mono&quot;, &quot;IBM Plex Mono&quot;, ui-monospace, monospace;--vibe-leading-body:1.75;--vibe-tracking-display:0em;--vibe-display-case:none;--vibe-scale-body:1rem;--vibe-scale-caption:0.813rem;--vibe-scale-eyebrow:0.75rem;--vibe-scale-card-title:1.96rem;--vibe-scale-h2:2.744rem;--vibe-scale-display:clamp(2.744rem, 1.921rem + 4vw, 3.842rem);--vibe-radius-card:4px;--vibe-radius-button:2px;--vibe-border-width:1px;--vibe-space-base:1.15rem;--vibe-stack:1.725rem;--vibe-gutter:2rem;--vibe-section-y:4.313rem;--vibe-measure:70ch;--vibe-shadow-card:none;--vibe-shadow-float:none;--vibe-grain:0.025;--vibe-wash:0.04;--vibe-motion-scale:1;--vibe-ease:cubic-bezier(0.22, 1, 0.36, 1)" data-vibe-key="dark" data-mount="proof"><header class="hero" data-variant="centered-type"><div class="heroInner"><p class="eyebrow">a peek for</p><h1 class="headingDisplay heroTitle">Maya’s Housewarming</h1><p class="bodyText">Housewarming</p></div></header><section class="story" data-variant="pull-quote"><div class="storyBody"><p>You finally got the keys.</p><p style="margin-top:1em">We chipped in so the new place feels like yours from night one — pick whatever speaks to you.</p></div></section><section class="section"><h2 class="sectionHeading">The Drop</h2><div class="cardSet" data-variant="editorial-full-bleed"><ul class="cardList"><li class="card"><div class="cardMedia" data-placeholder="true" aria-hidden="true"></div><div class="cardBody"><span class="cardTag">crowd favorite</span><h3 class="cardTitle">Aurora Table Lamp</h3><p class="cardPrice">$88</p><p class="cardCaption">Warm dimmable glow for the new place.</p></div></li><li class="card"><div class="cardMedia" data-placeholder="true" aria-hidden="true"></div><div class="cardBody"><h3 class="cardTitle">Stovetop Kettle</h3><p class="cardPrice">$65</p><p class="cardCaption">Every morning, sorted.</p></div></li><li class="card"><div class="cardMedia" data-placeholder="true" aria-hidden="true"></div><div class="cardBody"><h3 class="cardTitle">Wool Throw</h3><p class="cardPrice">$120</p><p class="cardCaption">For the couch nights.</p></div></li></ul></div></section><div class="divider" data-variant="label"><span>•</span></div><section class="section"><h2 class="sectionHeading">The Kit</h2><div class="cardSet" data-variant="editorial-full-bleed"><ul class="cardList"><li class="card"><div class="cardMedia" data-placeholder="true" aria-hidden="true"></div><div class="cardBody"><h3 class="cardTitle">Cedar Candle</h3><p class="cardPrice">$34</p><p class="cardCaption">First-night ritual.</p></div></li><li class="card"><div class="cardMedia" data-placeholder="true" aria-hidden="true"></div><div class="cardBody"><h3 class="cardTitle">Ceramic Mug Set</h3><p class="cardPrice">$42</p><p class="cardCaption">Two, for good company.</p></div></li></ul></div></section><div class="cta" data-variant="button-row"><a class="button" href="#gifts">Open your gift</a></div><footer class="footer" data-variant="signature"><p>— the whole crew</p><p>made with peek.gift</p></footer></div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import type Anthropic from '@anthropic-ai/sdk';
+import type { OccasionKey } from '@/lib/vibe/grammar';
 
 // Common (always-loaded) skill bundles
 import { content as copyHouseStyle } from './skills/copy-house-style';
@@ -31,34 +32,43 @@ const CACHE_MARKER: Anthropic.CacheControlEphemeral = {
 };
 
 /**
- * Canonical occasion types Peek classifies into. The chat route either
- * passes one of these explicitly (when `peek.occasion` resolves to a
- * known template via `classify-occasion.ts`) or leaves it `undefined`
- * — Block 3 then omits the occasion template until classification
- * resolves.
+ * Canonical occasion taxonomy Peek classifies into — the 22-occasion enum that
+ * lives in `lib/vibe/grammar/presets.ts` (`OccasionKey`). This is the single
+ * source of truth shared by the grammar preset map (`OCCASION_VIBES`) and the
+ * curator skill loader, expanded from the original 10 launch values (BRIEF 07).
+ *
+ * The chat route either passes one of these explicitly (when `peek.occasion`
+ * resolves via `classify-occasion.ts`) or leaves it `undefined` — Block 3 then
+ * omits the occasion template until classification resolves. Only a subset of
+ * the 22 has a bundled skill template (see `OCCASION_TEMPLATES`); occasions
+ * without one still classify, they just don't inject an occasion-template skill.
  */
-export type OccasionType =
-  | 'anniversary'
-  | 'baby-shower'
-  | 'bachelorette'
-  | 'holiday'
-  | 'just-because'
-  | 'milestone-bday'
-  | 'princess-bday'
-  | 'retirement'
-  | 'teen-grad'
-  | 'wedding';
+export type OccasionType = OccasionKey;
 
-const OCCASION_TEMPLATES: Record<OccasionType, string> = {
+/**
+ * The occasions that have a bundled skill template under
+ * `skills/occasion-templates/`. PARTIAL by design: the 10 launch templates map
+ * onto the 22-occasion taxonomy. Some files serve more than one key — the
+ * `holiday` file covers both holiday keys, the `teen-grad` file covers teen
+ * birthdays and graduations, and `princess-bday` covers the littles. The other
+ * occasions classify without injecting a template (Block 3 omits it).
+ *
+ * NOTE: the template FILES keep their original launch names, so a remapped
+ * skill is labelled by the new taxonomy key while its body still references the
+ * legacy name — purely cosmetic; the prompt content is unchanged.
+ */
+const OCCASION_TEMPLATES: Partial<Record<OccasionType, string>> = {
   anniversary: anniversaryTpl,
   'baby-shower': babyShowerTpl,
   bachelorette: bacheloretteTpl,
-  holiday: holidayTpl,
+  'holiday-cheerful': holidayTpl,
+  'holiday-tender': holidayTpl,
   'just-because': justBecauseTpl,
   'milestone-bday': milestoneBdayTpl,
-  'princess-bday': princessBdayTpl,
+  'kid-bday-littles': princessBdayTpl,
   retirement: retirementTpl,
-  'teen-grad': teenGradTpl,
+  'teen-bday': teenGradTpl,
+  graduation: teenGradTpl,
   wedding: weddingTpl,
 };
 

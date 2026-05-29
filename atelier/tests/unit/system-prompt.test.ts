@@ -82,8 +82,23 @@ describe('classifyOccasionToTemplate', () => {
     expect(classifyOccasionToTemplate('25th anniversary')).toBe('anniversary');
     expect(classifyOccasionToTemplate('baby shower')).toBe('baby-shower');
     expect(classifyOccasionToTemplate('retirement party')).toBe('retirement');
-    expect(classifyOccasionToTemplate('graduation')).toBe('teen-grad');
+    // graduation is now its own key in the 22-occasion taxonomy (was the
+    // legacy combined 'teen-grad'); it still loads the teen-grad template.
+    expect(classifyOccasionToTemplate('graduation')).toBe('graduation');
     expect(classifyOccasionToTemplate('80th birthday')).toBe('milestone-bday');
+  });
+
+  it('classifies the expanded 22-occasion taxonomy (BRIEF 07)', () => {
+    expect(classifyOccasionToTemplate('their engagement party')).toBe('engagement');
+    expect(classifyOccasionToTemplate("Steve's bachelor party")).toBe('bachelor');
+    expect(classifyOccasionToTemplate('housewarming')).toBe('housewarming');
+    expect(classifyOccasionToTemplate('sympathy / loss of her mother')).toBe('sympathy');
+    expect(classifyOccasionToTemplate('divorce party')).toBe('divorce');
+    expect(classifyOccasionToTemplate('get well soon')).toBe('get-well');
+    expect(classifyOccasionToTemplate('new baby arrival')).toBe('baby-arrival');
+    expect(classifyOccasionToTemplate("Valentine's day")).toBe('holiday-tender');
+    expect(classifyOccasionToTemplate('Christmas')).toBe('holiday-cheerful');
+    expect(classifyOccasionToTemplate('teen birthday')).toBe('teen-bday');
   });
 
   it('returns null for unmatched strings', () => {
