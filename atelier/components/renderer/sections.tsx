@@ -23,6 +23,7 @@ import type {
   StoryVariant,
 } from '@/lib/vibe/grammar';
 import type { PageContent, RenderCard } from './page-state';
+import { GIFT_BRAND_DEFAULTS } from './page-state';
 import { s } from './styles';
 
 /* ── content resolution ──────────────────────────────────────────────────── */
@@ -39,7 +40,7 @@ function resolveText(ref: string | undefined, content: PageContent): string | nu
     case 'signature':
       return content.signature;
     case 'cta:primary':
-      return 'Open your gift';
+      return content.brand?.ctaLabel ?? GIFT_BRAND_DEFAULTS.ctaLabel;
     default:
       if (ref.startsWith('group:')) {
         const id = ref.slice('group:'.length);
@@ -64,11 +65,13 @@ function cssUrl(url: string): string {
 
 export function Hero({
   variant,
+  eyebrow,
   title,
   subtitle,
   imageUrl,
 }: {
   variant: HeroVariant;
+  eyebrow: string;
   title: string;
   subtitle: string | null;
   imageUrl: string | null;
@@ -94,7 +97,7 @@ export function Hero({
         />
       ) : null}
       <div className={s.heroInner}>
-        <p className={s.eyebrow}>a peek for</p>
+        <p className={s.eyebrow}>{eyebrow}</p>
         <h1 className={`${s.headingDisplay} ${s.heroTitle}`}>{title}</h1>
         {subtitle ? <p className={s.bodyText}>{subtitle}</p> : null}
       </div>
@@ -201,16 +204,20 @@ export function ProductCardSet({
 export function Cta({
   variant,
   label,
+  href,
   secondaryLabel,
+  secondaryHref,
 }: {
   variant: CtaVariant;
   label: string;
+  href: string;
   secondaryLabel: string | null;
+  secondaryHref: string;
 }) {
   if (variant === 'inline-link') {
     return (
       <div className={s.cta} data-variant={variant}>
-        <a className={s.buttonLink} href="#gifts">
+        <a className={s.buttonLink} href={href}>
           {label}
         </a>
       </div>
@@ -218,11 +225,11 @@ export function Cta({
   }
   return (
     <div className={s.cta} data-variant={variant}>
-      <a className={s.button} href="#gifts">
+      <a className={s.button} href={href}>
         {label}
       </a>
       {secondaryLabel ? (
-        <a className={s.button} data-emphasis="outline" href="#note">
+        <a className={s.button} data-emphasis="outline" href={secondaryHref}>
           {secondaryLabel}
         </a>
       ) : null}
@@ -243,14 +250,16 @@ export function Divider({ variant, label }: { variant: DividerVariant; label: st
 export function Footer({
   variant,
   signature,
+  attribution,
 }: {
   variant: FooterVariant;
   signature: string | null;
+  attribution: string;
 }) {
   return (
     <footer className={s.footer} data-variant={variant}>
       {signature ? <p>{signature}</p> : null}
-      <p>made with peek.gift</p>
+      <p>{attribution}</p>
     </footer>
   );
 }
@@ -271,6 +280,7 @@ export function RenderSection({
       return (
         <Hero
           variant={section.variant}
+          eyebrow={content.brand?.heroEyebrow ?? GIFT_BRAND_DEFAULTS.heroEyebrow}
           title={resolveText(section.slots.titleRef, content) ?? content.title}
           subtitle={resolveText(section.slots.subtitleRef, content)}
           imageUrl={section.slots.imageRef ? content.heroImageUrl : null}
@@ -306,8 +316,14 @@ export function RenderSection({
       return (
         <Cta
           variant={section.variant}
-          label={resolveText(section.slots.labelRef, content) ?? 'Open your gift'}
+          label={
+            resolveText(section.slots.labelRef, content) ??
+            content.brand?.ctaLabel ??
+            GIFT_BRAND_DEFAULTS.ctaLabel
+          }
+          href={content.brand?.ctaHref ?? GIFT_BRAND_DEFAULTS.ctaHref}
           secondaryLabel={resolveText(section.slots.secondaryLabelRef, content)}
+          secondaryHref="#note"
         />
       );
     case 'footer':
@@ -315,6 +331,7 @@ export function RenderSection({
         <Footer
           variant={section.variant}
           signature={resolveText(section.slots.signatureRef, content)}
+          attribution={content.brand?.footerAttribution ?? GIFT_BRAND_DEFAULTS.footerAttribution}
         />
       );
   }
