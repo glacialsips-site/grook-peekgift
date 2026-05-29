@@ -12,11 +12,11 @@ _Use this as the decision-tree when you sit down. Tier-by-tier fire/merge/repeat
 - Spine thread at `/spine/*` (chat → mutate → publish → recipient view)
 - All 6 research REPORTs
 
-**In your inbox when you sit down (best-effort from the 30-min prep window):**
-- Mobile vibe gallery — 40 presets × mobile viewport × proper fonts (sub working)
-- Structural variation showcase — 3 vibes × 13 layout variants each (sub working)
+**In your inbox when you sit down (from the 30-min prep window):**
+- ✅ **Structural variation showcase** RETURNED — 42 SSR renders across 3 vibes × all variants. Files already sent to you. **Critical finding**: hero variants 5/5 distinct (✅), product-set variants nominally 6 but **visually distinct on mobile = 4** (❌). `editorial-full-bleed` ≈ `single-hero-product` (near-twins); `collage-masonry` doesn't activate at typical 3-4 card counts. **This is the structural root of your "feels like what we had" concern — the grammar's structural vocabulary is too narrow.**
+- ⏳ Mobile vibe gallery (40 presets × mobile viewport × proper fonts) — sub still working.
 
-Both subs answer "do the vibes actually go radical?" with real evidence. Take 5 min to scan when you sit down.
+**🆕 BRIEF 20 written: grammar variant expansion.** Adds 4 new `ProductSetVariant` values (`feature-pair`, `zigzag-prose`, `stacked-polaroids`, `gallery-wall`) + decision on whether to prune `single-hero-product`. **Independent of all other briefs — can fire ANY time after Tier 1 lands. This directly attacks "feels like what we had".**
 
 **Lieutenants in flight at session start:**
 - Lieutenant C (BRIEF 08 mutation-log-schema) — was firing 60+ min ago, no branch push yet. Likely stalled. Three options when you sit:
@@ -47,6 +47,9 @@ After Lieutenant C merges, fire BRIEF 04 (depends on all of Tier 1A) + BRIEFs th
 
 **Lieutenant 10** (landing — independent of 04):
 > On branch `claude/bold-ride-Li5zK`, read `_packets/LIEUTENANT/PROTOCOL.md` then `_packets/LIEUTENANT/10-landing/BRIEF.md` and execute fully. Spawn your own subs. Report per the protocol.
+
+**Lieutenant 20** (grammar variant expansion — the radical-vibes fix; independent of EVERYTHING; recommend firing in parallel with Wave 2 since it's the highest-leverage fix to your "feels like what we had" concern):
+> On branch `claude/bold-ride-Li5zK`, read `_packets/LIEUTENANT/PROTOCOL.md` then `_packets/LIEUTENANT/20-grammar-variants-expansion/BRIEF.md` and execute fully. Spawn your own subs. Report per the protocol.
 
 Fire these 3 in parallel sessions. While they cook, scan the vibe gallery + structural showcase to give me your taste read.
 
