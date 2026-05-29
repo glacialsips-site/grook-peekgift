@@ -1164,8 +1164,7 @@ const DISPLAY_WEIRDEN: Record<
   script: 'script',
 };
 
-const MIN_SCALE = 1.067;
-const MAX_SCALE = 1.95;
+const MAX_SCALE = 1.95; // ceiling for the +contrast remix (mirrors MAX_SCALE_RATIO)
 
 /** Apply a single remix axis. Pure; output is still a `GenerationOutput`. */
 export function remix(input: GenerationOutput, axis: RemixAxis): GenerationOutput {
