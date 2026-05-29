@@ -1,43 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
 import {
-  CARD_COLUMNS,
-  PEEK_COLUMNS,
-  rowsToState,
-} from '@/lib/spine/wire';
+  runToolLoop,
+  type AnthropicMessage,
+  type AnthropicToolDef,
+  type ToolLoopEvent,
+} from '@/lib/anthropic-edge';
+import {
+  deleteCard,
+  insertCard,
+  loadSpineState,
+  updatePeek,
+} from '@/lib/db-edge';
 import type { SpineSseEvent, SpineState } from '@/lib/spine/types';
 import type { Vibe } from '@/db/schema/peeks';
 
 export const runtime = 'edge';
 
 const MODEL = 'claude-sonnet-4-6';
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_VERSION = '2023-06-01';
 const MAX_ITERS = 8;
 const MAX_TOKENS = 1024;
 const MAX_MESSAGE_LEN = 4000;
 
-type AnthropicBlock =
-  | { type: 'text'; text: string }
-  | { type: 'tool_use'; id: string; name: string; input: unknown };
-
-type AnthropicMessage = {
-  role: 'user' | 'assistant';
-  content: string | AnthropicBlock[] | ToolResultBlock[];
-};
-
-type ToolResultBlock = {
-  type: 'tool_result';
-  tool_use_id: string;
-  content: string;
-};
-
-const TOOLS = [
+const TOOLS: AnthropicToolDef[] = [
   {
     name: 'set_hero',
     description:
       'Set who the peek is for. Use as soon as you learn the recipient or occasion. Any field omitted is left unchanged.',
     input_schema: {
-      type: 'object' as const,
+      type: 'object',
       properties: {
         recipientName: { type: 'string' },
         occasion: { type: 'string' },
@@ -50,7 +39,7 @@ const TOOLS = [
     name: 'set_note',
     description: 'Set the personal note (markdown) shown to the recipient.',
     input_schema: {
-      type: 'object' as const,
+      type: 'object',
       properties: { noteMd: { type: 'string' } },
       required: ['noteMd'],
     },
@@ -60,7 +49,7 @@ const TOOLS = [
     description:
       'Adjust the visual vibe. Only set dials you mean to change. palette colors are hex strings.',
     input_schema: {
-      type: 'object' as const,
+      type: 'object',
       properties: {
         mood: { type: 'string', enum: ['minimal', 'rich', 'whimsical', 'editorial'] },
         density: { type: 'string', enum: ['compact', 'cozy', 'breathable'] },
@@ -84,7 +73,7 @@ const TOOLS = [
     description:
       'Add one gift idea to the peek. priceCents reveals a price to the recipient when set.',
     input_schema: {
-      type: 'object' as const,
+      type: 'object',
       properties: {
         title: { type: 'string' },
         description: { type: 'string' },
@@ -102,36 +91,12 @@ const TOOLS = [
     name: 'remove_card',
     description: 'Remove a gift card by its id.',
     input_schema: {
-      type: 'object' as const,
+      type: 'object',
       properties: { cardId: { type: 'string' } },
       required: ['cardId'],
     },
   },
 ];
-
-function sb() {
-  const url = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-  const key = process.env['SUPABASE_SERVICE_ROLE_KEY'];
-  if (!url || !key) throw new Error('supabase_env_missing');
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    db: { schema: 'peek_v2' },
-  });
-}
-
-type SB = ReturnType<typeof sb>;
-
-async function loadState(
-  client: SB,
-  peekId: string,
-): Promise<SpineState | null> {
-  const [peekRes, cardsRes] = await Promise.all([
-    client.from('peeks').select(PEEK_COLUMNS).eq('id', peekId).maybeSingle(),
-    client.from('cards').select(CARD_COLUMNS).eq('peek_id', peekId),
-  ]);
-  if (peekRes.error || !peekRes.data) return null;
-  return rowsToState(peekRes.data, cardsRes.data ?? []);
-}
 
 function systemPrompt(state: SpineState): string {
   const cardList =
@@ -165,8 +130,15 @@ function hex(v: unknown): string | undefined {
   return typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : undefined;
 }
 
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : 'db error';
+}
+
+// Execute one curator tool against the DB via the edge db slice, returning a
+// compact {ok, summary} the model sees as the tool_result and the UI shows as
+// a `tool` SSE event. db-edge accessors throw on DB error; we convert that to
+// {ok:false} so a single failed tool never tears down the whole turn.
 async function execTool(
-  client: SB,
   state: SpineState,
   name: string,
   input: Record<string, unknown>,
@@ -187,21 +159,22 @@ async function execTool(
         patch['hero_image_source'] = 'external';
       }
       if (Object.keys(patch).length === 0) return { ok: false, summary: 'nothing to set' };
-      const { error } = await client.from('peeks').update(patch).eq('id', peekId);
-      return error
-        ? { ok: false, summary: error.message }
-        : { ok: true, summary: 'hero updated' };
+      try {
+        await updatePeek(peekId, patch);
+        return { ok: true, summary: 'hero updated' };
+      } catch (e) {
+        return { ok: false, summary: errMsg(e) };
+      }
     }
     case 'set_note': {
       const noteMd = input['noteMd'];
       if (typeof noteMd !== 'string') return { ok: false, summary: 'noteMd required' };
-      const { error } = await client
-        .from('peeks')
-        .update({ note_md: noteMd })
-        .eq('id', peekId);
-      return error
-        ? { ok: false, summary: error.message }
-        : { ok: true, summary: 'note set' };
+      try {
+        await updatePeek(peekId, { note_md: noteMd });
+        return { ok: true, summary: 'note set' };
+      } catch (e) {
+        return { ok: false, summary: errMsg(e) };
+      }
     }
     case 'set_vibe': {
       const current: Vibe = state.peek.vibe ?? ({} as Vibe);
@@ -229,13 +202,12 @@ async function execTool(
           ...(hex(pal['accent2']) ? { accent2: hex(pal['accent2']) } : {}),
         };
       }
-      const { error } = await client
-        .from('peeks')
-        .update({ vibe: next })
-        .eq('id', peekId);
-      return error
-        ? { ok: false, summary: error.message }
-        : { ok: true, summary: 'vibe updated' };
+      try {
+        await updatePeek(peekId, { vibe: next });
+        return { ok: true, summary: 'vibe updated' };
+      } catch (e) {
+        return { ok: false, summary: errMsg(e) };
+      }
     }
     case 'add_card': {
       const title = input['title'];
@@ -255,128 +227,26 @@ async function execTool(
         value_cents: priceCents,
         reveal_value: priceCents != null,
       };
-      const { error } = await client.from('cards').insert(row);
-      return error
-        ? { ok: false, summary: error.message }
-        : { ok: true, summary: `added "${title.trim()}"` };
+      try {
+        await insertCard(row);
+        return { ok: true, summary: `added "${title.trim()}"` };
+      } catch (e) {
+        return { ok: false, summary: errMsg(e) };
+      }
     }
     case 'remove_card': {
       const cardId = input['cardId'];
       if (typeof cardId !== 'string') return { ok: false, summary: 'cardId required' };
-      const { error } = await client
-        .from('cards')
-        .delete()
-        .eq('id', cardId)
-        .eq('peek_id', peekId);
-      return error
-        ? { ok: false, summary: error.message }
-        : { ok: true, summary: 'card removed' };
+      try {
+        await deleteCard(cardId, peekId);
+        return { ok: true, summary: 'card removed' };
+      } catch (e) {
+        return { ok: false, summary: errMsg(e) };
+      }
     }
     default:
       return { ok: false, summary: `unknown tool ${name}` };
   }
-}
-
-async function modelTurn(
-  apiKey: string,
-  messages: AnthropicMessage[],
-  system: string,
-  onText: (t: string) => void,
-): Promise<{ blocks: AnthropicBlock[]; stopReason: string | null }> {
-  const res = await fetch(ANTHROPIC_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': ANTHROPIC_VERSION,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      system,
-      messages,
-      tools: TOOLS,
-      stream: true,
-    }),
-  });
-  if (!res.ok || !res.body) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`anthropic_${res.status}: ${detail.slice(0, 200)}`);
-  }
-
-  const blocks: AnthropicBlock[] = [];
-  const partials = new Map<number, string>();
-  let stopReason: string | null = null;
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const chunks = buffer.split('\n\n');
-    buffer = chunks.pop() ?? '';
-    for (const chunk of chunks) {
-      const dataLine = chunk
-        .split('\n')
-        .find((l) => l.startsWith('data:'));
-      if (!dataLine) continue;
-      const json = dataLine.slice('data:'.length).trim();
-      if (!json || json === '[DONE]') continue;
-      let ev: Record<string, unknown>;
-      try {
-        ev = JSON.parse(json) as Record<string, unknown>;
-      } catch {
-        continue;
-      }
-      const t = ev['type'];
-      if (t === 'content_block_start') {
-        const idx = ev['index'] as number;
-        const cb = ev['content_block'] as Record<string, unknown>;
-        if (cb['type'] === 'text') {
-          blocks[idx] = { type: 'text', text: '' };
-        } else if (cb['type'] === 'tool_use') {
-          blocks[idx] = {
-            type: 'tool_use',
-            id: cb['id'] as string,
-            name: cb['name'] as string,
-            input: {},
-          };
-          partials.set(idx, '');
-        }
-      } else if (t === 'content_block_delta') {
-        const idx = ev['index'] as number;
-        const delta = ev['delta'] as Record<string, unknown>;
-        if (delta['type'] === 'text_delta') {
-          const text = delta['text'] as string;
-          const b = blocks[idx];
-          if (b && b.type === 'text') b.text += text;
-          onText(text);
-        } else if (delta['type'] === 'input_json_delta') {
-          partials.set(idx, (partials.get(idx) ?? '') + (delta['partial_json'] as string));
-        }
-      } else if (t === 'content_block_stop') {
-        const idx = ev['index'] as number;
-        const b = blocks[idx];
-        if (b && b.type === 'tool_use') {
-          const raw = partials.get(idx) ?? '';
-          try {
-            b.input = raw ? JSON.parse(raw) : {};
-          } catch {
-            b.input = {};
-          }
-        }
-      } else if (t === 'message_delta') {
-        const delta = ev['delta'] as Record<string, unknown>;
-        if (typeof delta['stop_reason'] === 'string')
-          stopReason = delta['stop_reason'];
-      }
-    }
-  }
-
-  return { blocks: blocks.filter(Boolean), stopReason };
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -404,54 +274,50 @@ export async function POST(req: Request): Promise<Response> {
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (ev: SpineSseEvent) =>
+      const send = (ev: SpineSseEvent): void =>
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(ev)}\n\n`));
+      // Flush a comment frame immediately so proxies open the stream before the
+      // first (latency-heavy) model call — beats the edge header timeout.
       controller.enqueue(encoder.encode(': spine open\n\n'));
       try {
         if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
-        const client = sb();
-        let state = await loadState(client, peekId);
-        if (!state) throw new Error('peek not found');
+        const initial = await loadSpineState(peekId);
+        if (!initial) throw new Error('peek not found');
+        // Pin to SpineState after the guard: the closures below capture `state`,
+        // which would otherwise widen back to `SpineState | null`.
+        let state: SpineState = initial;
 
-        const messages: AnthropicMessage[] = [{ role: 'user', content: message }];
+        // Mutate the page, then reload so subsequent tools (card positions,
+        // vibe merge) and the next turn's system prompt see current state.
+        const dispatch = async (
+          name: string,
+          input: unknown,
+        ): Promise<{ ok: boolean; summary: string }> => {
+          const out = await execTool(state, name, input as Record<string, unknown>);
+          send({ type: 'tool', name, ok: out.ok, summary: out.summary });
+          const refreshed = await loadSpineState(peekId);
+          if (refreshed) state = refreshed;
+          return out;
+        };
 
-        for (let iter = 0; iter < MAX_ITERS; iter++) {
-          const { blocks, stopReason } = await modelTurn(
-            apiKey,
-            messages,
-            systemPrompt(state),
-            (t) => send({ type: 'text', text: t }),
-          );
+        const onEvent = (ev: ToolLoopEvent): void => {
+          if (ev.type === 'text') send({ type: 'text', text: ev.text });
+          else if (ev.type === 'tool_batch_complete') send({ type: 'state', state });
+        };
 
-          messages.push({ role: 'assistant', content: blocks });
+        const seed: AnthropicMessage[] = [{ role: 'user', content: message }];
 
-          const toolUses = blocks.filter(
-            (b): b is Extract<AnthropicBlock, { type: 'tool_use' }> =>
-              b.type === 'tool_use',
-          );
-          if (stopReason !== 'tool_use' || toolUses.length === 0) break;
-
-          const results: ToolResultBlock[] = [];
-          for (const tu of toolUses) {
-            const out = await execTool(
-              client,
-              state,
-              tu.name,
-              (tu.input ?? {}) as Record<string, unknown>,
-            );
-            send({ type: 'tool', name: tu.name, ok: out.ok, summary: out.summary });
-            results.push({
-              type: 'tool_result',
-              tool_use_id: tu.id,
-              content: JSON.stringify(out),
-            });
-            const refreshed = await loadState(client, peekId);
-            if (refreshed) state = refreshed;
-          }
-
-          send({ type: 'state', state });
-          messages.push({ role: 'user', content: results });
-        }
+        await runToolLoop({
+          model: MODEL,
+          // Thunk: re-fold the live page state into the prompt every turn.
+          system: () => systemPrompt(state),
+          messages: seed,
+          tools: TOOLS,
+          dispatch,
+          onEvent,
+          maxIters: MAX_ITERS,
+          maxTokens: MAX_TOKENS,
+        });
 
         send({ type: 'done' });
       } catch (err) {
