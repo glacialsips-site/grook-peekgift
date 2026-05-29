@@ -14,6 +14,7 @@
 
 import type { Card, Peek, VariantGroup } from '@/db/schema';
 import type { GenerationOutput, Section } from './grammar';
+import { VIBE_PRESETS } from './presets';
 
 /* ── The example peek (DB-shaped rows) ───────────────────────────────────── */
 
@@ -246,10 +247,218 @@ export const VIBE_LUXE: GenerationOutput = {
   ),
 };
 
+/* ── 7 grammar-preset vibes × the SAME peek (BRIEF 07) ────────────────────── */
+
+/**
+ * Each reuses its preset's authored vibe (`VIBE_PRESETS['<key>'].output.vibe`)
+ * and supplies a per-vibe section layout over the brief's shared content
+ * (hero + story + The Drop ×3 + divider + The Kit ×2 + cta + footer). Variants
+ * vary for visual range; every layout is legal-by-construction (0 repairs):
+ * The Drop (3 cards) uses only tight-grid/horizontal-scroll/list/editorial-
+ * full-bleed; The Kit (2 cards) uses only editorial-full-bleed/list; the hero
+ * is the single focal section; a divider separates the two productSets.
+ */
+
+/** cottage-warm — Housewarming. */
+const VIBE_COTTAGE_WARM: GenerationOutput = {
+  ...VIBE_PRESETS['cottage-warm'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'stacked-card',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'prose', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'tight-grid',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'motif' },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'button-row', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'signature', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** chalk-line — Sympathy (no decorative motif; whitespace divider). */
+const VIBE_CHALK_LINE: GenerationOutput = {
+  ...VIBE_PRESETS['chalk-line'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'minimal-mark',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'prose', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'list',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'whitespace' },
+    {
+      type: 'productSet',
+      variant: 'list',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'inline-link', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'minimal', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** velvet-rope — Milestone. */
+const VIBE_VELVET_ROPE: GenerationOutput = {
+  ...VIBE_PRESETS['velvet-rope'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'centered-type',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'pull-quote', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'label' },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'button-row', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'signature', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** zine-punk — Teen Birthday. */
+const VIBE_ZINE_PUNK: GenerationOutput = {
+  ...VIBE_PRESETS['zine-punk'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'centered-type',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'banner', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'horizontal-scroll',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'rule' },
+    {
+      type: 'productSet',
+      variant: 'list',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'banner-bar', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'branded', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** gummy-bear — Baby Arrival. */
+const VIBE_GUMMY_BEAR: GenerationOutput = {
+  ...VIBE_PRESETS['gummy-bear'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'stacked-card',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'prose', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'tight-grid',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'motif' },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'button-row', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'signature', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** dusk-poem — Engagement. */
+const VIBE_DUSK_POEM: GenerationOutput = {
+  ...VIBE_PRESETS['dusk-poem'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'stacked-card',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'pull-quote', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'motif' },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'inline-link', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'signature', slots: { signatureRef: 'signature' } },
+  ],
+};
+
+/** concrete-poet — Brutalist. */
+const VIBE_CONCRETE_POET: GenerationOutput = {
+  ...VIBE_PRESETS['concrete-poet'].output,
+  sections: [
+    {
+      type: 'hero',
+      variant: 'centered-type',
+      slots: { titleRef: 'title', subtitleRef: 'subtitle' },
+      emphasis: 'focal',
+    },
+    { type: 'story', variant: 'banner', slots: { bodyRef: 'noteMd' } },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_drop_1', 'card_drop_2', 'card_drop_3'], headingRef: 'group:grp_drop' },
+    },
+    { type: 'divider', variant: 'label' },
+    {
+      type: 'productSet',
+      variant: 'editorial-full-bleed',
+      slots: { cardRefs: ['card_kit_1', 'card_kit_2'], headingRef: 'group:grp_kit' },
+    },
+    { type: 'cta', variant: 'button-row', slots: { labelRef: 'cta:primary' } },
+    { type: 'footer', variant: 'branded', slots: { signatureRef: 'signature' } },
+  ],
+};
+
 export const PROOF_VIBES = {
   princess: { label: 'Princess 6th Birthday', output: VIBE_PRINCESS },
   bachelor: { label: 'Bachelor Party', output: VIBE_BACHELOR },
   luxe: { label: 'Luxe Jewelry', output: VIBE_LUXE },
+  'cottage-warm': { label: 'Cottage Warm — Housewarming', output: VIBE_COTTAGE_WARM },
+  'chalk-line': { label: 'Chalk Line — Sympathy', output: VIBE_CHALK_LINE },
+  'velvet-rope': { label: 'Velvet Rope — Milestone', output: VIBE_VELVET_ROPE },
+  'zine-punk': { label: 'Zine Punk — Teen Birthday', output: VIBE_ZINE_PUNK },
+  'gummy-bear': { label: 'Gummy Bear — Baby Arrival', output: VIBE_GUMMY_BEAR },
+  'dusk-poem': { label: 'Dusk Poem — Engagement', output: VIBE_DUSK_POEM },
+  'concrete-poet': { label: 'Concrete Poet — Brutalist', output: VIBE_CONCRETE_POET },
 } as const;
 
 export type ProofVibeKey = keyof typeof PROOF_VIBES;

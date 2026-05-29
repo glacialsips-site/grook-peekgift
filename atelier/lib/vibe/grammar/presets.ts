@@ -5,13 +5,10 @@
  * 40 vibe presets + 22-occasion taxonomy + many-to-many map + remix operators.
  * Conforms to `atelier/lib/vibe/grammar/grammar.ts` (`GenerationOutput`).
  *
- * Status: RESEARCH DRAFT. Do not import from atelier yet. A lieutenant will:
- *   - move this into `atelier/lib/vibe/grammar/presets.ts`
- *   - update the import path for grammar types (currently relative)
- *   - add a test that every preset survives `generateAndRepair` and that every
- *     `OCCASION_VIBES` entry references a real `VibeKey`
- *   - wire `pickPreset()` into the curator skill loader so a preset seeds the
- *     vibe BEFORE the model writes its own
+ * Status: INTEGRATED (BRIEF 07). Exported from the grammar barrel
+ * (`./index.ts`). Covered by `tests/unit/vibe-presets.test.ts`. Consumed by
+ * `lib/curator-tools/seed.ts` (`seedVibeFromBrief`) so a preset seeds the vibe
+ * BEFORE the model writes its own, and by the SSR proof fixtures.
  *
  * Authoring notes:
  *   - Every preset is shaped as `GenerationOutput` so it flows through the
@@ -27,7 +24,7 @@
  *     authors the section list per peek content.
  */
 
-import type { GenerationOutput, Section } from '../../../../atelier/lib/vibe/grammar/grammar';
+import type { GenerationOutput, Section } from './grammar';
 
 /* ════════════════════════════════════════════════════════════════════════
  * Occasion taxonomy
@@ -1068,7 +1065,10 @@ export function pickPreset(
 ): VibePreset {
   const ranked = OCCASION_VIBES[occasion];
   const idx = Math.min(edginess, ranked.length - 1);
-  return VIBE_PRESETS[ranked[idx]];
+  // OCCASION_VIBES entries are non-empty by construction; the `paper-letter`
+  // fallback only exists to keep the indexer total under noUncheckedIndexedAccess.
+  const key = ranked[idx] ?? 'paper-letter';
+  return VIBE_PRESETS[key];
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -1079,6 +1079,7 @@ export type RemixAxis =
   | '+saturation'
   | '+contrast'
   | '+texture'
+  | '-texture'
   | '+motion'
   | '+shape'
   | '+depth'
@@ -1122,6 +1123,17 @@ const MOTIF_NEXT: Record<
   confetti: 'confetti',
   botanical: 'botanical',
 };
+/** Inverse of MOTIF_NEXT: step decoration DOWN toward `none` (the `-texture` floor). */
+const MOTIF_PREV: Record<
+  'none' | 'confetti' | 'sparkle' | 'botanical' | 'geometric',
+  'none' | 'confetti' | 'sparkle' | 'botanical' | 'geometric'
+> = {
+  confetti: 'sparkle',
+  sparkle: 'geometric',
+  geometric: 'none',
+  botanical: 'none',
+  none: 'none',
+};
 const KEY_FLIP: Record<'light' | 'dim' | 'dark', 'light' | 'dim' | 'dark'> = {
   light: 'dark',
   dark: 'light',
@@ -1152,8 +1164,7 @@ const DISPLAY_WEIRDEN: Record<
   script: 'script',
 };
 
-const MIN_SCALE = 1.067;
-const MAX_SCALE = 1.95;
+const MAX_SCALE = 1.95; // ceiling for the +contrast remix (mirrors MAX_SCALE_RATIO)
 
 /** Apply a single remix axis. Pure; output is still a `GenerationOutput`. */
 export function remix(input: GenerationOutput, axis: RemixAxis): GenerationOutput {
@@ -1189,6 +1200,13 @@ export function remix(input: GenerationOutput, axis: RemixAxis): GenerationOutpu
       const grain = Math.min(0.06, v.texture.grain + 0.02);
       const wash = Math.min(0.15, v.texture.wash + 0.05);
       const motif = MOTIF_NEXT[v.texture.motif];
+      return { ...input, vibe: { ...v, texture: { grain, wash, motif } } };
+    }
+    case '-texture': {
+      // De-escalation ("make it minimal"): strip decoration toward the floor.
+      const grain = Math.max(0, v.texture.grain - 0.02);
+      const wash = Math.max(0, v.texture.wash - 0.05);
+      const motif = MOTIF_PREV[v.texture.motif];
       return { ...input, vibe: { ...v, texture: { grain, wash, motif } } };
     }
     case '+motion':
@@ -1265,9 +1283,10 @@ export function remixAll(
  * list of remix axes to apply. Conservative: unknown words are ignored.
  */
 const SIGNAL_AXES: ReadonlyArray<readonly [RegExp, RemixAxis]> = [
-  [/\b(wild|crazy|crazier|insane|unhinged|chaotic)\b/i, '+saturation'],
+  [/\b(wild|crazy|crazier|insane|unhinged|chaotic|bold|bolder|boldest)\b/i, '+saturation'],
   [/\b(loud|louder|big|bigger|huge|massive)\b/i, '+contrast'],
   [/\b(textured|rich|messy|grungy|gritty)\b/i, '+texture'],
+  [/\b(minimal|minimalist|cleaner|simpler|spare|stripped|quieter|pared)\b/i, '-texture'],
   [/\b(lively|bouncy|alive|energetic|kinetic)\b/i, '+motion'],
   [/\b(soft|softer|round|rounder|pillowy)\b/i, '+shape'],
   [/\b(deeper|elevated|lifted|dramatic)\b/i, '+depth'],
