@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>PerfectPurchase — ONE engine, TWO verticals</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+body { font-family: system-ui, sans-serif; background:#0c0c0e; color:#eee; padding:16px; }
+h1 { font-size:18px; } p.sub { color:#9aa; font-size:13px; margin-top:-6px; }
+.grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+figure { margin:0; } figcaption { font-size:13px; padding:6px 2px; }
+iframe { width:100%; height:1500px; border:1px solid #333; background:#fff; border-radius:6px; }
+.meta { font-size:11px; color:#9ad; }</style></head>
+<body><h1>ONE engine (grammar + renderer, ZERO changes) · TWO unrelated verticals · SSR</h1>
+<p class="sub">Left: a gift experience. Right: a water-filtration storefront. Same renderer, same grammar — only the config/page-state differs.</p>
+<div class="grid">
+<figure><figcaption>Gift Peek — Priya turns 30<div class="meta">15.42:1 ink/bg · 4.99:1 onAccent · repairs 0 · a11y PASS</div></figcaption>
+<iframe src="./config-swap-gift.html" title="Gift Peek — Priya turns 30"></iframe></figure>
+<figure><figcaption>GlacialSips — Water Filtration<div class="meta">16.61:1 ink/bg · 7.43:1 onAccent · repairs 1 · a11y PASS</div></figcaption>
+<iframe src="./config-swap-water.html" title="GlacialSips — Water Filtration"></iframe></figure>
+</div></body></html>
