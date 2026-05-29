@@ -39,6 +39,36 @@ export interface RenderCard {
   readonly type: Card['type'];
 }
 
+/**
+ * Vertical-level brand copy. Lets the SAME renderer drive any vertical's
+ * chrome (hero eyebrow, CTA copy + anchor, footer attribution) purely from
+ * config. Every field is optional; when absent the renderer falls back to the
+ * peek.gift gift defaults, so existing gift peeks render byte-identical.
+ */
+export interface PageBrand {
+  /** Hero eyebrow above the title. Default: "a peek for". */
+  readonly heroEyebrow?: string;
+  /** Primary CTA label, used when no `cta:primary` slot text resolves. Default: "Open your gift". */
+  readonly ctaLabel?: string;
+  /** CTA anchor target. Default: "#gifts". */
+  readonly ctaHref?: string;
+  /** Footer attribution line. Default: "made with peek.gift". */
+  readonly footerAttribution?: string;
+}
+
+/**
+ * The peek.gift gift defaults for brand copy. These are the ONLY place the
+ * historical gift literals live; the renderer falls back to these whenever a
+ * `brand` field is absent, so an unbranded (gift) page is byte-identical to
+ * before this slot existed.
+ */
+export const GIFT_BRAND_DEFAULTS: Required<PageBrand> = {
+  heroEyebrow: 'a peek for',
+  ctaLabel: 'Open your gift',
+  ctaHref: '#gifts',
+  footerAttribution: 'made with peek.gift',
+};
+
 /** Resolved content for the page (the "slots" reference into this). */
 export interface PageContent {
   readonly title: string; // hero headline
@@ -46,6 +76,8 @@ export interface PageContent {
   readonly heroImageUrl: string | null;
   readonly noteMd: string | null; // the personal note
   readonly signature: string | null; // "— the crew"
+  /** Optional per-vertical brand copy (hero eyebrow, CTA, footer). Absent → gift defaults. */
+  readonly brand?: PageBrand;
   readonly cards: Readonly<Record<string, RenderCard>>;
   /** named product groupings → ordered card ids (e.g. "The Drop", "The Kit"). */
   readonly groups: ReadonlyArray<{

@@ -51,7 +51,7 @@ require.extensions['.css'] = (mod: NodeModule) => {
 };
 
 import type { GenerationOutput } from '../lib/vibe/grammar/grammar';
-import type { PageContent, RenderCard } from '../components/renderer/page-state';
+import type { PageBrand, PageContent, RenderCard } from '../components/renderer/page-state';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, 'proof-out');
@@ -110,6 +110,8 @@ function pageContent(input: {
   groupId: string;
   groupTitle: string;
   cards: RenderCard[];
+  /** Per-vertical brand copy. Omitted (gift) → renderer uses peek.gift defaults. */
+  brand?: PageBrand;
 }): PageContent {
   const cards: Record<string, RenderCard> = {};
   for (const c of input.cards) cards[c.id] = c;
@@ -120,6 +122,7 @@ function pageContent(input: {
     heroImageUrl: null,
     noteMd: input.noteMd,
     signature: input.signature,
+    ...(input.brand ? { brand: input.brand } : {}),
     cards,
     groups: [{ id: input.groupId, title: input.groupTitle, cardOrder: order }],
     cardOrder: order,
@@ -234,6 +237,15 @@ const WATER_CONTENT: PageContent = pageContent({
     'Independently lab-tested to NSF/ANSI 53 + 58. Removes lead, PFAS, chlorine, and microplastics down to 0.5 microns.\n\nFour systems, sized by household demand and source-water hardness. Each ships with a 10-year housing warranty and a flow-rate guarantee.',
   // Footer "signature" slot repurposed as a brand sign-off line.
   signature: 'GlacialSips — filtration systems since 2014',
+  // Brand copy lifts the LAST gift-coupled literals: hero eyebrow, CTA copy +
+  // anchor, and footer attribution. With these set, the water page carries ZERO
+  // gift language — the engine is now config-driven end to end.
+  brand: {
+    heroEyebrow: 'Whole-home water filtration',
+    ctaLabel: 'Get matched to a system',
+    ctaHref: '#systems',
+    footerAttribution: 'GlacialSips',
+  },
   groupId: 'systems',
   groupTitle: 'Choose your system',
   cards: [
