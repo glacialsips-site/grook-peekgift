@@ -11,8 +11,12 @@
  *       - set_card_rules     → before = { lock, taunt }            (prior)
  *       - remove_card        → before = { card: <full prior Card> }
  *       - reorder_cards      → before = { card_ids: <prior order> }
- *       - set_recipient      → before = { ...prior fields }
+ *       - set_recipient      → before = { recipient_name, relationship, occasion,
+ *           giver_names, budget_cents }  (FULL prior — the forward op NULLs any
+ *           omitted relationship/occasion, so a partial `before` would not restore)
  *       - set_recipient_profile → before = { profile: <FULL prior profile> }
+ *           (forward PRESERVES omitted keys and overwrites provided ones — it never
+ *           clears — so undo must REPLACE the whole profile, hence `_replace: true`)
  *       - set_note           → before = { note_md: <prior | null> }
  *       - set_spend_caps     → before = { ...prior caps }
  *       - ALL vibe verbs     → before = { vibe: <FULL prior Vibe doc> }
@@ -28,8 +32,9 @@
  *     mark_ready_to_publish.
  *   undo-only primitives (NOT curator tools): `remove_card_group`,
  *     `set_vibe` (full-doc vibe restore).
- *   input flags: `_replace: true` (profile — replace, don't merge),
- *     `_status_reset: 'draft'` (revert ready→draft).
+ *   input flags: `_replace: true` (profile — replace the whole profile, do NOT
+ *     merge; the forward op preserves omitted keys so a merge would leave
+ *     newly-added ones behind), `_status_reset: 'draft'` (revert ready→draft).
  */
 import type { MutationInverse, MutationVerb } from './types';
 

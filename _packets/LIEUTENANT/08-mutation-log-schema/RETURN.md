@@ -119,7 +119,8 @@ handler must put prior state on `toolOutput.before` and created ids on
 - `update_card` → `before = { ...patched fields' prior values }`
 - `remove_card` → `before = { card: <full prior Card> }`
 - `reorder_cards` → `before = { card_ids: <prior order> }`
-- `set_recipient` / `set_spend_caps` → `before = { ...prior fields }`
+- `set_recipient` → `before = { recipient_name, relationship, occasion, giver_names, budget_cents }` (FULL prior — the forward op NULLs omitted relationship/occasion)
+- `set_spend_caps` → `before = { ...prior caps }`
 - `set_recipient_profile` → `before = { profile: <FULL prior profile> }`
 - `set_note` → `before = { note_md: <prior | null> }`
 - **all 6 vibe verbs** → `before = { vibe: <FULL prior Vibe doc> }` (not just the
@@ -165,9 +166,12 @@ a real decision, not a non-event). Diff-mark chip color = `entry.chipColor`
    This is correct ONLY if the handler captured the entire prior `Vibe` doc, not
    just the dimension it touched. A handler that records only the changed
    dimension would make undo wipe the others. Documented; flagged here loudly.
-2. **`set_recipient_profile` merges additively.** Its inverse carries
-   `_replace: true` so the applier must REPLACE the profile with the prior
-   snapshot, not merge it (a merge would leave the added items in place).
+2. **`set_recipient_profile` preserves omitted keys.** The live handler
+   (`lib/anthropic/tools/set_recipient_profile.ts`) overwrites the keys it IS given
+   (arrays wholesale; only `sizes` merges) and PRESERVES the ones it isn't — it
+   never clears. So its inverse carries `_replace: true`: the applier must REPLACE
+   the profile with the full prior snapshot, not re-send it through the normal tool
+   (which would preserve the newly-added keys and fail to undo them).
 3. **State-undoable but cost-sunk.** `generate_hero_image` (fal spend) and
    `add_card` with a scrape (scrape spend) revert STATE cleanly but the cost is
    already incurred and stays recorded in `*_cost_cents`. Undo reverts state only
@@ -203,6 +207,24 @@ a real decision, not a non-event). Diff-mark chip color = `entry.chipColor`
 - **No curator-facing read RLS policy** — deliberate (brief §2). Reads go through an
   authed server action, not RLS. If you later want recipient/curator direct reads,
   that's a new policy.
+- **Spec-vs-impl drift in BRIEF 04 territory (heads-up, not my bug):** spec §1 A2
+  says `set_recipient_profile` "merges additively on arrays," but the implemented
+  handler overwrites provided array keys wholesale (only `sizes` merges) and
+  preserves omitted keys. Undo is correct against the REAL handler (the `_replace`
+  inverse doesn't depend on which it is), but the spec text is stale — worth
+  reconciling when BRIEF 04 finalizes.
+
+## Independent review
+
+An adversarial sub reviewed verb coverage, inverse correctness, summaries, and the
+RLS/cascade reasoning against spec §6/§4 (read the actual handlers, not just my
+files). Verdict: **mergeable as-is, no blockers** — every finding was
+doc/disclosure/coordination. Folded in: corrected the `set_recipient_profile`
+"additive merge" premise (the live handler overwrites + preserves omitted),
+tightened the `set_recipient` inverse contract to "FULL prior" (forward NULLs
+omitted relationship/occasion), and confirmed the sunk-cost and 0015→0016 notes
+above. Left as-is: the summary quote glyph (spec `'…'` vs impl `"…"`) — purely
+cosmetic and the tests are self-consistent.
 
 ## Bright ideas
 
