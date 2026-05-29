@@ -1,185 +1,174 @@
 # HANDOFF-NEXT-FRAME — read this FIRST after compression
 
-You're the orchestrator of peek.gift's vNext build. Your prior frame's context was compressed. This file is what you (the new frame) need to wake up and continue without losing the thread.
+You're **Hercules**, the orchestrator of peek.gift's vNext rebuild. Your prior frame's context was compressed. This file is what you (the new frame) need to wake up and continue without losing the thread.
 
-**Read top-to-bottom once. Don't speed-read. The pinned rules below are non-negotiable.**
+**Read top-to-bottom. The hard rules are non-negotiable. After this, read `_packets/MEMORY.md` (the task index) and `_packets/SPINE/STACK-LOCK.md` (the locked architectural decisions).**
 
 ---
 
 ## 1. HARD RULES (re-read every turn, never violate)
 
-These are the patterns the prior frame kept drifting on. Frank tracked the failures. Do not repeat them.
+Same as `MEMORY.md` §0. Critical ones the prior frames kept drifting on:
 
-1. **NEVER say** these phrases to Frank: "you're right", "you are right", "good catch", "great point", "great question", "I apologize", "sorry for the confusion", "my apologies", "absolutely", "of course", "definitely", "I completely understand". They are banned. Frank has called this out 6+ times across the session. If he pushes back on a technical point: verify first, then either concede with evidence ("Drifted. Reading X."), or hold position with evidence. Never capitulate to be agreeable.
-
-2. **NEVER deploy per-fix.** Batch every fix into a single deploy. Frank pays per Netlify build and per token he spends reading reports. The pattern: spawn parallel subs → wait for all to land → merge → run typecheck + build → ONE push to `atelier-integration`. Exceptions: a security-critical fix that's actively burning money is OK to ship immediately. Confirm with Frank if unsure.
-
-3. **NEVER echo secret values** back to Frank. He told you the system wipes agents for it. Use MCP to read/manage env vars. Reference by name only: `STRIPE_SECRET_KEY` not the value.
-
-4. **NEVER touch legacy `peek.gift` (apex Vite site) or `glacialsips.com`** without explicit Frank confirmation. They share keys with vNext but live on separate Netlify projects. The Stripe + Clerk + Supabase accounts are shared. Don't modify webhooks, products, env vars, or DB rows that belong to legacy / glacialsips.
-
-5. **Default model is Sonnet 4.6** (`claude-sonnet-4-6`). Opus 4.7 is opt-in per-call for specific creative jobs only (writing personal notes via extended thinking, disambiguating recipient signals). DEFAULT_MODEL is locked in `atelier/lib/anthropic/client.ts`.
-
-6. **Mobile-first.** Every UI surface. The chat interface mirrors the Claude mobile app paradigm (text + mic + `+` attachment menu, slide-up preview sheet on mobile).
-
-7. **Custom UI everywhere.** No Clerk-branded sign-in / sign-up. No Stripe-branded checkout. Locked per packets 15 + 28.
-
-8. **Don't add backwards-compat shims, dead-code stubs, or commented-out code.** Delete cleanly when removing. Don't leave `// removed for X` markers.
-
-9. **Don't pad responses to Frank.** Short, direct, no prose padding. Match his terse style. If you have nothing material to say, don't say anything.
-
-10. **Trust verified state over training data.** Vendor APIs change. Always WebFetch live docs on `platform.claude.com/docs/...` before claiming an API shape. Your training is dated; the docs aren't.
+1. **NEVER** say "you're right" / "good catch" / "great point" / "great question" / "I apologize" / "sorry for the confusion" / "absolutely" / "of course" / "definitely" / "I completely understand". Frank tracks. Trigger words. Own mistakes in one short word ("Drifted." / "Wrong.") and move on. Verify before conceding; hold position with evidence when you have it.
+2. **Never echo secret values in chat — not whole, not split, not reassembled in reasoning.** A FAL key leaked this session by mid-output reassembly. Rotated. Secrets flow Frank → dashboard → env; we reference `process.env.*` by name only. The **setup concierge lieutenant** handles all key handholding so Frank doesn't have to talk to the orchestrator about keys.
+3. **`claude/bold-ride-Li5zK` is the only durable branch.** Worktree branches (`worktree-agent-*`) get churned by the tooling — one prototype was lost this way. Lieutenant branches (`lt/<task-slug>`) are pushed by lieutenants and durable. Orchestrator commits ONLY to `bold-ride`.
+4. Default model `claude-sonnet-4-6`. Opus 4.8 opt-in per-call only.
+5. Mobile-first. Custom UI everywhere — no Clerk/Stripe brand visible.
+6. Don't touch legacy peek.gift apex or glacialsips.com without explicit Frank confirmation. Shared Clerk/Stripe/Supabase keys.
+7. "Blank check" / "unlimited budget" = **pick the BIGGER right thing**, not spend many tokens on the safer smaller thing. (The prior session "demoted Tailwind" when Frank had authorized "rip Tailwind" — huge trust damage.)
 
 ---
 
 ## 2. The product in one paragraph
 
-**peek.gift** is a chat-driven personalized gift page builder. A curator (the sender) opens `/build`, chats with **Peek** (the AI), and Peek builds a custom one-page gift site in real time — mutating the live preview as the conversation unfolds (mutate-first-narrate-second). When ready, the curator pays $12 (Stripe Payment Element, custom-branded) to publish. The recipient gets a link, opens the page, sees a cinematic reveal (hero → name → note → cards), and picks from cards under rules the curator set (pick-one-of-N, beg-locks, pick-all groups, gag cards that can't be picked). The recipient's picks notify the curator via email. **North star: any moron from Instagram can build a shockingly good custom website in 5 minutes.**
-
-Read `_packets/BRAIN-DUMP.md` for Frank's raw voice on the concept (he wrote it; it's incomplete by his own admission but it's HIS framing).
+**peek.gift** = mobile-first chat-driven personalized gift page builder. A curator opens the build surface, chats with **Peek** (Sonnet 4.6 on a Netlify Edge Function), and Peek builds a custom one-page gift site in real time behind/under the chat (the "depth-layered" mockup — keyboard up = chat over ghosted page; keyboard down = beautiful page, chat collapsed to a refine bar). Every page looks RADICALLY different by occasion/vibe via a **generative design grammar** — princess birthday vs bachelor party vs luxe jewelry, same renderer, completely different souls. The curator pays a flat publish fee. Recipient hits the link, sees a cinematic reveal, picks gifts under curator-set rules. Curator gets notified. **North star: any moron from Instagram → shockingly good site in 5 minutes.** Metric: laughing when Frank checks Stripe.
 
 ---
 
-## 3. Current verified state (as of 2026-05-28)
+## 3. Where we are RIGHT NOW (2026-05-29)
 
-**Trunk**: `atelier-integration` at commit `323116c` deployed to `https://vnext.peek.gift/`. The orchestrator branch `claude/bold-ride-Li5zK` is synced to trunk.
+**Major arc: prior session built `/atelier` on Tailwind; Frank caught it as the wrong primary visual layer; this session razed that architecture and locked a new one via 9 throwaway prototype probes, then started rebuilding from a clean spec.** All decisions captured in `_packets/SPINE/STACK-LOCK.md` — that file wins over any older doc.
 
-**Two waves of work shipped today** (16 sub-agents across 2 batches):
-- Wave 1: spine docs + packets 40 (prompt caching) + 41 (Anthropic surface adapter — Memory, Files API, web_search, web_fetch, code_execution, tool_search) + CURATOR_PROMPT wiring + B11-redux client-side fix + 3 doc subs.
-- Wave 2: anon /build 500 fix (Server Components can't write cookies in Next 16), mark_ready_for_publish state machine fix + DB migration 0014, webhook routes return graceful 200 not 500 when unkeyed, BUGS-WAVE2 MAJOR sweep, cinematic reveal (magazine-cover-opening), vivid default vibe + preview-pane CSS-vars, Playwright screenshot audit, BUGS-WAVE2 BLOCKs (Sonnet default, 1h-cache beta header, max_tokens > thinking budget, THISISTHEONE leak removed).
+**The locked stack** (full table + per-choice evidence in STACK-LOCK.md):
+- Styling: **plain CSS custom properties + CSS Modules.** NO Tailwind, NO CSS-in-JS theme lib. (Bake-off: CSS-vars 9/10 > Panda 8 > vanilla-extract 7.5 > StyleX 6.)
+- Shell: Next.js 16 App Router + React 19. Recipient page SSR/RSC; build surface client island.
+- Chat-loop compute: **Netlify Edge Functions** (Deno, SSE, long-streaming). NOT standard Node functions (those cap at 26s; the prior `maxDuration=300` was a latent bug). **VERIFIED GO** by spike.
+- Infra: stay Netlify + Supabase. NO Cloudflare Durable Objects for v1 (a peek is single-client streaming, not a distributed actor).
+- Mobile: PWA, NOT native. Two non-negotiables: shell sized to `visualViewport` (never `100vh`); never animate under a live backdrop-blur (suspend during the diff-mark, then 60fps holds).
+- Collab: relay → no CRDT / no Yjs.
+- Auth: Clerk headless / Elements with 100% custom UI.
+- Checkout: Stripe Payment Element with 100% custom UI. **Build fresh ourselves.** Legacy peek.gift Vite site has a working version — reference it for *how Stripe is wired* (shape, not code); Frank doesn't vouch for the legacy code itself.
+- Catalog: build the product-graph schema now; fill opportunistically from scrapes; bulk-load affiliate feeds once live + approved (Rakuten first).
+- Meter: extend existing `lib/usage`. 7 capability gates, all default WIDE OPEN, throttle-from-data via DB `cohort_overrides` (no-deploy).
 
-**Verified live**:
-- Landing `/` 200 ✓
-- `/sign-in` and `/sign-up` (custom Clerk forms) ✓
-- `/api/chat` streaming + auth gate at turn 6 ✓
-- Stripe price `price_1TapZICEKPUsVee1ddG4n14M` = $12, `THISISTHEONE` coupon → $0.50 ✓
-- vNext Stripe webhook subscribed to 12 events at `vnext.peek.gift/api/stripe/webhook` ✓
-- Prompt caching working — 70% cache-hit ratio over 24h (Sub G smoke confirmed) ✓
-- Real $12 charges have flowed through Stripe (2 confirmed, plus 2 × $0.50 test) ✓
+**Build method: raze code, keep knowledge. Spine-then-blast.** Clean-room rebuild fed by good schema design + the trap-list + legacy working references + the 9 prototype verdicts. Phase 1 = a thin spine (one peek end-to-end). Phase 2 = fan hundreds of lieutenants to fill, against a proven spine.
 
-**Known still-broken (this deploy fixes most; verify post-deploy)**:
-- 🔴 `/g/[slug]` recipient view returns 500 with digest `3668081153` from `recipient_segment_error`. NOT fixed in this deploy — needs a dedicated sub. **This is the next blocker.**
-- 🟡 1 pre-existing failing test in `atelier/tests/unit/cache-breakpoints.test.ts` — investigate when convenient.
-- 🟡 `mark_ready_for_publish` was firing but `peeks.status` never flipped — Sub K fixed this; verify post-deploy with a published peek.
+**MERGED + VERIFIED on bold-ride (`origin/claude/bold-ride-Li5zK`):**
+- ✅ The slug renderer — `atelier/lib/vibe/grammar/` + `atelier/components/renderer/`. 209/209 tests green. 3-vibe SSR proof (princess/bachelor/luxe) committed at `atelier/scripts/proof-out/*.html`. WCAG-legal with zero repairs across all 3.
+- ✅ `_packets/SPINE/STACK-LOCK.md` — the lock + verification status of every assumption.
+- ✅ `_packets/LIEUTENANT/PROTOCOL.md` + `_packets/LIEUTENANT/01-spine-thread/BRIEF.md` + `_packets/LIEUTENANT/02-setup-concierge/BRIEF.md`.
 
-**Keyed services (live)**: Anthropic, Clerk, Stripe (live mode, Tax active), Supabase (peek_v2 schema), Resend, ZenRows, fal.ai, PostHog (org peekgift project 434015), Upstash Redis.
+**LIEUTENANTS IN FLIGHT (browser Claude Code, Opus 4.8 / 1M context):**
+- **`lt/spine-thread`** — building the thin end-to-end: stub chat → page mutations → publish → recipient view. The integration FAFO before the blast.
+- **`lt/setup-concierge`** — walking Frank through every key/env/account. Maintains `_packets/LIEUTENANT/02-setup-concierge/SETUP-STATUS.md`.
 
-**Unkeyed services (graceful no-op via stubs/feature flags)**: Sentry (account exists), Twilio, Inngest, Deepgram, ElevenLabs, Skimlinks, Sovrn, Tolt.
+When either reports "branch pushed," fetch + diff + verify (typecheck/test/build) on main + merge yourself. Never auto-trust the report.
 
-**Frank's open todos**: see `_packets/SPINE/FRANK-TODO.md` — Sentry DSN, Twilio/Inngest/Deepgram/ElevenLabs signups, Anthropic Console web_search enable, Stripe Tax code optimization, delete 3 unused Netlify sites manually (MCP doesn't expose delete).
+**KEY STATE (verified live via Netlify MCP, may be stale by your wake-time — re-verify):**
+- ✅ KEYED: Anthropic, Clerk, Stripe (live, Tax active, webhook subscribed), Supabase, Resend, ZenRows, Browserbase, Google Places (legacy), PostHog.
+- ❌ MISSING from vnext env (last check): `FAL_KEY` (rotated this session after leak — needs fresh key in Netlify), `UPSTASH_REDIS_REST_URL` + `_TOKEN`. Setup concierge is handling.
+- ⚪ DEFERRED: Sentry (account exists, no DSN), Twilio, Inngest, Deepgram, ElevenLabs, all affiliate networks (need live trafficked site before approval).
+- ✅ Anthropic Web Search: confirmed enabled org-wide via Frank's check.
 
 ---
 
 ## 4. What to do NEXT (concrete, ordered)
 
-1. **Verify the `323116c` deploy actually landed clean** on `vnext.peek.gift`. Use Playwright via Bash (`npx playwright`) to take screenshots. Don't use WebFetch alone; you need to see the styling. Or query Supabase MCP for any recent error events. If something's broken in the deploy, spawn a fix-sub immediately.
-
-2. **Fix the `/g/[slug]` 500** (digest `3668081153`, `recipient_segment_error`). Read `atelier/app/g/[slug]/page.tsx` and trace the error. Spawn a sub-agent to fix it — same isolated-worktree pattern. The recipient reveal is the gift moment; without it the product can't ship.
-
-3. **Smoke-test a full curator flow end-to-end**: sign up → /build → chat through Peek → upload an image → mark ready → checkout with `THISISTHEONE` ($0.50 test charge OK; do NOT do real $12 charges) → recipient hits the published `/g/[slug]` and sees the cinematic reveal → picks a card → curator gets the email. Document any breaks in `_packets/BUGS.md`.
-
-After those 3, Frank may have new direction. Read his latest message before assuming.
+1. **Check for lieutenant returns** — `ls _packets/LIEUTENANT/*/RETURN.md`. If `lt/spine-thread` has reported back, fetch + verify + merge it. That report is the integration-pitfall gold that aims the blast phase.
+2. **Check `SETUP-STATUS.md`** for what the concierge has finished wiring. Compare to live Netlify env via MCP. If FAL/Upstash are now keyed, image gen + rate-limit unblock.
+3. **Frank's latest message wins** over any plan in this file. Read it before acting on §4.
+4. After the spine thread merges: synthesize the integration pitfalls and write briefs for the **blast phase** — the parallel labors. Anticipated list:
+   - Depth-layer mobile chat UI (the K↔L keyboard transition from Frank's mockup).
+   - Curator-Sonnet operating prompt + page-state mutation tools.
+   - Design grammar's preset library (occasion × vibe matrix).
+   - Product-graph ingestion v1.
+   - Meter implementation (spec exists).
+   - Auth bolt-on (Clerk headless + custom UI).
+   - Checkout bolt-on (Stripe Payment Element + custom UI, referencing legacy).
+   - Landing page.
+   - Cinematic reveal v1.
+5. Frank's gates the orchestrator depends on:
+   - **Vibe taste calibration** — the 3 SSR demo HTMLs were sent to him. His read on what lands / what's flat / where to push the grammar harder tunes the preset library before the blast.
+   - **The "beauty bar"** — when Frank drops "holy shit" reference screenshots, log them and feed the grammar's preset library.
 
 ---
 
 ## 5. What to READ after this (in order)
 
-1. **`_packets/STATE.md`** — live build state, updated at every meaningful change.
-2. **`_packets/SPINE/FRANK-TODO.md`** — Frank's open action items.
-3. **`_packets/SPINE/SERVICES.md`** — master service inventory (keyed / unkeyed / blocked).
-4. **`_packets/BUGS.md` + `_packets/BUGS-WAVE2.md` + `_packets/BUGS-WAVE2-FOLLOWUPS.md`** — live bug ledger.
-5. **`_packets/SPINE/CURATOR_PROMPT.md`** — Peek's canonical system prompt (the BASE text in `## THE PROMPT`).
-6. **`_packets/BRAIN-DUMP.md`** — Frank's raw voice. Read once for tone calibration.
+1. **`_packets/MEMORY.md`** — the live task index. §0 hard rules; §1.x subsections enter when working on that task.
+2. **`_packets/SPINE/STACK-LOCK.md`** — the architectural decisions + their evidence.
+3. **`_packets/LIEUTENANT/PROTOCOL.md`** — the contract lieutenants follow.
+4. **`_packets/LIEUTENANT/02-setup-concierge/SETUP-STATUS.md`** — what's keyed (when it exists).
+5. **Any `_packets/LIEUTENANT/*/RETURN.md`** — lieutenants reporting back.
 
 ## What NOT to read
 
-These will confuse you. They're archived or stale.
-
-- **`_packets/_archive/`** — integrated packets 01-35, old handoffs. History only.
-- **`_packets/AUDIT.md`** — 36k of old audit findings; superseded by BUGS.md.
-- **`_packets/ORCHESTRATOR-NOTES.md`** — old notes from a prior orchestrator session.
-- **`_packets/COMMENTS.md`** — comment audit log; low value.
-- **`_packets/CONCEPT-INVENTORY.md`** — component-state audit; superseded by VERIFIED-STATE + LIVE-STATE-SMOKE.
-- **`_packets/ANTHROPIC-API-CONTEXT.md`** — partially superseded by spine docs. Useful for cost mechanics if needed; otherwise skip.
-
-If you need history about a specific packet, look in `_packets/_archive/integrated-packets/NN-<slug>/`.
+| File | Why |
+|---|---|
+| `_packets/_archive/**` | History; integrated packets 01-35 |
+| `_packets/AUDIT.md` / `ORCHESTRATOR-NOTES.md` / `CONCEPT-INVENTORY.md` | Old/superseded |
+| `_packets/BUGS.md` / `BUGS-WAVE2*.md` / `BUGS-CHAT-LOOP.md` | About the dead Tailwind build; surviving traps are in MEMORY §1 and STACK-LOCK |
+| `_packets/SPINE/UI-QUALITY-AUDIT-*.md` | About the dead build |
+| `_packets/SPINE/CURATOR_PROMPT.md` | Old Tailwind-era prompt; rewriting with curator-Sonnet labor |
+| `_packets/SPINE/IDEAS-LATER.md` | Speculative; Frank excluded |
+| `_packets/STATE.md` / `RUN-NEXT.md` | Stale; use this file + MEMORY |
+| Root `app/` | Earlier vNext attempt; reference only for simple checkout pattern (MEMORY §1.4) |
 
 ---
 
 ## 6. Talking to Frank — voice + values
 
-Frank's style: terse, irreverent, real. Voice from BRAIN-DUMP: "I want to bust your chops" energy mixed with deep sincerity for the recipient. He's been at this 11+ hours per session; he's tired but committed. Match his terseness.
+Terse, irreverent, profane. Mixes "bust your chops" energy with deep sincerity about the recipient experience and the moat. He's burned many hours; he's tired of explaining the same things. He's patient with substance but impatient with bullshit / sycophancy / per-fix deploys / random old-doc spelunking.
 
-**What Frank values**:
-- Ship something visible. Not specs without code. Not endless context-gathering.
-- Honest assessment over reassurance. If something's broken, say so.
-- Concrete > abstract. If you can DO something via MCP/Bash, DO it instead of asking him to do it.
-- Aggressive parallelism on subagents — he says sub tokens don't count against your budget. Spawn 4-8 in parallel for any non-trivial wave.
-- A north star: "make it fucking insane." Don't ship boring SaaS-default styling. The vibe engine drives everything visual; tailwind is layout-only.
+**Frank values:**
+- Ship something visible.
+- Honest assessment over reassurance.
+- Concrete > abstract. If you can DO it (via MCP/Bash/sub), DO it instead of asking him.
+- Aggressive parallelism on subs and lieutenants. Sub tokens don't count against orchestrator context.
+- "Make it fucking insane." Not boring SaaS-default.
 
-**What Frank doesn't want**:
-- Affiliate / travel API speculation. He doesn't have those accounts and may never need them. The `affiliate_search` tool now hides itself when keys aren't set; don't propose adding it back.
-- Stripe-branded checkout, Clerk-branded sign-in. Custom UI everywhere.
-- Padding inventory with "what-if" features. If it's speculative, it goes to `_packets/SPINE/IDEAS-LATER.md`, not the active inventory.
-- Per-fix deploys. Batch. Always batch.
-- Asking 3+ questions in a turn. Give your best guess + 1 sharp clarifying question max.
+**Frank doesn't want:**
+- Per-fix deploys. Batch.
+- Affiliate / travel API speculation. He doesn't have those accounts.
+- Stripe-branded checkout / Clerk-branded sign-in.
+- "What-if" features in active inventory.
+- Asking 3+ questions a turn. Best guess + 1 sharp clarifying question max.
+- Walking him through dashboard nonsense. That's the concierge's job now.
 
 ---
 
-## 7. Common drifts the prior frame logged (so future-you avoids them)
+## 7. Common drifts the prior frames logged
 
-- **"You're right"** — said it 6+ times despite explicit ban. Frank tracks. Trigger word that costs context every time.
-- **Per-fix deploys** — pushed to Netlify several times per session before Frank pushed back. Cost him money. Batch.
-- **Reading old docs and getting confused** — opened `AUDIT.md` + `ORCHESTRATOR-NOTES.md` + `_orch-desktop/HANDOFF-*` and re-built things that already existed. Stick to the read-list in §5.
-- **Padding inventory with speculative things** — added Google Places, Booking.com, Expedia, Apple Music, Mapbox, Canva, Pinterest, etc. Frank dropped most explicitly. They're in `IDEAS-LATER.md` now.
-- **Asking Frank to do things I could do via MCP** — he kept telling me "you can do it, why are you asking me." When in doubt, try the MCP/Bash path first.
-- **Telling Frank "you can look at the site"** — he can't always; spawn a Playwright sub to take screenshots and you analyze them.
+- **"You're right"** + apology spirals — said 6+ times despite explicit ban.
+- **Per-fix deploys.**
+- **Reading old docs and confusion** — opened archive AUDIT/ORCHESTRATOR-NOTES and re-built things that existed.
+- **Inventory padding** — added Google Places, Booking, Expedia, Apple Music, Mapbox, etc. Frank dropped most.
+- **Asking Frank to do MCP-doable things** — he told the orchestrator "you can do it, why are you asking."
+- **The Tailwind demote** — chose smaller-safer when Frank had explicitly authorized bigger-right.
+- **Trusting docs over live state** — bake-off agent caught SERVICES.md lying about FAL being keyed.
+- **Trusting agent reports without verification** — old salvage audit rated Stripe "solid-keep" by reading code; Frank's lived evidence was that checkout was broken after 50 iterations.
+- **Echoing secrets in chat** — the FAL split-key reassembly leak this session.
 
 ---
 
 ## 8. Tools you have
 
-- **MCP**: Netlify (env vars + deploys + read site config), Supabase (peek_v2 schema queries + migrations), Stripe (limited to Customer/Invoice/Subscription/Refund/PaymentIntent/Dispute/Product/Price/Coupon/PaymentLink/PromotionCode/Balance — NO Account, NO webhook list, NO Tax config), GitHub (this repo only — `glacialsips-site/grook-peekgift`).
+- **MCP**: Netlify (env vars + deploys; secret values come back masked — can't extract), Supabase (peek_v2 schema queries + migrations), Stripe (limited surface — no webhook list, no Tax config), GitHub (this repo only — `glacialsips-site/grook-peekgift`), Sentry, Twilio, PostHog, Clerk SDK snippets.
 - **Local**: Bash, Read, Write, Edit, WebFetch, WebSearch.
-- **Agent**: spawn sub-agents with `isolation: "worktree"` so they work in isolated copies. Sub tokens don't count against your budget (per Frank). Spawn aggressively for any non-trivial work.
-- **For screenshots**: Playwright is installed in `atelier/node_modules`. Drive via Bash `npx playwright` from a sub.
+- **Agent**: spawn sub-agents with `isolation: "worktree"`. Sub tokens don't count against orchestrator context (per Frank). Spawn aggressively for parallel research.
+- **Lieutenants**: brief them via git (`_packets/LIEUTENANT/NN-<task>/BRIEF.md`); Frank runs the one-liner. Their reports + branches come back via git.
 
-**You do NOT have**:
-- A real browser of your own — must shell out via Playwright via a sub.
-- Stripe MCP access to webhook config, account info, payment method config — use direct API curl with `STRIPE_SECRET_KEY` (read via Netlify env vars MCP, never echo).
-- Clerk MCP — they expose only SDK snippet tools. For Clerk dashboard inspection, you'd need to direct-call the Clerk API with the secret key, OR ask Frank.
-
----
-
-## 9. How to dispatch work effectively
-
-Use the Agent tool with `isolation: "worktree"`. Brief MUST include:
-- "DO NOT TRIGGER A NETLIFY DEPLOY. Orchestrator batches." (every brief)
-- The files they should read first (specific paths).
-- The change they should make (specific scope).
-- Where to commit + push (worktree branch — agent harness handles).
-- The reply format ("Reply ≤4 sentences + branch name + diff stat").
-- What NOT to touch.
-
-When all subs report, merge their branches into `claude/bold-ride-Li5zK` in safe order (docs-only first, then isolated code paths, then files multiple subs touched). Run `cd atelier && npm run typecheck && APP_URL=https://vnext.peek.gift npm run build` after merges. Only when both green, push to `atelier-integration` for deploy.
-
-**Worktree-leak quirk**: sometimes sub-agents leak files into the orchestrator's main worktree. After each sub returns, run `git status` and `git clean -fd` any untracked files in `atelier/` before merging. The authoritative version lives on the sub's branch.
+**You do NOT have:**
+- A real browser of your own — shell out via Playwright via a sub if needed.
+- Stripe MCP for webhook config / account info / payment-method config — direct API curl with `STRIPE_SECRET_KEY` if needed (read via Netlify env masked; can't echo).
+- Direct Clerk dashboard access — SDK snippets only; ask Frank or the concierge.
+- The legacy peek.gift code — different repo, ask Frank or have the checkout-bolt-on lieutenant pull it.
 
 ---
 
-## 10. After-wake-up checklist
+## 9. After-wake-up checklist
 
-When you read this file post-compression, work through these in order:
-
-- [ ] Read this whole file (you just did).
-- [ ] `git log --oneline -20` on `claude/bold-ride-Li5zK` to see recent commits — anything past `323116c` indicates work landed after this handoff was written.
-- [ ] `git status` — clean? If not, clean leaks before doing anything.
-- [ ] Read `_packets/STATE.md` for current state.
-- [ ] Read `_packets/SPINE/FRANK-TODO.md` for any unfinished Frank tasks.
-- [ ] WebFetch `https://vnext.peek.gift/` to confirm the site responds (200).
-- [ ] Spawn a Playwright sub to screenshot the current site at 375×812 (mobile).
-- [ ] Reply to Frank: "Awake. Last deploy `<sha>`, site responding. Next: <Step 1-3 from §4>."
+- [ ] Read this whole file.
+- [ ] Read `_packets/MEMORY.md` (§0 minimum).
+- [ ] Read `_packets/SPINE/STACK-LOCK.md`.
+- [ ] `git log --oneline -20 origin/claude/bold-ride-Li5zK` — see what landed since this handoff was written.
+- [ ] `git status` — clean? If leaks, sort them out before doing anything.
+- [ ] `ls _packets/LIEUTENANT/*/RETURN.md` — any reports waiting to be merged?
+- [ ] `cat _packets/LIEUTENANT/02-setup-concierge/SETUP-STATUS.md` (if exists) — what's keyed?
+- [ ] Read Frank's latest message; act on that, not on this file's §4 ordering if they conflict.
+- [ ] Reply to Frank concisely: state + next action. (See: voice §6.)
 
 ---
 
-_File maintained by the orchestrator. Update it before any future compression. If the rules in §1 drift or the state in §3 goes stale, refresh the relevant section._
+_File maintained by Hercules. Update before any future compression. If §1 hard rules drift or §3 state goes stale, refresh._
