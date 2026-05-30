@@ -70,6 +70,22 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/vibe-resolve:
+    dependencies:
+      '@peek/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@peek/vibe-genome':
+        specifier: workspace:*
+        version: link:../vibe-genome
+      '@peek/vibe-harmony':
+        specifier: workspace:*
+        version: link:../vibe-harmony
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
 packages:
 
   '@esbuild/aix-ppc64@0.28.0':
