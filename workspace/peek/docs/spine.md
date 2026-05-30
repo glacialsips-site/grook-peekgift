@@ -29,4 +29,8 @@ The whole product is **5 pages + popups.** Everything serves one loop:
 - Deploy = **modular monolith** (one Next app + edge/serverless fns), not 13 deployed services. Split only if scale demands.
 
 ## Verdict
-Tight: 5 pages · one app · one renderer · 5 contexts · every vendor a swappable adapter. **Good to go as the skeleton** — the engine packages slot straight in; the app shell just wraps them. The only thing I'd still watch: the Builder's real-time IR+Genome sync (CRDT) is the one genuinely-hard seam in this list; everything else is plumbing.
+Tight: 5 pages · one app · one renderer · 5 contexts · every vendor a swappable adapter. **Good to go as the skeleton** — the engine packages slot straight in; the app shell just wraps them.
+
+**v1 simplification (per /design — accepted):** the Builder is **single-user** — *kill CRDT.* Just **autosave the IR + the event/mutation log** (undo + history without conflict-resolution). CRDT becomes a **Later** adapter behind the composition port when multi-editor collab ships. That removes the one genuinely-hard seam from the v1 critical path; everything else is plumbing.
+
+**Missing axis (per /design — accepted): `pageType` ⊥ `world`.** Structure (invite / **gift-bundle** / shop) is orthogonal to style (the genome/world). peek.gift's *core* is the **gift bundle** — mixed-source item cards (product / experience / homemade / photo) + a personal **note** + the **$12 money button** — not event pages. Composition context owns `pageType`; commerce owns link→scraped-card + the bundle + affiliate. Added to the IR contract.

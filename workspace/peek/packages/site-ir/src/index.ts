@@ -63,6 +63,8 @@ export const cardSchema = z.object({
   estimateRange: z.tuple([z.string(), z.string()]).optional(),
   description: z.string().optional(),
   source: z.string().optional(), // retailer / donor / maker / supplier
+  itemType: z.enum(["product", "experience", "homemade", "photo"]).optional(),
+  link: z.string().optional(), // source URL (product / scraped item)
   media: mediaSchema,
   swatches: z.array(z.string()).optional(),
   badge: z.string().optional(), // e.g. "NEW"
@@ -239,8 +241,31 @@ export const footerBlockSchema = z.object({
   legal: z.string().optional(),
 });
 
+/** gift-bundle core: mixed-source curated items + the money button. */
+export const giftGridBlockSchema = z.object({
+  kind: z.literal("gift-grid"),
+  id: z.string(),
+  head: z
+    .object({ eyebrow: z.string().optional(), title: z.string(), note: z.string().optional() })
+    .optional(),
+  items: z.array(cardSchema), // product / experience / homemade / photo
+  action: z.object({ label: z.string(), price: z.string() }).optional(), // the $12 money button
+});
+
+/** the personal handwritten note that makes a gift-bundle feel one-to-one. */
+export const noteBlockSchema = z.object({
+  kind: z.literal("note"),
+  id: z.string(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  body: z.string(),
+  signoff: z.string().optional(),
+});
+
 export const blockSchema = z.discriminatedUnion("kind", [
   navBlockSchema,
+  giftGridBlockSchema,
+  noteBlockSchema,
   heroBlockSchema,
   marqueeBlockSchema,
   dividerBlockSchema,
@@ -271,6 +296,8 @@ export type Capability = z.infer<typeof capabilitySchema>;
 
 export const peekSchema = z.object({
   version: z.literal(SITE_IR_SCHEMA_VERSION),
+  /** STRUCTURE axis — orthogonal to the genome's STYLE. gift-bundle is peek.gift's core. */
+  pageType: z.enum(["invite", "gift-bundle", "shop"]).default("invite"),
   meta: z.object({
     id: z.string(),
     curatorId: z.string(), // tenancy seam — present from day 1, single-curator for now
