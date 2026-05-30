@@ -157,6 +157,16 @@ em{font-style:italic;color:var(--accent)}
 .footer .lines{color:var(--muted);font-size:14px;line-height:1.9}
 .footer .legal{color:var(--faint);font-size:12px;margin-top:18px}
 
+/* gift-bundle */
+.card .src{display:inline-block;font:700 10px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep);background:var(--accent-wash);padding:5px 9px;border-radius:var(--pill);margin-bottom:10px}
+.gift-grid .money{text-align:center;margin-top:44px}
+.money-btn{font-size:1.05rem;padding:18px 38px}
+.note-block{padding:var(--section) 0}
+.note-card{max-width:600px;margin:0 auto;background:var(--surface);border:var(--border);border-radius:var(--radius-card);padding:40px 44px;box-shadow:var(--shadow-card)}
+.note-head{display:flex;justify-content:space-between;gap:12px;font:700 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
+.note-body{font-size:1.15rem;line-height:1.7;color:var(--ink)}
+.note-sign{font-family:var(--font-script);font-size:1.9rem;color:var(--accent);margin-top:18px;text-align:right}
+
 /* keyframes */
 @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes holo{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}

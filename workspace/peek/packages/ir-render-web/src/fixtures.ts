@@ -127,7 +127,47 @@ const hemlockPeek: Peek = peekSchema.parse({
   ],
 });
 
+const grandmaGenome: Genome = genomeSchema.parse({
+  version: 1,
+  seed: 1960,
+  meta: { energy: 0.3, refinement: 0.55, formality: 0.25, warmth: 0.95, playfulness: 0.4, opulence: 0.35, boldness: 0.3, naturalism: 0.7, density: 0.35, era: "timeless", eraStrength: 0.2 },
+  knobs: {
+    layout: { archetype: "centered-invite", heroLayout: "centered", contentRhythm: "single-column-cards", containerWidth: 1080, focal: "single-hero", layering: 0.2 },
+    type: { displayClass: "classical-serif", pairing: "expressive-neutral", useScript: true, useMono: false, case: "sentence", tracking: 0.3, scaleRatio: 1.3, weightContrast: 0.3, headingScaleMax: 80, bodyWeight: 400, animacy: 0.2 },
+    color: { base: "light", application: "flat", hueAnchors: [30], harmony: "analogous", accentCount: 2, saturation: 0.5, lightnessMood: 0.82, temperature: 0.82, contrast: 0.82 },
+    motif: { vocabulary: ["botanical", "heart"], density: "low", generation: "curated" },
+    texture: { kind: "grain", surfaceShadow: "soft-tint", glassBlur: 12 },
+    shape: { edgeTreatment: "round", radiusButton: 999, radiusCard: 20, radiusSheet: 24, borderWeight: 1, borderStyle: "solid" },
+    motion: { intensity: "hover", easingProfile: "premium", loopSpeed: 0.2 },
+    density: { whitespace: "generous" },
+    imagery: { strategy: "glyph-filled", photoFrame: "polaroid", photoFilter: "none" },
+    voice: { tone: "warm", verbosity: 0.6, wit: 0.3 },
+    capability: { primary: "commerce", giftModel: "buy" },
+  },
+});
+
+const grandmaPeek: Peek = peekSchema.parse({
+  version: 1,
+  pageType: "gift-bundle",
+  meta: { id: "pk_sam", curatorId: "cur_demo", slug: "for-sam", title: "A care package for Sam" },
+  theme: { genomeRef: "grandma" },
+  capabilities: ["commerce"],
+  sections: [
+    { kind: "nav", id: "n", brand: { text: "for Sam", style: "script" }, links: [] },
+    { kind: "hero", id: "h", greeting: "A little care package", eyebrow: "From Grandma", title: { lines: ["For Sam,", "off to college"], emphasis: [] }, lede: "A few small things to make the dorm feel like home — and so you don't forget your old grandma.", backgroundEffect: "botanicals" },
+    { kind: "note", id: "note", from: "Grandma", to: "Sam", body: "Sammy — I can't believe you're off to college already. I packed a few little things to keep you warm and fed when you're missing home. Don't live on ramen, call me on Sundays, and remember I'm proud of you every single day.", signoff: "— love always, Grandma" },
+    { kind: "gift-grid", id: "g", head: { eyebrow: "The care package", title: "Four little things" }, items: [
+      { id: "i1", name: "Shower Flip-Flops", source: "Zappos", price: "$24", itemType: "product", description: "For the dorm showers. Trust me on this one.", media: { kind: "glyph", glyph: "🩴", frame: "none" }, link: "https://zappos.com" },
+      { id: "i2", name: "The Good Granola", source: "Amazon", price: "$14", itemType: "product", description: "Not the cardboard kind — the real stuff.", media: { kind: "glyph", glyph: "🥣", frame: "none" }, link: "https://amazon.com" },
+      { id: "i3", name: "Grandma's Chicken Soup", source: "Homemade", itemType: "homemade", description: "Frozen — heat it up when you're sick or homesick. Recipe card tucked inside.", media: { kind: "glyph", glyph: "🍲", frame: "none" } },
+      { id: "i4", name: "Us at the lake, 2019", source: "Photo", itemType: "photo", description: "So your desk doesn't feel so far from home.", media: { kind: "glyph", glyph: "🏞", frame: "polaroid" } },
+    ], action: { label: "Send this peek to Sam", price: "$12" } },
+    { kind: "footer", id: "ft", brand: "peek.gift", centeredLines: ["made with love"], legal: "© peek.gift" },
+  ],
+});
+
 export const proofs: { name: string; genome: Genome; peek: Peek }[] = [
+  { name: "grandma", genome: grandmaGenome, peek: grandmaPeek },
   { name: "princess", genome: princessGenome, peek: princessPeek },
   { name: "cyber", genome: cyberGenome, peek: cyberPeek },
   { name: "hemlock", genome: hemlockGenome, peek: hemlockPeek },
