@@ -17,9 +17,9 @@ export interface FrameContent {
 
 const q = (s: string): string => s.replace(/"/g, "&quot;");
 
-function inner(c: FrameContent, size: string): string {
+function inner(c: FrameContent, _size: string): string {
   if (c.photo) return `<img src="${q(c.photo)}" alt="${q(c.alt ?? "")}" style="width:100%;height:100%;object-fit:cover">`;
-  return `<span class="frm-g" style="font-size:${size}">${c.glyph ?? "✦"}</span>`;
+  return ""; // gradient fallback — no emoji; real imagery (fal) drops into this same slot
 }
 
 const SPIN = `@keyframes spin{to{transform:rotate(360deg)}}`;
