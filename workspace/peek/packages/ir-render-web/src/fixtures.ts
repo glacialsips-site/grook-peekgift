@@ -96,7 +96,7 @@ const cyberPeek: Peek = peekSchema.parse({
   capabilities: ["ticketing"],
   sections: [
     { kind: "nav", id: "n", brand: { text: "AFTERGLOW", style: "wordmark" }, links: [{ label: "Lineup" }, { label: "Gear" }, { label: "Access" }], trailingAction: { label: "Get Access" } },
-    { kind: "hero", id: "h", eyebrow: "▓▒░ one night only", title: { lines: ["AFTER", "GLOW"], emphasis: [1] }, lede: "A night that doesn't stop. Neon, bass, and the city after dark.", meta: [{ key: "GATES", value: "22:00" }, { key: "ZONE", value: "District 9" }], media: { kind: "glyph", glyph: "◆", frame: "none" }, ctas: [{ label: "Get Wristband" }, { label: "View Lineup" }], backgroundEffect: "grid-floor" },
+    { kind: "hero", id: "h", eyebrow: "▓▒░ one night only", title: { lines: ["AFTER", "GLOW"], emphasis: [1] }, lede: "A night that doesn't stop. Neon, bass, and the city after dark.", meta: [{ key: "GATES", value: "22:00" }, { key: "ZONE", value: "District 9" }], media: { kind: "glyph", glyph: "◆", frame: "porthole" }, ctas: [{ label: "Get Wristband" }, { label: "View Lineup" }], backgroundEffect: "grid-floor" },
     { kind: "marquee", id: "m", items: ["INITIATE_RAVE.EXE", "HYDRATE OR DIE-DRATE", "NO SLEEP", "SECTOR 2087"], separator: "//" },
     { kind: "collection", id: "c", variant: "gifts", head: { eyebrow: "The Gear", title: "Loadout" }, items: [
       gift("g1", "Pulse Wristband", "$35", "⬡", "Sound-reactive, glows with the bass. Standard issue.", "Add to loadout"),

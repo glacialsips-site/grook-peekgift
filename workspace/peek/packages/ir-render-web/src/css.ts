@@ -110,11 +110,7 @@ em{font-style:italic;color:var(--accent)}
 .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
 .hero-meta .pill{font:600 12.5px/1 var(--font-body);letter-spacing:.04em;padding:9px 15px;border-radius:var(--pill);background:var(--accent-wash);color:var(--accent-deep)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
-.hero-media{position:relative;aspect-ratio:4/5;border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow-card);
-  background:linear-gradient(160deg,var(--accent),var(--accent-deep))}
-.hero-media.arched{border-radius:300px 300px var(--radius-card) var(--radius-card)}
-.hero-media.circular{border-radius:50%;aspect-ratio:1}
-.hero-media .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:4rem;opacity:.85}
+.hero-media{position:relative}
 
 /* marquee */
 .marquee{border-top:0.5px solid var(--line);border-bottom:0.5px solid var(--line);padding:16px 0;overflow:hidden;white-space:nowrap;
@@ -134,8 +130,7 @@ em{font-style:italic;color:var(--accent)}
 .card{background:var(--surface);border:var(--border);border-radius:var(--radius-card);overflow:hidden;
   box-shadow:var(--shadow-card);transition:transform var(--dur) var(--ease)}
 .card:hover{transform:translateY(-6px)}
-.card-media{aspect-ratio:4/3;display:grid;place-items:center;font-size:3rem;position:relative;
-  background:linear-gradient(150deg,var(--accent),var(--accent-deep))}
+.card-media{position:relative}
 .card-body{padding:18px 18px 22px}
 .card .badge{position:absolute;top:10px;right:10px;font:700 10px/1 var(--font-body);letter-spacing:.5px;
   padding:5px 9px;border-radius:var(--pill);background:var(--accent);color:var(--on-accent)}
