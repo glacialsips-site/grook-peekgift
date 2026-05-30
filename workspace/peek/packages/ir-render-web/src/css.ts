@@ -26,7 +26,7 @@ function bodyBackground(t: DesignTokens): string {
   const a = c.accents;
   switch (c.application) {
     case "gradient":
-      return `radial-gradient(120% 90% at 85% -10%, ${(a[1] ?? a[0]) + "22"}, transparent 55%), radial-gradient(90% 70% at 0% 0%, ${a[0] + "1c"}, transparent 50%), ${c.bg}`;
+      return `radial-gradient(85% 55% at 88% -8%, ${(a[1] ?? a[0]) + "1c"}, transparent 50%), radial-gradient(75% 50% at 2% 3%, ${(a[2] ?? a[0]) + "14"}, transparent 46%), ${c.bg}`;
     case "glow":
       return `radial-gradient(70% 50% at 50% 0%, ${a[0] + "26"}, transparent 60%), ${c.bg}`;
     case "holographic":
@@ -51,6 +51,7 @@ export function buildCss(t: DesignTokens, genome: Genome): string {
 :root{
   --bg:${c.bg}; --surface:${c.surface}; --ink:${c.ink}; --muted:${c.muted}; --faint:${c.faint}; --line:${c.line};
   --accent:${a0}; --accent2:${a1}; --accent3:${a2}; --accent-deep:${c.accentDeep}; --accent-wash:${c.accentWash}; --on-accent:${c.onAccent};
+  --tint-0:${a0}; --tint-1:${a1}; --tint-2:${a2}; --tint-3:color-mix(in oklch,${a0} 50%,${a1}); --tint-4:color-mix(in oklch,${a1} 50%,${a2}); --tint-5:color-mix(in oklch,${a2} 50%,${a0});
   --font-display:${ty.display.family}; --font-body:${ty.body.family};
   --font-script:${ty.script?.family ?? ty.display.family}; --font-mono:${ty.mono?.family ?? "ui-monospace, monospace"};
   --size-display:${ty.display.size}; --size-heading:${ty.heading.size}; --size-sub:${ty.heading.size}; --size-body:${ty.body.size}; --size-eyebrow:${ty.eyebrow.size};

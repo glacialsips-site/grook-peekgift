@@ -56,7 +56,10 @@ const TOOL_DESCRIPTION = `Emit ONE complete design — a \`genome\` (the design 
 GENOME (the look):
 - brief (optional): your read of the request — thesis (one line, the felt direction), occasion, recipient, mustInclude, antiPatterns.
 - meta: the Tier-0 director dials (each 0..1) + era. These set the whole mood; every knob below must AGREE with them.
-- knobs: the atomic choices across every domain — layout, type, color, motif, texture, shape, motion, density, imagery, voice, capability. Fill them ALL, coherently. color.hueAnchors are degrees 0..360. Make bold, specific choices: a moody dark holographic rave and an airy warm garden invite should share almost no knob values.
+- knobs: the atomic choices across every domain — layout, type, color, motif, texture, shape, motion, density, imagery, voice, capability. Fill them ALL, coherently. Make bold, specific choices: a moody dark holographic rave and an airy warm garden invite should share almost no knob values.
+- color.hueAnchors are **OKLCH hue degrees** (perceptual — NOT RGB/HSL). Pick by this scale, not by RGB intuition:
+    ~15 wine/burgundy · ~30 red · ~40 rust · ~46 terracotta · ~65 caramel/honey · ~84 amber/gold/mustard · ~110 chartreuse · ~130 sage/olive · ~150 forest green · ~195 teal/cyan · ~230 sky blue · ~260 navy/indigo · ~300 violet/plum · ~330 magenta/orchid · ~355 crimson.
+    So "warm autumn amber" = ~75–90 (NOT ~30, which is red); "terracotta" ≈ 46; "dusty rose" ≈ 12; "sage" ≈ 130; "navy" ≈ 260; "kraft/tan" ≈ 70 at low saturation. Get this right — a wrong anchor turns a cozy amber bundle into a pink one.
 - rationale: one sentence, shown to the curator, naming the vibe you built.
 
 PEEK (the content):

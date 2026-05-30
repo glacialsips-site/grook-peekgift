@@ -53,11 +53,16 @@ export function backgroundEffect(effect: string, genome: Genome): Effect {
   background:repeating-conic-gradient(from 0deg at 50% 0%,var(--accent) 0deg 3.5deg,transparent 3.5deg 11deg);
   -webkit-mask-image:radial-gradient(62% 60% at 50% 0%,#000,transparent);mask-image:radial-gradient(62% 60% at 50% 0%,#000,transparent)}`,
       };
-    case "radial-glow":
+    case "radial-glow": {
+      // Accent-over-bg reads heavy on light surfaces, as a glow on dark. Scale to the base.
+      const dark = genome.knobs.color.base === "dark";
+      const g1 = dark ? 40 : 15;
+      const g2 = dark ? 34 : 12;
       return {
         html: `<div class="fx fx-glow"></div>`,
-        css: `${FX_BASE}.fx-glow{background:radial-gradient(46% 42% at 18% 8%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 60%),radial-gradient(42% 42% at 86% 26%,color-mix(in srgb,var(--accent2) 34%,transparent),transparent 60%)}`,
+        css: `${FX_BASE}.fx-glow{background:radial-gradient(46% 42% at 18% 8%,color-mix(in srgb,var(--accent) ${g1}%,transparent),transparent 60%),radial-gradient(42% 42% at 86% 26%,color-mix(in srgb,var(--accent2) ${g2}%,transparent),transparent 60%)}`,
       };
+    }
     case "memphis": {
       const cols = ["var(--accent)", "var(--accent2)", "var(--accent3)", "var(--accent-deep)"];
       const kinds = ["circle", "ring", "bar", "tri"];

@@ -24,16 +24,28 @@ function mediaContent(m: Card["media"]): FrameContent {
   return c;
 }
 
-function renderCard(c: Card, genome: Genome, frameOverride?: string): { html: string; css: string } {
-  const kind = frameOverride ?? (c.itemType === "photo" ? "polaroid" : pickFrame(genome, "card"));
+/** Per-card hue: each tile pulls a distinct tint so a grid reads as a varied set, not one color. */
+function cardTint(i: number): string {
+  const n = i % 6;
+  const n2 = (i + 3) % 6;
+  return ` style="--accent:var(--tint-${n});--accent2:var(--tint-${n2});--accent-deep:color-mix(in oklch,var(--tint-${n}),#000 26%);--accent-wash:color-mix(in oklch,var(--tint-${n}),var(--surface) 86%)"`;
+}
+
+function renderCard(
+  c: Card,
+  genome: Genome,
+  opts?: { frame?: string; tint?: number },
+): { html: string; css: string } {
+  const kind = opts?.frame ?? (c.itemType === "photo" ? "polaroid" : pickFrame(genome, "card"));
   const f = mediaFrame(kind, mediaContent(c.media));
+  const tint = opts?.tint !== undefined ? cardTint(opts.tint) : "";
   const badge = c.badge ? `<span class="badge">${esc(c.badge)}</span>` : "";
   const src = c.source ? `<span class="src">${esc(c.source)}</span>` : "";
   const sub = c.subtitle ? `<div class="sub">${esc(c.subtitle)}</div>` : "";
   const desc = c.description ? `<p class="desc">${esc(c.description)}</p>` : "";
   const price = c.price ? `<span class="price">${esc(c.price)}</span>` : "";
   const action = c.claim ? `<button class="claim">${esc(c.claim.label)}</button>` : "";
-  const html = `<article class="card"><div class="card-media">${badge}${f.html}</div><div class="card-body">${src}<h3>${esc(c.name)}</h3>${sub}${desc}<div class="row">${price}${action}</div></div></article>`;
+  const html = `<article class="card"${tint}><div class="card-media">${badge}${f.html}</div><div class="card-body">${src}<h3>${esc(c.name)}</h3>${sub}${desc}<div class="row">${price}${action}</div></div></article>`;
   return { html, css: f.css };
 }
 
@@ -79,7 +91,7 @@ export function renderBlock(block: Block, genome: Genome, effects: Effect[]): st
       const head = block.head
         ? `<div class="sec-head">${block.head.eyebrow ? `<span class="eyebrow">${esc(block.head.eyebrow)}</span>` : ""}<h2>${esc(block.head.title)}</h2></div>`
         : "";
-      const rendered = block.items.map((c) => renderCard(c, genome));
+      const rendered = block.items.map((c, i) => renderCard(c, genome, { tint: i }));
       for (const r of rendered) effects.push({ html: "", css: r.css });
       const cards = rendered.map((r) => r.html).join("");
       return `<section class="section"><div class="wrap">${head}<div class="grid">${cards}</div></div></section>`;
@@ -88,7 +100,9 @@ export function renderBlock(block: Block, genome: Genome, effects: Effect[]): st
       const head = block.head
         ? `<div class="sec-head">${block.head.eyebrow ? `<span class="eyebrow">${esc(block.head.eyebrow)}</span>` : ""}<h2>${esc(block.head.title)}</h2></div>`
         : "";
-      const rendered = block.items.map((c) => renderCard(c, genome, c.itemType === "photo" ? "polaroid" : "panel"));
+      const rendered = block.items.map((c, i) =>
+        renderCard(c, genome, { frame: c.itemType === "photo" ? "polaroid" : "panel", tint: i }),
+      );
       for (const r of rendered) effects.push({ html: "", css: r.css });
       const cards = rendered.map((r) => r.html).join("");
       const money = block.action
