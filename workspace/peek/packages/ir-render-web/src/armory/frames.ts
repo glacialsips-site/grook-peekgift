@@ -75,15 +75,22 @@ ${SPIN}`,
         html: `<div class="frm-med">${inner(c, "2.2rem")}</div>`,
         css: `.frm-med{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,#fff 36%,var(--accent)),var(--accent) 55%,var(--accent-deep));display:grid;place-items:center;box-shadow:inset 0 0 0 5px color-mix(in srgb,#fff 50%,transparent),0 14px 28px -10px var(--accent-deep)}`,
       };
+    case "hud-panel":
+      return {
+        html: `<div class="frm-hud"><span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>${inner(c, "3.2rem")}</div>`,
+        css: `.frm-hud{position:relative;aspect-ratio:4/3;height:100%;min-height:240px;border-radius:var(--radius-card);overflow:hidden;display:grid;place-items:center;color:var(--accent);border:1px solid var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 26%,#000),color-mix(in srgb,var(--accent2) 18%,#000)),repeating-linear-gradient(0deg,transparent 0 3px,#0003 3px 4px);box-shadow:0 0 30px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 0 40px #000a}
+.frm-hud .c{position:absolute;width:18px;height:18px;border:2px solid var(--accent2)}
+.frm-hud .tl{top:10px;left:10px;border-right:0;border-bottom:0}
+.frm-hud .tr{top:10px;right:10px;border-left:0;border-bottom:0}
+.frm-hud .bl{bottom:10px;left:10px;border-right:0;border-top:0}
+.frm-hud .br{bottom:10px;right:10px;border-left:0;border-top:0}`,
+      };
     case "panel":
     default:
       return {
-        html: `<div class="frm-panel"><span class="c tl"></span><span class="c br"></span>${inner(c, "3.4rem")}</div>`,
+        html: `<div class="frm-panel">${inner(c, "3.4rem")}</div>`,
         css: `.frm-panel{position:relative;aspect-ratio:4/3;height:100%;min-height:240px;border-radius:var(--radius-card);background:linear-gradient(150deg,var(--accent),var(--accent-deep));display:grid;place-items:center;color:var(--on-accent);box-shadow:var(--shadow-card),inset 0 -44px 64px -30px #0005;overflow:hidden}
-.frm-panel::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 72% 18%,#fff5,transparent 44%);pointer-events:none}
-.frm-panel .c{position:absolute;width:20px;height:20px;border:2px solid color-mix(in srgb,#fff 42%,transparent)}
-.frm-panel .tl{top:12px;left:12px;border-right:0;border-bottom:0}
-.frm-panel .br{bottom:12px;right:12px;border-left:0;border-top:0}`,
+.frm-panel::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 72% 18%,#fff5,transparent 44%);pointer-events:none}`,
       };
   }
 }

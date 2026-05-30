@@ -2,6 +2,7 @@ import type { Block, Card } from "@peek/site-ir";
 import type { Genome } from "@peek/vibe-genome";
 import { backgroundEffect, type Effect } from "./effects";
 import { mediaFrame, type FrameContent } from "./armory/frames";
+import { pickFrame } from "./armory/select";
 
 const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -23,11 +24,8 @@ function mediaContent(m: Card["media"]): FrameContent {
   return c;
 }
 
-/** IR media-frame -> armory frame kind ("none" gets the rich default panel). */
-const heroFrame = (irFrame: string): string => (irFrame === "none" ? "panel" : irFrame);
-
-function renderCard(c: Card): { html: string; css: string } {
-  const f = mediaFrame("panel", mediaContent(c.media));
+function renderCard(c: Card, genome: Genome): { html: string; css: string } {
+  const f = mediaFrame(pickFrame(genome, "card"), mediaContent(c.media));
   const badge = c.badge ? `<span class="badge">${esc(c.badge)}</span>` : "";
   const sub = c.subtitle ? `<div class="sub">${esc(c.subtitle)}</div>` : "";
   const desc = c.description ? `<p class="desc">${esc(c.description)}</p>` : "";
@@ -61,7 +59,8 @@ export function renderBlock(block: Block, genome: Genome, effects: Effect[]): st
         : "";
       let media = "";
       if (block.media && layout === "split-lr") {
-        const f = mediaFrame(heroFrame(block.media.frame), mediaContent(block.media));
+        const frameKind = block.media.frame !== "none" ? block.media.frame : pickFrame(genome, "hero");
+        const f = mediaFrame(frameKind, mediaContent(block.media));
         effects.push({ html: "", css: f.css });
         media = `<div class="hero-media">${f.html}</div>`;
       }
@@ -78,7 +77,7 @@ export function renderBlock(block: Block, genome: Genome, effects: Effect[]): st
       const head = block.head
         ? `<div class="sec-head">${block.head.eyebrow ? `<span class="eyebrow">${esc(block.head.eyebrow)}</span>` : ""}<h2>${esc(block.head.title)}</h2></div>`
         : "";
-      const rendered = block.items.map(renderCard);
+      const rendered = block.items.map((c) => renderCard(c, genome));
       for (const r of rendered) effects.push({ html: "", css: r.css });
       const cards = rendered.map((r) => r.html).join("");
       return `<section class="section"><div class="wrap">${head}<div class="grid">${cards}</div></div></section>`;
