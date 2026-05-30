@@ -1,0 +1,28 @@
+{
+  "name": "@peek/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@peek/site-ir": "workspace:*",
+    "@peek/design-tokens": "workspace:*",
+    "@peek/vibe-genome": "workspace:*",
+    "@peek/vibe-harmony": "workspace:*",
+    "@peek/vibe-resolve": "workspace:*",
+    "@peek/ir-render-web": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}
