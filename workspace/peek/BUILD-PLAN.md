@@ -25,7 +25,7 @@ unlocked contracts = eight divergent foundations. Then parallelize breadth hard.
 
 ## Phases & gates
 - [x] **P0 — Scaffold.** pnpm + turbo monorepo, strict TS, workspace layout. ← *done*
-- [ ] **P1 — Contracts (LOCK).** `packages/site-ir` (versioned block tree, Zod) +
+- [x] **P1 — Contracts (LOCK).** ✓ all 3 typecheck-green. `packages/site-ir` (versioned block tree, Zod) +
       `packages/vibe-genome` (knob schema, meta-dials, open registry) + `packages/design-tokens`
       (token shape). The 10 reference sites encoded as IR + Genome fixtures.
 - [ ] **P2 — Engine core PROOF (the "00").** `vibe-harmony` (OKLCH color, type-pairing, scales) +
