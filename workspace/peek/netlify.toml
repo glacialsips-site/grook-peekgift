@@ -1,0 +1,14 @@
+# Deploy config for the peek.gift Builder (Next.js 15, pnpm monorepo).
+# To deploy: connect a Netlify site with base directory = workspace/peek,
+# OR deploy via CLI with a NETLIFY_AUTH_TOKEN. The Next runtime plugin handles routing.
+
+[build]
+  command = "pnpm --filter @peek/web build"
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  PNPM_FLAGS = "--shamefully-hoist=false"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

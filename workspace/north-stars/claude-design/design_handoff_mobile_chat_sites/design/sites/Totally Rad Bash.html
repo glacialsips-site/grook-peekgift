@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>★ TOTALLY RAD ★ Jade's Totally Rad Throwback Bash ★</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bungee:wght@400&family=Bungee+Shade&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --ink:#1B1430;
+    --cream:#FFF6E6;
+    --cream2:#FFEFD0;
+    --pink:#FF3E9A;
+    --cyan:#1FD3E8;
+    --yellow:#FFCB1F;
+    --lime:#7BE04B;
+    --purple:#8B47E0;
+    --coral:#FF6B3D;
+    --disp:"Bungee",system-ui,sans-serif;
+    --shade:"Bungee Shade",system-ui,sans-serif;
+    --body:"Fredoka",system-ui,sans-serif;
+    --bd:4px solid var(--ink);
+    --sh:8px 8px 0 var(--ink);
+    --sh-sm:5px 5px 0 var(--ink);
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);
+    font-weight:500;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+    background-image:
+      radial-gradient(circle, rgba(27,20,48,.05) 1.5px, transparent 1.6px);
+    background-size:26px 26px;}
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;border:none;cursor:pointer;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 30px;position:relative;z-index:2;}
+  .disp{font-family:var(--disp);text-transform:uppercase;}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:14px;
+    font-family:var(--disp);font-size:14px;text-transform:uppercase;
+    background:var(--pink);color:#fff;border:var(--bd);box-shadow:var(--sh-sm);
+    transition:transform .12s ease,box-shadow .12s ease;}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink);}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink);}
+  .btn--cyan{background:var(--cyan);color:var(--ink);}
+  .btn--yellow{background:var(--yellow);color:var(--ink);}
+  .btn--lime{background:var(--lime);color:var(--ink);}
+  .btn--purple{background:var(--purple);color:#fff;}
+
+  /* sticker chip */
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--disp);font-size:12px;text-transform:uppercase;
+    padding:8px 14px;border:3px solid var(--ink);border-radius:999px;box-shadow:3px 3px 0 var(--ink);background:#fff;}
+
+  /* floating decor shapes */
+  .decor{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .shape{position:absolute;}
+  @keyframes float1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-26px) rotate(18deg)}}
+  @keyframes float2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(22px) rotate(-16deg)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes wiggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* ── NAV ── */
+  header.nav{position:sticky;top:0;z-index:60;background:var(--yellow);border-bottom:var(--bd);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:66px;}
+  .logo{font-family:var(--disp);font-size:20px;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+  .logo .star{color:var(--pink);animation:spin 6s linear infinite;display:inline-block;}
+  .nav-links{display:flex;gap:24px;}
+  .nav-links a{font-family:var(--disp);font-size:12px;text-transform:uppercase;
+    padding:6px 12px;border-radius:10px;transition:background .2s ease,color .2s ease;}
+  .nav-links a:hover{background:var(--ink);color:var(--yellow);}
+  .nav .btn{padding:10px 18px;}
+
+  /* ── HERO ── */
+  .hero{position:relative;overflow:hidden;padding:46px 0 80px;}
+  .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr .9fr;gap:46px;align-items:center;}
+  .hero .kicker{display:inline-flex;gap:8px;margin-bottom:16px;}
+  .hero h1{font-family:var(--disp);text-transform:uppercase;font-size:clamp(48px,9vw,108px);line-height:.92;margin:0;}
+  .hero h1 .l1{color:var(--pink);display:inline-block;animation:wiggle 2.4s ease-in-out infinite;}
+  .hero h1 .l2{color:var(--cyan);display:block;animation:wiggle 2.4s ease-in-out infinite .3s;}
+  .hero h1 .l3{font-family:var(--shade);color:var(--purple);display:block;}
+  .hero p.lede{font-size:18px;font-weight:600;margin:22px 0 0;max-width:38ch;}
+  .hero .info{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 0;}
+  .hero .info .chip{background:#fff;}
+  .hero .info .chip.a{background:var(--lime);}
+  .hero .info .chip.b{background:var(--cyan);}
+  .hero .info .chip.c{background:var(--coral);color:#fff;border-color:var(--ink);}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin:28px 0 0;}
+
+  /* polaroid */
+  .polaroid-wrap{position:relative;display:flex;justify-content:center;align-items:center;}
+  .polaroid{position:relative;background:#fff;border:var(--bd);box-shadow:var(--sh);padding:14px 14px 54px;
+    transform:rotate(-4deg);max-width:380px;width:100%;animation:bob 5s ease-in-out infinite;}
+  .polaroid .pic{position:relative;aspect-ratio:1/1;border:3px solid var(--ink);overflow:hidden;
+    background:repeating-linear-gradient(45deg,#FFE0F0 0 18px,#E0F7FB 18px 36px);
+    display:flex;align-items:center;justify-content:center;text-align:center;}
+  .polaroid .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;}
+  .polaroid .pic .cap{font-family:var(--disp);font-size:12px;text-transform:uppercase;padding:24px;line-height:1.6;color:var(--purple);}
+  .polaroid .label{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:var(--disp);font-size:15px;text-transform:uppercase;}
+  .polaroid .tape{position:absolute;width:96px;height:30px;background:rgba(255,203,31,.7);border:2px solid rgba(27,20,48,.3);}
+  .polaroid .tape.t1{top:-14px;left:30px;transform:rotate(-8deg);}
+  .polaroid .tape.t2{top:-14px;right:30px;transform:rotate(7deg);}
+  .starburst{position:absolute;z-index:5;top:-22px;right:-10px;width:96px;height:96px;
+    background:var(--pink);color:#fff;display:grid;place-items:center;text-align:center;
+    font-family:var(--disp);font-size:13px;text-transform:uppercase;border:var(--bd);
+    clip-path:polygon(50% 0,61% 25%,89% 12%,80% 39%,100% 50%,80% 61%,89% 88%,61% 75%,50% 100%,39% 75%,11% 88%,20% 61%,0 50%,20% 39%,11% 12%,39% 25%);
+    animation:spin 14s linear infinite;}
+  .starburst span{animation:spin 14s linear infinite reverse;}
+
+  /* ── MARQUEE ── */
+  .strip{background:var(--ink);overflow:hidden;border-top:var(--bd);border-bottom:var(--bd);}
+  .strip-track{display:flex;padding:12px 0;white-space:nowrap;animation:mq 22s linear infinite;font-family:var(--disp);}
+  .strip-track span{font-size:14px;text-transform:uppercase;color:var(--yellow);padding:0 22px;}
+  .strip-track span:nth-child(even){color:var(--cyan);}
+  .strip-track span::after{content:"★";margin-left:22px;color:var(--pink);}
+  @keyframes mq{to{transform:translateX(-50%);}}
+
+  /* ── SECTION ── */
+  .sec{padding:84px 0;position:relative;overflow:hidden;}
+  .sec-head{text-align:center;margin-bottom:50px;}
+  .sec-head h2{font-family:var(--disp);text-transform:uppercase;font-size:clamp(36px,6vw,68px);line-height:.92;margin:0;display:inline-block;
+    transform:rotate(-1.5deg);}
+  .sec-head h2 .hl{background:var(--yellow);padding:0 14px;border:var(--bd);box-shadow:var(--sh-sm);display:inline-block;}
+  .sec-head p{font-size:17px;font-weight:600;margin:20px auto 0;max-width:46ch;}
+
+  /* ── LINEUP (tilted tickets) ── */
+  .lineup{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+  .gig{display:grid;grid-template-columns:140px 1fr;align-items:stretch;background:#fff;border:var(--bd);box-shadow:var(--sh);
+    transition:transform .15s ease,box-shadow .15s ease;}
+  .gig:nth-child(odd){transform:rotate(-1.2deg);}
+  .gig:nth-child(even){transform:rotate(1.2deg);}
+  .gig:hover{transform:rotate(0deg) translateY(-4px);box-shadow:12px 12px 0 var(--ink);}
+  .gig .time{border-right:var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 10px;text-align:center;}
+  .gig .time .t{font-family:var(--disp);font-size:24px;text-transform:uppercase;line-height:1;}
+  .gig .time .ap{font-family:var(--disp);font-size:12px;margin-top:4px;}
+  .gig:nth-child(5n+1) .time{background:var(--pink);color:#fff;}
+  .gig:nth-child(5n+2) .time{background:var(--cyan);}
+  .gig:nth-child(5n+3) .time{background:var(--lime);}
+  .gig:nth-child(5n+4) .time{background:var(--yellow);}
+  .gig:nth-child(5n+5) .time{background:var(--coral);color:#fff;}
+  .gig .body{padding:18px 24px;display:flex;align-items:center;gap:16px;}
+  .gig .body .ic{width:48px;height:48px;flex:none;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;background:var(--cream2);}
+  .gig .body .ic svg{width:26px;height:26px;}
+  .gig .body h4{font-family:var(--disp);font-size:20px;text-transform:uppercase;margin:0;line-height:1;}
+  .gig .body p{font-weight:500;margin:6px 0 0;font-size:14px;}
+
+  /* ── GOODIES ── */
+  .feature{position:relative;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;
+    background:var(--purple);color:#fff;border:var(--bd);box-shadow:var(--sh);margin-bottom:40px;transform:rotate(-.8deg);}
+  .feature .fcopy{padding:clamp(30px,4vw,52px);}
+  .feature .ribbon{display:inline-block;font-family:var(--disp);font-size:13px;text-transform:uppercase;background:var(--yellow);color:var(--ink);
+    padding:7px 16px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);transform:rotate(-2deg);}
+  .feature h3{font-family:var(--disp);text-transform:uppercase;font-size:clamp(28px,4vw,46px);line-height:.94;margin:18px 0 0;}
+  .feature p{font-weight:500;margin:14px 0 0;max-width:38ch;opacity:.95;}
+  .feature .price{font-family:var(--disp);font-size:22px;color:var(--yellow);margin-top:16px;}
+  .feature .fart{position:relative;align-self:stretch;min-height:280px;display:flex;align-items:center;justify-content:center;border-left:var(--bd);background:var(--cyan);}
+
+  .goodies{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  .goody{position:relative;background:#fff;border:var(--bd);box-shadow:var(--sh-sm);display:flex;flex-direction:column;
+    transition:transform .18s ease,box-shadow .18s ease;}
+  .goody:hover{animation:wiggle .4s ease-in-out;box-shadow:8px 8px 0 var(--ink);}
+  .goody .pic{aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:var(--bd);}
+  .goody .pic .glyph{width:58%;height:58%;}
+  .goody .store{position:absolute;top:10px;left:10px;font-family:var(--disp);font-size:9px;text-transform:uppercase;
+    background:var(--ink);color:#fff;padding:4px 8px;border-radius:6px;}
+  .goody .tag{position:absolute;top:-12px;right:-10px;font-family:var(--disp);font-size:14px;background:var(--lime);
+    border:3px solid var(--ink);border-radius:999px;padding:8px 12px;transform:rotate(8deg);box-shadow:3px 3px 0 var(--ink);}
+  .goody .body{padding:14px 16px 16px;}
+  .goody .name{font-family:var(--disp);font-size:15px;text-transform:uppercase;line-height:1;}
+  .goody .desc{font-weight:500;font-size:12.5px;margin:7px 0 0;color:#6B5E76;}
+  .goody .get{margin-top:12px;font-family:var(--disp);font-size:11px;text-transform:uppercase;color:var(--purple);}
+
+  /* ── RSVP ── */
+  .rsvp{position:relative;overflow:hidden;background:var(--cyan);border:var(--bd);box-shadow:var(--sh);
+    padding:clamp(46px,7vw,82px) 30px;text-align:center;transform:rotate(-.6deg);}
+  .rsvp-inner{position:relative;z-index:3;max-width:600px;margin:0 auto;}
+  .rsvp h2{font-family:var(--disp);text-transform:uppercase;font-size:clamp(40px,6.5vw,78px);line-height:.88;margin:0;color:var(--ink);}
+  .rsvp h2 .pk{color:var(--pink);-webkit-text-stroke:2px var(--ink);}
+  .rsvp p{font-weight:600;font-size:17px;margin:18px 0 0;}
+  .rsvp form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:28px 0 0;}
+  .rsvp input{padding:15px 20px;border:var(--bd);border-radius:12px;font-family:var(--body);font-weight:600;font-size:15px;min-width:250px;background:#fff;box-shadow:var(--sh-sm);}
+  .rsvp input:focus{outline:none;transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink);}
+  .rsvp small{display:block;margin-top:18px;font-family:var(--disp);font-size:11px;text-transform:uppercase;}
+
+  /* ── FOOTER ── */
+  footer{background:var(--ink);color:var(--cream);padding:56px 0 46px;text-align:center;border-top:var(--bd);}
+  footer .big{font-family:var(--shade);font-size:clamp(34px,7vw,60px);text-transform:uppercase;color:var(--yellow);line-height:.9;}
+  footer p{font-family:var(--disp);font-size:13px;text-transform:uppercase;color:var(--cyan);margin:14px 0 0;}
+  footer .small{font-weight:500;text-transform:none;color:#9C92AE;font-family:var(--body);margin-top:10px;font-size:13px;}
+
+  /* ── MOBILE COMPONENTS ── */
+  .hamburger{display:none;width:46px;height:46px;place-items:center;color:var(--ink);background:transparent;cursor:pointer;flex:none;}
+  .hamburger:active{transform:scale(.92);}
+  .hamburger span{position:relative;width:22px;height:3px;background:currentColor;border-radius:2px;display:block;transition:background .2s ease;}
+  .hamburger span::before,.hamburger span::after{content:"";position:absolute;left:0;width:22px;height:3px;background:currentColor;border-radius:2px;transition:transform .3s ease;}
+  .hamburger span::before{top:-7px;}
+  .hamburger span::after{top:7px;}
+  body.menu-open .hamburger span{background:transparent;}
+  body.menu-open .hamburger span::before{transform:translateY(7px) rotate(45deg);}
+  body.menu-open .hamburger span::after{transform:translateY(-7px) rotate(-45deg);}
+
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(27,20,48,.55);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;}
+  .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(84vw,360px);background:var(--cream);border-left:var(--bd);transform:translateX(105%);transition:transform .4s cubic-bezier(.3,.9,.2,1.1);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 20px) 24px calc(var(--safe-b) + 24px);box-shadow:-12px 0 0 rgba(27,20,48,.12);}
+  .mobile-menu .mm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .mobile-menu .mm-brand{font-family:var(--disp);font-size:20px;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .mobile-menu .mm-brand .star{color:var(--pink);}
+  .mm-close{width:44px;height:44px;display:grid;place-items:center;background:var(--pink);color:#fff;border:3px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);cursor:pointer;}
+  .mm-close:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  .mobile-menu nav{display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+  .mobile-menu nav a{font-family:var(--disp);font-size:22px;text-transform:uppercase;color:var(--ink);padding:14px 16px;border:var(--bd);border-radius:14px;box-shadow:var(--sh-sm);display:flex;align-items:center;justify-content:space-between;opacity:0;transform:translateX(20px);transition:opacity .35s ease,transform .35s ease;}
+  .mobile-menu nav a:nth-child(1){background:var(--pink);color:#fff;}
+  .mobile-menu nav a:nth-child(2){background:var(--cyan);}
+  .mobile-menu nav a:nth-child(3){background:var(--lime);}
+  .mobile-menu nav a .ix{font-size:16px;}
+  body.menu-open .mobile-menu nav a{opacity:1;transform:none;}
+  body.menu-open .mobile-menu nav a:nth-child(1){transition-delay:.08s;}
+  body.menu-open .mobile-menu nav a:nth-child(2){transition-delay:.15s;}
+  body.menu-open .mobile-menu nav a:nth-child(3){transition-delay:.22s;}
+  .mobile-menu .mm-foot{margin-top:auto;padding-top:20px;}
+  .mobile-menu .mm-foot p{font-family:var(--disp);font-size:11px;text-transform:uppercase;color:var(--purple);margin:0;line-height:1.8;}
+  body.menu-open{overflow:hidden;}
+  body.menu-open .scrim{opacity:1;visibility:visible;}
+  body.menu-open .mobile-menu{transform:none;}
+
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:12px;padding:12px 18px calc(12px + var(--safe-b));background:var(--yellow);border-top:var(--bd);transform:translateY(160%);transition:transform .4s cubic-bezier(.3,.9,.2,1.1);}
+  .mobile-bar.show{transform:none;}
+  .mobile-bar .mb-meta{flex:1;min-width:0;}
+  .mobile-bar .mb-meta .k{font-family:var(--disp);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--purple);}
+  .mobile-bar .mb-meta .v{font-family:var(--disp);font-size:17px;text-transform:uppercase;color:var(--ink);line-height:1;}
+  .mobile-bar .btn{flex:0 0 auto;padding:12px 20px;}
+
+  .sheet-scrim{position:fixed;inset:0;z-index:90;background:rgba(27,20,48,.6);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:91;background:var(--cream);border-top:var(--bd);border-radius:22px 22px 0 0;transform:translateY(101%);transition:transform .4s cubic-bezier(.3,.9,.2,1.05);padding:10px 22px calc(26px + var(--safe-b));max-height:92vh;overflow-y:auto;}
+  body.sheet-open{overflow:hidden;}
+  body.sheet-open .sheet-scrim{opacity:1;visibility:visible;}
+  body.sheet-open .sheet{transform:none;}
+  .sheet .grab{width:50px;height:5px;border-radius:999px;background:var(--ink);opacity:.3;margin:6px auto 16px;}
+  .sheet .sh-pic{position:relative;width:100%;aspect-ratio:3/2;border:var(--bd);border-radius:14px;display:flex;align-items:center;justify-content:center;}
+  .sheet .sh-pic .glyph{width:40%;height:40%;}
+  .sheet .sh-store{display:inline-block;margin-top:18px;font-family:var(--disp);font-size:11px;text-transform:uppercase;background:var(--ink);color:#fff;padding:5px 12px;border-radius:8px;}
+  .sheet .sh-name{font-family:var(--disp);font-size:24px;text-transform:uppercase;color:var(--ink);margin-top:12px;line-height:1;}
+  .sheet .sh-desc{font-weight:600;font-size:15px;color:#6B5E76;margin-top:10px;}
+  .sheet .sh-price{font-family:var(--disp);font-size:26px;color:var(--pink);margin-top:14px;}
+  .sheet .sh-cta{display:flex;gap:12px;margin-top:22px;}
+  .sheet .sh-cta .btn{flex:1;justify-content:center;}
+  .sheet .sh-cta .btn--ghost{background:#fff;color:var(--ink);}
+
+  .goody .claimed-badge{position:absolute;top:-12px;left:-8px;z-index:4;display:none;align-items:center;gap:4px;font-family:var(--disp);font-size:12px;text-transform:uppercase;background:var(--lime);color:var(--ink);border:3px solid var(--ink);border-radius:999px;padding:6px 11px;box-shadow:3px 3px 0 var(--ink);transform:rotate(-8deg);}
+  .goody.claimed .claimed-badge{display:inline-flex;}
+  .goody.claimed{opacity:.7;}
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;gap:40px;}
+    .polaroid-wrap{order:-1;}
+    .feature{grid-template-columns:1fr;}
+    .feature .fart{min-height:200px;border-left:none;border-top:var(--bd);}
+    .goodies{grid-template-columns:repeat(2,1fr);}
+    .nav-links{display:none;}
+    .hamburger{display:grid;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 18px;}
+    .hero{padding:34px 0 104px;}
+    .hero h1{font-size:clamp(54px,17vw,92px);}
+    .hero-cta{flex-direction:column;}
+    .hero-cta .btn{width:100%;justify-content:center;}
+    .sec{padding:56px 0;}
+    .sec-head{margin-bottom:34px;}
+    .lineup{gap:18px;}
+    /* goodies → horizontal snap carousel */
+    .goodies{display:flex;grid-template-columns:none;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -18px;padding:18px 18px 6px;scroll-padding-left:18px;}
+    .goodies::-webkit-scrollbar{display:none;}
+    .goody{flex:0 0 66%;max-width:230px;scroll-snap-align:start;cursor:pointer;}
+    .goody:last-child{margin-right:8px;}
+    .goody:hover{animation:none;}
+    .goody:active{transform:translate(0,2px);}
+    .gig{grid-template-columns:84px 1fr;}
+    .gig .time .t{font-size:18px;}
+    .gig:hover{transform:rotate(0deg);}
+    .rsvp form{flex-direction:column;}
+    .rsvp input{min-width:0;width:100%;}
+    .rsvp form .btn{width:100%;justify-content:center;}
+    .mobile-bar{display:flex;}
+  }
+  @media (max-width:380px){
+    .goodies{flex-basis:74%;}
+    .goody{flex-basis:74%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.12s!important;}
+    .shape,.starburst,.starburst span,.logo .star{animation:none!important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ MOBILE MENU ══ -->
+<div class="scrim" data-close-menu></div>
+<aside class="mobile-menu" aria-label="Menu">
+  <div class="mm-top">
+    <span class="mm-brand"><span class="star">★</span> RAD BASH</span>
+    <button class="mm-close" data-close-menu aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <nav>
+    <a href="#lineup" data-close-menu>Lineup <span class="ix">★</span></a>
+    <a href="#goodies" data-close-menu>Goodies <span class="ix">★</span></a>
+    <a href="#rsvp" data-close-menu>RSVP <span class="ix">★</span></a>
+  </nav>
+  <div class="mm-foot">
+    <p>The Roxy Roller Rink<br/>Sat Sept 13 · 8PM 'til late</p>
+  </div>
+</aside>
+
+<!-- ══ NAV ══ -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <button class="hamburger" data-open-menu aria-label="Open menu"><span></span></button>
+    <div class="logo"><span class="star">★</span>RAD BASH</div>
+    <nav class="nav-links">
+      <a href="#lineup">Lineup</a>
+      <a href="#goodies">Goodies</a>
+      <a href="#rsvp">RSVP</a>
+    </nav>
+    <a class="btn btn--purple" href="#rsvp">Get On The List</a>
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="top">
+  <div class="decor">
+    <svg class="shape" style="top:40px;left:4%;animation:float1 7s ease-in-out infinite" width="70" height="70" viewBox="0 0 70 70"><path d="M5 35c8-18 22-18 30 0s22 18 30 0" stroke="#FF3E9A" stroke-width="7" fill="none" stroke-linecap="round"/></svg>
+    <div class="shape" style="top:120px;right:6%;width:54px;height:54px;background:var(--lime);border:4px solid var(--ink);border-radius:50%;animation:float2 8s ease-in-out infinite"></div>
+    <svg class="shape" style="bottom:60px;left:46%;animation:spin 12s linear infinite" width="56" height="56" viewBox="0 0 56 56"><path d="M28 2l7 16 18 1-14 12 5 18-16-10-16 10 5-18-14-12 18-1z" fill="#FFCB1F" stroke="#1B1430" stroke-width="3"/></svg>
+    <div class="shape" style="top:240px;left:30%;width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:46px solid var(--cyan);animation:float1 9s ease-in-out infinite .6s;filter:drop-shadow(3px 3px 0 var(--ink))"></div>
+    <svg class="shape" style="bottom:30px;right:14%;animation:float2 6s ease-in-out infinite" width="80" height="40" viewBox="0 0 80 40"><path d="M5 20l10-14 10 28 10-28 10 28 10-28 10 14" stroke="#8B47E0" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="shape" style="top:60px;left:60%;width:40px;height:20px;background:var(--coral);border:4px solid var(--ink);border-radius:0 0 40px 40px;animation:bob 5s ease-in-out infinite"></div>
+  </div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="kicker"><span class="chip" style="background:var(--lime)">★ You're Invited</span><span class="chip" style="background:var(--pink);color:#fff">EST. 1994</span></div>
+      <h1><span class="l1">Totally</span><span class="l2">Rad</span><span class="l3">Bash!</span></h1>
+      <p class="lede">Jade's cranking it back to the radical decade — neon, mixtapes, and big hair. Grab your scrunchie and get over here, dude.</p>
+      <div class="info">
+        <span class="chip a">📼 Sat · Sept 13</span>
+        <span class="chip b">🕗 8PM 'til late</span>
+        <span class="chip c">📍 The Roxy Roller Rink</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn--pink" href="#rsvp">I'm so there!</a>
+        <a class="btn btn--yellow" href="#lineup">Peep the lineup</a>
+      </div>
+    </div>
+
+    <div class="polaroid-wrap">
+      <div class="polaroid">
+        <span class="tape t1"></span><span class="tape t2"></span>
+        <div class="starburst"><span>Big 3-0!</span></div>
+        <div class="pic">
+          <div class="cap">[ tape a totally rad photo of the birthday legend here ]</div>
+          <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80&auto=format&fit=crop" alt="The birthday legend" onerror="this.style.display='none'"/>
+        </div>
+        <div class="label">★ The Guest of Honor ★</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MARQUEE ══ -->
+<div class="strip">
+  <div class="strip-track">
+    <span>Dress code: outrageous</span><span>BYO scrunchie</span><span>Mixtapes welcome</span><span>No squares allowed</span>
+    <span>Dress code: outrageous</span><span>BYO scrunchie</span><span>Mixtapes welcome</span><span>No squares allowed</span>
+  </div>
+</div>
+
+<!-- ══ LINEUP ══ -->
+<section class="sec" id="lineup">
+  <div class="decor">
+    <div class="shape" style="top:50px;left:3%;width:42px;height:42px;background:var(--yellow);border:4px solid var(--ink);border-radius:50%;animation:bob 6s ease-in-out infinite"></div>
+    <svg class="shape" style="bottom:80px;right:4%;animation:spin 16s linear infinite" width="50" height="50" viewBox="0 0 56 56"><path d="M28 2l7 16 18 1-14 12 5 18-16-10-16 10 5-18-14-12 18-1z" fill="#1FD3E8" stroke="#1B1430" stroke-width="3"/></svg>
+  </div>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="disp">The <span class="hl">Lineup</span></h2>
+      <p>Here's how the night goes down. Don't be a square — show up on time.</p>
+    </div>
+    <div class="lineup">
+      <div class="gig"><div class="time"><div class="t">8:00</div><div class="ap">PM</div></div>
+        <div class="body"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16v9H4zM8 8V6h8v2M9 12.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z" stroke="#1B1430" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <div><h4>Doors &amp; Boombox Warm-Up</h4><p>Roll in, grab a neon name tag, and claim your spot on the rink.</p></div></div></div>
+      <div class="gig"><div class="time"><div class="t">8:45</div><div class="ap">PM</div></div>
+        <div class="body"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="18" r="2.4" stroke="#1B1430" stroke-width="1.8"/><circle cx="16" cy="16" r="2.4" stroke="#1B1430" stroke-width="1.8"/><path d="M10 18V6l8-1.5V16" stroke="#1B1430" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><h4>Skate Session &amp; Limbo</h4><p>Lace up the quad skates — DJ spins nothing but throwback bangers.</p></div></div></div>
+      <div class="gig"><div class="time"><div class="t">9:30</div><div class="ap">PM</div></div>
+        <div class="body"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="8" width="14" height="11" rx="2" stroke="#1B1430" stroke-width="1.8"/><circle cx="9" cy="13" r="1.6" fill="#1B1430"/><circle cx="15" cy="13" r="1.6" fill="#1B1430"/><path d="M8 8V5h8v3" stroke="#1B1430" stroke-width="1.8"/></svg></div>
+          <div><h4>Best Outfit Contest</h4><p>Shoulder pads, leg warmers, frosted tips — the rink crowns the radest fit.</p></div></div></div>
+      <div class="gig"><div class="time"><div class="t">10:15</div><div class="ap">PM</div></div>
+        <div class="body"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19h14M6 19v-6h12v6M8 13c0-3 2-3 2-6M14 13c0-3 2-3 2-6" stroke="#1B1430" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><h4>Neon Cake &amp; Candles</h4><p>A glow-in-the-dark cake, 30 candles, and the loudest happy-birthday yet.</p></div></div></div>
+      <div class="gig"><div class="time"><div class="t">11:00</div><div class="ap">PM</div></div>
+        <div class="body"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#1B1430" stroke-width="1.8"/><circle cx="12" cy="12" r="2" fill="#1B1430"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3" stroke="#1B1430" stroke-width="1.8"/></svg></div>
+          <div><h4>Disco-Ball Dance-Off</h4><p>Last one off the floor wins. The mirror ball does not stop spinning.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GOODIES ══ -->
+<section class="sec" id="goodies" style="background:var(--cream2);border-top:var(--bd);border-bottom:var(--bd);">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="disp">The <span class="hl" style="background:var(--pink);color:#fff">Goodies</span></h2>
+      <p>No gifts needed — but if you're feeling generous, here's Jade's totally rad wishlist.</p>
+    </div>
+
+    <!-- featured experience -->
+    <div class="feature">
+      <div class="fcopy">
+        <span class="ribbon">★ The Big One ★</span>
+        <h3>A Private Arcade<br/>Buyout at Pixel Palace</h3>
+        <p>The whole arcade, after hours, for Jade and the crew — every machine set to free play, a high-score tournament, and a tower of pizza. Insert no coins required.</p>
+        <div class="price">$480 · chip in on the buyout</div>
+        <div style="margin-top:20px"><a class="btn btn--yellow" href="#">Pitch in on the fun</a></div>
+      </div>
+      <div class="fart">
+        <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+          <rect x="52" y="34" width="76" height="112" rx="8" fill="#1B1430"/>
+          <rect x="62" y="46" width="56" height="38" rx="4" fill="#7BE04B"/>
+          <rect x="70" y="54" width="8" height="8" fill="#1B1430"/><rect x="86" y="62" width="8" height="8" fill="#1B1430"/><rect x="102" y="54" width="8" height="8" fill="#1B1430"/>
+          <circle cx="72" cy="100" r="7" fill="#FF3E9A"/>
+          <rect x="92" y="96" width="9" height="9" fill="#FFCB1F"/><rect x="106" y="96" width="9" height="9" fill="#1FD3E8"/>
+          <rect x="62" y="118" width="56" height="20" rx="4" fill="#8B47E0"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- goody grid -->
+    <div class="goodies">
+      <article class="goody">
+        <span class="tag">$95</span>
+        <div class="pic" style="background:var(--cyan)"><span class="store">Amazon</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="14" y="34" width="72" height="34" rx="6" fill="#1B1430"/><circle cx="34" cy="51" r="11" fill="#FF3E9A"/><circle cx="66" cy="51" r="11" fill="#FFCB1F"/><circle cx="34" cy="51" r="4" fill="#1B1430"/><circle cx="66" cy="51" r="4" fill="#1B1430"/><rect x="48" y="44" width="4" height="14" fill="#7BE04B"/></svg>
+        </div>
+        <div class="body"><div class="name">Retro Boombox</div><div class="desc">Bluetooth + cassette deck.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$120</span>
+        <div class="pic" style="background:var(--pink)"><span class="store">Etsy</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><path d="M28 30h30v26H28z" fill="#FFF6E6" stroke="#1B1430" stroke-width="3"/><circle cx="34" cy="62" r="7" fill="#1B1430"/><circle cx="52" cy="62" r="7" fill="#1B1430"/><path d="M58 36l16-6v22" stroke="#1B1430" stroke-width="3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="body"><div class="name">Quad Roller Skates</div><div class="desc">Light-up wheels, hot pink.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$40</span>
+        <div class="pic" style="background:var(--yellow)"><span class="store">Target</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="30" fill="#1B1430"/><circle cx="50" cy="50" r="9" fill="#FFF6E6"/><circle cx="50" cy="50" r="3" fill="#1B1430"/><path d="M50 50l16-12" stroke="#FF3E9A" stroke-width="4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="body"><div class="name">Vinyl Record Set</div><div class="desc">Greatest hits of the decade.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$28</span>
+        <div class="pic" style="background:var(--lime)"><span class="store">Etsy</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="26" y="26" width="48" height="34" rx="4" fill="#1B1430"/><rect x="32" y="32" width="36" height="22" rx="2" fill="#1FD3E8"/><path d="M40 60v8h20v-8M34 68h32" stroke="#1B1430" stroke-width="3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="body"><div class="name">Mini Arcade Machine</div><div class="desc">240 games in your pocket.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$18</span>
+        <div class="pic" style="background:var(--purple)"><span class="store">Claire's</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="14" fill="#FF3E9A" stroke="#FFF6E6" stroke-width="3"/><path d="M50 50c18-6 26 8 0 22-26-14-18-28 0-22z" fill="#FFCB1F" stroke="#1B1430" stroke-width="2"/></svg>
+        </div>
+        <div class="body"><div class="name">Scrunchie Mega-Pack</div><div class="desc">24 neon scrunchies. Obviously.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$64</span>
+        <div class="pic" style="background:var(--coral)"><span class="store">Amazon</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="30" y="22" width="40" height="56" rx="6" fill="#1B1430"/><rect x="36" y="30" width="28" height="20" rx="2" fill="#7BE04B"/><circle cx="50" cy="62" r="7" fill="#FF3E9A"/></svg>
+        </div>
+        <div class="body"><div class="name">Handheld Game Console</div><div class="desc">The OG, in see-through teal.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$52</span>
+        <div class="pic" style="background:var(--cyan)"><span class="store">Urban Outfitters</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><ellipse cx="50" cy="50" rx="30" ry="20" fill="#1B1430"/><ellipse cx="50" cy="50" rx="14" ry="20" fill="#8B47E0"/><path d="M20 50h60" stroke="#FFCB1F" stroke-width="3"/></svg>
+        </div>
+        <div class="body"><div class="name">Lava Lamp</div><div class="desc">Neon blobs, eternal vibes.</div><div class="get">Get it →</div></div>
+      </article>
+      <article class="goody">
+        <span class="tag">$36</span>
+        <div class="pic" style="background:var(--pink)"><span class="store">Etsy</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="30" y="34" width="40" height="32" rx="4" fill="#1B1430"/><circle cx="40" cy="50" r="7" fill="#1FD3E8"/><circle cx="60" cy="50" r="7" fill="#FFCB1F"/><rect x="44" y="66" width="12" height="10" fill="#1B1430"/></svg>
+        </div>
+        <div class="body"><div class="name">Polaroid Camera</div><div class="desc">For documenting the chaos.</div><div class="get">Get it →</div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RSVP ══ -->
+<section class="sec" id="rsvp">
+  <div class="decor">
+    <svg class="shape" style="top:30px;left:6%;animation:float1 7s ease-in-out infinite" width="60" height="60" viewBox="0 0 56 56"><path d="M28 2l7 16 18 1-14 12 5 18-16-10-16 10 5-18-14-12 18-1z" fill="#8B47E0" stroke="#1B1430" stroke-width="3"/></svg>
+    <div class="shape" style="bottom:40px;right:8%;width:50px;height:50px;background:var(--yellow);border:4px solid var(--ink);border-radius:50%;animation:bob 5s ease-in-out infinite"></div>
+  </div>
+  <div class="wrap">
+    <div class="rsvp">
+      <div class="decor">
+        <div class="shape" style="top:20px;right:12%;width:30px;height:30px;background:var(--pink);border:3px solid var(--ink);border-radius:50%;animation:bob 4s ease-in-out infinite"></div>
+        <svg class="shape" style="bottom:24px;left:10%;animation:spin 14s linear infinite" width="40" height="40" viewBox="0 0 56 56"><path d="M28 2l7 16 18 1-14 12 5 18-16-10-16 10 5-18-14-12 18-1z" fill="#FFCB1F" stroke="#1B1430" stroke-width="3"/></svg>
+      </div>
+      <div class="rsvp-inner">
+        <span class="chip" style="background:var(--yellow)">★ Don't Be A Square ★</span>
+        <h2 style="margin-top:16px">Are You<br/><span class="pk">In?!</span></h2>
+        <p>Drop your name and we'll text you the deets, the dress code hotline, and the official party playlist.</p>
+        <form onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').textContent='SEE YA THERE, DUDE! ★';">
+          <input type="text" placeholder="Your totally rad name" required/>
+          <button class="btn btn--pink" type="submit">Count me in!</button>
+        </form>
+        <small>Questions? Hit up Jade at 555 · RAD-1994</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="wrap">
+    <div class="big">Stay Rad</div>
+    <p>★ Jade's Totally Rad Bash · The Roxy Roller Rink · Sept 13 ★</p>
+    <div class="small">No squares were harmed in the making of this party.</div>
+  </div>
+</footer>
+
+<!-- ══ MOBILE STICKY BAR ══ -->
+<div class="mobile-bar" aria-hidden="true">
+  <div class="mb-meta"><div class="k">Sept 13 · The Roxy</div><div class="v">Are you in?!</div></div>
+  <a class="btn btn--pink" href="#rsvp">RSVP</a>
+</div>
+
+<!-- ══ GOODY BOTTOM SHEET ══ -->
+<div class="sheet-scrim" data-close-sheet></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-label="Goody detail">
+  <div class="grab"></div>
+  <div class="sh-pic"><span class="glyph"></span></div>
+  <span class="sh-store"></span>
+  <div class="sh-name"></div>
+  <div class="sh-desc"></div>
+  <div class="sh-price"></div>
+  <div class="sh-cta">
+    <button class="btn btn--ghost sh-x" data-close-sheet>Close</button>
+    <button class="btn btn--pink sh-claim">I'll bring this! ★</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var body = document.body;
+  function openMenu(){ body.classList.add('menu-open'); }
+  function closeMenu(){ body.classList.remove('menu-open'); }
+  document.querySelectorAll('[data-open-menu]').forEach(function(el){ el.addEventListener('click', openMenu); });
+  document.querySelectorAll('[data-close-menu]').forEach(function(el){ el.addEventListener('click', closeMenu); });
+
+  var sheet = document.querySelector('.sheet');
+  var shPic = sheet.querySelector('.sh-pic');
+  var shGlyph = sheet.querySelector('.glyph');
+  var shStore = sheet.querySelector('.sh-store');
+  var shName = sheet.querySelector('.sh-name');
+  var shDesc = sheet.querySelector('.sh-desc');
+  var shPrice = sheet.querySelector('.sh-price');
+  var shClaim = sheet.querySelector('.sh-claim');
+  var current = null;
+
+  function openSheet(card){
+    current = card;
+    shPic.style.background = card.querySelector('.pic').style.background;
+    shGlyph.innerHTML = card.querySelector('.glyph').innerHTML;
+    shGlyph.setAttribute('viewBox','0 0 100 100');
+    shStore.textContent = card.querySelector('.store').textContent;
+    shName.textContent = card.querySelector('.name').textContent;
+    shDesc.textContent = card.querySelector('.desc').textContent;
+    shPrice.textContent = card.querySelector('.tag').textContent;
+    var claimed = card.classList.contains('claimed');
+    shClaim.textContent = claimed ? 'You got this one! ★' : "I'll bring this! ★";
+    shClaim.disabled = claimed;
+    body.classList.add('sheet-open');
+  }
+  function closeSheet(){ body.classList.remove('sheet-open'); }
+
+  document.querySelectorAll('.goodies .goody').forEach(function(card){
+    var badge = document.createElement('span');
+    badge.className = 'claimed-badge';
+    badge.textContent = '★ Got it!';
+    card.appendChild(badge);
+    card.addEventListener('click', function(){ openSheet(card); });
+  });
+  document.querySelectorAll('[data-close-sheet]').forEach(function(el){ el.addEventListener('click', closeSheet); });
+  shClaim.addEventListener('click', function(){
+    if(!current) return;
+    current.classList.add('claimed');
+    shClaim.textContent = 'Rad — it\u2019s yours! ★';
+    shClaim.disabled = true;
+    setTimeout(closeSheet, 950);
+  });
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeMenu(); closeSheet(); } });
+
+  var bar = document.querySelector('.mobile-bar');
+  var heroEl = document.getElementById('top');
+  if('IntersectionObserver' in window && heroEl){
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ bar.classList.toggle('show', !en.isIntersecting); });
+    }, {rootMargin:'-45% 0px 0px 0px'}).observe(heroEl);
+  }
+})();
+</script>
+
+<script>
+/* deep-link state hook for showcase canvas: ?cc=menu | sheet | bar */
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get('cc');
+    if(!p) return;
+    var run = function(){
+      var b = document.body;
+      if(p==='menu'){ b.classList.add('menu-open'); }
+      else if(p==='sheet'){ var c=document.querySelector('.grid .card, .gifts .gift, .loot .item, .lots .lot, .payload .cargo, .goodies .goody'); if(c) c.click(); }
+      else if(p==='bar'){ var bar=document.querySelector('.mobile-bar'); if(bar) bar.classList.add('show'); window.scrollTo(0, Math.round(window.innerHeight*0.92)); }
+    };
+    setTimeout(run, 120);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

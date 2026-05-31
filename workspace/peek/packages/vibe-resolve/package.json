@@ -1,0 +1,22 @@
+{
+  "name": "@peek/vibe-resolve",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peek/design-tokens": "workspace:*",
+    "@peek/vibe-genome": "workspace:*",
+    "@peek/vibe-harmony": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>A Midsummer Garden Party · for Eloise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Tangerine:wght@400;700&family=Mulish:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --parch:#FBF8EF;
+    --parch2:#F4EEDF;
+    --cream:#FFFDF7;
+    --ink:#3A4034;
+    --ink2:#525A48;
+    --stone:#7E8470;
+    --sage:#8FA078;
+    --sage-dp:#5E6F4A;
+    --eucalyptus:#A9B89A;
+    --blush:#E4B7AE;
+    --blush-dp:#C98A7E;
+    --terra:#C57B57;
+    --butter:#E9D49A;
+    --plum:#7A5A6E;
+    --line:rgba(58,64,52,0.16);
+    --disp:"Marcellus",Georgia,serif;
+    --script:"Tangerine",cursive;
+    --body:"Mulish",system-ui,sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--parch);color:var(--ink);font-family:var(--body);font-weight:400;
+    font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;border:none;cursor:pointer;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 38px;}
+  .disp{font-family:var(--disp);}
+  .script{font-family:var(--script);}
+  .eyebrow{font-family:var(--body);font-size:12px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--sage-dp);}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 32px;border-radius:999px;
+    font-family:var(--body);font-size:12.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+    background:var(--sage-dp);color:var(--cream);border:1px solid var(--sage-dp);
+    transition:background .35s ease,color .35s ease,transform .2s ease;}
+  .btn:hover{transform:translateY(-2px);background:var(--ink);border-color:var(--ink);}
+  .btn--terra{background:var(--terra);border-color:var(--terra);}
+  .btn--terra:hover{background:var(--blush-dp);border-color:var(--blush-dp);}
+  .btn--ghost{background:transparent;color:var(--sage-dp);border-color:var(--line);}
+  .btn--ghost:hover{background:transparent;border-color:var(--sage-dp);color:var(--ink);}
+
+  /* sprig divider */
+  .sprig{display:flex;align-items:center;justify-content:center;gap:16px;color:var(--sage);}
+  .sprig .ln{height:1px;width:80px;background:var(--line);}
+
+  /* ── NAV ── */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(251,248,239,.88);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:74px;}
+  .logo{font-family:var(--script);font-size:38px;line-height:1;color:var(--sage-dp);}
+  .nav-links{display:flex;gap:36px;}
+  .nav-links a{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);transition:color .3s ease;}
+  .nav-links a:hover{color:var(--terra);}
+
+  /* ── HERO ── */
+  .hero{position:relative;overflow:hidden;padding:60px 0 90px;text-align:center;}
+  .hero .arch{position:relative;max-width:760px;margin:0 auto;padding:54px 40px 48px;
+    border:1px solid var(--line);border-radius:300px 300px 22px 22px;background:var(--cream);
+    box-shadow:0 30px 70px rgba(94,111,74,.1);}
+  .hero .arch::before{content:"";position:absolute;inset:10px;border:1px solid var(--line);border-radius:290px 290px 16px 16px;pointer-events:none;}
+  .hero .invite{font-family:var(--body);font-size:12px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--terra);}
+  .hero .you{font-family:var(--script);font-size:clamp(46px,8vw,86px);color:var(--blush-dp);line-height:.85;margin:14px 0 0;}
+  .hero h1{font-family:var(--disp);font-size:clamp(38px,6.4vw,76px);line-height:1.04;letter-spacing:.01em;margin:10px 0 0;color:var(--ink);}
+  .hero .for{font-family:var(--script);font-size:clamp(34px,5vw,56px);color:var(--sage-dp);margin:4px 0 0;line-height:1;}
+  .hero p.lede{font-size:16px;color:var(--ink2);margin:24px auto 0;max-width:46ch;}
+  .hero .meta{display:flex;justify-content:center;flex-wrap:wrap;gap:0;margin:30px 0 0;}
+  .hero .meta .c{padding:0 26px;border-right:1px solid var(--line);}
+  .hero .meta .c:last-child{border-right:none;}
+  .hero .meta .k{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);}
+  .hero .meta .v{font-family:var(--disp);font-size:19px;margin-top:5px;}
+  .hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 0;}
+  /* floating botanicals */
+  .botanical{position:absolute;color:var(--eucalyptus);opacity:.7;pointer-events:none;}
+  @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+
+  /* ── SECTION ── */
+  .band{background:var(--parch2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .sec{padding:92px 0;position:relative;overflow:hidden;}
+  .sec-head{text-align:center;max-width:600px;margin:0 auto 54px;}
+  .sec-head .you{font-family:var(--script);font-size:46px;color:var(--blush-dp);line-height:.8;}
+  .sec-head h2{font-family:var(--disp);font-size:clamp(30px,4.4vw,48px);line-height:1.05;margin:6px 0 0;color:var(--ink);}
+  .sec-head p{color:var(--ink2);margin:16px auto 0;font-size:15.5px;}
+
+  /* ── ITINERARY (the afternoon) ── */
+  .afternoon{max-width:720px;margin:0 auto;position:relative;}
+  .afternoon::before{content:"";position:absolute;left:97px;top:14px;bottom:14px;width:1px;background:var(--line);}
+  .moment{position:relative;display:grid;grid-template-columns:80px 1fr;gap:46px;padding:22px 0;}
+  .moment .time{text-align:right;font-family:var(--disp);font-size:19px;color:var(--terra);padding-top:8px;}
+  .moment .dot{position:absolute;left:91px;top:30px;width:13px;height:13px;border-radius:50%;background:var(--cream);border:2px solid var(--sage);}
+  .moment .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--sage);}
+  .moment .card{display:flex;gap:16px;align-items:flex-start;}
+  .moment .ic{width:48px;height:48px;flex:none;border-radius:50%;background:var(--cream);border:1px solid var(--line);display:grid;place-items:center;color:var(--sage-dp);}
+  .moment .ic svg{width:26px;height:26px;}
+  .moment h4{font-family:var(--disp);font-size:23px;margin:0;color:var(--ink);}
+  .moment p{color:var(--ink2);margin:5px 0 0;font-size:14.5px;max-width:46ch;}
+
+  /* ── GIFTS ── */
+  .feature{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--cream);margin-bottom:46px;box-shadow:0 24px 56px rgba(94,111,74,.1);}
+  .feature .art{position:relative;min-height:380px;background:linear-gradient(160deg,#DCE6CF,#B7C6A2);overflow:hidden;}
+  .feature .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .feature .copy{padding:clamp(34px,4.5vw,60px);display:flex;flex-direction:column;justify-content:center;}
+  .feature .copy .you{font-family:var(--script);font-size:40px;color:var(--blush-dp);line-height:.8;}
+  .feature .copy h3{font-family:var(--disp);font-size:clamp(26px,3.4vw,40px);line-height:1.08;margin:6px 0 0;color:var(--ink);}
+  .feature .copy p{color:var(--ink2);margin:16px 0 0;max-width:40ch;font-size:15px;}
+  .feature .copy .price{font-family:var(--disp);font-size:19px;color:var(--terra);margin:20px 0 0;}
+
+  .gifts{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;}
+  .gift{background:var(--cream);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s ease;}
+  .gift:hover{transform:translateY(-6px);box-shadow:0 20px 44px rgba(94,111,74,.16);}
+  .gift .pic{aspect-ratio:4/5;position:relative;display:flex;align-items:center;justify-content:center;}
+  .gift .pic .glyph{width:50%;height:50%;color:var(--sage-dp);}
+  .gift .shop{position:absolute;top:12px;left:12px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);background:rgba(255,253,247,.85);border-radius:999px;padding:5px 11px;}
+  .gift .body{padding:16px 18px 20px;border-top:1px solid var(--line);}
+  .gift .name{font-family:var(--disp);font-size:19px;color:var(--ink);line-height:1.1;}
+  .gift .desc{font-size:12.5px;color:var(--stone);margin:6px 0 0;}
+  .gift .foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+  .gift .pr{font-family:var(--disp);font-size:18px;color:var(--terra);}
+  .gift .get{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dp);}
+
+  /* ── RSVP ── */
+  .rsvp{position:relative;overflow:hidden;border-radius:26px;text-align:center;padding:clamp(48px,7vw,84px) 30px;
+    background:linear-gradient(160deg,#DCE6CF,#C7D3B2);border:1px solid var(--line);}
+  .rsvp-inner{position:relative;z-index:2;max-width:600px;margin:0 auto;}
+  .rsvp .you{font-family:var(--script);font-size:52px;color:var(--blush-dp);line-height:.8;}
+  .rsvp h2{font-family:var(--disp);font-size:clamp(30px,4.6vw,50px);line-height:1.04;margin:8px 0 0;color:var(--ink);}
+  .rsvp p{color:var(--ink2);margin:16px 0 0;font-size:15.5px;}
+  .rsvp form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:28px 0 0;}
+  .rsvp input{padding:15px 22px;border-radius:999px;border:1px solid var(--sage-dp);background:var(--cream);color:var(--ink);
+    font-family:var(--body);font-size:15px;min-width:250px;text-align:center;}
+  .rsvp input:focus{outline:none;border-color:var(--terra);}
+  .rsvp small{display:block;margin-top:18px;font-size:12px;letter-spacing:.06em;color:var(--ink2);}
+
+  /* ── FOOTER ── */
+  footer{text-align:center;padding:64px 0 54px;}
+  footer .logo{font-family:var(--script);font-size:56px;color:var(--sage-dp);}
+  footer p{color:var(--ink2);font-size:14px;margin:8px 0 0;}
+  footer .fine{margin-top:22px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);}
+
+  /* ── MOBILE COMPONENTS ── */
+  .hamburger{display:none;width:46px;height:46px;place-items:center;color:var(--sage-dp);background:transparent;cursor:pointer;}
+  .hamburger span{position:relative;width:22px;height:1.6px;background:currentColor;border-radius:2px;display:block;transition:background .3s ease;}
+  .hamburger span::before,.hamburger span::after{content:"";position:absolute;left:0;width:22px;height:1.6px;background:currentColor;border-radius:2px;transition:transform .3s ease;}
+  .hamburger span::before{top:-7px;}
+  .hamburger span::after{top:7px;}
+  body.menu-open .hamburger span{background:transparent;}
+  body.menu-open .hamburger span::before{transform:translateY(7px) rotate(45deg);}
+  body.menu-open .hamburger span::after{transform:translateY(-7px) rotate(-45deg);}
+
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(58,64,52,.4);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .45s ease,visibility .45s ease;}
+  .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(84vw,340px);background:var(--cream);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .5s cubic-bezier(.3,.8,.2,1);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 22px) 30px calc(var(--safe-b) + 30px);box-shadow:-30px 0 90px rgba(94,111,74,.2);}
+  .mobile-menu .mm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .mobile-menu .mm-brand{font-family:var(--script);font-size:40px;line-height:1;color:var(--sage-dp);}
+  .mm-close{width:46px;height:46px;display:grid;place-items:center;background:transparent;cursor:pointer;color:var(--terra);margin-right:-8px;}
+  .mobile-menu nav{display:flex;flex-direction:column;}
+  .mobile-menu nav a{font-family:var(--disp);font-size:27px;color:var(--ink);padding:16px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;opacity:0;transform:translateX(14px);transition:opacity .5s ease,transform .5s ease;}
+  .mobile-menu nav a .ix{color:var(--eucalyptus);}
+  .mobile-menu nav a .ix svg{width:22px;height:22px;}
+  body.menu-open .mobile-menu nav a{opacity:1;transform:none;}
+  body.menu-open .mobile-menu nav a:nth-child(1){transition-delay:.1s;}
+  body.menu-open .mobile-menu nav a:nth-child(2){transition-delay:.18s;}
+  body.menu-open .mobile-menu nav a:nth-child(3){transition-delay:.26s;}
+  .mobile-menu .mm-foot{margin-top:auto;padding-top:24px;}
+  .mobile-menu .mm-foot .eyebrow{display:block;margin-bottom:8px;}
+  .mobile-menu .mm-foot p{font-size:13px;color:var(--ink2);margin:0;line-height:1.7;}
+  body.menu-open{overflow:hidden;}
+  body.menu-open .scrim{opacity:1;visibility:visible;}
+  body.menu-open .mobile-menu{transform:none;}
+
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:16px;padding:12px 22px calc(12px + var(--safe-b));background:rgba(251,248,239,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);transform:translateY(160%);transition:transform .5s cubic-bezier(.3,.8,.2,1);}
+  .mobile-bar.show{transform:none;}
+  .mobile-bar .mb-meta{flex:1;min-width:0;}
+  .mobile-bar .mb-meta .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);}
+  .mobile-bar .mb-meta .v{font-family:var(--disp);font-size:18px;color:var(--ink);line-height:1.1;margin-top:1px;}
+  .mobile-bar .btn{flex:0 0 auto;padding:13px 24px;}
+
+  .sheet-scrim{position:fixed;inset:0;z-index:90;background:rgba(58,64,52,.45);opacity:0;visibility:hidden;transition:opacity .45s ease,visibility .45s ease;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:91;background:var(--cream);border-radius:26px 26px 0 0;transform:translateY(101%);transition:transform .5s cubic-bezier(.3,.85,.2,1);padding:10px 26px calc(30px + var(--safe-b));max-height:92vh;overflow-y:auto;box-shadow:0 -30px 90px rgba(94,111,74,.24);}
+  body.sheet-open{overflow:hidden;}
+  body.sheet-open .sheet-scrim{opacity:1;visibility:visible;}
+  body.sheet-open .sheet{transform:none;}
+  .sheet .grab{width:46px;height:4px;border-radius:999px;background:var(--line);margin:8px auto 18px;}
+  .sheet .sh-pic{position:relative;width:100%;aspect-ratio:3/2;border-radius:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);}
+  .sheet .sh-pic .glyph{width:32%;height:32%;color:var(--sage-dp);}
+  .sheet .sh-shop{display:inline-block;margin-top:20px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);background:var(--parch2);border-radius:999px;padding:5px 12px;}
+  .sheet .sh-name{font-family:var(--disp);font-size:28px;color:var(--ink);margin-top:12px;line-height:1.1;}
+  .sheet .sh-desc{font-size:14.5px;color:var(--stone);margin-top:8px;}
+  .sheet .sh-price{font-family:var(--disp);font-size:22px;color:var(--terra);margin-top:16px;}
+  .sheet .sh-cta{display:flex;gap:14px;margin-top:26px;}
+  .sheet .sh-cta .btn{flex:1;justify-content:center;}
+
+  .gift{position:relative;}
+  .gift .claimed-badge{position:absolute;top:12px;right:12px;z-index:3;display:none;align-items:center;gap:5px;background:var(--sage-dp);color:var(--cream);border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:5px 11px;}
+  .gift.claimed{opacity:.64;}
+  .gift.claimed .claimed-badge{display:inline-flex;}
+
+  @media (max-width:880px){
+    .wrap{padding:0 26px;}
+    .feature{grid-template-columns:1fr;}
+    .feature .art{min-height:240px;}
+    .gifts{grid-template-columns:repeat(2,1fr);}
+    .afternoon::before{left:69px;}
+    .moment{grid-template-columns:56px 1fr;gap:30px;}
+    .moment .dot{left:63px;}
+    .nav-links{display:none;}
+    .hamburger{display:grid;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 20px;}
+    .hero{padding:40px 0 78px;}
+    .hero .arch{padding:40px 24px 36px;border-radius:160px 160px 20px 20px;}
+    .hero .arch::before{border-radius:152px 152px 14px 14px;}
+    .hero .meta{border-top:1px solid var(--line);padding-top:18px;margin-top:24px;}
+    .hero .meta .c{padding:6px 14px;}
+    .hero-cta{flex-direction:column;}
+    .hero-cta .btn{width:100%;justify-content:center;}
+    .sec{padding:64px 0;}
+    .sec-head{margin-bottom:38px;}
+    .moment{grid-template-columns:46px 1fr;gap:22px;}
+    .afternoon::before{left:56px;}
+    .moment .dot{left:50px;}
+    .moment .time{font-size:16px;}
+    /* wishlist → soft horizontal carousel */
+    .gifts{display:flex;grid-template-columns:none;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -20px;padding:4px 20px;scroll-padding-left:20px;}
+    .gifts::-webkit-scrollbar{display:none;}
+    .gift{flex:0 0 64%;max-width:240px;scroll-snap-align:start;cursor:pointer;}
+    .gift:last-child{margin-right:6px;}
+    .gift:hover{transform:none;}
+    .gift:active{transform:scale(.98);}
+    .rsvp form{flex-direction:column;align-items:stretch;}
+    .rsvp input{min-width:0;width:100%;}
+    .rsvp form .btn{width:100%;justify-content:center;}
+    .mobile-bar{display:flex;}
+  }
+  @media (max-width:380px){
+    .gifts{margin:0 -18px;padding:4px 18px;scroll-padding-left:18px;}
+    .gift{flex-basis:72%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.12s!important;}
+    .botanical{animation:none!important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="scrim" data-close-menu></div>
+<aside class="mobile-menu" aria-label="Menu">
+  <div class="mm-top">
+    <span class="mm-brand">Eloise</span>
+    <button class="mm-close" data-close-menu aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </div>
+  <nav>
+    <a href="#afternoon" data-close-menu>The Afternoon <span class="ix">✿</span></a>
+    <a href="#wishlist" data-close-menu>Wishlist <span class="ix">✿</span></a>
+    <a href="#rsvp" data-close-menu>RSVP <span class="ix">✿</span></a>
+  </nav>
+  <div class="mm-foot">
+    <span class="eyebrow">The Walled Garden</span>
+    <p>Saturday, June 21st<br/>2 in the afternoon</p>
+  </div>
+</aside>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <button class="hamburger" data-open-menu aria-label="Open menu"><span></span></button>
+    <a class="logo" href="#top">Eloise</a>
+    <nav class="nav-links">
+      <a href="#afternoon">The Afternoon</a>
+      <a href="#wishlist">Wishlist</a>
+      <a href="#rsvp">RSVP</a>
+    </nav>
+    <a class="btn btn--ghost" href="#rsvp" style="padding:11px 22px">RSVP</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <svg class="botanical" style="top:30px;left:5%;animation:sway 7s ease-in-out infinite" width="90" height="130" viewBox="0 0 90 130" fill="none"><path d="M45 130V20" stroke="currentColor" stroke-width="2"/><path d="M45 40c-14-2-22-12-22-12s14-4 22 6M45 60c14-2 22-12 22-12s-14-4-22 6M45 80c-14-2-22-12-22-12s14-4 22 6M45 28c0-10 6-16 6-16s6 8 0 18" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+  <svg class="botanical" style="top:60px;right:6%;animation:sway 8s ease-in-out infinite .5s" width="80" height="120" viewBox="0 0 80 120" fill="none"><path d="M40 120V30" stroke="currentColor" stroke-width="2"/><circle cx="40" cy="22" r="9" stroke="currentColor" stroke-width="2"/><path d="M40 50c12 0 18-8 18-8M40 70c-12 0-18-8-18-8M40 90c12 0 18-8 18-8" stroke="currentColor" stroke-width="2"/></svg>
+  <div class="wrap">
+    <div class="arch">
+      <div class="invite">Please join us</div>
+      <div class="you">A Midsummer</div>
+      <h1 class="disp">Garden Party</h1>
+      <div class="for">for Eloise</div>
+      <p class="lede">Among the roses and the long grass, we're gathering to toast a year well-lived. Come for lemonade, stay for the golden hour.</p>
+      <div class="meta">
+        <div class="c"><div class="k">When</div><div class="v disp">Sat · June 21</div></div>
+        <div class="c"><div class="k">Time</div><div class="v disp">2 in the afternoon</div></div>
+        <div class="c"><div class="k">Where</div><div class="v disp">The Walled Garden</div></div>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn--terra" href="#rsvp">I'd love to come</a>
+        <a class="btn btn--ghost" href="#afternoon">See the afternoon</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="wrap" style="padding-top:60px;padding-bottom:0"><div class="sprig"><span class="ln"></span><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 24V8M13 13c-6-1-9-6-9-6s6-2 9 3M13 17c6-1 9-6 9-6s-6-2-9 3M13 8c0-3 2-5 2-5s2 3 0 6" stroke="#8FA078" stroke-width="1.6"/></svg><span class="ln"></span></div></div>
+
+<!-- AFTERNOON -->
+<section class="sec" id="afternoon">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="you">how the day</div>
+      <h2 class="disp">unfolds</h2>
+      <p>A slow afternoon in the garden — no need to be anywhere else.</p>
+    </div>
+    <div class="afternoon">
+      <div class="moment"><div class="time disp">2:00</div><div class="dot"></div><div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M6 11h12l-1 8H7l-1-8zM9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div><h4>Arrival & Elderflower Lemonade</h4><p>Wander in through the rose arch and find a glass waiting in the shade.</p></div></div></div>
+      <div class="moment"><div class="time disp">2:45</div><div class="dot"></div><div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5" stroke="currentColor" stroke-width="1.7"/><path d="M12 14v7M9 18h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div><h4>Flower-Crown Making</h4><p>Baskets of blooms and ribbon on the long table — everyone leaves crowned.</p></div></div></div>
+      <div class="moment"><div class="time disp">3:30</div><div class="dot"></div><div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18h16M6 18l1-7h10l1 7M9 11V8h6v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h4>The Long-Table Lunch</h4><p>Garden salads, warm bread, and peaches, served family-style under the linen canopy.</p></div></div></div>
+      <div class="moment"><div class="time disp">5:00</div><div class="dot"></div><div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19h14M7 19v-6h10v6M9 13c0-3 2-3 2-6M14 13c0-3 2-3 2-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h4>Cake Beneath the Oak</h4><p>An elderflower & lemon cake, candles lit, the whole garden singing.</p></div></div></div>
+      <div class="moment"><div class="time disp">6:30</div><div class="dot"></div><div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div><div><h4>Golden-Hour Toast</h4><p>As the light turns honey, a glass of fizz and a quiet word for the birthday girl.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WISHLIST -->
+<section class="sec band" id="wishlist">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="you">a little</div>
+      <h2 class="disp">Wishlist</h2>
+      <p>Your company is gift enough — but if you're inclined, Eloise would treasure any of these.</p>
+    </div>
+
+    <div class="feature">
+      <div class="art"><img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=900&q=80&auto=format&fit=crop" alt="Flower arranging" onerror="this.style.display='none'"/></div>
+      <div class="copy">
+        <div class="you">the loveliest gift</div>
+        <h3 class="disp">A Flower-Arranging Workshop for Two</h3>
+        <p>A morning at the flower farm — cutting blooms from the field and learning to build a hand-tied bouquet, tea and scones included. An afternoon she'll keep.</p>
+        <div class="price">£140 · for two</div>
+        <div style="margin-top:22px"><a class="btn btn--terra" href="#">Gift the workshop</a></div>
+      </div>
+    </div>
+
+    <div class="gifts">
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#E7EFD9,#CBD9B6)"><span class="shop">Etsy</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M28 30h24l-3 34H31l-3-34z" stroke="currentColor" stroke-width="2"/><path d="M28 30c0-8 5-12 12-12s12 4 12 12" stroke="currentColor" stroke-width="2"/><path d="M40 42v14M34 48h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="name">Terracotta Pots</div><div class="desc">Hand-thrown, set of three.</div><div class="foot"><span class="pr">£38</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F2E2D6,#E0C0B2)"><span class="shop">The Linen Co.</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M26 24h28v34a4 4 0 0 1-4 4H30a4 4 0 0 1-4-4V24z" stroke="currentColor" stroke-width="2"/><path d="M30 24l4-8h12l4 8M40 36v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="name">Linen Garden Apron</div><div class="desc">Stonewashed, deep pockets.</div><div class="foot"><span class="pr">£52</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F2E9C8,#DEC988)"><span class="shop">Local Apiary</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="30" y="22" width="20" height="40" rx="4" stroke="currentColor" stroke-width="2"/><rect x="34" y="16" width="12" height="8" rx="2" stroke="currentColor" stroke-width="2"/><path d="M30 36h20M30 48h20" stroke="currentColor" stroke-width="2"/></svg></div>
+        <div class="body"><div class="name">Wildflower Honey</div><div class="desc">Raw, from the next field over.</div><div class="foot"><span class="pr">£14</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#E7EFD9,#C2D2AC)"><span class="shop">Seed & Sow</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="24" y="28" width="32" height="22" rx="3" stroke="currentColor" stroke-width="2"/><path d="M40 28V16M40 16c-5 0-8-3-8-3s5-3 8 2M40 16c5 0 8-3 8-3s-5-3-8 2" stroke="currentColor" stroke-width="2"/><path d="M30 36h20M30 42h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="name">Heirloom Seed Box</div><div class="desc">A year of cut-flower seeds.</div><div class="foot"><span class="pr">£28</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F2E2D6,#D8B7C2)"><span class="shop">Ceramics Studio</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M26 40h28c0 14-8 22-14 22s-14-8-14-22z" stroke="currentColor" stroke-width="2"/><path d="M54 44c8-3 11 8 3 11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 36c0-6 3-8 3-14M46 36c0-6 3-8 3-14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="name">Speckled Tea Set</div><div class="desc">Two cups & a pot, glazed sage.</div><div class="foot"><span class="pr">£64</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#E7EFD9,#CBD9B6)"><span class="shop">Garden Tools Co.</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><path d="M40 20v26M40 46c-6 0-10 4-12 14h24c-2-10-6-14-12-14z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M34 28l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="body"><div class="name">Brass Trowel Set</div><div class="desc">Ash handles, leather strap.</div><div class="foot"><span class="pr">£46</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F2E9C8,#E0CDA0)"><span class="shop">Soy & Wick</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="30" y="30" width="20" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M40 30v-8M40 22c-3-2-3-6-3-6s4 1 4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="body"><div class="name">Garden Candle</div><div class="desc">Fig leaf & cut grass.</div><div class="foot"><span class="pr">£32</span><span class="get">View →</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F2E2D6,#E0C0B2)"><span class="shop">The Bindery</span><svg class="glyph" viewBox="0 0 80 80" fill="none"><rect x="26" y="22" width="28" height="38" rx="3" stroke="currentColor" stroke-width="2"/><path d="M40 22v38M32 32h4M32 40h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M48 30c4 0 6 4 6 10" stroke="currentColor" stroke-width="2"/></svg></div>
+        <div class="body"><div class="name">Pressed-Flower Journal</div><div class="desc">Hand-bound, botanical cover.</div><div class="foot"><span class="pr">£24</span><span class="get">View →</span></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- RSVP -->
+<section class="sec" id="rsvp">
+  <div class="wrap">
+    <div class="rsvp">
+      <svg class="botanical" style="top:18px;left:8%;animation:sway 7s ease-in-out infinite" width="70" height="100" viewBox="0 0 80 120" fill="none"><path d="M40 120V30" stroke="currentColor" stroke-width="2"/><circle cx="40" cy="22" r="9" stroke="currentColor" stroke-width="2"/><path d="M40 50c12 0 18-8 18-8M40 70c-12 0-18-8-18-8" stroke="currentColor" stroke-width="2"/></svg>
+      <div class="rsvp-inner">
+        <div class="you">do say</div>
+        <h2 class="disp">you'll come</h2>
+        <p>Kindly reply by the first of June, so we know how many glasses to chill.</p>
+        <form onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').textContent='How lovely — see you in the garden ✿';">
+          <input type="text" placeholder="Your name" required/>
+          <button class="btn btn--terra" type="submit">I'll be there</button>
+        </form>
+        <small>Questions? Ring Eloise's mother, Margaret — 555 · 0164</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="logo">Eloise</div>
+    <p>A Midsummer Garden Party · The Walled Garden · June 21st</p>
+    <div class="fine">Gather among the roses</div>
+  </div>
+</footer>
+
+<!-- MOBILE STICKY BAR -->
+<div class="mobile-bar" aria-hidden="true">
+  <div class="mb-meta"><div class="k">June 21 · Reply by June 1</div><div class="v disp">Do say you'll come</div></div>
+  <a class="btn btn--terra" href="#rsvp">RSVP</a>
+</div>
+
+<!-- WISHLIST BOTTOM SHEET -->
+<div class="sheet-scrim" data-close-sheet></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-label="Gift detail">
+  <div class="grab"></div>
+  <div class="sh-pic"><span class="glyph"></span></div>
+  <span class="sh-shop"></span>
+  <div class="sh-name disp"></div>
+  <div class="sh-desc"></div>
+  <div class="sh-price disp"></div>
+  <div class="sh-cta">
+    <button class="btn btn--ghost" data-close-sheet>Close</button>
+    <button class="btn btn--terra sh-claim">I'll bring this ✿</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var body = document.body;
+  function openMenu(){ body.classList.add('menu-open'); }
+  function closeMenu(){ body.classList.remove('menu-open'); }
+  document.querySelectorAll('[data-open-menu]').forEach(function(el){ el.addEventListener('click', openMenu); });
+  document.querySelectorAll('[data-close-menu]').forEach(function(el){ el.addEventListener('click', closeMenu); });
+
+  var sheet = document.querySelector('.sheet');
+  var shPic = sheet.querySelector('.sh-pic');
+  var shGlyph = sheet.querySelector('.glyph');
+  var shShop = sheet.querySelector('.sh-shop');
+  var shName = sheet.querySelector('.sh-name');
+  var shDesc = sheet.querySelector('.sh-desc');
+  var shPrice = sheet.querySelector('.sh-price');
+  var shClaim = sheet.querySelector('.sh-claim');
+  var current = null;
+
+  function openSheet(card){
+    current = card;
+    shPic.style.background = card.querySelector('.pic').style.background;
+    shGlyph.innerHTML = card.querySelector('.glyph').innerHTML;
+    shGlyph.setAttribute('viewBox','0 0 80 80');
+    shShop.textContent = card.querySelector('.shop').textContent;
+    shName.textContent = card.querySelector('.name').textContent;
+    shDesc.textContent = card.querySelector('.desc').textContent;
+    shPrice.textContent = card.querySelector('.pr').textContent;
+    var claimed = card.classList.contains('claimed');
+    shClaim.textContent = claimed ? 'You\u2019re bringing this ✿' : "I'll bring this ✿";
+    shClaim.disabled = claimed;
+    body.classList.add('sheet-open');
+  }
+  function closeSheet(){ body.classList.remove('sheet-open'); }
+
+  document.querySelectorAll('.gifts .gift').forEach(function(card){
+    var badge = document.createElement('span');
+    badge.className = 'claimed-badge';
+    badge.textContent = '✓ Spoken for';
+    card.querySelector('.pic').appendChild(badge);
+    card.addEventListener('click', function(){ openSheet(card); });
+  });
+  document.querySelectorAll('[data-close-sheet]').forEach(function(el){ el.addEventListener('click', closeSheet); });
+  shClaim.addEventListener('click', function(){
+    if(!current) return;
+    current.classList.add('claimed');
+    shClaim.textContent = 'Lovely — it\u2019s yours ✿';
+    shClaim.disabled = true;
+    setTimeout(closeSheet, 1000);
+  });
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeMenu(); closeSheet(); } });
+
+  var bar = document.querySelector('.mobile-bar');
+  var heroEl = document.getElementById('top');
+  if('IntersectionObserver' in window && heroEl){
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ bar.classList.toggle('show', !en.isIntersecting); });
+    }, {rootMargin:'-45% 0px 0px 0px'}).observe(heroEl);
+  }
+})();
+</script>
+
+<script>
+/* deep-link state hook for showcase canvas: ?cc=menu | sheet | bar */
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get('cc');
+    if(!p) return;
+    var run = function(){
+      var b = document.body;
+      if(p==='menu'){ b.classList.add('menu-open'); }
+      else if(p==='sheet'){ var c=document.querySelector('.grid .card, .gifts .gift, .loot .item, .lots .lot, .payload .cargo, .goodies .goody'); if(c) c.click(); }
+      else if(p==='bar'){ var bar=document.querySelector('.mobile-bar'); if(bar) bar.classList.add('show'); window.scrollTo(0, Math.round(window.innerHeight*0.92)); }
+    };
+    setTimeout(run, 120);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
