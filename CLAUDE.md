@@ -26,3 +26,6 @@ GitHub · Netlify · Supabase · Stripe · PostHog · Sentry · Figma · Twilio 
 ## Housekeeping
 - Never commit secrets. `.env*` stays untracked. Don't commit build output (`.next/`).
 - Push only to the working branch the current session is on.
+
+## Current state
+Read **WAKEUP.md** first — it holds live project state, the active tear (the aesthetic-gap fix), the review loop, and the keys/deploy reality (deploy to vnext.peek.gift; never mommy Frank about keys).
