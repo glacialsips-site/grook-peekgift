@@ -1309,3 +1309,40 @@ rebuilds — the XII.2 investigation sharpens which rebuild is canonical.)
   open items are unchanged: deploy-pointer → persistence → publish/claim+rules → feed-the-chat-the-
   design-method (↪ Add. X). The not-in-git docs (BUILD-BOOK, stack-decision — XI.6) would formally
   corroborate this, but Frank's statement is authoritative.
+
+---
+
+# Addendum XIV — Branch-lineage map & iteration forensics (historical record) (2026-06-01)
+
+> Supporting evidence for XIII (feynman canonical), from an independent branch deep-dive. FACTUAL.
+> Enriches §3/G1–G4 and closes XI.3 with code-level proof. ↪ = body pointer.
+
+## XIV.1 — Four real iterations off root `ef5647c` (+ scaffolding)
+| Iteration | Branch(es) | Tip | What it is |
+|---|---|---|---|
+| **Lean single-app — CANONICAL** | `claude/bold-feynman-SZzaO` | `1049d0c` 06-01 (newest) | model-is-resolver Opus rebuild: `lib/ir`+`lib/peek-render`+`lib/peek-chat`, **conversational streaming tool-loop** (~18 tools), runs on stubs. The agreed direction (XIII). |
+| **Jolly monorepo — REJECTED-engine bet** | `claude/jolly-mccarthy-QMqC9` | `67e2787` 05-31 | clean-room Turborepo/pnpm "Builder": `site-ir` + `vibe-genome` (enumerated knobs) + **deterministic OKLCH `vibe-resolve`** + **single-shot** Opus `synthesize.ts`. Never deployed. |
+| **Atelier — scrapped rigid** | `atelier-integration` (+ ~134 `packet-*`/`wave1-*`/`worktree-agent-*`/`lt/*`/`feat/*`) | `dec5312` 05-28 | the deployed-then-scrapped Sonnet + governed-template + OKLCH-grammar engine (Drizzle/Inngest/event-sourced/edge-chat). **= the current Netlify production branch.** |
+| **Config-vertical — atelier descendant** | `peek-clean` ⟵ `feat/brand-config` ⟵ `proof/config-swap` | `033a64b` 05-29 | atelier engine made config-driven for **two verticals (gift + GlacialSips water)**. Reference-only. |
+
+Topology: feynman⟷atelier 19/330, feynman⟷jolly 19/20, jolly⟷atelier 20/330; none an ancestor of another (all off `ef5647c`). Only the config-vertical chain is contained-in another (extends atelier).
+
+## XIV.2 — Why `jolly` is NOT the lean rebuild (the precise distinction)  ↪ closes XI.3
+- Its `packages/vibe-resolve` is a **pure deterministic `knobs → DesignTokens` engine** ("Resolution is deterministic given a genome"), fed by `vibe-genome`'s **fixed enumerated armory** (10 layout archetypes, 8 display classes, 9 eras, Tier-0 dials). The model fills a rulebook; a resolver computes the look. **This is pattern-identical to the project's own fenced `peek-jumpoff/reference/engine-parametric-REJECTED/resolver.js`** — i.e., jolly cleanly rebuilt the exact thing `DECISIONS.md` rejected ("the model is the resolver; no mandatory deterministic design engine").
+- Its "chat" is a **single-shot, stateless** `synthesize(brief)`/`tweak(genome,peek,change)` → `{genome,peek}` (the user-facing `/build` is a keyword-regex stub that only calls the API when reachable). Contrast feynman's **conversational streaming tool-loop** authoring a free-form `PeekIR`. So even though both call `claude-opus-4-8`, only feynman is the lean "model authors freely" approach.
+- **PR #7 "Verified live" = locally-run + screenshotted, NOT deployed** (the PR itself says "Deploy target TBD… will not overwrite vnext.peek.gift" and is a **draft**). My XI.3 worry was based on that overstated phrase; **debunked — jolly never deployed.** (Both feynman and jolly are undeployed; deploy state can't break the tie — architecture + DECISIONS does, and Frank ratified feynman.)
+- **Jolly is a monorepo but does NOT implement REQUIREMENTS §10's stack** — Turborepo+pnpm+Zod only; **no tRPC, no Drizzle, no pgvector, no event-sourcing, no Expo**. So "jolly = the §10 monorepo" is ~30% true (shell only) and false on the load-bearing parts. Jolly satisfies **neither** `REQUIREMENTS §10` (skips its hard parts) **nor** `DECISIONS.md` (violates no-engine). It is a dead-end on both axes.
+
+## XIV.3 — The §10-vs-DECISIONS conflict: resolved by recency + Frank's greenlight  ↪ closes XI.3
+`REQUIREMENTS_SPEC §10` (05-28/29) locks a Turborepo/tRPC/Drizzle/pgvector/event-sourced/Expo monorepo;
+`DECISIONS.md` (06-01, design-seat-greenlit) locks the lean single-app + model-is-resolver and names
+`bold-feynman`. Under `CLAUDE.md` #1 (Frank's current word > repo) + Frank's "the latest one is the
+feynman" (XIII), **the lean single-app is operative; §10's monorepo is the older end-vision, superseded.**
+Note the config-vertical branches show Frank *did* explore a "one config-driven engine, many verticals
+(peek.gift + GlacialSips water)" idea on the atelier engine — worth knowing for PerfectPurchase/the catalog
+moat, but it's the scrapped lineage, not the lean path.
+
+## XIV.4 — Honest functional grade (both undeployed)
+- **feynman:** `tsc`-clean + `next build`-green (verified, §5/V1–V2); real Opus streaming tool-loop; **runs entirely on stubs** (persistence/payment/scrape/image all stub); `opus-4-8` never billed; recipient `/g/[slug]` still old-v0 (not on the IR renderer); `lib/peek/*` first-cut still present (DQ-11).
+- **jolly:** real `/api/generate` Opus call + a real OKLCH renderer, but the "chat" is one-shot and no auth/persistence/payment wired; **its `pnpm` monorepo build is UNVERIFIED here** (sandbox can't `pnpm install`). 
+- **Net:** keep `bold-feynman` as canonical (XIII). Salvage from jolly is narrow: only its OKLCH color math (`vibe-harmony`) is worth referencing, and only if wanted — never the engine or the genome as authority.
