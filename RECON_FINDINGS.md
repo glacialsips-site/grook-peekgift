@@ -636,3 +636,57 @@ _a concrete PeekIR instance; note legacy `radius: 6` normalized by the Zod mirro
 }
 
 ~~~~~
+
+---
+
+# Addendum — out-of-scope observations (Frank follow-up, 2026-06-01)
+
+> Added at Frank's follow-up request: *"provide any out-of-scope comments/observations,
+> etc. as well as anything else."* These fall **outside the brief's numbered items**
+> (§3–§9) but surfaced during the read-only investigation and are worth the next chat's
+> attention. Same evidentiary standard — every claim cites the file/command. Ordered by how
+> hard they'd bite. Read-only still holds: nothing here was changed, only observed.
+
+## Z1 — Abuse/cost surface on the live chat (highest — bites the instant a key deploys)
+`app/api/peek-studio/route.ts` has **no auth check, no rate limit, and never calls botGate**; `curatorId` defaults to `'anon-curator'` (line 53). The moment `ANTHROPIC_API_KEY` is live on the deploy, that endpoint is an open, unauthenticated Opus-4.8 tool-loop (`MAX_HOPS=12`) — anyone who finds the URL can burn the prepaid balance. `BotGatePort` exists but is a stub (always `human:true`) and isn't wired into the route. `TIPS.md` already names this ("Turnstile before the first LLM call … Open chat = open wallet") — a known, unbuilt guard. **Wire botGate + a per-IP/session cap (or gate behind Clerk) before the first keyed deploy.**
+
+## Z2 — Clerk fails OPEN, not closed
+`middleware.ts`: `if (!hasRealClerkSecret) return NextResponse.next();` — if `CLERK_SECRET_KEY` is unset or contains `PLACEHOLDER`, **every** route (incl. `/dashboard`, `/build`, `/studio`) is public. Combined with Z1, a deploy with a real Anthropic key but a missing/placeholder Clerk key = a fully open *paid* chat. Confirm Clerk keys are real on the Netlify site, not merely "present."
+
+## Z3 — `custom`-block HTML is the product's main injection surface
+The model authors arbitrary HTML in `Section.kind:'custom'`, injected into the recipient page. The ONLY guard is `sanitizeCustomHtml()` (DOMPurify) + `sanitizeCssVars()`. The config intentionally allows inline `style`, `ALLOW_DATA_ATTR:true`, and `<form>` ("inert theater"). Defensible today — but **the entire XSS posture rests on that one function** on a public slug. Treat `sanitizeCustomHtml`/`sanitizeCssVars` as security-critical: unit-test them, pin the DOMPurify version, and review any loosening. Related: `next.config.mjs` sets `images.remotePatterns:[{hostname:'**'}]` — the image optimizer will proxy *any* https host (model/scrape-supplied URLs); tighten if practical.
+
+## Z4 — Netlify Node-function timeout vs. a 60s / 12-hop chat
+`app/api/peek-studio/route.ts` is `runtime='nodejs'` + `maxDuration=60`. A cold authoring turn (Opus streaming, up to 12 tool hops, each re-validating the IR) can run long. Netlify synchronous functions have a hard wall (the atelier line moved chat to **Edge** specifically to dodge "the 26s wall", PR #3). **Latent deploy risk:** the stream may be killed mid-turn even with `maxDuration=60` declared. Validate the real function timeout on `peek-gift-vnext`, or move the chat loop to an Edge/streaming runtime before relying on it. (Cross-ref A6: feynman dropped the Edge chat the atelier line had.)
+
+## Z5 — "Merge JUMPOFF into the prompt" was a one-time COPY, not a live include
+`lib/peek-chat/system-prompt.ts` is a `FROZEN STRING — no interpolation` (its own header). The method was hand-merged from `JUMPOFF.md` once, so **editing `JUMPOFF.md` does not change the running chat** — and the two will drift. If the design seat tunes `JUMPOFF.md` expecting the chat to follow, nothing happens. Pick a source of truth: generate the prompt from `JUMPOFF.md` at build time, or document `system-prompt.ts` as canonical and `JUMPOFF.md`/`DESIGN_DIRECTOR_AGENT.md` as reference (3 overlapping copies of the method exist).
+
+## Z6 — Two `contract.ts` files, diverged
+`peek-jumpoff/ir/contract.ts` (256 lines, design-seat original) and `lib/ir/contract.ts` (393 lines, ported+amended) **both exist and DIFFER** (`diff -q` → DIFFER). `lib/ir/` is authoritative (it has `gallery/countdown/claim/stats/lede`; the jumpoff copy predates them — which is why `SHELL_SPEC.md`'s line refs point at the older shape). A fresh chat that opens the jumpoff copy first reads a stale contract. Add a banner to `peek-jumpoff/ir/contract.ts` pointing at `lib/ir/contract.ts` as canonical, or delete the duplicate.
+
+## Z7 — Zero automated tests on the lean branch
+`git ls-files` finds **no test files / no runner** on `bold-feynman` (the atelier line had 413). The highest-value targets are the deterministic core: `reduceTool` (16 tools; ID/position bookkeeping) and the Zod legacy-shape normalization. Today's only "verification" is the design seat's manual DOM inspection. Stand up a minimal vitest harness next phase — `PLAN.md` §5's conformance + cold-round-trip tests are a natural first suite.
+
+## Z8 — No observability/cost tracking on the new chat path
+`AnalyticsPort` is a noop stub and nothing in `lib/peek-chat/*` or `app/api/peek-studio` calls `analytics.capture` or writes `usage_ledger`. The OLD chat fed `usage_ledger` (hence the ledger has data); the new one flies blind on spend + funnel once live. Wire `analytics.capture` + a usage-ledger write into the engine early — doubly so given Z1.
+
+## Z9 — Salvage from the rejected branches before they bit-rot
+The architecture was rightly rejected, but two pieces of real work elsewhere are things the IR line lacks and may want as **reference (not merge)**:
+- **Undo / mutation-log** (atelier PR #6, `lt/mutation-log-schema`): per-peek append-only log with ULIDs + per-verb `inverseOf()` for undo. `PersistencePort.appendVersion` gestures at versioning but has no undo design — that log is a worked one.
+- **WCAG-AA color enforcement** (jolly PR #7): the OKLCH `vibe-resolve` enforced AA contrast on generated palettes. `ThemeSpec` has **no contrast guard** — a model can author an unreadable palette and nothing catches it. Worth a lightweight contrast check on `set_theme`.
+
+## Z10 — Safeword is discoverable in the repo
+`PEEK_SAFEWORD=bananahead` is committed in `.env.example:37` and is the code default (`engine.ts: ?? 'bananahead'`). DECISIONS is satisfied it's "never inline in the prompt" (true), but the founder-handshake word is plainly readable by anyone with repo access. If it's meant to be a private operator channel, set a non-committed value on the deploy and drop the committed default.
+
+## Z11 — Minor / cosmetic
+- The engine **seed IR** uses `Fraunces + Inter` — the exact "every page is the same font" pairing the method bans. Only a placeholder (overwritten by `set_theme`, and commented), but an ironic default.
+- **Anthropic SDK 0.65.0**: the adapter casts params because the SDK types "predate the `adaptive` thinking variant" — a wire feature ahead of the `.d.ts`; pin/verify on upgrade.
+- **Branch sprawl**: ~140 remote branches (mostly stale `worktree-agent-*`/`packet-*`/`lt/*`). Pruning merged/dead branches would make the repo navigable for the next chat.
+- **DB tables provisioned-but-empty**: `curator_memory`, `tier_config`, `relationships`, `webhook_log`, `affiliate_revenue` have 0 rows; `curator_memory` belongs to atelier's Memory-tool feature (PR #9), not the IR line — empty tables ≠ built features on `bold-feynman`.
+
+## Z12 — Scope boundaries of THIS recon (so the planning instance calibrates trust)
+- **Multi-repo (G8): only this repo was examined.** `list_repos` was unavailable; I could not confirm or rule out sibling GitHub repos. "The lean iteration lives on `bold-feynman`" is scoped to **this** repo's branches.
+- **`/render-check` caliber (V6): not screenshotted by me** — relied on the design seat's DOM-verified `docs/DESIGN_REVIEW_2026-06-01.md` + a green `next build`. Spinning up `next start` + headless browser was judged out of scope for read-only recon.
+- **RLS (A4): not re-queried** — the planning instance already verified it on the live DB; no migration defines policies on `bold-feynman`, so the repo-level answer is app-layer (public `/g/*` + status gate) only.
+- **Live Netlify env (C8): not inspected** — no Netlify access this session; `.env.example` is the declared contract; presence on the site is asserted by docs, not verified by me.
