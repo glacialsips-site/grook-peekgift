@@ -880,3 +880,143 @@ Verified against `lib/ir/ports.ts:211-215` (`PaymentPort`) + `lib/peek-chat/tool
 - **Decoupling is already correct.** `mark_ready` is a pure intent (`{ready:true, next_step:'paywall'}`, mutates no IR); the comment + doctrine (tools.ts:19-25, ports.ts:7-13) make the **route** the only caller of `ports.payment.createCheckout` — the chat/IR/renderer never import Stripe. `AuthPort.currentUserId(req)` (ports.ts:220-222) is the symmetric auth seam (Clerk behind it). The stub returns `/checkout/mock`, so the flow runs keyless.
 - **The contract is under-spec'd for "every country/currency/tax/coupon."** `createCheckout({peekId, amount_cents, kind})` has **no**: `currency` (amount is a bare integer — ambiguous once non-USD), `locale`, billing/tax address, `tax_id`/`automatic_tax`, `promotion_code`/`allow_promotion_codes`, `customer` identity, `success/cancel` URLs, `idempotency_key`, contribution/group-gift target+contributor, or open `metadata` passthrough. And `verifyWebhook` returns only `{event, peekId?}` — it **drops** `session_id`/`amount`/`currency`/`customer`/`kind`, so the core can't reconcile *which* checkout (publish vs which contribution, how much) settled. For group-gift (`kind:'contribution'` exists but is otherwise unbuilt), `peekId` alone is insufficient.
 - (Proposed widened `CheckoutRequest`/`verifyWebhook` shapes and the external-checkout-as-PaymentPort-adapter approach are recommendations → see the single Opinions addendum.)
+
+---
+
+# Addendum IV — Design-method corpus depth (the full zip vs. the repo) (2026-06-01)
+
+> FACTUAL findings (recommendations are in the single Opinions addendum). Source: the full
+> design export `/tmp/anth_unzip/export/` (the pre-weeding corpus Frank attached), read in
+> full and cross-checked against the repo's `peek-jumpoff/`. ↪ = pointer into the §3–§9 body.
+
+## IV.1 — The single highest-leverage finding: the chat has NO design vocabulary in context  ↪ revises §6/A11, §6/A12, relates to Z5
+The shipped prompt `lib/peek-chat/system-prompt.ts` (100 lines) is **pure method/doctrine** — it tells the model to "set palette, scene, motifs (1–4)… vary type.display" but injects **zero concrete vocabulary**: no font list, no palette names, no scene/frame/type-art menu. It never imports `parts.js` or any pantry. The model is authoring on taste-doctrine alone. The corpus the doctrine keeps *referring to* (the "pantry") exists — but was cut on import (see IV.2) and is not handed to the model.
+
+## IV.2 — What the repo LACKS: `DESIGN_ENGINE_TOOLKIT.md` §1–§9 (the parts bin, 1,130 lines, 62KB)  ↪ supplements §4/F12
+`peek-jumpoff/reference/REFERENCE.md` states the toolkit was deliberately cut on import (flagged ⚠️). The repo kept only a thin **data extract** in `peek-jumpoff/engine/parts.js` (31 fonts, 20 palettes, 10 worlds, 13 motifs) — and that file is itself flagged prior-gen/superseded and is **not wired into the live chat**. The toolkit's actual contents:
+- **§1 Fonts** — ~**211 Google families in 17 personality groups** (Didone, transitional/humanist serif, neo-grotesque, geometric/condensed/fat-display sans, retro-groovy, script, fashion-caps, techno/mono, pixel, blackletter, kids, western, stencil), each row tagged REUSABLE/HYBRID/ADHOC with weights + vibe + **"pairs with."** (Repo has 31 of ~211.)
+- **§2 Type pairing + type-art** — 7 pairing rules, 11 named pairings, and a full **type-art CSS library**: outline/stroke, gradient-clip, holographic, 3D/long-shadow, glitch/RGB-split, neon, chrome, multi-line highlight box, arched `textPath`, letterpress, drop-cap. **Repo: 0 of these** (`grep` for `h-glitch`/`h-holo`/`textPath`/`box-decoration-break` → no hits). **This is the "loud vocabulary" gap the repo's own `GAP_ANALYSIS.md` #2 independently flags** (El Taquito's `text-shadow:3px 3px 0 cobalt`, kraft texture). 
+- **§3 Color** — 6 harmony schemes (mono/analogous/complementary/split-comp/triadic/tetradic, with hue math), value modes, the `{bg,surface,ink,muted,line,accent,accent2,glow}` recipe + AA rules, **20 named palettes** (in `parts.js`), grain SVG.
+- **§4 Motion** — 8 easings, duration scale, 8 ambient loops, scroll-reveal IO JS, reduced-motion block.
+- **§5 Scenes (11)**, **§6 Motifs (13)**, **§7 Media frames (11)**, **§8 Section archetypes (10)** — each with CSS/HTML recipes. (The repo's `lib/peek-render` *implements* most of these for the renderer, but they are not reference vocabulary the chat sees.)
+
+## IV.3 — Crown-jewel verbatim extracts (the reusable taste data)
+**(a) The Design-DNA knob vector** (`DESIGN_ENGINE_TOOLKIT.md` §10.2) — the precise language for "darker/louder/more formal" refinements (the *engine* around it is rejected; the vocabulary is not):
+`formality` (casual→black-tie), `energy` (calm→frenetic), `whimsy` (serious→playful), `era` (timeless·deco·midcentury·70s·80s·90s·y2k·retrofuture·contemporary), `warmth` (cool→warm), `luminosity` (light·dark·alternating), `saturation` (muted→neon), `contrast` (soft→hard), `ornamentation` (minimal→maximal), `density` (airy→packed), `texture` (flat→material), `motionIntensity` (still→kinetic).
+
+**(b) Casual-phrase → concept-seed + knob-delta map** (`DESIGN_DIRECTOR_AGENT.md` §2.2 — in-repo but not extracted as usable data; this is what turns "she loves mermaids" into a design):
+```jsonc
+{ "mermaids/ocean": {concept:"under-the-sea kingdom", knobs:{whimsy:+.5,saturation:+.2, motifs:["shells","waves","pearls","scales"]}},
+  "old money/prestigious": {concept:"private-club heritage", knobs:{formality:+.5,ornamentation:+.2,saturation:-.3,contrast:+.3,era:"deco"}},
+  "loud/blowout/send it": {concept:"maximal hype", knobs:{energy:+.5,saturation:+.4,density:+.3,motionIntensity:+.4}},
+  "intimate/just us/cozy": {concept:"handwritten note", knobs:{formality:-.2,ornamentation:-.3,density:-.3,texture:+.3,type:"script-accent"}},
+  "boss babe/empire/luxe": {concept:"fashion-house editorial", knobs:{formality:+.3,contrast:+.4,type:"didone"}},
+  "vintage/throwback": {concept:"era-postcard", knobs:{era:"70s",texture:+.4,warmth:+.3}},
+  "spooky/dark/moody": {concept:"after-midnight", knobs:{luminosity:"dark",saturation:-.2,contrast:+.3}},
+  "zen/calm/mindful": {concept:"negative-space ritual", knobs:{energy:-.5,ornamentation:-.6,density:-.4}} }
+```
+**(c) The 10-axis self-critique rubric** (`DESIGN_DIRECTOR_AGENT.md` §5; score 0–2, ship ≥24/30 & no zeros): Concept clarity · One bold move · Hierarchy · Restraint · Type · Color · Authenticity · Copy voice · Specificity · Slop check.
+**(d) Coherence invariants** (`DESIGN_ENGINE_TOOLKIT.md` §10.5 — good as model self-checks, not engine code): AA contrast ≥4.5:1 · ≤2 families + 1 script accent · script never as body · ornament budget = round(ornamentation×4) · era consistency · one dominant accent. (Repo `ThemeSpec` has no contrast guard — cf. Z9.)
+
+## IV.4 — Quality triage of the strategy docs (the ⚠️ warning is accurate)  ↪ supplements §9/X1
+- **⭐ Trustworthy** (match the mockups / the settled lean architecture): `ARCHITECTURE_CLARITY.md` ("a strong model IS the resolver" — the doc `DECISIONS.md`/`00_MAP.md §4` descend from), `FIRST_TRY.md`, `LIGHT_CHAT_DEPLOY.md` (ships a literal lean drop-in prompt; calls the keyword lexicon "what v0 OMITS"), `START_HERE.md` ("Do NOT build a mandatory deterministic engine"), `STACK_INTEGRATION.md`, `_NOTE_TO_SELF.md`, toolkit §1–§9 (vocabulary), `DESIGN_DIRECTOR_AGENT.md` §1–§7 (taste; already byte-identical in repo).
+- **⚠️ Drifted / contradicts the settle**: `ARCHITECTURE.md` (14-service Kafka/EventStoreDB/Temporal/K8s/GraphQL-federation + ReBAC — **explicitly walked back by its own companion `STACK_INTEGRATION.md`** and by `FOR_CODE.md` "Do NOT add Kafka/K8s/microservices"); `DESIGN_ENGINE_TOOLKIT.md` **§10** (the `resolve()/placeWorld()/coherencePass()` deterministic pipeline — directly contradicts "the model is the resolver"); `CHECKPOINT.md` (describes the rejected engine as the live brain — residue); `DESIGN_DIRECTOR_AGENT.md`'s engine *framing* (its §intro/§8 "Director sits on the deterministic resolver §10 / calls resolve()" — strip framing, keep taste; cf. §4/F12).
+- **The contradiction is already resolved inside the export**: the later docs (`ARCHITECTURE_CLARITY`/`LIGHT_CHAT_DEPLOY`/`FIRST_TRY`) overrode `ARCHITECTURE.md`+toolkit-§10, and the repo took the corrected path. Toolkit §1–§9 vocabulary is orthogonal to the engine question and fully salvageable.
+
+## IV.5 — `DESIGN_ENGINE_BACKEND_WISHLIST.md`: net-new capability asks to anticipate  ↪ supplements §7/C8, §6/A8
+Behind ports, none touching auth/checkout: **(1) dynamic full-Google-Fonts serving + edge subsetting** (the "infinite worlds" multiplier; the direct fix for the 31-font cap / DQ-6), (2) prompt-caching the system prompt + parts bin, (3) vision input (photo→theme), (4) **fal** image-gen + img2img/bg-removal/upscale/inpaint, (5) **LLM-generated SVG motifs** (model emits SVG → `sanitizeCustomHtml`), (6) Iconify (200k icons) + Unsplash/Pexels stock fallback + in-app palette extraction + multimodal embeddings (Voyage/Jina) for style memory. Day-one "magic" minimum per the doc: Anthropic (tools+vision+cache) + fal text-to-image + dynamic fonts + IR JSONB + Supabase Storage + Turnstile.
+
+---
+
+# Addendum VI — Parametric engine (pantry vs. deadend) + chat-over-preview UI (2026-06-01)
+
+> FACTUAL findings (recommendations → Opinions addendum). Source: zip `04_engine-parametric/`
+> + `03_chat-ui/`, read against the repo's `lib/peek-render/` and `app/studio/`. ↪ = body pointer.
+
+## VI.1 — `parts.js` = reusable PANTRY (taste data, not engine)  ↪ supplements §4/F12, §6/A12
+`04_engine-parametric/engine/parts.js` is pure data + tiny SVG builders, safe to reuse as a model-facing reference deck (it does NOT violate "model is the resolver"): **30 `FONT_SPECS`** (with exact Google `css2` axis queries), **20 `PALETTES`** (full `{mode,bg,surface,ink,muted,line,accent,accent2,glow?,texture?}` token sets), **10 `WORLDS`**, **14 `MOTIFS`** (inline SVG), **`IMG_STYLE`** (per-world art-direction prompt pairs for image-gen), **`IMG_OPS`** (vendor-neutral image-op vocab: generate/styleRef/edit/bgRemove/upscale/inpaint/outpaint/relight/vectorize/animate/paletteFrom). The **10 WORLDS** (the densest artifact — font trio + palette shortlist + scene/motif/frame/section picks + cta + voice; the per-world `anchor` knob-vectors are engine fuel, ignore them):
+```
+Heritage    Fraunces/Inter         · Hemlock Field/Forest Lodge/Sage Linen · topo,grain · star,stamp · stamp,arch    · "Shop the collection" · crafted, understated, earthy
+Gala        Cinzel/Cormorant/Pinyon· Ballroom Noir/Champagne/Merlot        · rayfan,starfield · sparkle,rule · arch,locket · "Register to bid" · gracious, restrained, certain
+Zen         Marcellus/Mulish       · Hanami Ink/Sumi Night/Sage Linen      · grain · rule,hanko · hanko,arch       · "Reserve a seat" · calm, precise, quiet
+Disco       Shrikhand/Poppins/Monoton· Disco Heat/Vapor Sunset             · mirrorball,rayfan · star,sunburst · vinyl,polaroid · "RSVP to the floor" · groovy, warm, fun
+Cyber       Orbitron/Rajdhani/ShareTechMono· Cyber Afterglow/Vapor Sunset  · gridfloor,scanlines · chrome,zigzag · idcard,polaroid · "Get tickets" · hype, loud, electric
+Princess    Dancing Script/Quicksand/Baloo 2· Princess Pastel/Cotton Candy · sunburst,confetti · crown,sparkle,dots · locket,polaroid · "RSVP" · wonder-struck, sweet
+Memphis     Archivo Black/Space Grotesk· Memphis Pop/Rad Bash              · halftone,confetti · zigzag,dots,star · polaroid · "Are you in?!" · loud, playful
+MissionCtrl Saira Condensed/Space Mono· Mission Control/Deep Space         · starfield,blueprint · star,rule · porthole,idcard · "Send aboard" · precise, retro-technical
+Garden      Cormorant/Nunito Sans  · Botanical Garden/Sage Linen/Coastal   · mesh,grain · leaf,sparkle · arch,locket · "RSVP" · fresh, soft, organic
+Casino      Cinzel Decorative/Jost/Monoton· Casino Gold/Ballroom Noir       · rayfan,scanlines · suit,sparkle · stamp,idcard · "Claim the loot" · high-roller, sly
+```
+
+## VI.2 — `resolver.js` + `director.js` = the rejected lookup-table deadend (confirmed in code)  ↪ confirms §6 (model-is-resolver), supplements §9/X3
+Read from the actual code: `resolver.js` does `interpret(brief)` over a hardcoded `OCCASION` knob table → `placeWorld(dna)` = **literal nearest-anchor Euclidean lookup** over 8 knobs → `resolveTokens()` = **seeded-RNG** (`mulberry32`) derivation. `director.js` is a **regex vibe-lexicon** (`/neon|cyber|y2k/`→Cyber) + occasion regex + a 75-line heuristic, and `llmUpgrade()` **demotes the LLM to a gap-filler over the authoritative heuristic** ("LLM only chooses a world when heuristic is unsure"). This is the inverted philosophy the project rejected. `resolver.js`'s own header concedes it: *"NOT the brain… training wheels, never a gate."* The repo contains **zero** of it (`grep` for `placeWorld`/`mulberry32`/`WORLDS`/nearest-anchor → none); `lib/peek-render/theme.ts` consumes a model-authored `ThemeSpec` straight to CSS vars. Salvageable (narrow, non-engine): the `PAGE_TYPES`⟂`WORLDS` structure-vs-style orthogonality (already embodied by SectionKind vs ThemeSpec) and stateless color helpers `rotateHue/adjustSat/hexToHsl/hslToHex`.
+
+## VI.3 — `renderer.js` is a strict SUBSET of the repo's renderer  ↪ confirms §5/V6, §6
+Head-to-head: the repo's `lib/peek-render/{shell,sections,scenes}.ts` covers **every** scene, frame, hero variant, and section kind the old `renderer.js` has, **plus** `details/stats/lede/countdown/claim` kinds, giftgrid layout variants (carousel/grid/checklist), live count-ups + countdown tick, claim theater, locked/beg/date_after card states, swatches, `?cc=` deep-links, full teardown, and `markPlaced`. **Nothing in the old renderer is missing from the new one.** The only technique not directly present: the imperative `fitHead()` headline shrink-to-fit loop (renderer.js:399-406) — the repo uses CSS `clamp()` instead (a ~8-line JS fallback if a long single-word headline ever overflows). Do not port the renderer.
+
+## VI.4 — chat-over-preview UI: the studio already ports most of it; the gap is the keyboard-collapse  ↪ revises §6 open-item #3, supplements §9/X2
+The "transparent glass chat over a live preview" pattern (`03_chat-ui/{chat-live,chat-glass,chat-live-docked,live-preview,product-preview,ios-frame,chat-keyboard}.jsx`) is well-specified: a fixed iOS frame with the live page as a z-0 backdrop the glass samples; assistant text floats with NO bubble on a continuous feathered ink-wash ("SmokeFilm") for legibility; user text gets a coral-glass bubble; a docked input pill; and a keyboard that **bakes the tool rail (+/camera/paperclip/mic) into the accessory bar**. **The repo's `app/studio` has already ported the bulk** — `chat-ui.tsx` ≈ `chat-live.jsx` (SmokeFilm, no-bubble serif, coral glass), `ios-frame.tsx` ports the shell, `StudioClient.tsx` wires the dock + `markPlaced`. Verified coded gaps vs. the reference:
+1. **Keyboard-driven collapse is missing** (the core of the "transparent-floating" critique). The studio collapses only via a manual chevron and never listens to `window.visualViewport`; on real mobile the OS keyboard will cover the chat and the preview won't auto-reveal. The reference end-state (`chat-live-docked.jsx`) collapses the whole chat to a single glass dock pill on keyboard dismiss.
+2. **Expanded chat is "heavy"** — `StudioClient` uses a `maxHeight:420` scroll slab and defaults `expanded:true`; the reference keeps the at-rest state as the dock pill with the preview leading.
+3. **No tool-rail/accessory composer** — the studio's `InputPill` is a bare input+send; the reference exposes +/camera/photo/mic inline.
+4. **The "just-placed" ping is thinner** — repo: a transient `Just placed` badge + 3-pulse halo (`mount.ts:149-162`, `styles.ts:237`); reference: a persistent breathing animation on the newest card + an in-card `JUST PLACED` chip + a **section-header "updated by claude" Ping** marking *which* section changed.
+5. Minor: no post-turn quick-reply chips ("Warmer / Shorten / Send via email"); the glass header is heavier than the reference's lightest variant.
+- **Ignore** `design-canvas.jsx` (973-line Figma-style gallery harness — not part of the studio).
+
+---
+
+# Addendum VII — OPINIONS & RECOMMENDATIONS (the single opinion addendum) (2026-06-01)
+
+> Per Frank's instruction, this is the **only** addendum that contains my judgment — everything
+> above is findings. (Earlier Addenda I–II's "Z" items predate that instruction and also carry
+> recommendations; treat THIS as the consolidated, current view.) Pointers (↪) reference the
+> factual basis. Ordered by leverage-to-effort.
+
+## VII.1 — Top lever, cheap: give the chat the design vocabulary it's missing  ↪ IV.1, IV.2, IV.3
+The renderer is already at caliber (↪ Add. II, V6), the reducer is sound (↪ Z15), the IR is complete. The binding constraint on output quality is that **the model authors with zero concrete vocabulary** — no font taxonomy, no type-art CSS, no palette/world menu. I'd make this the first creative-quality task: inject the parts bin (toolkit §1–§9: the 17-group font taxonomy, the §2.2 type-art CSS recipes, the 20 palettes, the 10 WORLDS bundles, the §3.1 harmony schemes) as **cached reference context**, NOT baked into the frozen `system-prompt.ts` (↪ Z5 — that string is a one-time copy and would drift). Prompt-caching makes a large static deck ~free per turn (↪ IV.5). This is the highest quality-per-token-of-work move available and it touches nothing structural. Pair it with the §10.5 coherence invariants as model self-checks (AA contrast, ≤2 families, ornament budget) since `ThemeSpec` has no contrast guard (↪ Z9).
+
+## VII.2 — Bookend anticipation: widen the seams now, build the surfaces later  ↪ Add. III, V.5
+Frank's isolation strategy is right and the spine already supports it. The concrete, non-breaking change that lets his existing custom checkout/auth drop in without the break-fix cycle is to **widen the port contracts now** (all new fields optional, so the stub + current call sites compile unchanged), then implement his external surfaces as adapters:
+```ts
+// PaymentPort.createCheckout — open request so tax/currency/coupon are non-breaking to add
+createCheckout(req: {
+  peekId: string; kind: 'publish'|'contribution';
+  amount_cents?: number; currency?: string; priceRef?: string;     // priceRef lets the checkout own tax/coupon math
+  customer?: { id?: string; email?: string; userId?: string };
+  locale?: string; billingAddress?: { country: string; postal_code?: string };
+  taxId?: string; promotionCode?: string; allowPromotionCodes?: boolean;
+  contribution?: { contributorId?: string; targetCents?: number; remainingCents?: number };
+  successUrl?: string; cancelUrl?: string; idempotencyKey?: string;
+  metadata?: Record<string,string>;
+}): Promise<Result<{ url: string; session_id: string }>>;
+// verifyWebhook — return enough to reconcile which checkout settled
+verifyWebhook(rawBody, sig): Promise<Result<{ event; peekId?; kind?; session_id?; amount_cents?; currency?; customer?; metadata? }>>;
+```
+Keep `mark_ready` a pure intent emitter; the **route** (a bookend concern) gathers locale/currency/address/promo from the bookend UI and calls the port — never the reducer. Frank's "fully custom checkout, every country/currency/tax/coupon" then becomes one `PaymentPort` adapter (it can even be an HTTP call to his external checkout service). Symmetric for auth: Clerk behind `AuthPort` (maybe also return email/org for the customer link). The IR/renderer/chat never learn any of it exists. **One caution from the data**: the live Stripe account's coupons/promo codes are all internal-test/comp (↪ V.2) and tax/currency config is UNKNOWN via MCP (↪ V.3) — before wiring "every country/tax," confirm Stripe Tax + presentment currencies in the dashboard; with automatic tax, prefer `priceRef` over a fixed `amount_cents` (the final charge is computed at checkout).
+
+## VII.3 — The keystone is still persistence; the sequence hasn't changed  ↪ Z16, A1, V.1
+Everything downstream of the chat is theater until a real `PersistencePort` exists (the publish→claim path has never run; ↪ §2, V4). My recommended order is unchanged by this round's findings: **(1) deploy unblock** — repoint Netlify off `atelier-integration` to the canonical branch (↪ C2/P3; I couldn't do it — Netlify has no tools this session); **(2) the persistence adapter + the `peeks` JSONB migration + `*_versions`** (↪ Z16); **(3) the publish→claim vertical built behind `mark_ready`** with the widened PaymentPort (VII.2); **(4) the rules/variant engine** (renderer GAP 1) folded into the claim work, because a claim that can't honor pick-one/beg/unlock isn't the product (↪ Add. II/Z14).
+
+## VII.4 — Fix the three renderer GAPs; GAP 3 is a one-liner  ↪ Z14, IV.2
+In priority: **GAP 1** (variant_groups unrendered + uniform `'★ Got it'` badge — the defensible core); **GAP 3** (glow dead-coded — change `theme.ts:188` to emit the glow when `glow && !displayShadow` instead of always `'none'`; ~1 line); **GAP 2** (activity itinerary dropped — render `proposed_date`/`location_hint`/`metadata.itinerary`, and consider promoting `itinerary` to a first-class activity-card field). Separately, the "loud vocabulary" deficit `GAP_ANALYSIS.md` #2 flags is literally the missing toolkit §2.2 type-art CSS (↪ IV.2) — so VII.1 and GAP-fixing are the same lever from two ends. Also close the reducer enum gap so `stats`/`lede` are chat-authorable (↪ Z15).
+
+## VII.5 — Studio: the "too heavy" fix is the keyboard-collapse reveal  ↪ VI.4
+Don't redesign the studio — it already ports the reference. Add a `window.visualViewport` listener that lifts the input above the keyboard and **auto-collapses the transcript to the dock pill when the keyboard dismisses**, and default to collapsed once a page exists so the preview leads. That single interaction is most of the "transparent-floating" feel. Then the cheaper polish: section-header "updated by claude" ping, a continuous breathe on the newest card, and an inline +/photo affordance in the composer.
+
+## VII.6 — Gate the core before any keyed deploy  ↪ Z1, V.4
+`/api/peek-studio` is an open, unauthenticated Opus loop; the moment a key is live it's an open wallet. This is independent of the auth bookend (anon curators hit the core directly). Wire `BotGate` (Turnstile) + a per-IP/session rate-limit into the route before deploying with a real `ANTHROPIC_API_KEY`. The design corpus agrees ("Turnstile before the first model call"; ↪ V.4).
+
+## VII.7 — Models & cost  ↪ C6, IV.5
+Opus 4.8 for authoring; a cheap model (Haiku 4.5) behind `LLMPort` for classification/moderation; prompt-cache the (now larger, post-VII.1) system context + tools. The ledger's haiku/sonnet/opus split is already this instinct.
+
+## VII.8 — Salvage list (what to take from the zip, what to leave)  ↪ IV, VI
+**Take (as reference data / model context, not runtime):** toolkit §1–§9 vocabulary + §10.2 knobs + §10.5 invariants; `parts.js` PALETTES/WORLDS/FONT_SPECS/IMG_STYLE/IMG_OPS; the casual-phrase→concept map + 10-axis rubric (already in-repo, just unextracted); `STACK_INTEGRATION.md` as the canonical infra doc; the `BACKEND_WISHLIST` capability rows as ports to declare-and-stub (dynamic fonts first). **Leave:** `ARCHITECTURE.md`'s distributed-systems machinery, toolkit §10 *as a function*, `resolver.js`/`director.js` (confirmed deadend), `CHECKPOINT.md`, `design-canvas.jsx`, and the old `renderer.js` (the repo's renderer is a strict superset).
+
+## VII.9 — My honest, critical read of project health (the "self-police" ask)
+- **The core is genuinely good and close.** The IR contract, the reducer, and the renderer are real, coherent, caliber-aimed work — not the overstatement I was warned to expect. The "model is the resolver" bet is sound and the rejected engine was correctly rejected (↪ VI.2).
+- **The real risks are (a) the unbuilt keystone** (persistence/publish/claim — the product's whole economic loop has never executed) **and (b) scope-sprawl/drift** — the corpus contains a 14-microservice fantasy doc, three parallel architecture iterations on branches, and a design method spread across ~15 docs with known hallucination. The discipline that keeps this shippable is exactly Frank's "between the bookends" isolation + the ports + "the bar is the mockups, not the prose."
+- **Loose ends that will bite if ignored:** the safeword is committed in `.env.example` (↪ Z10); the prompt is a frozen copy that won't track `JUMPOFF.md` edits (↪ Z5); zero automated tests on the lean branch (↪ Z7); the DQ-11 first-cut (`lib/peek/*`, `/peek`) still ships (↪ Z14/X2); `CLAUDE.md` cites a non-existent `SPEC.md` (↪ C3/X1); `next build` ignores type/lint errors (↪ Z2).
+- **What I'd literally do first, in one sentence:** repoint the deploy → ship the stub studio so Frank can use it live → import the parts bin (VII.1) and fix GAP 3 (one line) for an immediate visible quality jump → then build persistence and the publish/claim+rules vertical behind the widened, isolated bookend seams.
+
+## VII.10 — What I could not reach this session (so the picture is honest)  ↪ G8, C8
+I never saw the actual **landing / auth / checkout code** — it isn't in either accessible repo, the private `glacialsips-site` repo is out of session scope (no `add_repo`), and Netlify + a live browser were unavailable. Notion/Airtable held no peek.gift content (sample data / empty). So VII.2's bookend recommendations are derived from the *core's* seams + the *design corpus* + the *live Stripe* config — not from reading Frank's real checkout/auth. To validate them, the lightest unblock is: add `glacialsips-site` (or wherever those live) to the session scope, or zip them, or share Figma URLs for the landing. I'll fold whatever arrives into the relevant factual addendum and revisit VII.
