@@ -1286,3 +1286,26 @@ npm install` (mirrors the repo's `scripts/bootstrap.sh`). The "8.0" implies seve
 per XII.3 that does not fragment the code. (Frank's caution "you're looking at a mix of an older version and
 the undeployed rebuild" ↪ is handled by the branch-iteration map: atelier = old rigid; bold-feynman/jolly =
 rebuilds — the XII.2 investigation sharpens which rebuild is canonical.)
+
+---
+
+# Addendum XIII — RESOLUTION: bold-feynman is canonical (Frank, 2026-06-01)
+
+> Closes the XI.3 / XII.2 open question. Frank, directly: **"the latest one is the feynman."**
+
+**Resolved.** `claude/bold-feynman-SZzaO` is the **latest = canonical lean rebuild** — the
+"somewhat-functional, never-deployed lean Opus iteration." This:
+- **Confirms** my original §3/G1 + G7 + C1 conclusion (bold-feynman is the canonical base). The XI.3
+  caution was a worthwhile flag, but Frank's word (which outranks any doc — `CLAUDE.md` #1) settles it.
+- **Resolves the architecture tension (XI.3) toward the lean single-app.** Since feynman — a single
+  Next app (`lib/ir` + `lib/peek-render` + `lib/peek-chat`, model-is-resolver, no monorepo/tRPC/Drizzle/
+  event-sourcing) — is the latest, the **`REQUIREMENTS_SPEC §10` Turborepo/tRPC/event-sourced monorepo
+  is an earlier, superseded bet**, as is the `jolly-mccarthy` monorepo iteration (PR #7). They join
+  `atelier` as prior iterations, not the current direction. (The `jolly`-vs-feynman deep-dive still
+  running will be folded as historical record + the branch-lineage map, but no longer affects "which is
+  canonical.")
+- **Therefore, going forward:** the build is the lean single-app on `bold-feynman`; REQ §10's monorepo
+  stack reads as aspiration/over-build (like `ARCHITECTURE.md`, ↪ IV.4), not the plan. The durable
+  open items are unchanged: deploy-pointer → persistence → publish/claim+rules → feed-the-chat-the-
+  design-method (↪ Add. X). The not-in-git docs (BUILD-BOOK, stack-decision — XI.6) would formally
+  corroborate this, but Frank's statement is authoritative.
