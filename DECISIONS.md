@@ -47,3 +47,6 @@ lives in `PLAN.md` + `DESIGN_QUESTIONS.md`; this is the durable record.
 - **DQ-8** safeword value (Frank).
 - Design to verify `PLAN.md` + `DESIGN_QUESTIONS.md` from git on branch
   `claude/bold-feynman-SZzaO` → final greenlight → fan out Milestone 0.
+
+## DQ-8 RESOLVED (2026-06-01)
+Safeword = **bananahead** (design/Frank). Ships as `PEEK_SAFEWORD` config (default in .env.example); the chat reads `process.env.PEEK_SAFEWORD ?? "bananahead"`, never inline in the system prompt.
