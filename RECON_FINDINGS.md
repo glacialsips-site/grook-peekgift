@@ -849,3 +849,34 @@ use the core directly, so "auth is a separate bookend" does not cover the open-p
 never run" describe **deliberately-parked bookends**, not core debt. The first real-build slice
 stays *deploy → persistence (A1) → recipient/render core*; the checkout bookend attaches at the
 `mark_ready` seam when its turn comes, in isolation.
+
+---
+
+# Addendum V — Bookends & live commerce: Stripe, stack docs, auth/checkout seam (2026-06-01)
+
+> FACTUAL findings only (opinions are quarantined to the single opinions addendum). Sourced
+> from the live Stripe account (`acct_1T4xnbCEKPUsVee1`, Frank DeAndino, livemode) via the
+> Stripe MCP, and the design corpus `…/design_handoff_mobile_chat_sites/{ARCHITECTURE,STACK_INTEGRATION,LIGHT_CHAT_DEPLOY,DESIGN_ENGINE_BACKEND_WISHLIST}.md`.
+> Pointer notation: ↪ marks where a finding revises a §3–§9 body answer.
+
+## V.1 — The $12 publish is real and confirmed  ↪ confirms §2 facts; revises §6/A1, §7/C8
+- Product **`prod_UZzXnuYuX4ud15`** "peek.gift vNext — Standard" → single active price **`price_1TapZICEKPUsVee1ddG4n14M` = `unit_amount:1200`, `currency:"usd"`, `type:"one_time"`, `recurring:null`, `tax_behavior:"unspecified"`, `active:true`**. The repo's `.env.example` / README references are both valid and correct.
+- A **legacy v1 twin** exists: `prod_UQqlb4e5Ti9zYL` "peek.gift Standard" → `price_1TRz46CEKPUsVee1CnLlacTr`, also **$12 one-time** but `tax_behavior:"exclusive"` (note the divergence). Plus many inactive $0.50 test prices.
+- **No subscriptions** for peek.gift — every peek price is one-time/flat-per-publish. (The other ~18 active products in the account are GlacialSips/PerfectPurchase water-filtration hardware — unrelated.)
+
+## V.2 — Coupons / promo codes (live)
+- ~**22 coupons** + ~**24 promotion codes**, all `valid/active:true`, livemode — but **almost entirely internal-test / comp / launch / reused-GlacialSips-marketing**, none wired to the IR/PaymentPort. Peek-tagged examples: `THISISTHEONE`→`thisistheone_50c` (`amount_off:1150`, drops $12→$0.50, redeemed 2×), `QUEENLUCY`→`queenlucy_internal_50c`. Plus destructive test coupons (`NUKE`/`$9999 off`, `99% off everything`) and generic `SPRING20`/`MOM10`/etc. **No production discount strategy is encoded.** Promo codes carry empty `restrictions` (no first-time/minimum gates).
+
+## V.3 — Tax / currencies / payment methods = UNKNOWN (not retrievable)  ↪ revises §7/C8
+- The read-only Stripe MCP does **not** expose `GET /v1/tax/{registrations,settings}`, `/v1/tax_rates`, or `/v1/payment_method_configurations` (every attempt returned "not available"; no `stripe_api_search` hits). So **Stripe Tax automatic-calculation status, tax registrations/jurisdictions, manual tax rates, enabled presentment currencies, and per-country payment-method configs are all UNKNOWN this session.** Only signal: price-level `tax_behavior` (vNext `unspecified`, legacy `exclusive`). Every observed peek price is USD-only; account-level multi-currency presentment is UNKNOWN. To enumerate: a direct Stripe key / dashboard (Settings → Tax, Settings → Payment methods) or an MCP with those ops whitelisted. (No secret keys were accessed or printed.)
+
+## V.4 — Design corpus on the bookends + the documented drift  ↪ supplements §6/A10, §9/X1
+- **Two load-bearing claims survive** scrutiny (the only bookend statements that match the live stack): **auth = Clerk + Supabase RLS** (`STACK_INTEGRATION.md:27`), **publish = the $12 Stripe Checkout Session** (`STACK_INTEGRATION.md:28,56-57`; `LIGHT_CHAT_DEPLOY.md:67-72` — the only hard content-gate before checkout is when/where/action for invites or who/items/delivery for gifts).
+- **Landing/marketing is essentially unaddressed** in the corpus (consistent with CLAUDE.md "landing deprioritized" — a gap, not drift).
+- **Documented drift is real and large** (the design seat's own ⚠️ warning holds): `ARCHITECTURE.md` prescribes a 14-service Kafka/EventStoreDB/Temporal/K8s/GraphQL-federation distributed system + ReBAC/Zanzibar authz + `commerce/` microservice; **`STACK_INTEGRATION.md` explicitly retracts all of it** to the actual lean stack (Next/Netlify · Supabase · Clerk · Stripe · Anthropic · Resend · PostHog · fal). **Treat `ARCHITECTURE.md` as aspiration, `STACK_INTEGRATION.md` as the correction.** (`DESIGN_ENGINE_BACKEND_WISHLIST.md` = capability asks — fonts/fal-img-ops/Iconify/stock/palette-extract/embeddings — all behind ports, none touching auth/checkout.) Neither corpus anticipates multi-currency/tax/coupon checkout — Frank's i18n custom checkout is a NEW requirement beyond what the docs scoped.
+
+## V.5 — The core's commerce seam: shape correct, contract under-spec'd  ↪ revises §6/A1, §6/A6, §9/X2
+Verified against `lib/ir/ports.ts:211-215` (`PaymentPort`) + `lib/peek-chat/tools.ts:1017-1023` (`mark_ready`):
+- **Decoupling is already correct.** `mark_ready` is a pure intent (`{ready:true, next_step:'paywall'}`, mutates no IR); the comment + doctrine (tools.ts:19-25, ports.ts:7-13) make the **route** the only caller of `ports.payment.createCheckout` — the chat/IR/renderer never import Stripe. `AuthPort.currentUserId(req)` (ports.ts:220-222) is the symmetric auth seam (Clerk behind it). The stub returns `/checkout/mock`, so the flow runs keyless.
+- **The contract is under-spec'd for "every country/currency/tax/coupon."** `createCheckout({peekId, amount_cents, kind})` has **no**: `currency` (amount is a bare integer — ambiguous once non-USD), `locale`, billing/tax address, `tax_id`/`automatic_tax`, `promotion_code`/`allow_promotion_codes`, `customer` identity, `success/cancel` URLs, `idempotency_key`, contribution/group-gift target+contributor, or open `metadata` passthrough. And `verifyWebhook` returns only `{event, peekId?}` — it **drops** `session_id`/`amount`/`currency`/`customer`/`kind`, so the core can't reconcile *which* checkout (publish vs which contribution, how much) settled. For group-gift (`kind:'contribution'` exists but is otherwise unbuilt), `peekId` alone is insufficient.
+- (Proposed widened `CheckoutRequest`/`verifyWebhook` shapes and the external-checkout-as-PaymentPort-adapter approach are recommendations → see the single Opinions addendum.)
