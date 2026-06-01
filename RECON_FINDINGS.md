@@ -805,3 +805,47 @@ live `getComputedStyle` probes (font family/size/text-shadow quoted). The full-s
 limitation is stated honestly; I did not fake a below-the-fold screenshot. The server + a
 throwaway puppeteer script were used transiently and removed; `recon-assets/` (5 PNGs) is the
 only added artifact beyond the two markdown files.
+
+---
+
+# Addendum III — intentional scope: the "between the bookends" isolation (Frank, 2026-06-01)
+
+> Frank clarified that the absence of landing/auth and checkout is **deliberate, not a gap.**
+> Recording it here so the next chat inherits the intent instead of re-deriving (or undoing)
+> it. This supersedes the neutral framing of A10 / C7 / §9.
+
+**The decision.** Work is intentionally focused on the **core "between the bookends"** — the
+in-site chat + the IR + the live renderer (and, next, persistence + the recipient view). The
+**bookends are deliberately deferred AND kept isolated:** (1) landing + auth, (2) checkout —
+plus a later **account page** and the **tertiary pages** (about, 404, legal, etc.).
+
+**Why (observed failure mode, from prior attempts).** The bookends are high-churn *integration*
+surfaces (Clerk's session/redirect quirks, Stripe webhooks/PAY_MODE). When they're coupled to
+the creative core, chats fall into a **break-fix-break cycle**: editing the core breaks
+auth/checkout; repairing auth/checkout breaks the core. Isolating the core lets it be iterated
+hard without that cascade.
+
+**The architecture already half-enforces this — keep it that way.** The next chat should NOT
+wire landing/auth/checkout into the core; build them as **isolated surfaces** that couple to the
+core only through the existing seams:
+- The core imports Clerk + Stripe **only via `AuthPort` / `PaymentPort`** (never the SDKs
+  directly) — the spine's whole point. Don't let a vendor SDK leak into `lib/peek-chat` or
+  `lib/peek-render`.
+- `middleware.ts` is **fail-soft** (no real Clerk secret ⇒ public passthrough), and the core
+  runs on `PAY_MODE=mock` + stub auth — so the core **builds, deploys, and demos without the
+  bookends present.** Preserve that invariant (it's also what makes the stub studio testable).
+- `mark_ready` is the **hand-off seam**: the core emits a "ready" intent and the *route* (a
+  bookend concern) triggers the paywall. The publish→claim vertical (C7) should be built behind
+  that seam as its own surface, not woven into `reduceTool`/the renderer.
+- Use **App Router route groups + per-segment `error.tsx`** so a landing/auth/checkout fault is
+  contained to its segment and cannot blank the core or the recipient page.
+
+**What does NOT move with this strategy.** The core chat still needs its **own** lightweight gate
+(rate-limit + botGate on `/api/peek-studio`) **independent of the auth bookend** — anon curators
+use the core directly, so "auth is a separate bookend" does not cover the open-paid-chat risk
+(Z1). Gate the core at the core.
+
+**Re-framing for the recon answers:** A10's "landing/auth built (old v0)" and C7/§9's "checkout
+never run" describe **deliberately-parked bookends**, not core debt. The first real-build slice
+stays *deploy → persistence (A1) → recipient/render core*; the checkout bookend attaches at the
+`mark_ready` seam when its turn comes, in isolation.
