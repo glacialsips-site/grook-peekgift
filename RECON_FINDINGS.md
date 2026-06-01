@@ -1043,3 +1043,39 @@ I never saw the actual **landing / auth / checkout code** — it isn't in either
 | browser / puppeteer | last-known up | Used for the render-check screenshots (Add. II); live landing/checkout unreachable anyway (Netlify down + JS-only shell). |
 
 **Conclusion (↪ VII.10):** the peek.gift **landing / auth / checkout are not reachable via any connector** — they're local to Frank's machine or in the unreadable private repo. The connectors that ARE up that *aren't* the core (Canva, the private repo) hold the **GlacialSips water-filtration vertical**, confirming the "one engine, two verticals" framing (cf. the `proof/config-swap` / `feat/brand-config` branches). **Lightest unblock to cover the bookends:** add the repo holding them to this session's scope, OR zip them (as with the design export), OR share Figma/Canva URLs for the actual peek.gift landing. The bookend *recommendations* in VII.2 stand on the core seams + design corpus + live Stripe — not on having read Frank's real checkout/auth.
+
+---
+
+# Addendum IX — Backend services & env/keys inventory (Frank-supplied doc) (2026-06-01)
+
+> FACTUAL. Source: Frank's `backendservices-revised.md` (dated **2026-05-29**; one of the three
+> product docs `DESIGN_REVIEW §3` flagged as NOT-in-git — preserved verbatim at
+> `recon-assets/backendservices-revised.md`). Its header self-flags: env/key columns reflect
+> the **last successful Netlify env read; MCP flaky since, not re-verified live.** This fills the
+> §7/C8 blank I marked UNKNOWN (no Netlify access) and resolves parts of Addendum V.3.
+
+## IX.1 — Env-var / key inventory by status (names only; no values present in the doc)  ↪ resolves §7/C8
+- **In place (keyed, working):**
+  - Anthropic `ANTHROPIC_API_KEY` (Sonnet 4.6 live; **Opus 4.8 opt-in**; web_search enabled) ↪ corroborates §5/V3, §6/A11
+  - Clerk `CLERK_SECRET_KEY`, `*PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SIGNING_SECRET`, sign-in/up URLs, `ADMIN_CLERK_USER_IDS`
+  - Stripe `STRIPE_SECRET_KEY`, `*PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`, `PAY_MODE`, **`STRIPE_ADAPTIVE_PRICING`**; `acct_1T4xnb…`, webhook `we_1Tb7Ph…` (12 events); role notes **"$12 Checkout Session, webhook, Tax, Adaptive Pricing"**
+  - Supabase `SUPABASE_URL`, `NEXT_PUBLIC_*`, `SERVICE_ROLE_KEY`, `DATABASE_URL`, bucket vars; `ewqpujqerdnrkjqlpobo`; **14 tables** (14th = `curator_memory`); pgvector available, not installed
+  - Resend `RESEND_API_KEY`, `NOTIFICATIONS_FROM` (DKIM verified)
+  - ZenRows `ZENROWS_API_KEY` (primary scrape); Browserbase `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID`
+  - PostHog `NEXT_PUBLIC_POSTHOG_KEY`/`_HOST` (org peekgift, proj 434015)
+  - Google Places `GOOGLE_PLACES_API_KEY`, `VITE_*` (**legacy, unused in vNext, kept for glacialsips** — confirms the shared account/infra with the water vertical)
+  - Netlify env store, site `932646db…` (vnext.peek.gift); GitHub OAuth `glacialsips-site/grook-peekgift`
+- **In flight (being keyed):** fal `FAL_KEY` (**"key pasted in chat, not rotated per Frank"** — code wired, no-op until keyed); Upstash `UPSTASH_REDIS_REST_URL`/`_TOKEN` (`probable-lemur-138225`, not yet wired); Sentry `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN`/`_AUTH_TOKEN`/`_ORG`/`_PROJECT` (build-wrapped, runtime no-op); Inngest `INNGEST_EVENT_KEY`/`_SIGNING_KEY` (no account yet)
+- **Planned (NOT started; the launch gates):** **Bot/abuse — Turnstile/hCaptcha (Status: Planned, Horizon: NOW)** "gate before the public guest chat… open chat → Anthropic = a live financial wound"; **Content moderation — text via Anthropic, image via Hive/Rekognition (Near, hard gate before public publish)**; **multimodal embeddings — Voyage/Cohere v4/Jina CLIP (Near, hard dep for the catalog; NOT text-only)**; secrets manager — Doppler/Infisical ("advisable post-leak")
+- **Candidate (optional/later):** Twilio, Deepgram, ElevenLabs/Cartesia, LiveKit/Daily, Mux/CF Stream/Bunny, Exa/Tavily, Dub.co, DeepL, Typesense/Algolia, Cloudinary/imgix, Jina Reader, Mapbox, Lottie, Tolt/Rewardful, Klaviyo/Customer.io, EasyPost/Shippo, Motherduck/BigQuery, Gorgias/Intercom, Axiom/Better Stack; affiliate aggregators `SKIMLINKS_PUBLISHER_ID`/`_WEBHOOK_SECRET`, `SOVRN_API_KEY` (+ Awin/Impact/CJ/Rakuten); direct-retailer affiliates; travel/events/content cards.
+
+## IX.2 — Resolves Addendum V.3 (the Stripe tax/currency UNKNOWN)  ↪ resolves V.3, revises VII.2
+The doc states Stripe runs **Tax + Adaptive Pricing** with a `STRIPE_ADAPTIVE_PRICING` flag. So "every country/currency/tax" is handled **Stripe-native**: **Adaptive Pricing** auto-presents local currency, **Stripe Tax** auto-computes tax — not by the core passing currency/tax. (Caveat: the doc is a 2026-05-29 snapshot, not live-verified; the MCP still can't read tax/PMC config to confirm jurisdictions/enabled currencies — V.3's *enumeration* stays UNKNOWN, but the *mechanism* is now known.) Implication for the seam (VII.2): the custom checkout should **own the money math** (pass a `priceRef`/Stripe price + let Adaptive Pricing/Tax compute the final charge) rather than the core passing a fixed `amount_cents` — which strengthens the `priceRef`-over-`amount_cents` recommendation already in VII.2.
+
+## IX.3 — Corroborations & corrections  ↪ confirms Z1/VII.6, refines §6/A8, relates Z10
+- **The gates are Frank's own hard launch gates**, not just my recommendation: Turnstile **before public guest chat**, image moderation **before public publish** (↪ confirms Z1, VII.6, V.4). "Next keys, in order: fal + Upstash → Turnstile (free) → image moderation → multimodal embeddings."
+- **Tier-1 launch needs zero new vendors:** "land → Clerk auth → Anthropic builds → $12 Stripe → Resend notifies" is closed by *In place* services.
+- **A8 refinement:** ZenRows is the **primary** scrape; **Browserbase's real role is the Stagehand browser-agent** (the PerfectPurchase checkout/fulfillment "money button"), running as scrape-#2 only is "premature spend." (My §6/A8 mapped browserbase→url_scrape tier; per Frank that's its *secondary* use.) Jina = candidate scrape-fallback/embeddings, not in place. (The ledger's billed zenrows/browserbase/jina came from the OLD atelier scrape code, not feynman's stub ports.)
+- **Secrets hygiene (↪ Z10):** fal `FAL_KEY` "pasted in chat, not rotated"; secrets manager "advisable **post-leak**" — corroborates a credential exposure (cf. the `lt/setup-concierge` branch "2 creds exposed in chat, rotation required"). Rotation is Frank's call (per CLAUDE.md), noted as fact.
+- **`.env.example` is behind the live env:** the live env carries vars not in feynman's `.env.example` (e.g. `STRIPE_ADAPTIVE_PRICING`, `CLERK_WEBHOOK_SIGNING_SECRET`, `ADMIN_CLERK_USER_IDS`, Sentry/Inngest/Upstash/Browserbase set). The next chat should regenerate `.env.example` from this catalog.
+- **North star "PerfectPurchase"** = the cross-retailer commerce/catalog layer (the doc is "peek.gift / PerfectPurchase"); the affiliate/fulfillment/embeddings/Stagehand rows are its substrate — explicitly Platform+ horizon, decoupled from the page-creation core (matches Frank's bookend-isolation instinct, Add. III).
