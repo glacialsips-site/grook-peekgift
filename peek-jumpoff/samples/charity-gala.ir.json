@@ -1,0 +1,172 @@
+{
+  "_comment": "DIAGNOSIS SAMPLE — Charity Gala (The Lumière Gala). Minimal-but-faithful PeekIR targeting reference/original-mockups/Charity Gala.html: gala invite with live countdown, auction lots, attend tiers; Bodoni Moda display + Jost body; emerald/brass/ivory on near-black ink; engraved/editorial. Authored to exercise the renderer's invite archetypes (countdown, flightplan, giftgrid, tiers, claim) so the gap vs the bespoke mockup is visible.",
+  "schema_version": 1,
+  "peek": {
+    "id": "pk_gala",
+    "slug": "lumiere-gala",
+    "curator_id": "stub-user",
+    "page_type": "invite",
+    "recipient_name": null,
+    "relationship": null,
+    "occasion": "The Lumière Gala",
+
+    "concept": {
+      "oneLiner": "A black-tie conservation gala as an engraved Bodoni invitation",
+      "boldMove": "a live brass countdown under a full-bleed candlelit hero, then a numbered live-auction lot catalogue",
+      "voice": "hushed, patrician, philanthropic",
+      "emotionalCore": "one luminous night that keeps a river alive for another generation",
+      "antiPattern": "a colourful Eventbrite card with a stock confetti banner"
+    },
+
+    "theme": {
+      "type": {
+        "display": { "family": "Bodoni Moda", "source": "google", "weights": [400, 500, 600, 700], "axis": "Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400" },
+        "body": { "family": "Jost", "source": "google", "weights": [300, 400, 500, 600] },
+        "accent": { "family": "Jost", "source": "google", "weights": [400, 500] },
+        "scaleRatio": 1.5,
+        "displayTracking": "-0.01em",
+        "eyebrowTracking": "0.42em",
+        "displayCase": "none"
+      },
+      "palette": {
+        "mode": "dark",
+        "bg": "#15171A", "surface": "#1B1E22", "ink": "#F4EFE6", "muted": "#938D80",
+        "line": "#2C2F34", "accent": "#225C46", "accent2": "#B0894C"
+      },
+      "scene": "grain",
+      "motifs": ["rule"],
+      "frame": "plain",
+      "radius": { "card": 0, "pill": 0 },
+      "space": { "sectionY": 72, "gutter": 22, "stack": 14 },
+      "motion": { "intensity": 0.3, "reduceMotionOK": true }
+    },
+
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1100&q=80&auto=format&fit=crop",
+      "source": "stock",
+      "alt": "Candlelit grand hall set for a gala dinner",
+      "frame": "plain"
+    },
+    "note_md": null,
+    "cta_label": "Reserve a place",
+
+    "status": "draft",
+    "stripe_payment_intent_id": null,
+    "stripe_checkout_session_id": null,
+    "published_at": null,
+    "expires_at": null,
+    "share_url": null,
+    "created_at": "2026-05-31T00:00:00Z",
+    "updated_at": "2026-05-31T00:00:00Z"
+  },
+
+  "sections": [
+    {
+      "id": "s_hero", "kind": "hero",
+      "data": {
+        "variant": "full-bleed-photo",
+        "eyebrow": "In Aid of the Riverside Conservancy",
+        "headline": "The Lumière\nGala",
+        "dek": "An evening of light, in service of the river that gives us ours. Saturday, 21 November · 7 O'Clock · The Old Customs Hall."
+      }
+    },
+    {
+      "id": "s_countdown", "kind": "countdown", "title": "Until the doors open",
+      "data": { "target": "2026-11-21T19:00:00Z", "label": "Until the doors open" }
+    },
+    {
+      "id": "s_programme", "kind": "flightplan", "title": "The Programme",
+      "data": {
+        "eyebrow": "The Order of the Evening",
+        "phases": [
+          ["7:00", "Champagne Reception", "Received in the lantern-lit courtyard with a glass of vintage cuvée and a string quartet."],
+          ["8:00", "Seated Dinner", "A five-course menu by Chef Aurélie Vasseur, composed entirely of produce from the river valley."],
+          ["9:15", "The Patron's Address", "A few words on the year behind, and the river still to be won back."],
+          ["9:45", "The Live Auction", "Our auctioneer takes the rostrum for twelve extraordinary lots. Paddles at the ready."],
+          ["10:30", "A Performance", "An intimate set beneath the great hall's lanterns — a surprise guest of some renown."],
+          ["11:00", "Dancing & Digestifs", "The floor opens and the bar warms. We dance until the lanterns are spent."]
+        ]
+      }
+    },
+    {
+      "id": "s_auction", "kind": "giftgrid", "title": "The Auction",
+      "data": { "intro": "Twelve lots, each donated in full. Every paddle raised becomes water restored." }
+    },
+    {
+      "id": "s_attend", "kind": "tiers", "title": "Attend",
+      "data": {
+        "eyebrow": "Reserve Your Place",
+        "tiers": [
+          { "name": "Individual Place", "price": "£350", "sub": "Per guest", "perks": ["Champagne reception", "Five-course dinner", "Access to the live auction", "Dancing until late"] },
+          { "name": "A Table of Ten", "price": "£3,200", "sub": "Best value · seats ten", "featured": true, "perks": ["A prime table on the floor", "A magnum of champagne", "Named in the evening's programme", "Priority auction registration"] },
+          { "name": "Patron's Table", "price": "£6,500", "sub": "By invitation", "perks": ["Front-of-house table for ten", "A private reception with the patron", "Full-page acknowledgement", "A keepsake from the night"] }
+        ]
+      }
+    },
+    {
+      "id": "s_claim", "kind": "claim", "title": "Join Us",
+      "data": {
+        "eyebrow": "Reserve Your Place",
+        "dek": "Tables and individual places are limited, and traditionally claimed early.",
+        "field": { "type": "email", "placeholder": "Your email, to receive the invitation" },
+        "success_msg": "Thank you — we will be in touch",
+        "fine": "In aid of the Riverside Conservancy · Registered Charity No. 1184·207"
+      }
+    }
+  ],
+
+  "variant_groups": [],
+
+  "cards": [
+    {
+      "id": "lot1", "variant_group_id": null, "position": 0, "type": "aspirational",
+      "title": "A Fortnight at Villa Serena, Tuscany",
+      "description": "Two weeks in a restored 16th-century villa above the Val d'Orcia — a private chef, a vineyard tour, a cellar opened in your honour. Donated by the Marchetti family.",
+      "media": { "url": "https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=900&q=80&auto=format&fit=crop", "source": "stock", "alt": "A villa in Tuscany" },
+      "source_url": null, "source_retailer": "The Headline Lot",
+      "value_cents": null, "value_display": "£18,000 – £25,000", "reveal_value": true,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": { "featured": true }
+    },
+    {
+      "id": "lot2", "variant_group_id": null, "position": 1, "type": "aspirational",
+      "title": "A Cellar of Rare Bordeaux",
+      "description": "A case assembled across the great châteaux.",
+      "media": { "url": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=700&q=80&auto=format&fit=crop", "source": "stock", "alt": "Rare Bordeaux" },
+      "source_url": null, "source_retailer": "Berry Bros. & Rudd",
+      "value_cents": null, "value_display": "£4,000 – £6,000", "reveal_value": true,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "lot3", "variant_group_id": null, "position": 2, "type": "aspirational",
+      "title": "A Commissioned Portrait",
+      "description": "Sittings at the artist's studio, framed to your wall.",
+      "media": { "url": "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=700&q=80&auto=format&fit=crop", "source": "stock", "alt": "Artist's studio" },
+      "source_url": null, "source_retailer": "The Artist's Studio",
+      "value_cents": null, "value_display": "£6,000 – £9,000", "reveal_value": true,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "lot4", "variant_group_id": null, "position": 3, "type": "aspirational",
+      "title": "A Highland Stalking Weekend",
+      "description": "Two guns, a ghillie, and a lodge above the glen.",
+      "media": { "url": "https://images.unsplash.com/photo-1486915309851-b0cc1f8a0084?w=700&q=80&auto=format&fit=crop", "source": "stock", "alt": "Highland estate" },
+      "source_url": null, "source_retailer": "Glenfinnan Estate",
+      "value_cents": null, "value_display": "£5,500 – £8,000", "reveal_value": true,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "lot5", "variant_group_id": null, "position": 4, "type": "aspirational",
+      "title": "A Season in the Grand Tier",
+      "description": "A box at the opera, the full season through.",
+      "media": { "url": "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=700&q=80&auto=format&fit=crop", "source": "stock", "alt": "Opera house" },
+      "source_url": null, "source_retailer": "The Royal Opera House",
+      "value_cents": null, "value_display": "£3,000 – £4,500", "reveal_value": true,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    }
+  ]
+}
