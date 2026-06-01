@@ -1,0 +1,147 @@
+# RUN-NEXT — the live dispatch queue
+
+_Owner: orchestrator updates this file after every batch lands. Worker session reads it and dispatches subagents._
+
+## Current focus (2026-05-28)
+
+The spine is now shipping in **waves of parallel subs**, not pre-drafted numbered packets. Packets 42-50 from the original Tier 0 plan may not be needed in their original form — the SPINE substrate (CURATOR_PROMPT, skills loader, packet 40 caching, packet 41 Anthropic surface) is mostly live, and remaining work is bug-shaped or polish-shaped, not net-new feature packets.
+
+### In-flight subs (parallel right now)
+
+| Sub | What it's fixing |
+|---|---|
+| anon-build-500 | Anonymous `/build` route crashes before any SSE event reaches client. |
+| skimlinks-webhook-500 | `/api/webhooks/skimlinks` returns 500 on every payload — sig validator or schema drift. |
+| mark-ready-state-machine | `mark_ready_for_publish` tool fires but `peeks.ready_for_publish` doesn't always flip; publish CTA renders inconsistently. |
+| bland-styling | Vibe engine wires CSS vars but visual punch is missing — washed-out palette, no contrast on recipient + preview surfaces. |
+
+When these return, integration is one merge each into `claude/bold-ride-Li5zK` → forward-merge into `atelier-integration`.
+
+### BUGS-WAVE2 follow-ups (not yet assigned)
+
+W01-W05 BLOCKs landed in `17cd407`. W06-W18 MAJORs (see `_packets/BUGS-WAVE2.md`) are next-batch candidates:
+- W06 `expires_at` enforcement on curator memory
+- W07 in-memory FLAGS Map TTL eviction
+- W08 server-side `loadChatHistory` preserves `tool_result` rows (B11-redux completeness)
+- W09 wrap stub `InputSchema.parse` calls in try/catch
+- W10 compute `rulesPhase` / `imageGenerationPhase` / `voiceMode` from peek snapshot (unlocks ~85KB of dead conditional skills)
+- W11-W18 — see BUGS-WAVE2 for the rest
+
+These can dispatch as a parallel batch once the in-flight subs land.
+
+### Blocked on Frank-actions (canonical list lives in `_packets/SPINE/FRANK-TODO.md`)
+
+- **Sentry** — DSN + auth token from Frank's `peekgift` org. Errors silently log to console until keyed.
+- **Anthropic Console → Privacy → Web Search** — unlocks `web_search` server tool + `affiliate_search` fallback.
+- **Twilio** — SMS share / WhatsApp share. Voice STT is Deepgram — separate.
+- **Inngest** — `peek-gift-vnext` app signup. All 3 background jobs silently no-op without keys.
+- **Deepgram + ElevenLabs (or Cartesia)** — voice mode mic hidden until both keyed.
+- **Stripe Dashboard** — set `tax_code = txcd_10103001` on `prod_UZzXnuYuX4ud15` (currently general `txcd_10000000`). Minor.
+- **Skimlinks / Sovrn** — demoted from Tier 0 per Frank ("we don't have affiliates right now"). Apply when affiliates matter.
+- **Netlify dashboard** — delete 3 unused sandbox sites (no MCP delete-project op): `peekgift-v9k-modular-sandbox`, `peekgift-v1-sandbox`, `grook-peekgift`.
+
+---
+
+## How the worker session uses this file
+
+You (cc-on-web worker) are the single point of contact for the user. Each "go" or "dispatch" command means:
+
+1. `git pull origin atelier-integration`.
+2. Read this file — the **Ready batch** below.
+3. **For each READY packet, spawn an Agent subagent with `isolation: "worktree"`** in a SINGLE message containing parallel Agent tool calls. Don't dispatch one at a time. Don't await one before starting the next.
+4. Standard subagent prompt template:
+
+   > Read CLAUDE.md, _packets/PROTOCOL.md, _packets/STATE.md, _packets/AUDIT.md (if it exists), then execute _packets/NN-<slug>/prompt.md EXACTLY. Work on branch `claude/packet-NN-<slug>` in your isolated worktree (`pwd` should end in `.claude/worktrees/agent-*`). The packet itself says to use sub-sub-agents per directory/concern where parallel work is possible — DO THAT, max parallelism within your packet. Validate per the prompt's Validation rule. Commit `packet NN: <one-line summary>` and push. Reply with branch + 2 sentences + any NOTES.md key takeaway.
+
+5. Once ALL subagents return, push any STATE/RUN-NEXT updates you made, report results to the user in ONE message:
+   ```
+   Dispatched N packets in parallel. Returns:
+   - claude/packet-NN-<slug>: <1-line>
+   ...
+   ```
+6. End your turn.
+
+**Critical: subagents within each packet ALSO use sub-sub-agents.** The packets explicitly say "use subagents per directory/per concern" — make sure your dispatched subagent honors that, doesn't go serial.
+
+---
+
+## Ready batch — none currently queued
+
+_All of batch 4 (packets 28-35) integrated on `atelier-integration` as of 2026-05-26. Trunk at `2c53076`. Migrations `0005_enable_rls_default_deny` and `0006_rls_policies` applied to live DB. See `_packets/STATE.md` top section for integration notes._
+
+**User-side actions still pending before live deploy is fully functional:**
+1. Clerk Dashboard: confirm `peek-gift-vnext.netlify.app` is an authorized origin (packet 28's custom auth UI needs it to actually authenticate).
+2. Netlify env vars to add via MCP or dashboard:
+   - `GUEST_CLAIM_TOKEN_SECRET` (≥32 chars) — recipient HMAC now fail-closed (packet 31).
+   - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — rate-limiting + webhook idempotency (packet 31).
+   - `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — error visibility (packet 34).
+3. Verify live deploy at `peek-gift-vnext.netlify.app` after Netlify's auto-deploy (build hook fires on push to `atelier-integration`).
+
+## Ready batch — previously (preserved for ref) — 8 packets, dispatched + integrated
+
+| Packet | Path | What it kills | Branch on completion |
+|---|---|---|---|
+| 28 | `_packets/28-custom-auth-ui/prompt.md` | Clerk's branded `<SignIn />` / `<SignUp />` — replace with our custom forms via hooks | `claude/packet-28-custom-auth-ui` |
+| 29 | `_packets/29-audit/prompt.md` | Surfaces every shortcut + drift across `atelier/` → writes `_packets/AUDIT.md`. **NO CODE CHANGES.** Other packets reference its output. | `claude/packet-29-audit` |
+| 30 | `_packets/30-type-safety/prompt.md` | Generated Supabase types replace `Record<string, unknown>` placeholder; kill every `as unknown as` / `any` / `@ts-ignore` | `claude/packet-30-type-safety` |
+| 31 | `_packets/31-security/prompt.md` | HMAC fail-closed, Upstash rate-limiting, CSP headers, webhook idempotency, service-role audit | `claude/packet-31-security` |
+| 32 | `_packets/32-tests-ci/prompt.md` | Vitest unit + Playwright E2E + GitHub Actions running typecheck/lint/test/build on every push & PR | `claude/packet-32-tests-ci` |
+| 33 | `_packets/33-reliability/prompt.md` | React error boundaries, structured logger, retry/backoff on every external API call | `claude/packet-33-reliability` |
+| 34 | `_packets/34-observability/prompt.md` | Sentry re-add, OG image caching, internal scrape-worker call, client-side share events, per-turn LLM observability aggregation | `claude/packet-34-observability` |
+| 35 | `_packets/35-quality/prompt.md` | A11y audit + fixes, SEO basics, mobile slide-up sheet hardening, real palette extraction (replaces JPEG byte-histogram) | `claude/packet-35-quality` |
+
+All 8 target separate paths or are read-only. Conflicts on integration are mechanical (orchestrator handles).
+
+### Suggested dispatch order if you must serialize for some reason
+
+You shouldn't serialize. But if a subagent crashes mid-flight:
+- Dispatch 29 (audit) FIRST in its own batch — it's read-only and produces input for the others.
+- Then dispatch 28, 30-35 in one parallel batch.
+
+In practice: dispatch all 8 at once. Subagents are isolated worktrees. They don't see each other's work mid-flight. Conflicts surface at orchestrator integration time, not in your dispatch.
+
+---
+
+## Pre-dispatch checks (worker confirms with the user)
+
+Before dispatching, verify with the user:
+
+1. **Clerk `peek-gift-vnext.netlify.app` is an authorized origin** in Clerk Dashboard. Without this, packet 28's custom UI still won't render. User is fixing this manually.
+2. **Upstash Redis env vars** (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) are set on Netlify. Packet 31 wires rate-limiting; without these vars it falls back to "allow with warning" but degrades the value of the packet. If user hasn't set these, dispatch 31 anyway — orchestrator wires Upstash in a follow-up if needed.
+3. **`GUEST_CLAIM_TOKEN_SECRET`** is set on Netlify (≥32 chars). Packet 31 makes this REQUIRED — if the env var is absent, deploys break. User sets it via Netlify dashboard or orchestrator does it via MCP before merge.
+4. **Sentry org/project + DSN** if you want packet 34 to fully work — DSN can be missing (Sentry init no-ops), but the build wraps with `withSentryConfig`. Surface to user; not blocking.
+
+If any precondition is unclear, ask once, then proceed with the assumption stated.
+
+---
+
+## Drafted but not yet ready (lower-stakes, queued for after this batch)
+
+- **36 — i18n (next-intl):** currently English-only including the Peek persona. Wait until product is stable on EN.
+- **37 — Performance pass:** bundle analysis, code splitting strategy, image optimization audit. Wait until real traffic exists.
+- **38 — Cost dashboard:** structured logs → PostHog → vendor-cost rollup. After 33 + 34 settle.
+- **23 — Group co-curation MVP**: full multi-curator flow, invite tokens, role-gated tools.
+- **27 — Social outbound** (Pinterest, IG, TikTok, Buffer/Ayrshare).
+- **A1 — Live $12 payment smoke test:** manual, post-packet-28.
+
+---
+
+## After every dispatch cycle
+
+Reply to the user with ONE message:
+
+```
+Dispatched <N> packets in parallel.
+
+Branches & summaries:
+- claude/packet-NN-<slug>: <2-line summary, key NOTES takeaway>
+- ...
+
+Failed/blocked:
+- packet NN: <error>
+
+Pre-merge actions still on the user (if any):
+- ...
+```
+
+Then end your turn. Orchestrator takes integration from there.

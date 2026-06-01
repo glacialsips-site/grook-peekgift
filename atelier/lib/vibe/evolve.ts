@@ -1,0 +1,139 @@
+import 'server-only';
+import { eq } from 'drizzle-orm';
+import { db } from '@/db/client';
+import {
+  peeks,
+  type Vibe,
+  type VibeCore,
+  type VibePalette,
+  type VibePreset,
+  type VibeSignalSource,
+  type VibeSignalSourceEntry,
+} from '@/db/schema';
+import { classifyCards, type CardSignal } from './classify-cards';
+import { classifyTone } from './classify-tone';
+import { extractPalette, type ExtractedPalette } from './extract-palette';
+import { blendPalettes } from './palette-quality';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'vibe/evolve' });
+
+export type VibeSignal =
+  | { kind: 'hero_image'; imageUrl: string }
+  | { kind: 'note'; text: string }
+  | { kind: 'cards'; cards: CardSignal[] };
+
+const HISTORY_LIMIT = 10;
+
+export async function evolveVibe(
+  peekId: string,
+  signal: VibeSignal,
+): Promise<void> {
+  try {
+    const [row] = await db
+      .select({ vibe: peeks.vibe })
+      .from(peeks)
+      .where(eq(peeks.id, peekId))
+      .limit(1);
+    if (!row) return;
+    const current: Vibe = row.vibe ?? {};
+
+    const result = await derivePatch(signal, current);
+    if (!result || isEmptyPatch(result.patch)) return;
+
+    const history = current.signal_source_history ?? [];
+    const entry: VibeSignalSourceEntry = {
+      source: result.source,
+      ts: new Date().toISOString(),
+      patch: result.patch,
+    };
+    const nextHistory = [...history, entry].slice(-HISTORY_LIMIT);
+
+    const next: Vibe = {
+      ...current,
+      ...result.patch,
+      signal_source_history: nextHistory,
+    };
+
+    await db
+      .update(peeks)
+      .set({ vibe: next, updatedAt: new Date() })
+      .where(eq(peeks.id, peekId));
+  } catch (err) {
+    log.warn('evolveVibe failed', {
+      peekId,
+      signal_kind: signal.kind,
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
+interface PatchResult {
+  source: VibeSignalSource;
+  patch: Partial<VibeCore>;
+}
+
+async function derivePatch(
+  signal: VibeSignal,
+  current: Vibe,
+): Promise<PatchResult | null> {
+  if (signal.kind === 'hero_image') {
+    const extracted = await extractPalette(signal.imageUrl);
+    if (!extracted) return null;
+    const seasoned = seasonPalette(current.palette, extracted);
+    return { source: 'hero_palette', patch: { palette: seasoned } };
+  }
+  if (signal.kind === 'note') {
+    const tone = await classifyTone(signal.text);
+    if (!tone) return null;
+    return {
+      source: 'tone_classifier',
+      patch: {
+        preset: tone.tone as VibePreset,
+        mood_words: tone.mood_words,
+        motion: tone.motion,
+      },
+    };
+  }
+  if (signal.kind === 'cards') {
+    const patch = classifyCards(signal.cards);
+    return { source: 'card_mix', patch };
+  }
+  return null;
+}
+
+function seasonPalette(
+  existing: VibePalette | undefined,
+  extracted: ExtractedPalette,
+): VibePalette {
+  const blended = blendPalettes(toExtractedShape(existing), extracted);
+  const result: VibePalette = {
+    bg: blended.bg,
+    surface: blended.surface,
+    ink: blended.ink,
+    accent: blended.accent,
+  };
+  if (blended.accent2) result.accent2 = blended.accent2;
+  return result;
+}
+
+function toExtractedShape(
+  p: VibePalette | undefined,
+): ExtractedPalette | undefined {
+  if (!p) return undefined;
+  return {
+    bg: p.bg,
+    surface: p.surface,
+    ink: p.ink,
+    accent: p.accent,
+    accent2: p.accent2 ?? p.accent,
+  };
+}
+
+function isEmptyPatch(patch: Partial<VibeCore>): boolean {
+  return Object.keys(patch).length === 0;
+}
+
+export function scheduleEvolveVibe(peekId: string, signal: VibeSignal): void {
+  void evolveVibe(peekId, signal).catch(() => undefined);
+}

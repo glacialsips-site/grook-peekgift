@@ -1,0 +1,22 @@
+ALTER TABLE "peek_v2"."users" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."peeks" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."cards" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."variant_groups" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."picks" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."peek_collaborators" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."relationships" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."affiliate_revenue" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."chat_messages" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."webhook_log" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."users" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."peeks" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."cards" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."variant_groups" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."picks" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."peek_collaborators" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."relationships" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."events" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."affiliate_revenue" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."chat_messages" FORCE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "peek_v2"."webhook_log" FORCE ROW LEVEL SECURITY;

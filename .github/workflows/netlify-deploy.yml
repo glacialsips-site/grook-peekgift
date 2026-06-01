@@ -1,0 +1,15 @@
+name: Netlify build trigger
+
+on:
+  push:
+    branches:
+      - atelier-integration
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST Netlify build hook
+        run: |
+          curl -fsS -X POST -d '{}' \
+            'https://api.netlify.com/build_hooks/6a14cf135c167288ad60f6a9?trigger_branch=atelier-integration&trigger_title=push+by+${{ github.actor }}+sha+${{ github.sha }}'

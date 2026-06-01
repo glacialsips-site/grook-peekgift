@@ -1,0 +1,208 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { getSupabaseService } from '@/lib/supabase/service';
+import type { DbRow } from '@/lib/supabase/database.types';
+import { RecipientView } from '@/components/recipient/recipient-view';
+import { AlmostReady } from '@/components/recipient/almost-ready';
+import { readRecipientSessionFromCookies } from '@/lib/security/recipient';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ component: 'g/[slug]/page' });
+import type {
+  Card,
+  Peek,
+  PeekDraft,
+  UnlockRule,
+  VariantGroup,
+} from '@/lib/peek/types';
+
+export const dynamic = 'force-dynamic';
+
+type PeekRow = DbRow<'peeks'>;
+type CardRow = DbRow<'cards'>;
+type VariantGroupRow = DbRow<'variant_groups'>;
+type PickRow = DbRow<'picks'>;
+
+function toPeek(row: PeekRow): Peek {
+  return {
+    id: row.id,
+    slug: row.slug,
+    curatorId: row.curator_id,
+    recipientName: row.recipient_name,
+    relationship: row.relationship,
+    occasion: row.occasion,
+    giverNames: row.giver_names ?? [],
+    budgetCents: row.budget_cents ?? null,
+    recipientProfile: row.recipient_profile ?? {},
+    vibe: row.vibe,
+    heroImageUrl: row.hero_image_url,
+    heroImageSource: row.hero_image_source,
+    heroPrompt: row.hero_prompt,
+    noteMd: row.note_md,
+    status: row.status,
+    metadata: row.metadata ?? {},
+    updatedAt: row.updated_at,
+  };
+}
+
+function toCard(row: CardRow): Card {
+  const unlockRule: UnlockRule = row.unlock_rule;
+  return {
+    id: row.id,
+    peekId: row.peek_id,
+    variantGroupId: row.variant_group_id,
+    position: row.position,
+    type: row.type,
+    title: row.title,
+    description: row.description,
+    imageUrl: row.image_url,
+    valueCents: row.value_cents,
+    revealValue: row.reveal_value,
+    isTaunt: row.is_taunt,
+    tauntText: row.taunt_text,
+    isLocked: row.is_locked,
+    unlockRule,
+    proposedDate: row.proposed_date,
+    locationHint: row.location_hint,
+    addedByUserId: row.added_by_user_id,
+  };
+}
+
+function toVariantGroup(row: VariantGroupRow): VariantGroup {
+  return {
+    id: row.id,
+    peekId: row.peek_id,
+    title: row.title,
+    selection: row.selection,
+    position: row.position,
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  let peek: Pick<PeekRow, 'recipient_name' | 'occasion'> | null = null;
+  try {
+    const { data } = await getSupabaseService()
+      .from('peeks')
+      .select('recipient_name, occasion')
+      .eq('slug', slug)
+      .maybeSingle();
+    peek = data;
+  } catch (err) {
+    log.warn('generateMetadata lookup failed', {
+      slug,
+      err: err instanceof Error ? err.message : String(err),
+    });
+    peek = null;
+  }
+
+  const recipientName = peek?.recipient_name ?? null;
+  const occasion = peek?.occasion ?? null;
+  const title = recipientName
+    ? `A Peek for ${recipientName}${occasion ? ` — ${occasion}` : ''}`
+    : 'peek.gift';
+  const description = recipientName
+    ? `Open ${recipientName}'s Peek.`
+    : 'Open your Peek.';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `/g/${slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
+
+export default async function RecipientPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const sb = getSupabaseService();
+
+  const peekRes = await sb
+    .from('peeks')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (peekRes.error) {
+    throw new Error(`Failed to load peek: ${peekRes.error.message}`);
+  }
+  if (!peekRes.data) notFound();
+  const peek = toPeek(peekRes.data);
+
+  if (peek.status !== 'published' && peek.status !== 'claimed') {
+    return <AlmostReady peek={peek} />;
+  }
+
+  const session = await readRecipientSessionFromCookies();
+  if (!session) {
+    log.error('recipient_session_cookie_missing', { slug });
+    throw new Error(
+      'recipient_session_cookie_missing — middleware did not mint one',
+    );
+  }
+  const recipientSignature = session.signature;
+
+  const [cardsRes, groupsRes, picksRes] = await Promise.all([
+    sb.from('cards').select('*').eq('peek_id', peek.id),
+    sb.from('variant_groups').select('*').eq('peek_id', peek.id),
+    sb
+      .from('picks')
+      .select('id, card_id, recipient_signature, beg_message, recipient_note')
+      .eq('peek_id', peek.id)
+      .eq('recipient_signature', recipientSignature),
+  ]);
+
+  if (cardsRes.error) {
+    throw new Error(`Failed to load cards: ${cardsRes.error.message}`);
+  }
+  if (groupsRes.error) {
+    throw new Error(`Failed to load variant groups: ${groupsRes.error.message}`);
+  }
+  if (picksRes.error) {
+    throw new Error(`Failed to load picks: ${picksRes.error.message}`);
+  }
+
+  const cards = (cardsRes.data ?? []).map(toCard);
+  const variantGroups = (groupsRes.data ?? []).map(toVariantGroup);
+  const pickRows: Pick<
+    PickRow,
+    'id' | 'card_id' | 'beg_message' | 'recipient_note'
+  >[] = picksRes.data ?? [];
+
+  const draft: PeekDraft = {
+    peek,
+    cards: cards.sort((a, b) => a.position - b.position),
+    variantGroups: variantGroups.sort((a, b) => a.position - b.position),
+  };
+
+  const myPicks = pickRows.map((p) => ({
+    pickId: p.id,
+    cardId: p.card_id,
+    begMessage: p.beg_message,
+    recipientNote: p.recipient_note,
+  }));
+
+  return (
+    <RecipientView
+      draft={draft}
+      peekId={peek.id}
+      initialPicks={myPicks}
+    />
+  );
+}
