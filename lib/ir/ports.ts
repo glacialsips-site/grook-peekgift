@@ -332,10 +332,11 @@ const stub = {
 // Real adapters get imported and substituted here as they're built. Anything missing or
 // unkeyed stays a stub. DQ-9: the llm port flips on ANTHROPIC_API_KEY.
 //
-// `realAdapterPlaceholder` stands in for the real Anthropic LLM adapter the brain agent
-// will write (adapters/anthropic.ts, satisfies LLMPort). Until then, even WITH a key, we
-// fall back to the stub so the app never half-boots; the brain agent swaps this line.
-const realAdapterPlaceholder: LLMPort | null = null;
+// The real Anthropic LLM adapter (adapters/anthropic.ts, satisfies LLMPort), wired in
+// by the brain agent. WITH a key, the registry below selects this; without one, the
+// stub still drives the whole protocol so the app boots and demos with zero secrets.
+import { anthropicLLM } from '@/lib/adapters/anthropic';
+const realAdapterPlaceholder: LLMPort | null = anthropicLLM;
 
 export const ports: Ports = {
   ...stub,
