@@ -1020,3 +1020,26 @@ Opus 4.8 for authoring; a cheap model (Haiku 4.5) behind `LLMPort` for classific
 
 ## VII.10 — What I could not reach this session (so the picture is honest)  ↪ G8, C8
 I never saw the actual **landing / auth / checkout code** — it isn't in either accessible repo, the private `glacialsips-site` repo is out of session scope (no `add_repo`), and Netlify + a live browser were unavailable. Notion/Airtable held no peek.gift content (sample data / empty). So VII.2's bookend recommendations are derived from the *core's* seams + the *design corpus* + the *live Stripe* config — not from reading Frank's real checkout/auth. To validate them, the lightest unblock is: add `glacialsips-site` (or wherever those live) to the session scope, or zip them, or share Figma URLs for the landing. I'll fold whatever arrives into the relevant factual addendum and revisit VII.
+
+---
+
+# Addendum VIII — Connector reachability sweep (2026-06-01)
+
+> FACTUAL. A second pass across connectors (several were intermittently blocked today; Frank
+> flagged the instability). Records what each holds re: peek.gift, so the "where are the
+> bookends" question is closed honestly. ↪ reinforces VII.10, G8.
+
+| Connector | Status | What it holds re: peek.gift |
+|---|---|---|
+| **GitHub** | up (scoped) | Only 2 repos on the account: `grook-peekgift` (the core) + **private `glacialsips-site`** (HTML; **out of session scope — access denied**, no `add_repo` tool). Name + HTML + pre-dating the gift work ⇒ presumed the **water-filtration vertical's site**, not peek.gift landing. |
+| **Stripe** | up | $12 publish + commerce config (Addendum V). Real. |
+| **Canva** | up | **100% GlacialSips water-filtration marketing** — "YOUR PIPES NEED A FLUSH", "Chlorine in NJ Tap Water", "Refined Water…", "GS — Template (Feed 4:5)", folder "GlacialSips Insta Prod 1.0.0", + some "Odette" posters and untitled phone-aspect designs contemporaneous with the GlacialSips batch (presumed GlacialSips stories). **Zero peek.gift hits** (`search-designs "peek gift"` → empty; `search-folders` → empty). |
+| **Notion** | up | Only generic **sample/template** pages ("Website Redesign / Riley / Brand Guidelines", uniform 2026-05-21 timestamps). No peek.gift content. |
+| **Airtable** | up | **No bases.** |
+| **Clerk** | up | **SDK doc snippets only** (`list_clerk_sdk_snippets`) — NOT Frank's Clerk instance/config. Cannot read his custom auth flows. |
+| **Netlify** | **down** | No tools this session (confirms Frank's report) — can't read site env, deploy branch, or repoint the deploy. |
+| **Figma** | up | Works, but needs a **file URL** from Frank to read anything. |
+| **Supabase / PostHog / Sentry** | up | Backend/analytics/errors (the planning instance already verified the live DB). |
+| browser / puppeteer | last-known up | Used for the render-check screenshots (Add. II); live landing/checkout unreachable anyway (Netlify down + JS-only shell). |
+
+**Conclusion (↪ VII.10):** the peek.gift **landing / auth / checkout are not reachable via any connector** — they're local to Frank's machine or in the unreadable private repo. The connectors that ARE up that *aren't* the core (Canva, the private repo) hold the **GlacialSips water-filtration vertical**, confirming the "one engine, two verticals" framing (cf. the `proof/config-swap` / `feat/brand-config` branches). **Lightest unblock to cover the bookends:** add the repo holding them to this session's scope, OR zip them (as with the design export), OR share Figma/Canva URLs for the actual peek.gift landing. The bookend *recommendations* in VII.2 stand on the core seams + design corpus + live Stripe — not on having read Frank's real checkout/auth.
