@@ -1,0 +1,128 @@
+{
+  "_comment": "WORKED SAMPLE — 'For the Old Man'. Shows the full path: one sloppy user line → the IR the chat should author → which the renderer paints into mockups/For the Old Man.html. This is a few-shot exemplar for the chat AND proof the contract holds a wildly art-directed page (hardware work-order concept), not just a card list. JSON here for readability; in code it's a PeekIR object validated by the Zod mirror.",
+
+  "_user_input": "it's my dad's 60th. he's a yardwork guy, always out with the mower. me and my sister want to get him some stuff and take him to that steakhouse downtown he's always eyeing.",
+
+  "schema_version": 1,
+  "peek": {
+    "id": "pk_dad60",
+    "slug": "old-man-60",
+    "curator_id": "stub-user",
+    "page_type": "gift",
+    "recipient_name": "Big Ray",
+    "relationship": "dad",
+    "occasion": "60th birthday",
+
+    "concept": {
+      "oneLiner": "Dad's 60th as a hardware-store work order",
+      "boldMove": "the steak dinner is presented as a tear-off ticket stub clipped to the work order",
+      "voice": "gruff, dry, secretly tender",
+      "emotionalCore": "grown kids finally doing something for the guy who quietly did everything",
+      "antiPattern": "balloons, confetti, 'Happy 60th Birthday Dad!' in a script font"
+    },
+
+    "theme": {
+      "type": {
+        "display": { "family": "Oswald", "source": "google", "weights": [500, 700], "axis": "Oswald:wght@500;700" },
+        "body": { "family": "Work Sans", "source": "google", "weights": [400, 600] },
+        "accent": { "family": "Roboto Mono", "source": "google", "weights": [400, 700] },
+        "scaleRatio": 1.5,
+        "displayTracking": "0.005em",
+        "displayCase": "upper"
+      },
+      "palette": {
+        "mode": "light",
+        "bg": "#C9B795", "surface": "#F3ECDB", "ink": "#26240E", "muted": "#6E6443",
+        "line": "#A8946C", "accent": "#39411F", "accent2": "#B0532A",
+        "texture": true
+      },
+      "scene": "grain",
+      "motifs": ["stamp", "rule"],
+      "frame": "ticket",
+      "radius": 6,
+      "motion": { "intensity": 0.2, "reduceMotionOK": true }
+    },
+
+    "hero": {
+      "url": null,
+      "source": "pending",
+      "alt": "Dad at the lake, opening day",
+      "directive": { "op": "generate", "prompt": "candid photo of a 60-year-old man in a flannel shirt by a lake at dawn, warm natural light, film grain, documentary feel", "aspect": "3:4" },
+      "frame": "plain"
+    },
+    "note_md": "He'll say you _shouldn't have_. He'll mean _thank you_. 60 looks good on you, Dad.",
+    "cta_label": "Send it to Dad",
+
+    "status": "draft",
+    "stripe_payment_intent_id": null,
+    "stripe_checkout_session_id": null,
+    "published_at": null,
+    "expires_at": null,
+    "share_url": null,
+    "created_at": "2026-05-31T00:00:00Z",
+    "updated_at": "2026-05-31T00:00:00Z"
+  },
+
+  "sections": [
+    {
+      "id": "s_hero", "kind": "hero",
+      "data": {
+        "eyebrow": "JOB: DAD'S 60TH BIRTHDAY",
+        "headline": "FOR THE\nOLD MAN",
+        "dek": "60 years. Still out there every Saturday with the mower. Time we did something for him.",
+        "ledger": [["For", "Big Ray"], ["Occasion", "The Big 6-0"], ["From", "The Kids"]]
+      }
+    },
+    { "id": "s_grid", "kind": "giftgrid", "title": "The Haul", "data": { "intro": "work-order line items; check them off" } },
+    {
+      "id": "s_ticket", "kind": "custom", "title": "The Main Event",
+      "data": {
+        "_why": "the bold move — a tear-off ticket stub the giftgrid can't express, so the model writes it against --peek-* vars",
+        "html": "<div style=\"background:var(--peek-accent);color:var(--peek-surface);border-radius:10px;padding:20px;font-family:var(--peek-font-display)\"><div style=\"font-family:var(--peek-font-accent);font-size:10px;letter-spacing:.18em;opacity:.8\">ADMIT TWO · THE MAIN EVENT</div><div style=\"font-size:28px;text-transform:uppercase;margin:6px 0\">Steak Dinner, On Us</div><div style=\"font-family:var(--peek-font-accent);font-size:12px;opacity:.85\">Friday · 7:30 PM · that chophouse downtown he's been eyeing for a decade.</div></div>"
+      }
+    },
+    { "id": "s_note", "kind": "note", "data": {} },
+    { "id": "s_ship", "kind": "steps", "title": "How It Ships", "data": { "steps": [["01", "You send it"], ["02", "We pack & cold-ship"], ["03", "Lands at his door"]] } }
+  ],
+
+  "variant_groups": [],
+
+  "cards": [
+    {
+      "id": "c1", "variant_group_id": null, "position": 0, "type": "product",
+      "title": "Leather Work Gloves", "description": "the good ones, finally",
+      "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "premium leather work gloves product shot" } },
+      "source_url": "https://www.duluthtrading.com/...", "source_retailer": "Duluth",
+      "value_cents": 4400, "reveal_value": false,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "c2", "variant_group_id": null, "position": 1, "type": "product",
+      "title": "Heirloom Tomato Seeds", "description": "for the garden he won't stop talking about",
+      "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "heirloom tomato seed packets" } },
+      "source_url": "https://amazon.com/...", "source_retailer": "Amazon",
+      "value_cents": 1600, "reveal_value": false,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "c3", "variant_group_id": null, "position": 2, "type": "product",
+      "title": "A Six-Pack of His Lager", "description": "you know the one",
+      "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "amber lager six pack" } },
+      "source_url": null, "source_retailer": "Local",
+      "value_cents": 1400, "reveal_value": false,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": null, "location_hint": null, "metadata": {}
+    },
+    {
+      "id": "c4", "variant_group_id": null, "position": 3, "type": "activity",
+      "title": "Steak Dinner, On Us", "description": "the chophouse downtown",
+      "media": null,
+      "source_url": null, "source_retailer": null,
+      "value_cents": null, "reveal_value": false,
+      "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
+      "proposed_date": "2026-06-12T19:30:00Z", "location_hint": "downtown chophouse", "metadata": { "hero_activity": true }
+    }
+  ]
+}

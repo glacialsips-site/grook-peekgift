@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Boogie Wonderland · Linda Turns 50 · A Disco Affair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Yellowtail&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --cocoa:#231310;
+    --cocoa2:#311C16;
+    --cocoa3:#3E251D;
+    --cream:#F7E9CE;
+    --cream-dim:#D8C6A6;
+    --orange:#F26B22;
+    --tang:#D9531A;
+    --gold:#F6B538;
+    --pink:#EA4C8C;
+    --teal:#2FB79E;
+    --grape:#7E4BC9;
+    --ink:#231310;
+    --display:"Lilita One",system-ui,sans-serif;
+    --script:"Yellowtail",cursive;
+    --body:"Nunito",system-ui,sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;color:var(--cream);font-family:var(--body);font-weight:600;
+    font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(60% 40% at 85% -8%, rgba(246,181,56,.16) 0%, transparent 55%),
+      radial-gradient(50% 40% at 0% 6%, rgba(234,76,140,.16) 0%, transparent 55%),
+      linear-gradient(180deg,#2B1813 0%,#231310 60%,#1C0F0C 100%);
+    background-attachment:fixed;
+  }
+  img{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;border:none;cursor:pointer;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 30px;}
+
+  .display{font-family:var(--display);text-transform:uppercase;letter-spacing:.01em;}
+  .script{font-family:var(--script);}
+  .eyebrow{font-family:var(--display);font-size:13px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gold);display:inline-flex;align-items:center;gap:10px;}
+  .eyebrow::before,.eyebrow::after{content:"★";color:var(--orange);font-size:11px;}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:999px;
+    font-family:var(--display);font-size:16px;letter-spacing:.06em;text-transform:uppercase;
+    background:linear-gradient(135deg,var(--orange),var(--tang));color:#FFF4E4;
+    box-shadow:0 10px 0 #9E3A0F,0 16px 28px rgba(217,83,26,.4);
+    transition:transform .12s ease,box-shadow .12s ease;}
+  .btn:hover{transform:translateY(3px);box-shadow:0 7px 0 #9E3A0F,0 12px 22px rgba(217,83,26,.4);}
+  .btn--gold{background:linear-gradient(135deg,var(--gold),#E09A1E);color:#3A2406;box-shadow:0 10px 0 #A06A09,0 16px 28px rgba(246,181,56,.36);}
+  .btn--gold:hover{box-shadow:0 7px 0 #A06A09,0 12px 22px rgba(246,181,56,.36);}
+  .btn--teal{background:linear-gradient(135deg,var(--teal),#1E8E79);color:#06241E;box-shadow:0 10px 0 #135E50,0 16px 28px rgba(47,183,158,.36);}
+  .btn--teal:hover{box-shadow:0 7px 0 #135E50,0 12px 22px rgba(47,183,158,.36);}
+
+  /* mirror ball */
+  .ball{position:relative;border-radius:50%;
+    background:radial-gradient(circle at 36% 30%, #EAF6FF 0%, #BFD6E6 22%, #8FB0C6 52%, #5E7E96 78%, #3C5468 100%);
+    box-shadow:0 0 28px rgba(190,220,255,.45),inset -6px -8px 16px rgba(0,0,0,.4);overflow:hidden;}
+  .ball::before{content:"";position:absolute;inset:0;opacity:.5;mix-blend-mode:overlay;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 1px, transparent 1px 12%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.35) 0 1px, transparent 1px 12%);}
+  .ball::after{content:"";position:absolute;width:30%;height:18%;top:18%;left:24%;border-radius:50%;
+    background:rgba(255,255,255,.7);filter:blur(3px);}
+
+  /* sparkles */
+  .spark{position:absolute;color:var(--gold);pointer-events:none;
+    filter:drop-shadow(0 0 6px rgba(246,181,56,.8));animation:tw 2.6s ease-in-out infinite;}
+  @keyframes tw{0%,100%{opacity:.3;transform:scale(.7);}50%{opacity:1;transform:scale(1.2);}}
+
+  /* ── NAV ── */
+  header.nav{position:sticky;top:0;z-index:60;background:rgba(35,19,16,.86);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:3px solid;border-image:linear-gradient(90deg,var(--orange),var(--gold),var(--teal),var(--pink)) 1;}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo .ball{width:30px;height:30px;}
+  .logo b{font-family:var(--display);font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:var(--cream);}
+  .logo b span{color:var(--gold);}
+  .nav-links{display:flex;gap:30px;align-items:center;}
+  .nav-links a{font-family:var(--display);font-size:14px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--cream-dim);transition:color .2s ease;}
+  .nav-links a:hover{color:var(--pink);}
+
+  /* ── HERO ── */
+  .hero{position:relative;overflow:hidden;padding:50px 0 92px;}
+  .hero-sun{position:absolute;top:-40%;right:-18%;width:80%;height:160%;pointer-events:none;opacity:.6;
+    background:repeating-conic-gradient(from 0deg at 50% 50%,
+      var(--orange) 0deg 9deg, transparent 9deg 18deg, var(--gold) 18deg 27deg, transparent 27deg 36deg);
+    -webkit-mask:radial-gradient(circle at 50% 50%, #000 0%, transparent 62%);
+    mask:radial-gradient(circle at 50% 50%, #000 0%, transparent 62%);}
+  .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.08fr .92fr;gap:50px;align-items:center;}
+  .hero .greet{font-family:var(--script);font-size:clamp(40px,6vw,76px);color:var(--pink);line-height:.9;margin:8px 0 0;
+    text-shadow:0 3px 0 rgba(0,0,0,.2);}
+  .hero h1{font-family:var(--display);text-transform:uppercase;font-size:clamp(54px,9vw,120px);line-height:.82;
+    margin:6px 0 0;
+    background:linear-gradient(180deg,#FCE9B6 0%,var(--gold) 45%,var(--orange) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    -webkit-text-stroke:2px rgba(58,36,6,.25);
+    filter:drop-shadow(0 6px 0 rgba(158,58,15,.35));}
+  .hero p.lede{font-size:18px;color:var(--cream-dim);margin:22px 0 0;max-width:40ch;}
+  .hero .pills{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 0;}
+  .pill{display:inline-flex;align-items:center;gap:9px;background:var(--cocoa2);border:2px solid var(--cocoa3);
+    border-radius:999px;padding:9px 17px;font-size:14px;font-weight:800;color:var(--cream);}
+  .pill .dot{width:10px;height:10px;border-radius:50%;}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap;margin:30px 0 0;}
+
+  /* vinyl photo frame */
+  .vinyl-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+  .vinyl{position:relative;width:100%;max-width:430px;aspect-ratio:1/1;border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at 50% 50%, #1A1A1C 0 2px, #0E0E10 2px 5px);
+    box-shadow:0 30px 60px rgba(0,0,0,.5),inset 0 0 60px rgba(0,0,0,.6);
+    display:flex;align-items:center;justify-content:center;animation:spin 18s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .vinyl .shine{position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 210deg, transparent 0deg, rgba(255,255,255,.12) 30deg, transparent 70deg, transparent 200deg, rgba(255,255,255,.08) 240deg, transparent 290deg);}
+  .vinyl .label{position:relative;width:46%;height:46%;border-radius:50%;overflow:hidden;
+    background:radial-gradient(circle at 40% 35%, #F6CFE0, #EA4C8C 55%, #B92E6A);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    box-shadow:0 0 0 5px #231310,0 0 0 8px rgba(246,181,56,.6);}
+  .vinyl .label img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;}
+  .vinyl .label .cap{font-family:var(--display);font-size:12px;line-height:1.3;color:#fff;text-transform:uppercase;letter-spacing:.04em;padding:14px;z-index:1;}
+  .vinyl .hole{position:absolute;width:13px;height:13px;border-radius:50%;background:#231310;z-index:3;box-shadow:inset 0 0 0 2px rgba(255,255,255,.15);}
+  .vinyl-badge{position:absolute;z-index:5;top:6%;right:0;transform:rotate(8deg);
+    background:var(--teal);color:#06241E;font-family:var(--display);font-size:14px;text-transform:uppercase;
+    padding:9px 18px;border-radius:999px;box-shadow:0 8px 18px rgba(0,0,0,.4);border:3px solid #06241E;}
+
+  /* ── MARQUEE ── */
+  .strip{overflow:hidden;background:linear-gradient(90deg,var(--pink),var(--orange),var(--gold),var(--teal),var(--grape));}
+  .strip-track{display:flex;gap:40px;padding:14px 0;white-space:nowrap;animation:mq 26s linear infinite;}
+  .strip-track span{font-family:var(--display);font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:#2B1410;
+    display:inline-flex;align-items:center;gap:40px;text-shadow:0 1px 0 rgba(255,255,255,.25);}
+  .strip-track span::after{content:"●";}
+  @keyframes mq{to{transform:translateX(-50%);}}
+
+  /* ── SECTION ── */
+  .sec{padding:84px 0;}
+  .sec-head{text-align:center;max-width:680px;margin:0 auto 46px;}
+  .sec-head h2{font-family:var(--display);text-transform:uppercase;font-size:clamp(40px,6vw,74px);line-height:.86;margin:12px 0 0;color:var(--cream);}
+  .sec-head h2 .scr{display:block;font-family:var(--script);text-transform:none;color:var(--pink);font-size:.55em;margin-bottom:-.1em;}
+  .sec-head p{color:var(--cream-dim);margin:16px 0 0;font-size:16px;}
+
+  /* ── ITINERARY = RECORD SLEEVE TRACKLIST ── */
+  .sleeve{display:grid;grid-template-columns:.85fr 1.15fr;gap:0;border-radius:18px;overflow:hidden;
+    background:var(--cocoa2);border:3px solid var(--cocoa3);box-shadow:0 30px 70px rgba(0,0,0,.45);}
+  .sleeve .disc-side{position:relative;background:radial-gradient(circle at 50% 45%, #3E251D, #1C0F0C);
+    display:flex;align-items:center;justify-content:center;padding:30px;min-height:380px;overflow:hidden;}
+  .sleeve .disc-side .rays{position:absolute;inset:-30%;opacity:.4;
+    background:repeating-conic-gradient(from 0deg at 50% 50%, var(--gold) 0 6deg, transparent 6deg 12deg);
+    -webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%);}
+  .sleeve .disc{position:relative;width:78%;aspect-ratio:1/1;border-radius:50%;
+    background:repeating-radial-gradient(circle at 50% 50%, #18181A 0 2px, #0C0C0E 2px 5px);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px rgba(0,0,0,.5);animation:spin 14s linear infinite;}
+  .sleeve .disc .lbl{width:42%;height:42%;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--gold),var(--orange) 70%,var(--tang));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#3A2406;
+    box-shadow:0 0 0 4px #0C0C0E;}
+  .sleeve .disc .lbl .a{font-family:var(--display);font-size:clamp(14px,2vw,20px);text-transform:uppercase;line-height:1;}
+  .sleeve .disc .lbl .b{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;}
+  .sleeve .disc .hole{position:absolute;width:11px;height:11px;border-radius:50%;background:#0C0C0E;}
+  .sleeve .tracks{padding:clamp(26px,3.4vw,44px);}
+  .sleeve .tracks .side-tag{font-family:var(--display);font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;}
+  .track{display:flex;align-items:center;gap:16px;padding:15px 0;border-bottom:2px dotted var(--cocoa3);}
+  .track:last-child{border-bottom:none;}
+  .track .num{font-family:var(--display);font-size:18px;color:var(--gold);width:34px;flex:none;text-align:center;}
+  .track .info{flex:1;}
+  .track .info h4{font-family:var(--display);font-size:21px;text-transform:uppercase;margin:0;color:var(--cream);letter-spacing:.01em;}
+  .track .info p{font-size:13.5px;color:var(--cream-dim);margin:3px 0 0;}
+  .track .time{font-family:var(--display);font-size:17px;color:var(--pink);white-space:nowrap;}
+
+  /* ── WISHLIST ── */
+  .feature{position:relative;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;
+    border-radius:22px;overflow:hidden;margin-bottom:30px;
+    background:linear-gradient(120deg,var(--grape),var(--pink) 60%,var(--orange));
+    box-shadow:0 26px 60px rgba(0,0,0,.4);border:3px solid var(--gold);}
+  .feature .badge{position:absolute;top:18px;left:18px;background:var(--gold);color:#3A2406;
+    font-family:var(--display);font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:7px 18px;border-radius:999px;}
+  .feature .fcopy{padding:clamp(34px,4vw,56px);}
+  .feature .fcopy .tag{font-family:var(--display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#FCE9B6;}
+  .feature .fcopy h3{font-family:var(--display);text-transform:uppercase;font-size:clamp(30px,4vw,48px);line-height:.9;margin:10px 0 0;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.18);}
+  .feature .fcopy p{color:rgba(255,244,228,.92);margin:14px 0 0;max-width:38ch;}
+  .feature .fcopy .price{font-family:var(--display);font-size:22px;color:#FCE9B6;margin-top:16px;}
+  .feature .fart{position:relative;min-height:280px;display:flex;align-items:center;justify-content:center;}
+
+  .gifts{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+  .gift{background:var(--cream);color:var(--ink);border-radius:18px;overflow:hidden;
+    box-shadow:0 14px 0 rgba(0,0,0,.18);transition:transform .2s ease;display:flex;flex-direction:column;}
+  .gift:hover{transform:translateY(-6px) rotate(-1deg);}
+  .gift .pic{aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;}
+  .gift .pic .glyph{width:60%;height:60%;}
+  .gift .shop{position:absolute;top:12px;left:12px;background:var(--ink);color:var(--cream);
+    border-radius:999px;padding:5px 12px;font-family:var(--display);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
+  .gift .body{padding:16px 18px 18px;}
+  .gift .name{font-family:var(--display);font-size:19px;text-transform:uppercase;line-height:1;color:var(--ink);}
+  .gift .desc{font-size:12.5px;font-weight:700;color:#7A5A3E;margin:7px 0 0;}
+  .gift .foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+  .gift .pr{font-family:var(--display);font-size:20px;color:var(--tang);}
+  .gift .get{font-family:var(--display);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--grape);}
+
+  /* ── RSVP ── */
+  .rsvp{position:relative;overflow:hidden;border-radius:26px;text-align:center;padding:clamp(50px,7vw,88px) 30px;
+    background:radial-gradient(70% 100% at 50% 0%, var(--cocoa3), var(--cocoa));border:3px solid var(--gold);}
+  .rsvp .rays{position:absolute;top:-60%;left:50%;transform:translateX(-50%);width:120%;height:160%;opacity:.4;pointer-events:none;
+    background:repeating-conic-gradient(from 0deg at 50% 40%, var(--pink) 0 7deg, transparent 7deg 14deg, var(--teal) 14deg 21deg, transparent 21deg 28deg);
+    -webkit-mask:radial-gradient(circle at 50% 40%, #000, transparent 60%);mask:radial-gradient(circle at 50% 40%, #000, transparent 60%);}
+  .rsvp-inner{position:relative;z-index:2;max-width:620px;margin:0 auto;}
+  .rsvp h2{font-family:var(--display);text-transform:uppercase;font-size:clamp(42px,6vw,80px);line-height:.84;margin:12px 0 0;color:var(--cream);}
+  .rsvp h2 .scr{font-family:var(--script);text-transform:none;color:var(--gold);}
+  .rsvp p{color:var(--cream-dim);margin:16px 0 0;font-size:16px;}
+  .rsvp form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:30px 0 0;}
+  .rsvp input{padding:15px 22px;border-radius:999px;border:3px solid var(--cocoa3);background:var(--cocoa);
+    color:var(--cream);font-family:var(--body);font-weight:700;font-size:15px;min-width:250px;}
+  .rsvp input::placeholder{color:var(--cream-dim);}
+  .rsvp input:focus{outline:none;border-color:var(--pink);}
+  .rsvp small{display:block;margin-top:18px;font-size:13px;color:var(--cream-dim);}
+
+  /* ── FOOTER ── */
+  footer{text-align:center;padding:54px 0 48px;border-top:3px solid;
+    border-image:linear-gradient(90deg,var(--orange),var(--gold),var(--teal),var(--pink)) 1;}
+  footer .ball{width:46px;height:46px;margin:0 auto;}
+  footer .ttl{font-family:var(--script);font-size:40px;color:var(--gold);margin-top:10px;}
+  footer p{font-family:var(--display);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim);margin:10px 0 0;}
+
+  /* ── MOBILE COMPONENTS ── */
+  .hamburger{display:none;width:46px;height:46px;place-items:center;color:var(--cream);background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .hamburger:active{background:rgba(246,181,56,.16);border-radius:12px;}
+  .hamburger span{position:relative;width:20px;height:2.5px;background:currentColor;border-radius:2px;display:block;transition:background .2s ease;}
+  .hamburger span::before,.hamburger span::after{content:"";position:absolute;left:0;width:20px;height:2.5px;background:currentColor;border-radius:2px;transition:transform .3s ease;}
+  .hamburger span::before{top:-6px;}
+  .hamburger span::after{top:6px;}
+  body.menu-open .hamburger span{background:transparent;}
+  body.menu-open .hamburger span::before{transform:translateY(6px) rotate(45deg);}
+  body.menu-open .hamburger span::after{transform:translateY(-6px) rotate(-45deg);}
+
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(20,11,9,.7);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease;}
+  .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(84vw,360px);background:var(--cocoa2);border-left:3px solid;border-image:linear-gradient(180deg,var(--orange),var(--gold),var(--teal),var(--pink)) 1;transform:translateX(100%);transition:transform .4s cubic-bezier(.3,.8,.2,1);display:flex;flex-direction:column;padding:calc(var(--safe-t) + 22px) 26px calc(var(--safe-b) + 26px);box-shadow:-30px 0 80px rgba(0,0,0,.55);}
+  .mobile-menu .mm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;}
+  .mobile-menu .mm-brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:18px;text-transform:uppercase;color:var(--cream);}
+  .mobile-menu .mm-brand .ball{width:26px;height:26px;}
+  .mm-close{width:46px;height:46px;display:grid;place-items:center;background:transparent;cursor:pointer;color:var(--gold);margin-right:-8px;}
+  .mobile-menu nav{display:flex;flex-direction:column;}
+  .mobile-menu nav a{font-family:var(--display);text-transform:uppercase;font-size:30px;color:var(--cream);padding:16px 0;border-bottom:2px dotted var(--cocoa3);display:flex;align-items:center;justify-content:space-between;opacity:0;transform:translateX(16px);transition:opacity .4s ease,transform .4s ease;}
+  .mobile-menu nav a .ix{font-size:16px;color:var(--pink);}
+  body.menu-open .mobile-menu nav a{opacity:1;transform:none;}
+  body.menu-open .mobile-menu nav a:nth-child(1){transition-delay:.08s;}
+  body.menu-open .mobile-menu nav a:nth-child(2){transition-delay:.14s;}
+  body.menu-open .mobile-menu nav a:nth-child(3){transition-delay:.2s;}
+  .mobile-menu .mm-foot{margin-top:auto;padding-top:24px;}
+  .mobile-menu .mm-foot .eyebrow{display:flex;margin-bottom:10px;}
+  .mobile-menu .mm-foot p{font-family:var(--display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cream-dim);margin:0;}
+  body.menu-open{overflow:hidden;}
+  body.menu-open .scrim{opacity:1;visibility:visible;}
+  body.menu-open .mobile-menu{transform:none;}
+
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:12px;padding:11px 18px calc(11px + var(--safe-b));background:rgba(28,15,12,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:3px solid;border-image:linear-gradient(90deg,var(--orange),var(--gold),var(--teal),var(--pink)) 1;transform:translateY(160%);transition:transform .45s cubic-bezier(.3,.8,.2,1);}
+  .mobile-bar.show{transform:none;}
+  .mobile-bar .mb-meta{flex:1;min-width:0;}
+  .mobile-bar .mb-meta .k{font-family:var(--display);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim);}
+  .mobile-bar .mb-meta .v{font-family:var(--display);font-size:18px;text-transform:uppercase;color:var(--cream);line-height:1;}
+  .mobile-bar .btn{flex:0 0 auto;padding:12px 22px;box-shadow:0 5px 0 #A06A09;font-size:14px;}
+  .mobile-bar .btn:active{transform:translateY(2px);box-shadow:0 3px 0 #A06A09;}
+
+  .sheet-scrim{position:fixed;inset:0;z-index:90;background:rgba(20,11,9,.78);opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s ease;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:91;background:var(--cream);color:var(--ink);border-radius:24px 24px 0 0;transform:translateY(101%);transition:transform .45s cubic-bezier(.3,.85,.2,1);padding:10px 24px calc(26px + var(--safe-b));max-height:92vh;overflow-y:auto;box-shadow:0 -30px 80px rgba(0,0,0,.55);}
+  body.sheet-open{overflow:hidden;}
+  body.sheet-open .sheet-scrim{opacity:1;visibility:visible;}
+  body.sheet-open .sheet{transform:none;}
+  .sheet .grab{width:46px;height:5px;border-radius:999px;background:rgba(35,19,16,.25);margin:6px auto 16px;}
+  .sheet .sh-pic{position:relative;width:100%;aspect-ratio:3/2;border-radius:16px;display:flex;align-items:center;justify-content:center;}
+  .sheet .sh-pic .glyph{width:38%;height:38%;}
+  .sheet .sh-shop{display:inline-block;margin-top:18px;background:var(--ink);color:var(--cream);border-radius:999px;padding:5px 14px;font-family:var(--display);font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+  .sheet .sh-name{font-family:var(--display);text-transform:uppercase;font-size:26px;color:var(--ink);margin-top:12px;line-height:1;}
+  .sheet .sh-desc{font-size:14.5px;font-weight:700;color:#7A5A3E;margin-top:10px;}
+  .sheet .sh-price{font-family:var(--display);font-size:24px;color:var(--tang);margin-top:14px;}
+  .sheet .sh-cta{display:flex;gap:12px;margin-top:22px;}
+  .sheet .sh-cta .btn{flex:1;justify-content:center;font-size:14px;}
+  .sheet .sh-cta .btn--ghost{background:transparent;color:var(--ink);box-shadow:0 0 0 2px rgba(35,19,16,.2);}
+  .sheet .sh-cta .btn--ghost:active{transform:translateY(2px);}
+
+  .gift{position:relative;}
+  .gift .claimed-badge{position:absolute;top:12px;right:12px;z-index:3;display:none;align-items:center;gap:5px;background:var(--teal);color:#06241E;font-family:var(--display);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:5px 11px;border-radius:999px;}
+  .gift.claimed{opacity:.6;}
+  .gift.claimed .claimed-badge{display:inline-flex;}
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;gap:48px;}
+    .vinyl-wrap{order:-1;}
+    .sleeve{grid-template-columns:1fr;}
+    .sleeve .disc-side{min-height:280px;}
+    .feature{grid-template-columns:1fr;}
+    .feature .fart{min-height:200px;}
+    .gifts{grid-template-columns:repeat(2,1fr);}
+    .nav-links{display:none;}
+    .hamburger{display:grid;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 20px;}
+    .hero{padding:36px 0 112px;}
+    .hero h1{font-size:clamp(56px,17vw,92px);}
+    .hero .greet{font-size:clamp(38px,11vw,56px);}
+    .hero-cta{flex-direction:column;}
+    .hero-cta .btn{width:100%;justify-content:center;}
+    .sec{padding:58px 0;}
+    .sec-head{margin-bottom:32px;}
+    .vinyl{max-width:300px;}
+    /* gifts → horizontal snap carousel */
+    .gifts{display:flex;grid-template-columns:none;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -20px;padding:6px 20px;scroll-padding-left:20px;}
+    .gifts::-webkit-scrollbar{display:none;}
+    .gift{flex:0 0 62%;max-width:230px;scroll-snap-align:start;cursor:pointer;}
+    .gift:last-child{margin-right:6px;}
+    .gift:hover{transform:none;}
+    .gift:active{transform:scale(.98) rotate(-1deg);}
+    .track{gap:12px;}
+    .rsvp form{flex-direction:column;}
+    .rsvp input{min-width:0;width:100%;}
+    .rsvp form .btn{width:100%;justify-content:center;}
+    .mobile-bar{display:flex;}
+  }
+  @media (max-width:380px){
+    .wrap{padding:0 18px;}
+    .gifts{margin:0 -18px;padding:6px 18px;scroll-padding-left:18px;}
+    .gift{flex-basis:72%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;transition-duration:.08s!important;}
+    .vinyl,.sleeve .disc{animation:none!important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ MOBILE MENU ══ -->
+<div class="scrim" data-close-menu></div>
+<aside class="mobile-menu" aria-label="Menu">
+  <div class="mm-top">
+    <span class="mm-brand"><span class="ball"></span> BOOGIE</span>
+    <button class="mm-close" data-close-menu aria-label="Close menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+  <nav>
+    <a href="#night" data-close-menu>The Night <span class="ix">★</span></a>
+    <a href="#wishlist" data-close-menu>Wishlist <span class="ix">★</span></a>
+    <a href="#rsvp" data-close-menu>RSVP <span class="ix">★</span></a>
+  </nav>
+  <div class="mm-foot">
+    <span class="eyebrow">The Velvet Room</span>
+    <p>Sat Oct 11th · 7PM 'til late</p>
+  </div>
+</aside>
+
+<!-- ══ NAV ══ -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <button class="hamburger" data-open-menu aria-label="Open menu"><span></span></button>
+    <a class="logo" href="#top"><span class="ball"></span><b>BOOGIE <span>WONDERLAND</span></b></a>
+    <nav class="nav-links">
+      <a href="#night">The Night</a>
+      <a href="#wishlist">Wishlist</a>
+      <a href="#rsvp">RSVP</a>
+    </nav>
+    <a class="btn btn--gold" href="#rsvp" style="padding:10px 22px;box-shadow:0 6px 0 #A06A09">RSVP</a>
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="top">
+  <div class="hero-sun"></div>
+  <span class="spark" style="top:80px;left:8%;font-size:22px">★</span>
+  <span class="spark" style="top:240px;left:44%;font-size:15px;animation-delay:1s">★</span>
+  <span class="spark" style="bottom:120px;left:30%;font-size:18px;animation-delay:.5s">★</span>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">You're Invited to Get Down</div>
+      <div class="greet">Boogie Wonderland</div>
+      <h1>Linda<br/>Turns 50</h1>
+      <p class="lede">Dust off your platforms and find your funk — we're throwing the grooviest night of the decade, and the guest of honor is feeling <em>fine</em>.</p>
+      <div class="pills">
+        <span class="pill"><span class="dot" style="background:var(--orange)"></span>Sat · Oct 11th</span>
+        <span class="pill"><span class="dot" style="background:var(--teal)"></span>7PM 'til late</span>
+        <span class="pill"><span class="dot" style="background:var(--pink)"></span>The Velvet Room</span>
+        <span class="pill"><span class="dot" style="background:var(--gold)"></span>Dress: Groovy</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn" href="#rsvp">Count me in!</a>
+        <a class="btn btn--teal" href="#night">See the set list</a>
+      </div>
+    </div>
+
+    <div class="vinyl-wrap">
+      <div class="vinyl">
+        <div class="shine"></div>
+        <div class="label">
+          <div class="cap">a photo of Linda<br/>in her groove</div>
+          <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=700&q=80&auto=format&fit=crop" alt="The birthday girl" onerror="this.style.display='none'"/>
+        </div>
+        <div class="hole"></div>
+      </div>
+      <div class="vinyl-badge">★ Side A ★</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MARQUEE ══ -->
+<div class="strip">
+  <div class="strip-track">
+    <span>Dust off your platforms</span><span>Get on up</span><span>50 years of fabulous</span><span>Last one on the floor wins</span>
+    <span>Dust off your platforms</span><span>Get on up</span><span>50 years of fabulous</span><span>Last one on the floor wins</span>
+  </div>
+</div>
+
+<!-- ══ THE NIGHT / ITINERARY ══ -->
+<section class="sec" id="night">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The Set List</div>
+      <h2><span class="scr">how the night</span>Goes Down</h2>
+      <p>One record, two sides, zero wallflowers. Here's the running order for the boogie.</p>
+    </div>
+    <div class="sleeve">
+      <div class="disc-side">
+        <div class="rays"></div>
+        <div class="disc">
+          <div class="lbl"><div class="a">Linda<br/>@ 50</div><div class="b">Funk · 1974</div></div>
+          <div class="hole"></div>
+        </div>
+      </div>
+      <div class="tracks">
+        <div class="side-tag">◖ Side A · The Warm-Up</div>
+        <div class="track"><div class="num">A1</div><div class="info"><h4>Doors & Disco Sours</h4><p>Roll in, grab a cocktail, claim your spot under the mirror ball.</p></div><div class="time">7:00</div></div>
+        <div class="track"><div class="num">A2</div><div class="info"><h4>Supper at the Velvet Room</h4><p>A groovy spread + the first toast to the birthday queen.</p></div><div class="time">7:45</div></div>
+        <div class="track"><div class="num">A3</div><div class="info"><h4>Dance Floor Opens</h4><p>The DJ drops the needle. Boogie commences immediately.</p></div><div class="time">9:00</div></div>
+        <div class="side-tag" style="margin-top:22px">◗ Side B · The Main Event</div>
+        <div class="track"><div class="num">B1</div><div class="info"><h4>Best Outfit Contest</h4><p>Sequins, bell-bottoms, fros — the floor decides the winner.</p></div><div class="time">10:30</div></div>
+        <div class="track"><div class="num">B2</div><div class="info"><h4>Midnight Cake & Toast</h4><p>Lights low, sparklers up, 50 candles, one big wish.</p></div><div class="time">12:00</div></div>
+        <div class="track"><div class="num">B3</div><div class="info"><h4>Last Dance After-Party</h4><p>The diehards keep the floor warm 'til the lights come up.</p></div><div class="time">'til ?</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WISHLIST ══ -->
+<section class="sec" id="wishlist">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Linda's Wishlist</div>
+      <h2><span class="scr">if you're feeling</span>Generous</h2>
+      <p>Your presence is the only present she needs — but if the spirit moves you, here's what would make her shimmy.</p>
+    </div>
+
+    <!-- featured experience -->
+    <div class="feature">
+      <span class="badge">★ The Experience ★</span>
+      <div class="fcopy">
+        <div class="tag">The grooviest gift of all</div>
+        <h3>A Private<br/>Roller-Disco Night</h3>
+        <p>Rent the whole rink for Linda and her crew — skate hire, a live DJ spinning nothing but funk, and a fog machine that won't quit. The ultimate encore.</p>
+        <div class="price">$600 · chip in on the rink</div>
+        <div style="margin-top:20px"><a class="btn btn--gold" href="#">Pitch in on the magic</a></div>
+      </div>
+      <div class="fart">
+        <svg width="200" height="180" viewBox="0 0 200 180" fill="none">
+          <ellipse cx="100" cy="158" rx="64" ry="9" fill="rgba(0,0,0,.18)"/>
+          <rect x="60" y="92" width="80" height="22" rx="11" fill="#F7E9CE"/>
+          <rect x="66" y="84" width="68" height="12" rx="6" fill="#2FB79E"/>
+          <path d="M70 84c4-22 16-34 30-34s26 12 30 34" fill="#EA4C8C"/>
+          <circle cx="74" cy="124" r="12" fill="#231310"/><circle cx="100" cy="124" r="12" fill="#231310"/><circle cx="126" cy="124" r="12" fill="#231310"/>
+          <circle cx="74" cy="124" r="4" fill="#F6B538"/><circle cx="100" cy="124" r="4" fill="#F6B538"/><circle cx="126" cy="124" r="4" fill="#F6B538"/>
+          <circle cx="100" cy="40" r="9" fill="#F7E9CE"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- product gifts -->
+    <div class="gifts">
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#FCE0A0,#F6B538)"><span class="shop">Amazon</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="34" fill="#231310"/><circle cx="50" cy="50" r="13" fill="#EA4C8C"/><circle cx="50" cy="50" r="3" fill="#231310"/></svg>
+        </div>
+        <div class="body"><div class="name">Vinyl Record Crate</div><div class="desc">Classic funk & soul, 25 LPs.</div>
+          <div class="foot"><span class="pr">$85</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F6CFE0,#EA4C8C)"><span class="shop">Etsy</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="38" y="20" width="24" height="38" rx="12" fill="#231310"/><path d="M30 58h40l-6 24H36l-6-24z" fill="#F6B538"/><rect x="40" y="80" width="20" height="6" fill="#231310"/></svg>
+        </div>
+        <div class="body"><div class="name">Platform Boots</div><div class="desc">Glitter heel, 4-inch lift. Iconic.</div>
+          <div class="foot"><span class="pr">$120</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#BFEFE2,#2FB79E)"><span class="shop">Target</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><path d="M44 30h12v8c10 4 12 30 0 38v8H44v-8c-12-8-10-34 0-38v-8z" fill="#EA4C8C"/><ellipse cx="50" cy="58" rx="14" ry="18" fill="#F6B538"/><rect x="40" y="82" width="20" height="6" rx="3" fill="#231310"/></svg>
+        </div>
+        <div class="body"><div class="name">Lava Lamp</div><div class="desc">Slow-drifting amber blobs. Hypnotic.</div>
+          <div class="foot"><span class="pr">$36</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#E0CDF4,#7E4BC9)"><span class="shop">Crate & Barrel</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><path d="M30 40h40l-6 20H36l-6-20z" fill="#F6B538"/><rect x="46" y="60" width="8" height="16" fill="#231310"/><rect x="36" y="76" width="28" height="6" rx="3" fill="#231310"/><path d="M34 40c0-8 6-12 16-12s16 4 16 12" stroke="#231310" stroke-width="3" fill="none"/></svg>
+        </div>
+        <div class="body"><div class="name">Fondue Set</div><div class="desc">The ultimate '70s dinner party flex.</div>
+          <div class="foot"><span class="pr">$54</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#FCD9B8,#F26B22)"><span class="shop">Etsy</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="30" fill="#231310"/><path d="M50 50l18-12M50 50l-14 14" stroke="#F6B538" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="4" fill="#EA4C8C"/><circle cx="50" cy="20" r="3" fill="#F6B538"/></svg>
+        </div>
+        <div class="body"><div class="name">Sunburst Wall Clock</div><div class="desc">Brass rays, mid-century vibe.</div>
+          <div class="foot"><span class="pr">$68</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#FCE0A0,#2FB79E)"><span class="shop">Williams-Sonoma</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><path d="M34 30l8 10M66 30l-8 10" stroke="#231310" stroke-width="4" stroke-linecap="round"/><path d="M36 40h28l-3 14H39l-3-14z" fill="#EA4C8C"/><rect x="46" y="54" width="8" height="20" fill="#231310"/><rect x="38" y="74" width="24" height="6" rx="3" fill="#F6B538"/></svg>
+        </div>
+        <div class="body"><div class="name">Cocktail Shaker Kit</div><div class="desc">Gold-plated, for disco sours.</div>
+          <div class="foot"><span class="pr">$72</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#F6CFE0,#7E4BC9)"><span class="shop">Anthropologie</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><path d="M50 24c10 8 14 16 14 26a14 14 0 0 1-28 0c0-10 4-18 14-26z" fill="#F6B538"/><path d="M38 60c-6 4-8 12-8 16h40c0-4-2-12-8-16" stroke="#231310" stroke-width="3" fill="none"/></svg>
+        </div>
+        <div class="body"><div class="name">Silk Kimono Robe</div><div class="desc">Bold floral, pure lounge luxury.</div>
+          <div class="foot"><span class="pr">$95</span><span class="get">View ★</span></div></div>
+      </article>
+      <article class="gift">
+        <div class="pic" style="background:linear-gradient(160deg,#BFEFE2,#F6B538)"><span class="shop">Sephora</span>
+          <svg class="glyph" viewBox="0 0 100 100" fill="none"><rect x="40" y="22" width="20" height="40" rx="6" fill="#EA4C8C"/><rect x="44" y="14" width="12" height="10" rx="3" fill="#231310"/><circle cx="50" cy="74" r="12" fill="#F6B538"/><circle cx="50" cy="74" r="4" fill="#231310"/></svg>
+        </div>
+        <div class="body"><div class="name">Glam Perfume Set</div><div class="desc">Three signature scents, gift-boxed.</div>
+          <div class="foot"><span class="pr">$110</span><span class="get">View ★</span></div></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RSVP ══ -->
+<section class="sec" id="rsvp">
+  <div class="wrap">
+    <div class="rsvp">
+      <div class="rays"></div>
+      <div class="rsvp-inner">
+        <span class="spark" style="top:30px;left:14%;font-size:18px">★</span>
+        <span class="spark" style="bottom:40px;right:16%;font-size:22px;animation-delay:.8s">★</span>
+        <div class="eyebrow" style="justify-content:center;color:var(--pink)">Don't Leave Her Hangin'</div>
+        <h2>Will You<br/><span class="scr">boogie?</span></h2>
+        <p>Save your spot on the floor — drop your name and we'll send the address, the playlist, and the dress-code hotline.</p>
+        <form onsubmit="event.preventDefault();this.querySelector('input').value='';this.querySelector('button').textContent='SEE YOU ON THE FLOOR ★';">
+          <input type="text" placeholder="Your name, disco star" required/>
+          <button class="btn btn--gold" type="submit">I'll be there!</button>
+        </form>
+        <small>Questions? Ring the planning committee — Sandra at 555 · 0177</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="wrap">
+    <div class="ball"></div>
+    <div class="ttl">Keep on dancin'</div>
+    <p>Linda's 50th · Boogie Wonderland · The Velvet Room · Oct 11th</p>
+  </div>
+</footer>
+
+<!-- ══ MOBILE STICKY BAR ══ -->
+<div class="mobile-bar" aria-hidden="true">
+  <div class="mb-meta"><div class="k">Oct 11th · The Velvet Room</div><div class="v">Will you boogie?</div></div>
+  <a class="btn btn--gold" href="#rsvp">RSVP</a>
+</div>
+
+<!-- ══ WISHLIST BOTTOM SHEET ══ -->
+<div class="sheet-scrim" data-close-sheet></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-label="Gift detail">
+  <div class="grab"></div>
+  <div class="sh-pic"><span class="glyph"></span></div>
+  <span class="sh-shop"></span>
+  <div class="sh-name"></div>
+  <div class="sh-desc"></div>
+  <div class="sh-price"></div>
+  <div class="sh-cta">
+    <button class="btn btn--ghost" data-close-sheet>Close</button>
+    <button class="btn btn--gold sh-claim">I'll bring this ★</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var body = document.body;
+  function openMenu(){ body.classList.add('menu-open'); }
+  function closeMenu(){ body.classList.remove('menu-open'); }
+  document.querySelectorAll('[data-open-menu]').forEach(function(el){ el.addEventListener('click', openMenu); });
+  document.querySelectorAll('[data-close-menu]').forEach(function(el){ el.addEventListener('click', closeMenu); });
+
+  var sheet = document.querySelector('.sheet');
+  var shPic = sheet.querySelector('.sh-pic');
+  var shGlyph = sheet.querySelector('.glyph');
+  var shShop = sheet.querySelector('.sh-shop');
+  var shName = sheet.querySelector('.sh-name');
+  var shDesc = sheet.querySelector('.sh-desc');
+  var shPrice = sheet.querySelector('.sh-price');
+  var shClaim = sheet.querySelector('.sh-claim');
+  var current = null;
+
+  function openSheet(card){
+    current = card;
+    shPic.style.background = card.querySelector('.pic').style.background;
+    shGlyph.innerHTML = card.querySelector('.glyph').innerHTML;
+    shGlyph.setAttribute('viewBox','0 0 100 100');
+    shShop.textContent = card.querySelector('.shop').textContent;
+    shName.textContent = card.querySelector('.name').textContent;
+    shDesc.textContent = card.querySelector('.desc').textContent;
+    shPrice.textContent = card.querySelector('.pr').textContent;
+    var claimed = card.classList.contains('claimed');
+    shClaim.textContent = claimed ? 'You grabbed this ★' : "I'll bring this ★";
+    shClaim.disabled = claimed;
+    body.classList.add('sheet-open');
+  }
+  function closeSheet(){ body.classList.remove('sheet-open'); }
+
+  document.querySelectorAll('.gifts .gift').forEach(function(card){
+    var badge = document.createElement('span');
+    badge.className = 'claimed-badge';
+    badge.textContent = '★ Got it';
+    card.querySelector('.pic').appendChild(badge);
+    card.addEventListener('click', function(){ openSheet(card); });
+  });
+  document.querySelectorAll('[data-close-sheet]').forEach(function(el){ el.addEventListener('click', closeSheet); });
+  shClaim.addEventListener('click', function(){
+    if(!current) return;
+    current.classList.add('claimed');
+    shClaim.textContent = 'Far out — it\u2019s yours ★';
+    shClaim.disabled = true;
+    setTimeout(closeSheet, 950);
+  });
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeMenu(); closeSheet(); } });
+
+  var bar = document.querySelector('.mobile-bar');
+  var hero = document.getElementById('top');
+  if('IntersectionObserver' in window && hero){
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ bar.classList.toggle('show', !en.isIntersecting); });
+    }, {rootMargin:'-40% 0px 0px 0px'}).observe(hero);
+  }
+})();
+</script>
+
+<script>
+/* deep-link state hook for showcase canvas: ?cc=menu | sheet | bar */
+(function(){
+  try{
+    var p = new URLSearchParams(location.search).get('cc');
+    if(!p) return;
+    var run = function(){
+      var b = document.body;
+      if(p==='menu'){ b.classList.add('menu-open'); }
+      else if(p==='sheet'){ var c=document.querySelector('.grid .card, .gifts .gift, .loot .item, .lots .lot, .payload .cargo, .goodies .goody'); if(c) c.click(); }
+      else if(p==='bar'){ var bar=document.querySelector('.mobile-bar'); if(bar) bar.classList.add('show'); window.scrollTo(0, Math.round(window.innerHeight*0.92)); }
+    };
+    setTimeout(run, 120);
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

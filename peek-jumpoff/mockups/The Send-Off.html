@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>The Send-Off — care package</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Graduate&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Libre+Franklin:wght@600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --cream:#FAF4E6; --paper:#FFFDF6; --navy:#1C2B4A; --ink:#1A1B1E;
+    --red:#C5362C; --gold:#E0A638; --line:#E6DBC1; --muted:#7A7158;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:#0e1322;display:flex;justify-content:center;min-height:100vh;font-family:"Hanken Grotesk",system-ui,sans-serif}
+  .phone{width:100%;max-width:430px;background:var(--cream);position:relative;overflow:hidden;color:var(--ink)}
+  /* felt texture + grain */
+  .phone::before{content:"";position:fixed;inset:0;max-width:430px;margin:0 auto;pointer-events:none;z-index:0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/></svg>")}
+  .wrap{position:relative;z-index:1}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+  .badge{font-family:"Graduate";font-size:13px;letter-spacing:.04em;color:var(--navy)}
+  .badge b{color:var(--red)}
+  .menu{width:38px;height:38px;border:1.5px solid var(--navy);border-radius:50%;display:grid;place-items:center;color:var(--navy)}
+
+  /* hero */
+  .hero{padding:8px 20px 26px;text-align:center;position:relative}
+  .pennant{display:inline-block;position:relative;background:var(--navy);color:var(--cream);font-family:"Graduate";font-size:12px;letter-spacing:.14em;padding:8px 30px 8px 16px;margin-bottom:22px;
+    clip-path:polygon(0 0,100% 0,86% 50%,100% 100%,0 100%);}
+  .eyebrow{font-family:"Libre Franklin";font-weight:800;font-size:11px;letter-spacing:.22em;color:var(--red);margin-bottom:10px}
+  h1{font-family:"Graduate";font-weight:400;font-size:54px;line-height:.94;color:var(--navy);margin:0;letter-spacing:.01em}
+  h1 .yr{color:var(--red)}
+  .dek{font-size:15px;line-height:1.55;color:var(--muted);margin:16px auto 0;max-width:30ch}
+  .from{display:inline-flex;align-items:center;gap:8px;margin-top:30px;font-family:"Libre Franklin";font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--navy);text-transform:uppercase}
+  .from i{width:26px;height:2px;background:var(--gold)}
+
+  /* stitched divider */
+  .stitch{height:0;border-top:2px dashed var(--line);margin:6px 24px}
+
+  /* roster */
+  .sec{padding:30px 20px}
+  .sectitle{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px}
+  .sectitle h2{font-family:"Graduate";font-size:21px;color:var(--navy);margin:0;letter-spacing:.02em}
+  .sectitle span{font-family:"Libre Franklin";font-weight:700;font-size:11px;letter-spacing:.14em;color:var(--muted)}
+  .roster{display:flex;flex-direction:column;gap:12px}
+  .player{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;position:relative}
+  .num{font-family:"Graduate";font-size:30px;color:var(--navy);line-height:1;text-align:center}
+  .player.star{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,166,56,.16)}
+  .player .nm{font-family:"Libre Franklin";font-weight:800;font-size:15.5px;color:var(--ink);line-height:1.15}
+  .player .pos{font-size:12px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:7px}
+  .src{font-family:"Libre Franklin";font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);background:rgba(28,43,74,.08);padding:2px 7px;border-radius:99px}
+  .src.home{color:var(--red);background:rgba(197,54,44,.1)}
+  .src.exp{color:var(--gold);background:rgba(224,166,56,.14)}
+  .price{font-family:"Graduate";font-size:16px;color:var(--navy)}
+
+  /* locker note */
+  .note{margin:8px 20px 0;background:#FFFCF2;border:1.5px solid var(--line);border-radius:14px;padding:22px;position:relative;box-shadow:0 10px 24px rgba(28,43,74,.07)}
+  .note::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px var(--cream)}
+  .note .lbl{font-family:"Libre Franklin";font-weight:800;font-size:10px;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px}
+  .note p{margin:0;font-size:17px;line-height:1.5;color:var(--navy);font-weight:500}
+  .note .sig{margin-top:14px;font-family:"Graduate";font-size:15px;color:var(--ink)}
+
+  /* ship steps */
+  .ship{display:flex;gap:10px;margin-top:14px}
+  .step{flex:1;text-align:center;padding:14px 8px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper)}
+  .step .k{font-family:"Graduate";font-size:18px;color:var(--red)}
+  .step .t{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+  /* sticky CTA */
+  .cta{position:sticky;bottom:0;z-index:5;background:linear-gradient(180deg,rgba(250,244,230,0),var(--cream) 28%);padding:18px 20px 22px;display:flex;gap:12px;align-items:center}
+  .total{flex:1}
+  .total .s{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-family:"Libre Franklin"}
+  .total .v{font-family:"Graduate";font-size:22px;color:var(--navy)}
+  .send{border:none;background:var(--red);color:#fff;font-family:"Libre Franklin";font-weight:800;font-size:15px;letter-spacing:.02em;padding:15px 22px;border-radius:99px;box-shadow:0 8px 20px rgba(197,54,44,.32)}
+
+  .foot{text-align:center;padding:24px 20px 30px;color:var(--muted);font-size:12px}
+  .foot .p{font-family:"Graduate";color:var(--navy);font-size:14px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<div class="phone"><div class="wrap">
+  <div class="bar">
+    <div class="badge">PEEK<b>.</b>GIFT</div>
+    <div class="menu"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 8h16M4 16h16"/></svg></div>
+  </div>
+
+  <div class="hero">
+    <div class="pennant">CLASS OF '30</div>
+    <div class="eyebrow">FROM GRANDMA · FOR JORDAN</div>
+    <h1>THE<br>SEND-<span class="yr">OFF</span></h1>
+    <p class="dek">You're off to State, kiddo. A few things to get you through move-in week — and one that needs reheating.</p>
+    <div class="from"><i></i> Packed with love <i></i></div>
+  </div>
+
+  <div class="stitch"></div>
+
+  <div class="sec">
+    <div class="sectitle"><h2>THE LINEUP</h2><span>4 PICKS</span></div>
+    <div class="roster">
+      <div class="player">
+        <div class="num">01</div>
+        <div><div class="nm">Sunset Flip-Flops</div><div class="pos"><span class="src">zappos</span> dorm-shower MVP</div></div>
+        <div class="price">$28</div>
+      </div>
+      <div class="player">
+        <div class="num">02</div>
+        <div><div class="nm">Trail Granola — 12 pk</div><div class="pos"><span class="src">amazon</span> 2am study fuel</div></div>
+        <div class="price">$19</div>
+      </div>
+      <div class="player star">
+        <div class="num">03</div>
+        <div><div class="nm">Grandma's Matzo-Ball Soup</div><div class="pos"><span class="src home">homemade</span> one quart, frozen</div></div>
+        <div class="price">★</div>
+      </div>
+      <div class="player">
+        <div class="num">04</div>
+        <div><div class="nm">Pizza Money, On Me</div><div class="pos"><span class="src exp">experience</span> first Friday night</div></div>
+        <div class="price">$40</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <div class="lbl">A note in the box</div>
+    <p>Study hard, call your mother, and don't you dare skip breakfast. The soup's for your first bad day — you'll know when. Knock 'em dead.</p>
+    <div class="sig">— Grandma ♥</div>
+  </div>
+
+  <div class="sec">
+    <div class="sectitle"><h2>HOW IT SHIPS</h2><span>3 STEPS</span></div>
+    <div class="ship">
+      <div class="step"><div class="k">01</div><div class="t">You send it</div></div>
+      <div class="step"><div class="k">02</div><div class="t">We pack &amp; cold-ship the soup</div></div>
+      <div class="step"><div class="k">03</div><div class="t">Lands at his dorm</div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="p">THE SEND-OFF</div>
+    <div style="margin-top:6px">Made for Jordan · peek.gift/jordan-send-off</div>
+  </div>
+
+  <div class="cta">
+    <div class="total"><div class="s">Bundle total</div><div class="v">$87 + soup</div></div>
+    <button class="send">Send the care package →</button>
+  </div>
+</div></div>
+</body>
+</html>

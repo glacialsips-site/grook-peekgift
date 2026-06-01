@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Soft Landing — for the new parents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --cream:#FBF5F1; --blush:#F3DEE0; --sky:#D9E6E8; --sage:#A9B89B;
+    --plum:#4B3A44; --ink:#3D3138; --muted:#9A8A8F; --line:#EBDDDB; --rose:#C98A8E;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:#1a1418;display:flex;justify-content:center;min-height:100vh;font-family:"Mulish",system-ui,sans-serif}
+  .phone{width:100%;max-width:430px;background:var(--cream);color:var(--ink);position:relative;overflow:hidden}
+  .wrap{position:relative;z-index:1}
+
+  /* dawn gradient wash up top */
+  .sky{position:absolute;top:0;left:0;right:0;height:360px;z-index:0;
+    background:linear-gradient(180deg,var(--blush) 0%,#F6E7E4 40%,var(--cream) 100%)}
+  .sky .sun{position:absolute;top:54px;left:50%;transform:translateX(-50%);width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle,#FAE9D9,#F3DEE0);opacity:.8;filter:blur(2px)}
+
+  .bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px 22px}
+  .logo{font-family:"Newsreader";font-size:16px;font-style:italic;color:var(--plum)}
+  .menu{width:36px;height:36px;border:1px solid var(--rose);border-radius:50%;display:grid;place-items:center;color:var(--rose)}
+
+  .hero{position:relative;z-index:2;text-align:center;padding:26px 26px 30px}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.24em;color:var(--rose);text-transform:uppercase;margin-bottom:18px}
+  h1{font-family:"Newsreader";font-weight:400;font-size:50px;line-height:1.04;color:var(--plum);margin:0;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--rose)}
+  .dek{font-size:15.5px;line-height:1.6;color:var(--muted);margin:18px auto 0;max-width:28ch}
+  .wave{display:block;margin:26px auto 0;width:60px;height:14px}
+
+  .sec{padding:18px 22px}
+  .lead{font-family:"Newsreader";font-style:italic;font-size:20px;color:var(--plum);text-align:center;line-height:1.5;margin:6px auto 24px;max-width:26ch}
+
+  /* the care items — soft pills */
+  .items{display:flex;flex-direction:column;gap:12px}
+  .item{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px 16px}
+  .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+  .ic.b{background:var(--blush)} .ic.s{background:var(--sky)} .ic.g{background:#E4EADD}
+  .item .nm{font-family:"Newsreader";font-size:18px;color:var(--ink)}
+  .item .d{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .item .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--rose);background:var(--blush);padding:3px 9px;border-radius:99px;white-space:nowrap}
+
+  /* meal calendar — the centerpiece */
+  .cal{margin:24px 22px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 12px 30px rgba(75,58,68,.06)}
+  .cal h3{font-family:"Newsreader";font-style:italic;font-size:21px;color:var(--plum);margin:0 0 4px;text-align:center}
+  .cal .sm{text-align:center;font-size:12px;color:var(--muted);margin-bottom:18px}
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .day{aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--muted);background:#FAF3F1;border:1px solid var(--line)}
+  .day b{font-family:"Newsreader";font-size:14px;color:var(--ink);font-weight:500}
+  .day.full{background:var(--sage);border-color:var(--sage);color:#fff}
+  .day.full b{color:#fff}
+  .day.dot::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--rose);margin-top:3px}
+  .cal .hint{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
+  .cal .hint b{color:var(--sage)}
+
+  /* note */
+  .note{margin:6px 22px 0;text-align:center;padding:24px}
+  .note .q{font-family:"Newsreader";font-style:italic;font-size:22px;line-height:1.5;color:var(--plum)}
+  .note .sig{margin-top:14px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+  .cta{position:sticky;bottom:0;z-index:5;background:linear-gradient(180deg,rgba(251,245,241,0),var(--cream) 30%);padding:18px 22px 24px}
+  .send{width:100%;border:none;background:var(--plum);color:#fff;font-family:"Mulish";font-weight:700;font-size:15px;padding:16px;border-radius:99px;letter-spacing:.01em}
+  .cta .s{text-align:center;font-size:12px;color:var(--muted);margin-top:10px}
+
+  .foot{text-align:center;padding:26px;color:var(--muted);font-size:12px}
+  .foot .p{font-family:"Newsreader";font-style:italic;color:var(--plum);font-size:15px}
+</style>
+</head>
+<body>
+<div class="phone"><div class="wrap">
+  <div class="sky"><div class="sun"></div></div>
+
+  <div class="bar"><div class="logo">peek.gift</div>
+    <div class="menu"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 8h16M4 16h16"/></svg></div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">for Maya, Tom &amp; baby June</div>
+    <h1>soft<br><em>landing</em></h1>
+    <p class="dek">The first weeks are a blur. We're keeping the fridge full and the doorstep warm — so you two can just hold her.</p>
+    <svg class="wave" viewBox="0 0 60 14" fill="none" stroke="#C98A8E" stroke-width="2" stroke-linecap="round"><path d="M2 7q7-7 14 0t14 0 14 0 14 0"/></svg>
+  </div>
+
+  <div class="sec">
+    <p class="lead">A few warm things, dropped at your door.</p>
+    <div class="items">
+      <div class="item"><div class="ic b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C98A8E" stroke-width="1.6"><path d="M5 13a7 7 0 0114 0v5H5z"/><path d="M9 13a3 3 0 016 0"/></svg></div>
+        <div><div class="nm">Lasagna for two</div><div class="d">frozen, oven-ready · from Tía's kitchen</div></div><span class="tag">homemade</span></div>
+      <div class="item"><div class="ic s"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6E8A93" stroke-width="1.6"><path d="M7 8h10l-1 11H8z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg></div>
+        <div><div class="nm">The good coffee &amp; a thermos</div><div class="d">because 3am · from a link</div></div><span class="tag">amazon</span></div>
+      <div class="item"><div class="ic g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8C9C7E" stroke-width="1.6"><path d="M12 21s-7-4.5-7-9a4 4 0 017-2 4 4 0 017 2c0 4.5-7 9-7 9z"/></svg></div>
+        <div><div class="nm">Softest swaddle set</div><div class="d">cloud-grey, three-pack</div></div><span class="tag">etsy</span></div>
+    </div>
+  </div>
+
+  <div class="cal">
+    <h3>the meal train</h3>
+    <div class="sm">tap a night — we'll bring dinner</div>
+    <div class="week">
+      <div class="day full"><b>M</b>✓</div>
+      <div class="day dot"><b>T</b></div>
+      <div class="day full"><b>W</b>✓</div>
+      <div class="day"><b>T</b></div>
+      <div class="day dot"><b>F</b></div>
+      <div class="day full"><b>S</b>✓</div>
+      <div class="day"><b>S</b></div>
+    </div>
+    <div class="hint"><b>3 nights covered</b> by the family already · grab one of the open ones</div>
+  </div>
+
+  <div class="note">
+    <div class="q">"Sleep when you can. Cry if you need. We've got the dinners — you've got the baby."</div>
+    <div class="sig">— all of us, with love</div>
+  </div>
+
+  <div class="foot"><div class="p">soft landing</div><div style="margin-top:6px">for the new family · peek.gift/baby-june</div></div>
+
+  <div class="cta">
+    <button class="send">Send your love →</button>
+    <div class="s">or claim a meal night — no charge to say you're coming</div>
+  </div>
+</div></div>
+</body>
+</html>
