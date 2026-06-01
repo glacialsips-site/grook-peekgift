@@ -1078,3 +1078,64 @@ The doc states Stripe runs **Tax + Adaptive Pricing** with a `STRIPE_ADAPTIVE_PR
 - **A8 refinement:** ZenRows is the **primary** scrape; **Browserbase's real role is the Stagehand browser-agent** (the PerfectPurchase checkout/fulfillment "money button"), running as scrape-#2 only is "premature spend." (My §6/A8 mapped browserbase→url_scrape tier; per Frank that's its *secondary* use.) Jina = candidate scrape-fallback/embeddings, not in place. (The ledger's billed zenrows/browserbase/jina came from the OLD atelier scrape code, not feynman's stub ports.)
 - **`.env.example` is behind the live env:** the live env carries vars not in feynman's `.env.example` (e.g. `STRIPE_ADAPTIVE_PRICING`, `CLERK_WEBHOOK_SIGNING_SECRET`, `ADMIN_CLERK_USER_IDS`, Sentry/Inngest/Upstash/Browserbase set). The next chat should regenerate `.env.example` from this catalog.
 - **North star "PerfectPurchase"** = the cross-retailer commerce/catalog layer (the doc is "peek.gift / PerfectPurchase"); the affiliate/fulfillment/embeddings/Stagehand rows are its substrate — explicitly Platform+ horizon, decoupled from the page-creation core (matches Frank's bookend-isolation instinct, Add. III).
+
+---
+
+# Addendum X — Build proposal, deploy path & decisions for the planning instance (2026-06-01)
+
+> Written at Frank's request to carry back to the planning chat. This is the **actionable
+> extension of the opinions addendum (VII)** — same recommendations voice, consolidated here
+> for strategy. Nothing here is built; it's a proposal. ↪ = basis in the body/addenda.
+
+## X.1 — Deploy path, corrected (deploys flow through git)  ↪ revises §8/P2,P3, §7/C2
+Frank: deploys are **git-triggered** — Netlify auto-builds whatever branch is wired as the
+site's **production branch** on every push (that's how prior deploys shipped). So there is no
+manual "deploy" step; the only problem is **which branch is connected**. Current wiring =
+`atelier-integration` (old prototype) ⇒ pushes to the canonical `bold-feynman` never build,
+hence the stale live site (the exact "code never reached the deploy branch" failure). The fix
+is a **one-time production-branch change** in Netlify, after which git push = deploy as before:
+- **Option A (recommended):** repoint the `vnext.peek.gift` production branch → the canonical
+  branch. Cleanest; leaves `atelier-integration` untouched as history.
+- **Option B:** merge canonical → `atelier-integration` (keeps the connected branch, but drags
+  the new architecture on top of 330 commits of the scrapped iteration — messy).
+- **Caveat (Frank):** the git↔Netlify *integration itself* may currently be down (separate from
+  the branch question). Verify the connector is live before relying on auto-deploy. I have no
+  Netlify tools this session, so I can neither flip the branch nor confirm the link — these are
+  owner/planning-side actions.
+
+## X.2 — The functional build roadmap (ordered; each step composes)  ↪ consolidates VII.1–VII.6, Z14–Z16
+- **Step 0 — Deploy unblock (X.1).** Prerequisite; until the canonical branch is the connected
+  production branch, no code change is visible live. (Owner/Netlify.)
+- **Step 1 — Persistence (the keystone).** Build a `PersistencePort` Supabase adapter + a `peeks`
+  migration: add `concept/theme/sections/hero` jsonb + `page_type/cta_label`, a `peek_versions`
+  append table, and `ir_version`; align the IR `PeekStatus` with the DB enum (add
+  `ready_for_publish`). IR-as-JSONB is the write model; `cards`/`variant_groups`/`picks` stay
+  relational projections. ↪ Z16, A1, V.1. *Nothing real publishes/claims without this.*
+- **Step 2 — Publish→claim vertical.** Behind `mark_ready` (keep it a pure intent) + a widened
+  `PaymentPort` (`priceRef` + `metadata`, leaning on the live **Stripe Adaptive Pricing + Tax**
+  so the checkout owns the money math); recipient `/g/[slug]` rendered by the **IR renderer**
+  (not the old v0 view); `pick`/`beg`/`unlock` persistence. ↪ VII.2, IX.2, A4/A5.
+- **Step 3 — Renderer GAPs.** Fold the **rules/variant engine** (GAP 1 — the defensible core)
+  into Step 2's claim UI; ship the **glow one-liner** (GAP 3, `theme.ts:188`); render the
+  **activity itinerary** (GAP 2). ↪ Z14, IV.2.
+- **Step 4 — Feed the chat its vocabulary.** Inject the parts-bin (toolkit §1–§9: font taxonomy,
+  type-art CSS, palettes, worlds, harmony schemes) + coherence invariants as **cached** context
+  (not baked into the frozen prompt). Biggest visible quality jump per unit work. ↪ VII.1, IV.
+- **Step 5 — Gate the core.** `BotGate` (Turnstile) + rate-limit on `/api/peek-studio` before any
+  keyed public deploy — Frank's own hard launch gate. ↪ VII.6, IX.3, Z1.
+- **Parallel cleanup:** remove the DQ-11 first-cut (`lib/peek/*`, `/peek`); regenerate
+  `.env.example` from the IX catalog; fix the `SPEC.md` pointer in `CLAUDE.md`. ↪ Z14/X2, IX, C3.
+
+## X.3 — Decisions the planning instance should settle to stand up the next build chat
+1. **Canonical base branch** = `claude/bold-feynman-SZzaO` (only branch with the IR architecture; ↪ G1/G7/C1). Confirm.
+2. **Deploy fix** = Option A repoint (X.1), and **verify the git↔Netlify integration is live**.
+3. **Push scope for the next chat** — the prior dead-end was the push-proxy confining commits to a work branch ≠ the deploy branch (↪ P1/C9). The next build chat must be able to push to **the same branch Netlify deploys** (i.e. make canonical = work = production branch), or the loop breaks again.
+4. **Sequence** = persistence-first (Step 1), then the publish/claim+rules vertical (Steps 2–3). Confirm vs. any other priority.
+5. **Bookend bundle** — get the landing/auth/checkout code into reach (zip, or add the repo to scope) so VII.2's seams can be validated against the real implementation, not inferred (↪ VII.10, VIII).
+6. **Model/cost** — Opus 4.8 authoring + Haiku classification + prompt-cache the (now larger) context (↪ VII.7/C6).
+
+## X.4 — Status of this recon (so the planning instance knows what it's holding)
+Read-only investigation + analysis only; **nothing in the app was built or changed.** All
+findings + these proposals live in `RECON_FINDINGS.md` (Addenda I–X) + `RECON_RAW.md` + the
+`recon-assets/` artifacts, on branch `claude/gallant-planck-pu51x` (draft PR #10). Awaiting the
+planning instance's strategy + Frank's greenlight + a push/deploy scope before any building.
