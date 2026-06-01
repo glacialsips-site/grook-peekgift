@@ -1228,3 +1228,61 @@ Not in git; would materially shape the conclusions above — prioritized:
 5. (Optional) whether the older `anth chat+*.zip` / "design proposed first run with chat for engine.zip" hold anything beyond the design export already mined (Add. IV/VI).
 
 Once these land I'll finish the revisitation (esp. close XI.3) and re-issue the opinions (VII) / build proposal (X) against the real spec rather than the brief's framing.
+
+---
+
+# Addendum XII — Pivot confirmation + how environments/repos/branches tie (2026-06-01)
+
+> Source: Frank's pasted clarification (from the transcript with the now-deleted chat) + the
+> "Update cloud environment" form screenshot, cross-checked against the Claude-Code-on-web docs
+> (`code.claude.com/docs/en/claude-code-on-the-web`). ↪ = body pointer.
+
+## XII.1 — The rigid→lean pivot, confirmed by Frank directly  ↪ confirms §2b, §6/A11, Add. IV
+Frank's own words: the deployed-then-scrapped version was a **Sonnet** chat driven by a **massive rigid
+prompt + governed/enumerated design templates**; it was abandoned because that prompt misbehaved, the
+templates capped quality below the sample pages, and "the code base/languages" couldn't support future
+functionality (fal, etc.). The **current** direction: an in-page **Opus** chat that needs only **(1) what
+to collect** from the user, **(2) what NOT to do** (guardrails — stay on the gift-page task; don't get
+pulled into unrelated conversation even if the user pushes), and **(3) how the design seat generated the
+sample pages** (style / font / animation / image / layout). The model authors; no rigid rulebook. **This
+validates: §2b of the brief (accurate), my A11 (the shipped `system-prompt.ts` IS this lean shape), and —
+most importantly — Addendum IV's #1 lever** (the chat must be fed the design *method/vocabulary*; Frank's
+point 3 IS the parts-bin/method import). So the brief's lean framing was correct; the misleading chat's
+failure was elsewhere (XI.5).
+
+## XII.2 — "The somewhat-functional lean rebuild that never deployed, stuck in a branch"  ↪ confirms §3/G4, §8, §9/X1; refines XI.3
+Frank confirms it exists and never reached Netlify; the live site is the OLD rigid Sonnet iteration. My
+report assumed that branch = `bold-feynman`. **Under active investigation** (a subagent is deep-diving
+`jolly-mccarthy` — a post-rebuild Opus *monorepo* whose PR claims "verified live" — vs `bold-feynman`) to
+confirm which branch is the real lean rebuild and resolve the monorepo-vs-single-app question (XI.3). Not
+assuming bold-feynman until that lands.
+
+## XII.3 — How cloud environments, repos, and branches tie (Frank's open question)
+Grounded in the docs (not assumption):
+- **Cloud environment** (e.g. the form's "Peek.Gift 8.0") = a **reusable config** attached to a GitHub repo
+  source: a name, **network policy** (this session = **Full**), **env vars** (`.env` format, **explicitly
+  non-secret** — "visible to anyone who can edit that environment"), and a **setup script** (default
+  `npm install`). It is *config*, not code.
+- **Session** = one **ephemeral VM run** launched from an environment: it **clones the repo fresh**, works
+  on a branch, and is **reclaimed after inactivity** ("environment has expired"). **Only what's committed +
+  pushed survives.** (This is why I commit aggressively.)
+- **Branch** = git, inside the repo — **independent of environments**. An environment doesn't "own" a
+  branch; the session checks out / creates branches.
+- **So they tie together ONLY through (a) the shared git repo and (b) the Netlify deploy-branch setting** —
+  not through the environments themselves. Multiple environments (1.0…8.0) are **independent, disposable
+  configs**; they do **not** fragment the code, because the code lives in git. Frank's "cowork projects /
+  chats" analogy ≈ environment≈project, session≈chat — but the durable artifact is **neither**; it's the
+  **git commits + the Netlify production-branch pointer**. Corollary: the env-vars field is non-secret by
+  design, which is exactly why the real keys live on Netlify (↪ IX), not in the environment.
+- **Practical takeaway for the confusion:** consolidating to *one* environment bound to the canonical repo,
+  with the next build chat working the canonical branch that Netlify deploys (↪ X.1/X.3), removes the
+  "which environment/branch is real" ambiguity. The environments aren't the thing to organize — the
+  **repo's branches + the deploy pointer** are.
+
+## XII.4 — The cloud-environment form (facts)
+Name **"Peek.Gift 8.0"**; Network access **Full** (why git/npm/MCP work this session); **env-vars empty**
+(placeholders only — non-secret session vars, not the Netlify keys); **setup script** = default `#!/bin/bash
+npm install` (mirrors the repo's `scripts/bootstrap.sh`). The "8.0" implies several prior environments — but
+per XII.3 that does not fragment the code. (Frank's caution "you're looking at a mix of an older version and
+the undeployed rebuild" ↪ is handled by the branch-iteration map: atelier = old rigid; bold-feynman/jolly =
+rebuilds — the XII.2 investigation sharpens which rebuild is canonical.)
