@@ -1139,3 +1139,92 @@ Read-only investigation + analysis only; **nothing in the app was built or chang
 findings + these proposals live in `RECON_FINDINGS.md` (Addenda I–X) + `RECON_RAW.md` + the
 `recon-assets/` artifacts, on branch `claude/gallant-planck-pu51x` (draft PR #10). Awaiting the
 planning instance's strategy + Frank's greenlight + a push/deploy scope before any building.
+
+---
+
+# Addendum XI — REVISITATION (re-grounding the report on the primary requirements docs) (2026-06-01)
+
+> Frank flagged that the planning chat which drafted my recon brief was misleading — it did not
+> fully review the source docs nor read my report before recommending. So this re-validates the
+> report against the **primary** docs I had wrongly deprioritized: `peek-jumpoff/reference/vision/`
+> `REQUIREMENTS_SPEC.md` (204 ln) + `CONCEPT_BREAKDOWN.md` (145 ln), read in full. This is **round 1**
+> (in-git docs); it completes when the not-in-git docs in XI.6 arrive. ↪ = body pointer.
+
+## XI.1 — CORRECTION: the `reference/vision/*` docs are the SPEC, not "stale/ignore"  ↪ reverses §7/C4, §7/C3
+My C4 listed `reference/vision/*` under "Stale / ignore." **That is wrong and I'm reversing it.**
+`REQUIREMENTS_SPEC.md` is Frank's extracted product spec (tagged ⟦spec⟧ stated / ⟦live⟧ DB-verified /
+⟦thin⟧ needs-more) and carries his **hard working principles**; `CONCEPT_BREAKDOWN.md` is the product
+concept + the origin of the lean pivot. The repo's own label — commit `23f31a7` "preserve dated
+end-vision docs… as direction, **not authority**" — is the framing that buried them, and is plausibly
+what the misleading chat leaned on to skip them. **The next chat MUST read these as canonical product
+input.** (My error: I followed the repo's "dated" tag + the brief's framing instead of reading them.)
+
+## XI.2 — Frank's HARD working principles (REQUIREMENTS_SPEC §13) — surface these, don't bury them
+These govern HOW to build and I under-surfaced them: **top-down planning, ALWAYS** (his #1 complaint —
+"chats won't plan top-down, they frantically do random work in one turn"); **no skeletons** (a signature
+≠ an implementation; audits found "piles of skeletons that can't be excavated"); **prove, don't claim**
+(artifact = test/deploy/diff; files found 60% comments / 3200+ junk lines); **keep versioning**; **avoid
+the word "always"** in instruction docs ("a disaster… chats prioritize mds/code over your chat"); **get
+out of Tailwind** (runtime theming); **the gate** (fence the model with artifacts, don't rely on
+persuading it). (↪ These align with, and should be promoted into, CLAUDE.md per C3.)
+
+## XI.3 — The architecture tension I glossed (OPEN — needs the stack-decision doc)  ↪ revises §3/G1,G7, §7/C1
+My report asserted `bold-feynman` is "the canonical" and `atelier`/`jolly-mccarthy` are "rejected
+dead-ends." **That was stated too confidently.** `REQUIREMENTS_SPEC §10` (Frank-stated, 2026-05-29)
+specifies a **monorepo**: Turborepo + pnpm, a **framework-agnostic core package**, chat→**Zod-validated
+commands→events→state (event-sourcing)**, **tRPC**, **Drizzle**, pgvector, **Yjs** for co-edit, Braintrust
+evals, **PWA**, Expo-native-later — which resembles the **`atelier`/`jolly` monorepo** iterations, NOT
+`bold-feynman` (a lean single Next app: `lib/ir`, a Node route, no monorepo/tRPC/Drizzle/event-sourcing).
+Meanwhile `CONCEPT_BREAKDOWN §3` is the **"go dramatically leaner"** realization (the instance drives the
+flow; code stops carrying everything), and the design corpus settled lean (↪ IV.4). **So "which iteration
+is canonical" is genuinely unresolved between (a) the lean single-app `bold-feynman` and (b) the
+REQUIREMENTS §10 monorepo** — the two Frank-authored docs themselves pull different ways (overbuild-the-
+proven-stack vs. lean-pivot). `peekgift-stack-decision.html` (not in git — XI.6) is named to settle exactly
+this and is the decisive missing input. **Interim read:** `bold-feynman` remains the best base for the
+*lean* direction and the only one with the IR; but whether the target is a single app or a Turborepo
+monorepo around that IR is an OPEN call I should not have foreclosed. (G1/G7/C1 stand *for the lean path*;
+flagged contingent on stack-decision + BUILD-BOOK.)
+
+## XI.4 — Product scope I under-weighted (now corrected)  ↪ supplements §6/A5,A7,A9, §9
+- **The vibe engine is THE moat**, and its named **net-new gap is an *aesthetic quality/eval gate*** —
+  "valid/accessible ≠ beautiful/on-vibe; beauty is the moat; human-rated per occasion" (REQ §3/§14.2).
+  My report covered render *caliber* but not this **eval-gate requirement** (cf. Z9 contrast-guard — same
+  family, bigger ask). 
+- **The rules/selection engine is "the genuinely novel, defensible core"** (CONCEPT §6/§143; REQ §4) —
+  pick-N-of-M / unlock-on-condition / free-for-all as **first-class data**. ↪ This re-rates renderer **GAP 1**
+  (Z14) from "a gap" to **the product's defensible center** — highest build priority.
+- **Spending caps** (hard + soft; `peeks.budget_cents`; recipient selects within caps) — a real feature I
+  mentioned only thinly. 
+- **Intelligent affiliate suggestion is a NAMED CORE feature** (REQ §5), not just "deprioritized" (my A9):
+  cards carry `affiliate_url/network/commission_pct` + an `affiliate_revenue` table; the strategy is a
+  **normalized product graph** fed by Skimlinks/Sovrn/Impact/CJ/Rakuten + direct + Shopping-Content/Shopify
+  — the **catalog moat** (REQ §14.1) that underpins PerfectPurchase (§12). v1 may defer it, but it's core
+  intent, not absent.
+- **Collaboration (§6) + Social (§7)** are **named significant features**, DB-modeled (`peek_collaborators`),
+  but ⟦thin⟧ — Frank hasn't specified the rules (who edits what, invite/approval, conflict). My report called
+  collaboration "schema-only"; correction: it's **intended + awaiting Frank's spec**, not dropped.
+- **Fulfillment Tier-1** (REQ §8): the product **emails/SMSs the curator the recipient's selections; the
+  curator fulfills**; $12 flat publish; lifecycle `draft→ready_for_publish→published→claimed→archived`;
+  `picks` carries `beg_message/beg_approved_at/fulfilled_at/fulfillment_notes`. This grounds the publish→
+  claim→**notify-curator**→fulfill loop as an explicit requirement (↪ refines A5).
+- **`relationships` table = recipient memory** (birthday/anniversary/last-peek → **nudges** via Inngest) —
+  a feature I noted only as an empty table.
+
+## XI.5 — Reconciliation with the brief's "verified facts" (the misleading chat's actual sin)  ↪ relates §2, V.3, IX
+The REQUIREMENTS §9 live-schema table **matches** the brief's §2 DB facts (peeks 45 here vs 49 in the brief
+= snapshot drift across dates; same 14 tables, same IDs). So the brief's *DB facts were real* — the chat's
+failure was **framing/omission**, not fabrication: it labeled the requirements "dated/ignore," under-scoped
+the product (vibe-eval gate, rules-as-core, affiliate/catalog, caps, collab/social), and (per Frank) didn't
+read my report before recommending. One useful *confirmation* it yields: REQ §8 states **`PAY_MODE=live` +
+NJ tax active** — which resolves part of my V.3/IX UNKNOWN (Stripe Tax IS on, NJ registered; Adaptive
+Pricing for multi-currency per IX.2).
+
+## XI.6 — What's still needed to COMPLETE the revisitation (Frank offered to send)
+Not in git; would materially shape the conclusions above — prioritized:
+1. **`peek-gift-BUILD-BOOK.md`** — a "build book" = presumably the **top-down build plan** (§13's #1 rule); likely the most decision-shaping doc.
+2. **`peekgift-stack-decision.html`** — names the stack decision; the decisive input for XI.3 (monorepo vs lean single-app).
+3. **`CODE_PROJECT_SUMMARY_20260601.md`** + **`DESIGN_PROJECT_BRIEF.md`** — the code/design briefs the planning chat was given (compare against my read of the repo's `docs/PROJECT_SUMMARY_2026-06-01.md`).
+4. **`peek-gift-REQUIREMENTS-SPEC.md` / `…(1).md`** (hyphen variants) — to diff against the in-git underscore `REQUIREMENTS_SPEC.md` in case they're newer/fuller.
+5. (Optional) whether the older `anth chat+*.zip` / "design proposed first run with chat for engine.zip" hold anything beyond the design export already mined (Add. IV/VI).
+
+Once these land I'll finish the revisitation (esp. close XI.3) and re-issue the opinions (VII) / build proposal (X) against the real spec rather than the brief's framing.
