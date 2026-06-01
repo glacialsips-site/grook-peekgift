@@ -690,3 +690,118 @@ The architecture was rightly rejected, but two pieces of real work elsewhere are
 - **`/render-check` caliber (V6): not screenshotted by me** — relied on the design seat's DOM-verified `docs/DESIGN_REVIEW_2026-06-01.md` + a green `next build`. Spinning up `next start` + headless browser was judged out of scope for read-only recon.
 - **RLS (A4): not re-queried** — the planning instance already verified it on the live DB; no migration defines policies on `bold-feynman`, so the repo-level answer is app-layer (public `/g/*` + status gate) only.
 - **Live Netlify env (C8): not inspected** — no Netlify access this session; `.env.example` is the declared contract; presence on the site is asserted by docs, not verified by me.
+
+---
+
+# Addendum II — code-level deep-dive + render verification (Frank follow-up, 2026-06-01)
+
+> Frank asked me to use the larger budget and go deeper. I read the **renderer**
+> (`lib/peek-render/*`, 3,540 lines) and the **reducer** (`lib/peek-chat/tools.ts`, 1,075
+> lines) line-by-line, **ran the built app and screenshotted `/render-check`** (this
+> supersedes V6's "not screenshotted" note), and inspected the studio surface. Screenshots
+> are committed under **`recon-assets/`** and attached in chat. New IDs continue as Z##.
+
+## Z13 — Render verification (V6, done properly)
+I built (`next build`, green) and ran (`next start`) the app, then headless-Chromium
+screenshotted `/render-check?sample={dad,gala,taquito}` plus the real mockup
+`peek-jumpoff/mockups/For the Old Man.html`, at a 430px mobile viewport. Artifacts:
+`recon-assets/render-dad-full.png`, `render-gala-full.png`, `render-taquito-full.png`,
+`mockup-old-man.png`, `studio.png`.
+- **Caliber holds at the hero / above-the-fold.** Computed styles, read live from the DOM:
+  dad "FOR THE OLD MAN" = **Oswald 60px** (rust accent on "OLD MAN" via the inline-accent
+  feature); gala "The Lumière Gala" = **Bodoni Moda 58px**; taquito "Tacos & Tequila" =
+  **Yeseva One 56px** with a working loud offset shadow `rgb(23,99,176) 3px 3px 0`. **The #1
+  anti-generic test passes — three concepts, three genuinely different display faces**, not a
+  shared pairing. Taquito renders a full custom lotería hero (papel-picado bunting, sunburst,
+  watermelon, "47 · El Taquito", "backyard taco night") — real mockup-caliber `custom` work.
+  dad reproduces the mockup's hero closely (eyebrow → mega headline → dek → FOR/OCCASION/FROM
+  ledger strip → themed photo placeholder with caption).
+- **Honest capture limitation:** `/render-check` (and `/studio`) mount the renderer inside a
+  fixed iOS **device frame with a clipped internal scroller**, which defeated clean
+  full-scroll capture — my shots reliably show the hero/upper page, not the full scroll.
+  Below-the-fold caliber (the checklist, ticket-stub, note, sticky bar visible in
+  `mockup-old-man.png`) is corroborated by the code walk below + the design seat's own
+  unframed review (`docs/DESIGN_REVIEW_2026-06-01.md`). Fonts loaded from
+  `fonts.googleapis.com`, so the environment's network policy allows Google Fonts.
+- **Studio (`studio.png`)** is a polished teaching empty-state: iOS frame, "✱ peek" pill,
+  centered "a blank page, for now — tell Peek who it's for…", docked chat input + a warm
+  opener. The "overlay too heavy" item (open #3) is about the **active-build** state (chat
+  over a populated page), not this empty state.
+
+## Z14 — Renderer assessment: substantial and mostly caliber-faithful; the 3 GAPs confirmed in code
+`lib/peek-render/` is real, careful work — **not** overstated. `sections.ts` has **18 section
+builders** + **4 hero variants** (`full-bleed-photo / framed-media / centered / type-mega`),
+parametrized `giftgrid` (carousel/grid/checklist + featured headline card), the work-order
+checklist, details panel/list variants, a `stats` count-up band, `lede`, claim theater,
+`custom` with sanitize, and **unknown-kind → custom fallback** (forward-compat). `theme.ts`
+emits the full `--peek-*` contract incl. loud tokens; `cards.ts` has the running-total /
+star-label / homemade-remap logic; `mount.ts` is a clean create-once/update/destroy
+controller with hero auto-fit and `markPlaced`. The `docs/DESIGN_REVIEW` GAPs are **real and I
+confirmed each at the code level**:
+- **GAP 1 (rules/variant engine) — confirmed, highest.** `buildGiftgrid` (sections.ts:139)
+  iterates card views and renders each via `cardFace`; it **never groups by
+  `variant_group_id`** (never calls `groupFor`/reads `ir.variant_groups`). And `cardFace`
+  **hardcodes** `el('span',{class:'peek-card-badge',text:'★ Got it'})` (sections.ts:119) on
+  *every* card — so `pick_one` vs `pick_any` vs free-for-all are visually identical. The
+  CardView already carries `groupId`/`lockKind`/`begPrompt` (cards.ts) — the data is there;
+  the giftgrid builder just ignores it. Locked cards do get a lock icon, so beg/unlock has a
+  hint but no group affordance.
+- **GAP 2 (activity-as-itinerary) — confirmed.** `cardFace` renders activity cards the same
+  as products (photo + retailer chip + title + `sub` = `locationHint || description` +
+  price); `proposed_date` is in the CardView but unused, and **`metadata.itinerary` is never
+  read** (cards.ts doesn't extract it). An experience collapses to a product tile. (Note: the
+  `flightplan` *section* renders an itinerary spine, but an *activity card's own* itinerary is
+  dropped.)
+- **GAP 3 (glow on hero type) — confirmed, with exact root cause.** `buildHero`'s `mkHead`
+  sets `text-shadow:var(--peek-display-shadow, <glow-fallback>)` (sections.ts:1042) — but
+  `theme.ts:188` **unconditionally sets** `--peek-display-shadow` to `t.displayShadow || 'none'`.
+  So when `palette.glow:true` and no `loud.displayShadow` is authored, the var resolves to
+  `'none'` and the comma-fallback glow is **dead code** → hero shows no glow. My live probe
+  confirmed it: dad/gala `text-shadow:none`, taquito (which authored a loud `displayShadow`)
+  renders its offset shadow. **Fix:** in `theme.ts`, set `--peek-display-shadow` to the glow
+  value when `glow && !displayShadow` (one line), instead of defaulting to `'none'`.
+- **Bonus gap (mine, not in the design review):** the renderer builds `stats` + `lede`
+  sections, but the **reducer's tool enum can't author them** — see Z15. So they only appear
+  from hand-authored sample IRs (e.g. `charity-gala.ir.json`), never from the live chat.
+
+## Z15 — Reducer assessment: faithful and solid; one enum gap
+`lib/peek-chat/tools.ts` implements INTERFACES §3 well: 16 tools, each `safeParse(input) →
+cloneIR → mutate → finalize()` where `finalize` re-runs `validatePeekIR` and **rejects rather
+than persist an invalid IR**. ID/contiguous-position bookkeeping lives in the reducer; side
+effects go only through ports (`generate_hero_image→ports.image`, `resolve_card→ports.cardResolver`);
+`custom.html→sanitizeCustomHtml`, `cssVars→sanitizeCssVars`. Thoughtful touches: `set_note`
+auto-creates a `note` section, `add_card` auto-creates a `giftgrid` and validates the
+`variant_group_id` exists, `set_card_rule` infers `is_locked=true` when a rule is set,
+`reorderById` never drops unlisted ids, `deepMerge` replaces arrays (so `motifs` overwrite).
+**The gap:** `SECTION_KINDS` (tools.ts:96) — the enum the model authors against AND the Zod
+gate in `upsert_section` — lists **16 kinds and omits `stats` and `lede`**, which the contract
+(21 kinds) and the renderer both support. Net: the chat **cannot create stats/lede sections**
+(the reducer would reject them). Add `stats`,`lede` (and confirm the full set) to
+`SECTION_KINDS` so the count-up editorial bands are chat-authorable, not sample-only.
+
+## Z16 — A1 made concrete: the persistence shape to build (recommendation, not built)
+Since A1 is the keystone and "decided in docs but unbuilt," here is the exact shape the next
+chat should implement (do NOT treat as applied — recon only):
+- **Migration on `peek_v2.peeks`:** add `concept jsonb`, `theme jsonb`, `sections jsonb`,
+  `hero jsonb`, `page_type text`, `cta_label text`; keep `cards`/`variant_groups`/`picks`
+  relational; **add `peeks.ir_version int default 1`** and a **`peek_versions(peek_id,
+  version, ir jsonb, note text, created_at)` append table** (the `PersistencePort.appendVersion`
+  contract already implies it). Add `ready_for_publish` handling so the IR `PeekStatus` and the
+  DB enum line up (the IR type is currently missing it — see X1).
+- **Adapter:** `lib/adapters/persistence-supabase.ts satisfies PersistencePort`, selected in
+  `ports.ts` by `SUPABASE_SERVICE_ROLE_KEY`. `save(ir)` upserts the `peeks` row (jsonb columns
+  + relational projections of `cards`/`variant_groups`) and bumps `ir_version`;
+  `appendVersion` inserts into `peek_versions`; `bySlug`/`load` reconstruct a `PeekIR` from the
+  row (jsonb `sections`/`theme`/`concept` + joined `cards`). The IR JSONB is the **write-model
+  source of truth**; the relational `cards`/`picks` are projections for the recipient/claim
+  queries (which `/g/[slug]` already does relationally).
+- This unblocks the C7 vertical (`draft→ready_for_publish→$12→published→claim`) — which is why
+  it's the first real-build task after the deploy fix.
+
+## Z17 — Verification method + confidence (for this addendum)
+Renderer/reducer claims are from full reads of the cited files (line numbers given).
+Render/caliber claims are from a real `next build`+`next start`+headless-Chromium run with
+live `getComputedStyle` probes (font family/size/text-shadow quoted). The full-scroll capture
+limitation is stated honestly; I did not fake a below-the-fold screenshot. The server + a
+throwaway puppeteer script were used transiently and removed; `recon-assets/` (5 PNGs) is the
+only added artifact beyond the two markdown files.
