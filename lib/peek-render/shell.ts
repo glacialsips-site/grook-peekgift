@@ -19,6 +19,7 @@ import { media } from './scenes';
 import {
   type CardView,
   computeTotal,
+  computeCatalogueTotal,
   formatTotal,
   type TotalState,
 } from './cards';
@@ -136,20 +137,41 @@ export function buildShell(
   // ════════════════════════════════════════════════════════════════════════
   // ACTION BAR (the money bar)
   // ════════════════════════════════════════════════════════════════════════
-  const barK = el('div', { class: 'peek-k', text: ir.peek.occasion || ir.peek.recipient_name || 'Your picks' });
-  const barV = el('div', { class: 'peek-v', text: '' });
+  // at-rest catalogue total: the mockup bar shows the full subtotal ("$74 + dinner") BEFORE any
+  // claim, sourced from the whole card list — not the empty fallback.
+  const catalogue: TotalState = computeCatalogueTotal(cardViews);
+  const hasCatalogue = catalogue.cents > 0 || catalogue.starLabels.length > 0;
+  const restSubtitle = ctaSubtitle(ir); // "The whole job"
+
+  // De-dup the claim panel ↔ sticky bar on SINGLE-ACTION invites: when the page has a `claim`
+  // section AND no claimable catalogue (a pure RSVP, e.g. El Taquito), the claim panel's button
+  // and the bar's button are redundant → suppress the sticky bar; the panel is the action.
+  const hasClaimSection = ir.sections.some((sec) => sec.kind === 'claim');
+  const suppressBar = hasClaimSection && !hasCatalogue && cardViews.length === 0;
+
+  const barK = el('div', { class: 'peek-k', text: hasCatalogue ? restSubtitle : (ir.peek.occasion || ir.peek.recipient_name || 'Your picks') });
+  const barV = el('div', { class: 'peek-v', text: hasCatalogue ? formatTotal(catalogue, '') : '' });
   const barBtn = el('button', { class: 'peek-btn', text: ctaLabel(ir) }) as HTMLButtonElement;
   const bar = el('div', { class: 'peek-bar' }, [el('div', { class: 'peek-bar-meta' }, [barK, barV]), barBtn]);
-  const fallbackTotal = isRecipient ? 'Pick something' : ctaSubtitle(ir);
   on(barBtn, 'click', () => {
     if (isRecipient) opts.interactions.onCheckout?.();
   });
 
   function refreshTotal() {
     const state: TotalState = computeTotal(cardViews, claimed);
-    barV.textContent = formatTotal(state, fallbackTotal);
-    barK.textContent =
-      state.count > 0 ? `${state.count} picked` : ir.peek.occasion || ir.peek.recipient_name || 'Your picks';
+    if (state.count > 0) {
+      // recipient has picked items → show their running pick total
+      barV.textContent = formatTotal(state, restSubtitle);
+      barK.textContent = `${state.count} picked`;
+    } else if (hasCatalogue) {
+      // at rest → show the catalogue total ("$74 + dinner") / "The whole job"
+      barV.textContent = formatTotal(catalogue, restSubtitle);
+      barK.textContent = restSubtitle;
+    } else {
+      // invite with no priced cards → the CTA stands alone
+      barV.textContent = isRecipient ? 'Pick something' : restSubtitle;
+      barK.textContent = ir.peek.occasion || ir.peek.recipient_name || 'Your picks';
+    }
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -358,7 +380,7 @@ export function buildShell(
     // assemble overlays onto the root (absolute, NOT fixed)
     root.appendChild(scrim);
     root.appendChild(menu);
-    root.appendChild(bar);
+    if (!suppressBar) root.appendChild(bar);
     root.appendChild(sheetScrim);
     root.appendChild(sheet);
     root.appendChild(progress);

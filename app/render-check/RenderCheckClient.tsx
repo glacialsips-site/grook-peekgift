@@ -10,7 +10,15 @@ import type { PeekIR } from '@/lib/ir/contract';
 import { PeekRenderer } from '@/lib/peek-render';
 import type { PeekRendererController, RecipientInteractions } from '@/lib/peek-render';
 
-export default function RenderCheckClient({ ir }: { ir: PeekIR }) {
+export default function RenderCheckClient({
+  ir,
+  sample = 'dad',
+  target = 'mockups/For the Old Man.html',
+}: {
+  ir: PeekIR;
+  sample?: string;
+  target?: string;
+}) {
   const ctrl = useRef<PeekRendererController | null>(null);
   const [log, setLog] = useState<string[]>([]);
   const push = (s: string) => setLog((l) => [s, ...l].slice(0, 6));
@@ -76,8 +84,8 @@ export default function RenderCheckClient({ ir }: { ir: PeekIR }) {
           render-check
         </div>
         <p style={{ opacity: 0.8 }}>
-          Sample <code>dad-60th.ir.json</code> validated against the Zod schema, painted through{' '}
-          <code>PeekRenderer</code>. Target: <code>mockups/For the Old Man.html</code>.
+          Sample <code>{sample}</code> validated against the Zod schema, painted through{' '}
+          <code>PeekRenderer</code>. Target: <code>{target}</code>.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '12px 0' }}>
           <button onClick={() => ctrl.current?.markPlaced('s_ticket')} style={btn}>

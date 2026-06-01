@@ -135,46 +135,191 @@ function cardFace(ctx: SectionContext, v: CardView): HTMLElement {
   return c;
 }
 
-// ── giftgrid (THE CORE) ─────────────────────────────────────────────────────
+// ── giftgrid (THE CORE) — parametrized: carousel | grid | checklist + featured headline ──
 function buildGiftgrid(ctx: SectionContext, s: Section): HTMLElement {
   const { t } = ctx;
   const sec = el('section', { class: 'peek-sec peek-reveal', 'data-section-id': s.id });
   const intro = typeof s.data?.intro === 'string' ? (s.data.intro as string) : null;
-  const head = sectionHead(ctx, s.title || 'The Haul', { meta: `${ctx.cardViews.length} ITEMS` });
+  const layout = (strData(s, 'layout') as 'carousel' | 'grid' | 'checklist') || 'carousel';
+
+  // optional explicit card scoping: data.cardIds whitelists which cards this grid shows (so a
+  // card represented elsewhere — e.g. the dinner shown as a custom ticket — isn't duplicated).
+  const idWhitelist = Array.isArray(s.data?.cardIds)
+    ? (s.data.cardIds as unknown[]).filter((x): x is string => typeof x === 'string')
+    : null;
+  const scoped =
+    idWhitelist && idWhitelist.length
+      ? idWhitelist
+          .map((id) => ctx.cardViews.find((v) => v.id === id))
+          .filter((v): v is CardView => !!v)
+      : ctx.cardViews;
+
+  // optional featured/headline card spans full width above the rest. Either an explicit id
+  // (data.featuredCardId) or, in grid mode, the first card flagged `featured`.
+  const featuredId = strData(s, 'featuredCardId');
+  let featured: CardView | null =
+    (featuredId && scoped.find((v) => v.id === featuredId)) || null;
+  if (!featured && layout === 'grid') featured = scoped.find((v) => v.featured) || null;
+  const rest = featured ? scoped.filter((v) => v.id !== featured!.id) : scoped;
+
+  const head = sectionHead(ctx, s.title || 'The Haul', { meta: `${scoped.length} ITEMS` });
   if (head) sec.appendChild(head);
   if (intro) sec.appendChild(el('p', { class: 'peek-dek', style: 'margin:0 0 16px', text: intro }));
 
-  // Responsive: grid on wide, horizontal snap carousel with edge-peek on narrow.
-  // The device frame is ~390–430px → carousel is the canonical mode; we use a CSS grid
-  // that the host could media-query, but default to the snap carousel for mobile caliber.
-  const grid = el('div', { class: 'peek-grid' });
-  grid.setAttribute(
-    'style',
-    'display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(-1 * var(--peek-space-gutter));padding:4px var(--peek-space-gutter) 6px;',
-  );
-  ctx.cardViews.forEach((v) => {
-    const c = cardFace(ctx, v);
-    c.style.cssText += ';flex:0 0 64%;scroll-snap-align:start';
-    grid.appendChild(c);
-  });
-  sec.appendChild(grid);
+  if (featured) sec.appendChild(headlineCard(ctx, featured));
 
-  // subtotal line under the grid
+  if (layout === 'checklist') {
+    sec.appendChild(buildChecklist(ctx, rest));
+  } else if (layout === 'grid') {
+    const grid = el('div', { class: 'peek-grid' });
+    grid.setAttribute(
+      'style',
+      'display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start',
+    );
+    rest.forEach((v) => grid.appendChild(cardFace(ctx, v)));
+    sec.appendChild(grid);
+  } else {
+    // carousel (default): horizontal snap with edge-peek (mobile caliber)
+    const grid = el('div', { class: 'peek-grid' });
+    grid.setAttribute(
+      'style',
+      'display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(-1 * var(--peek-space-gutter));padding:4px var(--peek-space-gutter) 6px;',
+    );
+    rest.forEach((v) => {
+      const c = cardFace(ctx, v);
+      c.style.cssText += ';flex:0 0 64%;scroll-snap-align:start';
+      grid.appendChild(c);
+    });
+    sec.appendChild(grid);
+  }
+
+  // subtotal line under the grid (checklist runs its own rules so skip its top border doubling)
   sec.appendChild(
     el(
       'div',
       {
-        style: `display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid ${t.line}`,
+        style: `display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:var(--peek-border-weight,1px) solid ${t.line}`,
       },
       [
         el('span', {
           style: `font-family:var(--peek-font-body);font-size:13px;color:${t.muted}`,
-          text: `${ctx.cardViews.length} things, picked with care`,
+          text: `${scoped.length} things, picked with care`,
         }),
       ],
     ),
   );
   return sec;
+}
+
+// checklist layout (dad's work-order): checkbox + name (display caps) + source chip + right-rail
+// price, rows divided by dashed rules. Tap a row → sheet (same claim wiring as cards).
+function buildChecklist(ctx: SectionContext, views: CardView[]): HTMLElement {
+  const { t } = ctx;
+  const list = el('div', { class: 'peek-grid', style: 'display:block' });
+  views.forEach((v, i) => {
+    const row = el(
+      'article',
+      {
+        class: 'peek-card peek-chk-row',
+        style:
+          `display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:13px;` +
+          `padding:14px 0;border:none;border-radius:0;box-shadow:none;background:transparent;cursor:pointer;` +
+          `border-bottom:1px dashed ${t.line}`,
+        role: 'button',
+        'data-card-id': v.id,
+        onClick: () => ctx.onTapCard(v),
+      },
+      [
+        // checkbox (2px ink border, accent check) — fills on claim via .peek-claimed
+        el('div', {
+          class: 'peek-chk-box',
+          style:
+            `width:22px;height:22px;border:2px solid ${t.ink};border-radius:4px;display:grid;place-items:center;color:${t.accent2}`,
+          html: `<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><path d="M5 12l5 5L20 6"/></svg>`,
+        }),
+        el('div', { style: 'min-width:0' }, [
+          el('div', {
+            style: `font-family:var(--peek-font-display);font-weight:500;font-size:17px;text-transform:uppercase;color:${t.ink};letter-spacing:.01em;line-height:1.1`,
+            text: v.title,
+          }),
+          el('div', { style: 'display:flex;align-items:center;gap:8px;margin-top:3px' }, [
+            v.retailer
+              ? el('span', {
+                  style: `font-family:var(--peek-font-accent);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:${t.accent};background:${rgba(t.accent, 0.12)};padding:2px 6px;border-radius:3px`,
+                  text: v.retailer,
+                })
+              : null,
+            el('span', {
+              style: `font-family:var(--peek-font-accent);font-size:11px;color:${t.muted}`,
+              text: v.description || '',
+            }),
+          ]),
+        ]),
+        el('div', {
+          style: `font-family:var(--peek-font-display);font-weight:600;font-size:16px;color:${t.accent}`,
+          text: v.priceText || '★',
+        }),
+      ],
+    );
+    list.appendChild(row);
+  });
+  return list;
+}
+
+// full-width headline/featured lot (gala auction): big media + copy panel + register button.
+function headlineCard(ctx: SectionContext, v: CardView): HTMLElement {
+  const { t } = ctx;
+  const card = el(
+    'article',
+    {
+      class: 'peek-card peek-headlot',
+      style: `display:block;margin-bottom:20px;cursor:pointer`,
+      role: 'button',
+      'data-card-id': v.id,
+      onClick: () => ctx.onTapCard(v),
+    },
+    [
+      el('div', { style: 'position:relative' }, [
+        media(t, '16/9', v.url, v.alt),
+        el('span', {
+          style: `position:absolute;top:14px;left:14px;font-family:var(--peek-font-display);font-style:italic;font-size:14px;color:#fff;background:${rgba('#000', 0.42)};-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:7px 16px;border:1px solid ${rgba('#fff', 0.3)}`,
+          text: v.retailer || 'The Headline Lot',
+        }),
+      ]),
+      el(
+        'div',
+        { style: `padding:24px ${t.gutter ? '22px' : '22px'} 22px` },
+        [
+          el('div', { class: 'peek-eyebrow', style: `color:${t.accent}`, text: 'The Headline Lot' }),
+          el('div', {
+            style: `font-family:var(--peek-font-display);font-size:28px;line-height:1.05;color:${t.ink};margin-top:12px;text-transform:var(--peek-display-case)`,
+            text: v.title,
+          }),
+          v.description
+            ? el('p', { class: 'peek-dek', style: 'margin:14px 0 0', text: v.description })
+            : null,
+          v.priceText
+            ? el('div', {
+                style: `font-family:var(--peek-font-display);font-style:italic;font-size:20px;color:${t.ink};margin-top:18px`,
+                html: `<span style="font-family:var(--peek-font-body);font-style:normal;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:${t.muted};display:block;margin-bottom:6px">Estimate</span>${esc(v.priceText)}`,
+              })
+            : null,
+          el('div', { style: 'margin-top:22px' }, [
+            el('button', {
+              class: 'peek-btn',
+              style: `background:${t.accent}`,
+              text: ctx.ir.peek.cta_label || 'Register to bid',
+              onClick: ((e: Event) => {
+                e.stopPropagation();
+                ctx.onTapCard(v);
+              }) as unknown as EventListener,
+            }),
+          ]),
+        ].filter(Boolean) as Node[],
+      ),
+    ],
+  );
+  return card;
 }
 
 // ── rail (horizontal scroller) ────────────────────────────────────────────────
@@ -289,33 +434,77 @@ function buildNote(ctx: SectionContext, s: Section): HTMLElement {
   return sec;
 }
 
-// ── details (when/where/dress) ────────────────────────────────────────────────
+// ── details (when/where/dress) — parametrized: list | colored panel, key face, divider ──
 function buildDetails(ctx: SectionContext, s: Section): HTMLElement {
   const { t } = ctx;
   const sec = el('section', { class: 'peek-sec peek-reveal', 'data-section-id': s.id });
   const head = sectionHead(ctx, s.title || strData(s, 'heading'), { eyebrow: strData(s, 'eyebrow') });
   if (head) sec.appendChild(head);
   const rows = Array.isArray(s.data?.rows) ? (s.data.rows as unknown[][]) : [];
+
+  const variant = (strData(s, 'variant') as 'list' | 'panel') || 'list';
+  const panel = variant === 'panel';
+  // panel fill ('accent'|'accent2'|'surface'|raw) → literal color
+  const fillRef = strData(s, 'panelFill') || 'accent2';
+  const fill =
+    fillRef === 'accent' ? t.accent : fillRef === 'accent2' ? t.accent2 : fillRef === 'surface' ? t.surface : fillRef;
+  // on a colored panel, text is light; keys take a contrasting accent (marigold-on-cobalt feel)
+  const onPanel = panel && fillRef !== 'surface';
+  const fg = onPanel ? '#fff' : t.ink;
+  const subFg = onPanel ? rgba('#fff', 0.7) : t.muted;
+  const keyRef = strData(s, 'keyColor') || (onPanel ? '#F4A800' : 'accent');
+  const keyColor = keyRef === 'accent' ? t.accent : keyRef === 'accent2' ? t.accent2 : keyRef;
+  const dashed = strData(s, 'divider') === 'dashed' || panel;
+  const showMono = s.data?.monogram === true || (variant === 'list' && s.data?.monogram !== false && !panel);
+  const dividerColor = onPanel ? rgba('#fff', 0.28) : t.line;
+
   const list = el('div', {
-    style: `border:1px solid ${t.line};border-radius:var(--peek-radius-card);overflow:hidden`,
+    style: panel
+      ? `background:${fill};border-radius:16px;padding:8px 4px;color:${fg}`
+      : `border:var(--peek-border-weight,1px) solid ${t.line};border-radius:var(--peek-radius-card);overflow:hidden`,
   });
   rows.forEach((row, i) => {
     const label = String(row[0] ?? '');
     const value = String(row[1] ?? '');
     const subv = row[2] != null ? String(row[2]) : '';
+    const divider = i ? `border-top:1px ${dashed ? 'dashed' : 'solid'} ${dividerColor}` : '';
+    if (panel) {
+      // fiesta-menu row: [KEY | value + small], dashed dividers, no monogram tile
+      list.appendChild(
+        el(
+          'div',
+          { style: `display:flex;align-items:center;gap:14px;padding:14px 18px;${divider}` },
+          [
+            el('span', {
+              style: `font-family:var(--peek-font-display);font-size:13px;color:${keyColor};flex:0 0 78px;text-transform:uppercase`,
+              text: label,
+            }),
+            el('div', { style: 'min-width:0' }, [
+              el('div', { style: `font-weight:600;font-size:15px;color:${fg};line-height:1.2`, text: value }),
+              subv
+                ? el('div', { style: `font-weight:400;font-size:12px;color:${subFg};margin-top:2px`, text: subv })
+                : null,
+            ]),
+          ],
+        ),
+      );
+      return;
+    }
     list.appendChild(
       el(
         'div',
         {
-          style: `display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px 16px;${i ? `border-top:1px solid ${t.line}` : ''}`,
+          style: `display:grid;grid-template-columns:${showMono ? 'auto 1fr' : '1fr'};gap:14px;align-items:center;padding:14px 16px;${divider}`,
         },
         [
-          el('div', {
-            style: `width:44px;height:44px;border-radius:14px;background:${rgba(t.accent, 0.12)};color:${t.accent};display:grid;place-items:center;font-family:var(--peek-font-display);font-size:16px`,
-            text: label.slice(0, 1).toUpperCase(),
-          }),
+          showMono
+            ? el('div', {
+                style: `width:44px;height:44px;border-radius:14px;background:${rgba(t.accent, 0.12)};color:${t.accent};display:grid;place-items:center;font-family:var(--peek-font-display);font-size:16px`,
+                text: label.slice(0, 1).toUpperCase(),
+              })
+            : null,
           el('div', {}, [
-            el('div', { class: 'peek-eyebrow', text: label }),
+            el('div', { class: 'peek-eyebrow', style: `color:${keyColor}`, text: label }),
             el('div', {
               style: `font-family:var(--peek-font-display);font-size:17px;color:${t.ink};margin-top:3px;text-transform:var(--peek-display-case)`,
               text: value,
@@ -324,11 +513,98 @@ function buildDetails(ctx: SectionContext, s: Section): HTMLElement {
               ? el('div', { style: `font-family:var(--peek-font-body);font-size:12px;color:${t.muted};margin-top:2px`, text: subv })
               : null,
           ]),
-        ],
+        ].filter(Boolean) as Node[],
       ),
     );
   });
   sec.appendChild(list);
+  return sec;
+}
+
+// ── stats (serif-numeral count-up band, uses the existing count-up engine) ─────
+function buildStats(ctx: SectionContext, s: Section): HTMLElement {
+  const { t } = ctx;
+  const sec = el('section', { class: 'peek-sec peek-reveal', 'data-section-id': s.id });
+  const head = sectionHead(ctx, s.title, { eyebrow: strData(s, 'eyebrow') });
+  if (head) sec.appendChild(head);
+  const items = Array.isArray(s.data?.items) ? (s.data.items as Array<Record<string, unknown>>) : [];
+  const band = el('div', {
+    style:
+      `display:grid;grid-template-columns:repeat(${Math.max(1, Math.min(items.length || 1, 3))},1fr);` +
+      `border-top:var(--peek-border-weight,1px) solid ${t.line};border-bottom:var(--peek-border-weight,1px) solid ${t.line}`,
+  });
+  items.forEach((it, i) => {
+    const rawVal = it.value;
+    const numeric = typeof rawVal === 'number' ? rawVal : Number(rawVal);
+    const dec = typeof it.dec === 'number' ? it.dec : 0;
+    const pre = typeof it.pre === 'string' ? it.pre : '';
+    const suf = typeof it.suf === 'string' ? it.suf : '';
+    const label = String(it.label ?? '');
+    const cell = el(
+      'div',
+      {
+        style: `padding:34px 18px;text-align:center;${i ? `border-left:var(--peek-border-weight,1px) solid ${t.line}` : ''}`,
+      },
+      [
+        el('div', { style: 'display:flex;justify-content:center;align-items:baseline' }, [
+          pre
+            ? el('span', {
+                style: `font-family:var(--peek-font-display);font-size:36px;color:${t.accent2};line-height:1`,
+                text: pre,
+              })
+            : null,
+          (() => {
+            const n = el('span', {
+              style: `font-family:var(--peek-font-display);font-weight:500;font-size:44px;color:${t.ink};line-height:1;font-variant-numeric:tabular-nums`,
+              text: Number.isFinite(numeric) ? '0' : String(rawVal ?? ''),
+            });
+            if (Number.isFinite(numeric)) ctx.registerCounter(n, numeric, dec);
+            return n;
+          })(),
+          suf
+            ? el('span', {
+                style: `font-family:var(--peek-font-display);font-size:36px;color:${t.ink};line-height:1`,
+                text: suf,
+              })
+            : null,
+        ].filter(Boolean) as Node[]),
+        el('div', {
+          style: `font-family:var(--peek-font-body);font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:${t.muted};margin-top:14px`,
+          text: label,
+        }),
+      ],
+    );
+    band.appendChild(cell);
+  });
+  sec.appendChild(band);
+  return sec;
+}
+
+// ── lede (centered pull-quote + body, editorial spine) ─────────────────────────
+function buildLede(ctx: SectionContext, s: Section): HTMLElement {
+  const { t } = ctx;
+  const sec = el('section', { class: 'peek-sec peek-reveal', style: 'text-align:center', 'data-section-id': s.id });
+  if (strData(s, 'eyebrow') || s.title) {
+    sec.appendChild(el('div', { class: 'peek-eyebrow', style: 'margin-bottom:18px', text: strData(s, 'eyebrow') || s.title }));
+  }
+  const quote = strData(s, 'quote');
+  const accentWord = strData(s, 'accentWord');
+  if (quote) {
+    let html = esc(quote);
+    if (accentWord) {
+      const ew = esc(accentWord);
+      const re = new RegExp(ew.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      html = html.replace(re, `<em style="font-style:italic;color:${t.accent}">${ew}</em>`);
+    }
+    sec.appendChild(
+      el('div', {
+        style: `font-family:var(--peek-font-display);font-size:clamp(24px,7vw,34px);line-height:1.4;color:${t.ink};max-width:18ch;margin:0 auto;letter-spacing:-.005em`,
+        html,
+      }),
+    );
+  }
+  const body = strData(s, 'body');
+  if (body) sec.appendChild(el('p', { class: 'peek-dek', style: 'margin:22px auto 0;max-width:48ch', text: body }));
   return sec;
 }
 
@@ -625,18 +901,31 @@ function buildClaim(ctx: SectionContext, s: Section): HTMLElement {
       `position:relative;border-radius:var(--peek-radius-lg);border:1px solid ${t.line};background:${t.surface};` +
       `padding:32px var(--peek-space-gutter);text-align:center;overflow:hidden`,
   });
+  // Allow a HEADING-LESS claim: when eyebrow is explicitly '' and there is no title/heading,
+  // suppress the "YOU'RE INVITED / Will you be there?" boilerplate (single-action invites where
+  // the hero already carries the message — e.g. El Taquito's RSVP).
+  const eyebrowRaw = s.data?.eyebrow;
+  const hasEyebrowKey = typeof eyebrowRaw === 'string';
+  const eyebrowTxt = strData(s, 'eyebrow');
+  const headingTxt = s.title || strData(s, 'heading');
+  const suppressHeading = hasEyebrowKey && eyebrowRaw === '' && !headingTxt;
+
   const mr = motifRow(t, 18);
-  if (mr) {
+  if (mr && !suppressHeading) {
     mr.style.marginBottom = '14px';
     panel.appendChild(mr);
   }
-  panel.appendChild(el('div', { class: 'peek-eyebrow', text: strData(s, 'eyebrow') || 'You’re invited' }));
-  panel.appendChild(
-    el('h2', {
-      style: `font-family:var(--peek-font-display);font-size:30px;color:${t.ink};margin:8px 0 0;line-height:1.05;text-transform:var(--peek-display-case)`,
-      text: s.title || strData(s, 'heading') || 'Will you be there?',
-    }),
-  );
+  if (!suppressHeading) {
+    if (eyebrowTxt || !hasEyebrowKey) {
+      panel.appendChild(el('div', { class: 'peek-eyebrow', text: eyebrowTxt || 'You’re invited' }));
+    }
+    panel.appendChild(
+      el('h2', {
+        style: `font-family:var(--peek-font-display);font-size:30px;color:${t.ink};margin:8px 0 0;line-height:1.05;text-transform:var(--peek-display-case)`,
+        text: headingTxt || 'Will you be there?',
+      }),
+    );
+  }
   const dek = strData(s, 'dek');
   if (dek) panel.appendChild(el('p', { class: 'peek-dek', style: 'margin:10px auto 0;max-width:30em', text: dek }));
 
@@ -689,6 +978,10 @@ export function buildSection(ctx: SectionContext, s: Section): HTMLElement {
       return buildGallery(ctx, s);
     case 'details':
       return buildDetails(ctx, s);
+    case 'stats':
+      return buildStats(ctx, s);
+    case 'lede':
+      return buildLede(ctx, s);
     case 'steps':
       return buildSteps(ctx, s);
     case 'countdown':
@@ -729,6 +1022,15 @@ export function buildHero(ctx: SectionContext, s: Section): HTMLElement {
     style: 'position:relative;z-index:1;padding-top:24px',
   });
 
+  // hero inline accent: color + optional italic on ONE matching word (the rust "OLD MAN",
+  // the italic "Gala"). Falls back to plain escaped text when no accent authored.
+  const accentSpec = (s.data?.accent && typeof s.data.accent === 'object'
+    ? (s.data.accent as { word?: string; color?: string; italic?: boolean })
+    : null);
+  const headlineHtml = accentSpec?.word
+    ? accentHeadlineHtml(headline, accentSpec, t)
+    : escMultiline(headline);
+
   const mkEyebrow = (cls = '') =>
     eyebrowTxt ? el('div', { class: 'peek-eyebrow peek-anim ' + cls, style: 'animation-delay:.1s' as string, text: eyebrowTxt }) : null;
   const mkHead = (size: string, lh: string) =>
@@ -737,8 +1039,8 @@ export function buildHero(ctx: SectionContext, s: Section): HTMLElement {
       style:
         `margin:14px 0 0;font-family:var(--peek-font-display);font-weight:700;line-height:${lh};` +
         `font-size:${size};letter-spacing:var(--peek-display-tracking);text-transform:var(--peek-display-case);color:${t.ink};` +
-        `animation-delay:.28s;${t.glow ? `text-shadow:0 0 20px ${rgba(t.accent, 0.55)};` : ''}`,
-      html: escMultiline(headline),
+        `animation-delay:.28s;text-shadow:var(--peek-display-shadow,${t.glow ? `0 0 20px ${rgba(t.accent, 0.55)}` : 'none'});`,
+      html: headlineHtml,
     });
   const mkDek = () =>
     dekTxt
@@ -843,6 +1145,15 @@ export function buildHero(ctx: SectionContext, s: Section): HTMLElement {
   sectionEl.appendChild(
     el('div', {}, [mkEyebrow(), mkHead('clamp(54px,14vw,120px)', '.9'), mkDek(), mkLedger()].filter(Boolean) as Node[]),
   );
+  // type-mega still renders a framed photo slot when the hero carries media (the mockup's
+  // [YOUR PHOTO] framed block under the work-order header).
+  if (heroMedia) {
+    sectionEl.appendChild(
+      el('div', { class: 'peek-anim', style: 'margin-top:18px;animation-delay:.74s' }, [
+        frameMedia(heroMedia.frame || t.frame, t, heroMedia.url, heroMedia.alt, strData(s, 'caption') || undefined),
+      ]),
+    );
+  }
   const mr = motifRow(t);
   if (mr) {
     mr.classList.add('peek-anim');
@@ -874,6 +1185,33 @@ function normSteps(s: Section): Array<{ n: string; label: string; desc?: string 
     }
     return { n: num(i + 1), label: String(item) };
   });
+}
+
+/** Render a hero headline with ONE accent word colored/italicized. Escapes the whole headline
+ *  first (XSS-safe), converts \n → <br>, then wraps the (already-escaped) accent word in a span.
+ *  color: 'accent'|'accent2'|raw css color. The match is case-insensitive on the raw word. */
+function accentHeadlineHtml(
+  headline: string,
+  spec: { word?: string; color?: string; italic?: boolean },
+  t: Tokens,
+): string {
+  const word = spec.word || '';
+  if (!word) return escMultiline(headline);
+  const color =
+    spec.color === 'accent' || !spec.color
+      ? t.accent
+      : spec.color === 'accent2'
+        ? t.accent2
+        : spec.color;
+  const escFull = escMultiline(headline);
+  const escWord = esc(word);
+  const style =
+    `color:${color}` + (spec.italic ? ';font-style:italic;font-weight:400' : '');
+  // case-insensitive replace of the escaped word (handles "OLD MAN" across a <br> too, since
+  // escMultiline already turned \n into <br> — match the literal escaped substring).
+  const re = new RegExp(escWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  if (!re.test(escFull)) return escFull;
+  return escFull.replace(re, `<em style="${style}">${escWord}</em>`);
 }
 
 /** Minimal inline markdown → safe HTML for the note (bold/italic/links).

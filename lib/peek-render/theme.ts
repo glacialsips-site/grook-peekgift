@@ -47,12 +47,52 @@ export interface Tokens {
   btnInk: string;
   /** mix-blend-mode for grain/scanlines (dark→screen, light→multiply) */
   blend: string;
+  // ── loud decorative tokens (ADDITIVE; default to the prior quiet look) ──
+  /** css text-shadow value for display headlines, '' = none */
+  displayShadow: string;
+  /** css box-shadow value for cards/panels (composed from loud.cardShadow, or a soft default) */
+  cardShadow: string;
+  /** border thickness px on cards/panels/dividers (default 1) */
+  borderWeight: number;
+  /** grain overlay opacity 0..1 */
+  textureStrength: number;
 }
 
 export function toTokens(theme: ThemeSpec): Tokens {
   const p = theme.palette;
   const ty = theme.type;
   const accent2 = p.accent2 || p.accent;
+  const loud = theme.loud || {};
+
+  // resolve a loud-token color reference ('accent'|'accent2'|raw css) → literal color
+  const resolveColor = (c: string | undefined, fallback: string): string =>
+    c === 'accent' ? p.accent : c === 'accent2' ? accent2 : c === 'ink' ? p.ink : c || fallback;
+
+  // display-shadow: pass-through full css value; expand the "Xpx Ypx 0 accent" shorthand token
+  // keywords (accent/accent2/ink) to literal colors so it works in a static style string.
+  let displayShadow = '';
+  if (typeof loud.displayShadow === 'string' && loud.displayShadow.trim()) {
+    displayShadow = loud.displayShadow
+      .replace(/\baccent2\b/g, accent2)
+      .replace(/\baccent\b/g, p.accent)
+      .replace(/\bink\b/g, p.ink);
+  }
+
+  // card-shadow: compose from loud.cardShadow, else a soft default that matches the prior look.
+  let cardShadow: string;
+  if (loud.cardShadow) {
+    const cs = loud.cardShadow;
+    const col = resolveColor(cs.color, p.ink);
+    cardShadow = `${cs.x}px ${cs.y}px ${cs.blur ?? 0}px ${cs.spread ?? 0}px ${col}`;
+  } else {
+    cardShadow = 'none';
+  }
+
+  const borderWeight =
+    typeof loud.borderWeight === 'number' && loud.borderWeight > 0 ? loud.borderWeight : 1;
+  const textureStrength =
+    typeof loud.textureStrength === 'number' ? Math.max(0, Math.min(1, loud.textureStrength)) : 0.06;
+
   return {
     bg: p.bg,
     surface: p.surface,
@@ -85,6 +125,10 @@ export function toTokens(theme: ThemeSpec): Tokens {
     frame: theme.frame || 'plain',
     btnInk: p.mode === 'dark' ? '#0c0c0c' : '#ffffff',
     blend: p.mode === 'dark' ? 'screen' : 'multiply',
+    displayShadow,
+    cardShadow,
+    borderWeight,
+    textureStrength,
   };
 }
 
@@ -140,6 +184,11 @@ export function applyThemeVars(
   set('--peek-accent-soft', rgba(t.accent, 0.12));
   set('--peek-accent-faint', rgba(t.accent, 0.07));
   set('--peek-glow', t.glow ? `0 0 18px ${rgba(t.accent, 0.55)}` : 'none');
+  // ── loud decorative tokens (ADDITIVE) ──
+  set('--peek-display-shadow', t.displayShadow || 'none');
+  set('--peek-card-shadow', t.cardShadow);
+  set('--peek-border-weight', t.borderWeight + 'px');
+  set('--peek-texture-strength', String(t.textureStrength));
   // safe-area insets (every mockup pads the bar/menu/sheet by these)
   set('--peek-safe-b', 'env(safe-area-inset-bottom, 0px)');
   set('--peek-safe-t', 'env(safe-area-inset-top, 0px)');

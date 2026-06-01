@@ -217,6 +217,7 @@ export const PEEK_CSS = /* css */ `
   margin: 6px 0 0; font-family: var(--peek-font-display); font-size: 26px; font-weight: 700;
   color: var(--peek-ink); letter-spacing: var(--peek-display-tracking);
   text-transform: var(--peek-display-case); line-height: 1.05;
+  text-shadow: var(--peek-display-shadow, none);
 }
 .peek-sechead .peek-meta-note { font-family: var(--peek-font-body); font-size: 12px; letter-spacing: .1em; color: var(--peek-muted); white-space: nowrap; }
 .peek-dek { font-family: var(--peek-font-body); font-size: 15px; line-height: 1.55; color: var(--peek-muted); }
@@ -259,10 +260,12 @@ export const PEEK_CSS = /* css */ `
 
 /* ── card grid (giftgrid / rail) shared face ── */
 .peek-card {
-  background: var(--peek-surface); border: 1px solid var(--peek-line);
+  background: var(--peek-surface);
+  border: var(--peek-border-weight, 1px) solid var(--peek-line);
   border-radius: var(--peek-radius-card); overflow: hidden; cursor: pointer;
   position: relative; transition: transform .2s ease, box-shadow .2s ease;
   display: flex; flex-direction: column;
+  box-shadow: var(--peek-card-shadow, none);
 }
 .peek-card:hover { transform: translateY(-4px); }
 .peek-card.peek-claimed { opacity: .6; }
@@ -295,6 +298,17 @@ export const PEEK_CSS = /* css */ `
 /* taunt card */
 .peek-card-taunt { cursor: default; border-style: dashed; }
 .peek-card-taunt .peek-card-title { color: var(--peek-muted); text-decoration: line-through; }
+
+/* checklist row (work-order layout) — no card chrome, no hover-lift; check fills on claim */
+.peek-chk-row { transition: opacity .25s ease; }
+.peek-chk-row:hover { transform: none; }
+.peek-chk-box > svg { opacity: 0; transition: opacity .2s ease; }
+.peek-chk-row.peek-claimed .peek-chk-box { background: var(--peek-accent-2, var(--peek-accent)); border-color: var(--peek-accent-2, var(--peek-accent)); color: var(--peek-surface); }
+.peek-chk-row.peek-claimed .peek-chk-box > svg { opacity: 1; }
+.peek-chk-row.peek-claimed { opacity: .62; }
+
+/* headline lot (featured full-width card) keeps shadow but no inner-padding card body crop */
+.peek-headlot:hover { transform: none; }
 
 /* ── REDUCED MOTION: global guard + explicit ambient kills (SHELL_SPEC §1.7) ── */
 @media (prefers-reduced-motion: reduce) {

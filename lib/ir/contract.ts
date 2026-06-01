@@ -133,6 +133,27 @@ export interface RadiusSpec {
   pill: number;              // px, button/badge corner (≈ 8–999)
 }
 
+// ── "LOUD" DECORATIVE TOKENS (ADDITIVE, all optional → default to the prior quiet look) ──
+// The mockups lean on hard offset shadows, thick ink borders, real kraft grain. The thin
+// 1px-border / soft-radius / faint-grain renderer can't express these. These tokens give the
+// shell + section chrome a loud vocabulary. ALL optional; omitting them reproduces the old
+// (quiet) render exactly. Maps to --peek-display-shadow / --peek-card-shadow / --peek-border-weight
+// / --peek-texture-strength.
+export interface LoudSpec {
+  // hard offset text-shadow on display headlines, e.g. "3px 3px 0 var(--peek-accent-2)".
+  // Pass the FULL css text-shadow value (so the author controls offset/blur/color), or a
+  // shorthand the renderer expands. '' / omitted → no display shadow.
+  displayShadow?: string;
+  // hard offset box-shadow on cards/panels: { x, y, blur?, spread?, color? } → composed into
+  // `Xpx Ypx Bpx Spx color`. color defaults to ink. Omitted → soft default card shadow.
+  cardShadow?: { x: number; y: number; blur?: number; spread?: number; color?: string };
+  // border thickness (px) on cards, panels, ledger, dividers. Default 1.
+  borderWeight?: number;
+  // grain/texture overlay opacity 0..1 (the mockups run .07; the renderer ran a fixed .06).
+  // Omitted → the prior fixed faint value.
+  textureStrength?: number;
+}
+
 // DQ-2: motion intensity PLUS the easing curves the shell animates with (panel = slide
 // menu / sticky bar, sheet = bottom sheet). Maps to --peek-ease-panel / --peek-ease-sheet.
 export interface MotionSpec {
@@ -157,6 +178,7 @@ export interface ThemeSpec {
   radius: RadiusSpec;        // DQ-2: { card, pill } (was a single number)
   space: SpaceSpec;          // DQ-2: spacing rhythm as data
   motion: MotionSpec;        // DQ-2: intensity + easings
+  loud?: LoudSpec;           // ADDITIVE: hard-offset shadow / thick border / strong grain vocabulary
   // escape hatch: raw CSS custom properties the model wants to inject. MUST be
   // `--peek-*`-namespaced; sanitized server-side before render.
   cssVars?: Record<string, string>;
@@ -243,13 +265,25 @@ export interface VariantGroup {
 //    Each kind's expected `Section.data` shape (the renderer dispatches on `kind` and
 //    reads `data` accordingly; unknown extra keys are ignored, never an error):
 //      hero      : { eyebrow?: string; headline: string; dek?: string;
-//                    ledger?: [string,string][]; media?: MediaSlot }   // headline may contain \n
+//                    ledger?: [string,string][]; media?: MediaSlot;
+//                    accent?: { word: string; color?: 'accent'|'accent2'|string; italic?: boolean } }
+//                    // headline may contain \n; `accent` colors/italicizes ONE matching word
+//                    // (the rust "OLD MAN", the italic "Gala") instead of escaping to plain text
 //      note      : {}  — pulls Peek.note_md (gift pages). Optional { title?, sub? } override.
-//      giftgrid  : { intro?: string }  — renders Card[] filtered by group/position; THE core
+//      giftgrid  : { intro?: string; layout?: 'carousel'|'grid'|'checklist';
+//                    featuredCardId?: string }  // renders Card[]; layout picks the structural
+//                    // treatment (default carousel). featured card spans full-width above the rest.
+//      stats     : { items: {value:number|string, dec?:number, pre?:string, suf?:string,
+//                    label:string}[] }  // ADDITIVE: serif-numeral count-up band (gala £1.2M/30/14)
+//      lede      : { quote: string; body?: string; accentWord?: string }  // ADDITIVE: pull-quote
 //      rail      : { title?: string }  — horizontal scroller over Card[] / media
 //      lookbook  : { title?: string }  — editorial figure stack over Card[]
 //      gallery   : { title?: string; images?: MediaSlot[] }            // DQ-3 ADDED: photo strip
-//      details   : { rows: [string,string][] }                        // DQ-3 ADDED: when/where/dress
+//      details   : { rows: [string,string][];                          // DQ-3 ADDED: when/where/dress
+//                    variant?: 'list'|'panel'; panelFill?: 'accent'|'accent2'|'surface'|string;
+//                    keyColor?: 'accent'|'accent2'|string; divider?: 'solid'|'dashed';
+//                    monogram?: boolean }  // 'panel' = colored fiesta-menu card (El Taquito cobalt);
+//                    // monogram:false drops the forced avatar tile
 //      steps     : { steps: [string,string][] }   // [ ['01','You send it'], ... ]
 //      countdown : { target: ISODate; label?: string; doneText?: string }  // DQ-3 LIVE: ticking clock
 //      claim     : { label?: string; capacity?: number; cta?: string }     // DQ-3 LIVE: claim/RSVP count
@@ -268,6 +302,8 @@ export type SectionKind =
   | 'lookbook'      // editorial figure stack
   | 'gallery'       // DQ-3 ADDED: photo/moment strip
   | 'details'       // DQ-3 ADDED: when / where / dress (invites) — { rows }
+  | 'stats'         // ADDITIVE: serif-numeral stat band w/ count-up (editorial spine)
+  | 'lede'          // ADDITIVE: centered pull-quote + body (editorial spine)
   | 'steps'         // how it works / how it ships
   | 'countdown'     // DQ-3 PROMOTED: live ticking clock to a target date (carries live state)
   | 'claim'         // DQ-3 PROMOTED: live claim / RSVP count (carries live state)

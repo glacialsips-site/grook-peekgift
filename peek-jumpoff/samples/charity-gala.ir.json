@@ -67,12 +67,32 @@
         "variant": "full-bleed-photo",
         "eyebrow": "In Aid of the Riverside Conservancy",
         "headline": "The Lumière\nGala",
+        "accent": { "word": "Gala", "italic": true, "color": "ink" },
         "dek": "An evening of light, in service of the river that gives us ours. Saturday, 21 November · 7 O'Clock · The Old Customs Hall."
       }
     },
     {
       "id": "s_countdown", "kind": "countdown", "title": "Until the doors open",
       "data": { "target": "2026-11-21T19:00:00Z", "label": "Until the doors open" }
+    },
+    {
+      "id": "s_evening", "kind": "lede",
+      "data": {
+        "eyebrow": "The Evening",
+        "quote": "A single night that keeps a river alive for another generation.",
+        "accentWord": "alive",
+        "body": "For fourteen years the Riverside Conservancy has restored the wetlands, returned the otters, and reopened the banks. The Lumière Gala is the night we gather to ensure the next fourteen — over dinner, music, and an auction of once-in-a-lifetime lots, every penny of which flows back to the water."
+      }
+    },
+    {
+      "id": "s_stats", "kind": "stats",
+      "data": {
+        "items": [
+          { "value": 1.2, "dec": 1, "pre": "£", "suf": "M", "label": "Raised to date" },
+          { "value": 30, "label": "Hectares restored" },
+          { "value": 14, "label": "Years of stewardship" }
+        ]
+      }
     },
     {
       "id": "s_programme", "kind": "flightplan", "title": "The Programme",
@@ -90,7 +110,7 @@
     },
     {
       "id": "s_auction", "kind": "giftgrid", "title": "The Auction",
-      "data": { "intro": "Twelve lots, each donated in full. Every paddle raised becomes water restored." }
+      "data": { "layout": "grid", "featuredCardId": "lot1", "intro": "Twelve lots, each donated in full. Every paddle raised becomes water restored." }
     },
     {
       "id": "s_attend", "kind": "tiers", "title": "Attend",

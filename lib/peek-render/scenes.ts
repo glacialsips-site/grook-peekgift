@@ -165,11 +165,12 @@ export function buildScene(t: Tokens): HTMLElement | null {
       break;
   }
 
-  // grain everywhere on `grain` scene OR textured palettes
+  // grain everywhere on `grain` scene OR textured palettes. Opacity driven by the loud
+  // texture-strength token (mockups run ~.07; the old fixed .06 washed kraft out).
   if (name === 'grain' || t.texture) {
     wrap.appendChild(
       el('div', {
-        style: `position:absolute;inset:0;opacity:.06;mix-blend-mode:${t.blend};background-image:url("${GRAIN_SVG}")`,
+        style: `position:absolute;inset:0;opacity:${t.textureStrength};mix-blend-mode:${t.blend};background-image:url("${GRAIN_SVG}")`,
       }),
     );
   }

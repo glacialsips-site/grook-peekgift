@@ -137,6 +137,26 @@ export const MotionSpecSchema = z
   })
   .passthrough();
 
+// ADDITIVE: "loud" decorative tokens — all optional, so omitting `loud` reproduces the prior
+// quiet render. (hard offset shadows / thick borders / strong grain the mockups rely on.)
+export const LoudSpecSchema = z
+  .object({
+    displayShadow: z.string().optional(),
+    cardShadow: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+        blur: z.number().optional(),
+        spread: z.number().optional(),
+        color: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    borderWeight: z.number().optional(),
+    textureStrength: z.number().optional(),
+  })
+  .passthrough();
+
 export const ThemeSpecSchema = z
   .object({
     type: TypeSystemSchema,
@@ -149,6 +169,7 @@ export const ThemeSpecSchema = z
     // it, so legacy IRs validate unchanged while downstream always gets the rich shape.
     space: SpaceSpecSchema.default(DEFAULT_SPACE),
     motion: MotionSpecSchema,
+    loud: LoudSpecSchema.optional(), // ADDITIVE: optional loud-token set
     cssVars: z.record(z.string(), z.string()).optional(),
   })
   .passthrough();
@@ -237,6 +258,8 @@ export const SectionKindSchema = z.enum([
   'hero', 'note', 'giftgrid', 'rail', 'lookbook',
   'gallery',                 // DQ-3 ADDED
   'details',                 // DQ-3 ADDED
+  'stats',                   // ADDITIVE: serif-numeral count-up band
+  'lede',                    // ADDITIVE: pull-quote
   'steps',
   'countdown',               // DQ-3 PROMOTED (live)
   'claim',                   // DQ-3 PROMOTED (live)
@@ -353,8 +376,11 @@ const SANITIZE_CONFIG: Parameters<typeof DOMPurify.sanitize>[1] = {
   ADD_ATTR: ['style'],
   // keep data-* hooks the renderer may read; forbid nothing structural here.
   ALLOW_DATA_ATTR: true,
-  // belt-and-suspenders: never allow these even if a future config loosens.
-  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'base', 'form'],
+  // belt-and-suspenders: never allow these even if a future config loosens. NOTE: `form` is
+  // INTENTIONALLY allowed — themed `custom` blocks author RSVP/claim forms; DOMPurify still
+  // strips <script>, all on* handlers, and javascript:/data:-script URLs, so a form is inert
+  // theater (no action fires) and safe to render.
+  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'base'],
   FORBID_ATTR: ['srcdoc', 'formaction'],
   // return a string, not a TrustedHTML/Node
   RETURN_DOM: false,

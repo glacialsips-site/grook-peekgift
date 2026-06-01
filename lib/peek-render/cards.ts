@@ -148,6 +148,21 @@ export function computeTotal(views: CardView[], claimed: Set<string>): TotalStat
   return { cents, starLabels, count };
 }
 
+/** The at-rest CATALOGUE total: sum of ALL non-taunt priced cards + their star labels, ignoring
+ *  claim state. This is what the mockup bar shows before any interaction ("$74 + dinner"). */
+export function computeCatalogueTotal(views: CardView[]): TotalState {
+  let cents = 0;
+  const starLabels: string[] = [];
+  let count = 0;
+  for (const v of views) {
+    if (v.isTaunt || v.isLocked) continue;
+    count++;
+    if (v.countsToTotal && typeof v.valueCents === 'number') cents += v.valueCents;
+    else if (v.starLabel && !starLabels.includes(v.starLabel)) starLabels.push(v.starLabel);
+  }
+  return { cents, starLabels, count };
+}
+
 /** Format the bar's running-total string, e.g. "$74 + dinner" or "Pick something". */
 export function formatTotal(state: TotalState, fallback: string): string {
   const parts: string[] = [];

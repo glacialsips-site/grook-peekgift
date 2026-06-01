@@ -38,8 +38,10 @@
       },
       "scene": "grain",
       "motifs": ["stamp", "rule"],
-      "frame": "ticket",
+      "frame": "plain",
       "radius": 6,
+      "space": { "sectionY": 30, "gutter": 20, "stack": 12 },
+      "loud": { "borderWeight": 2, "textureStrength": 0.09 },
       "motion": { "intensity": 0.2, "reduceMotionOK": true }
     },
 
@@ -67,18 +69,21 @@
     {
       "id": "s_hero", "kind": "hero",
       "data": {
+        "variant": "type-mega",
         "eyebrow": "JOB: DAD'S 60TH BIRTHDAY",
         "headline": "FOR THE\nOLD MAN",
+        "accent": { "word": "OLD MAN", "color": "accent2" },
+        "caption": "Dad + me, opening day at the lake · 2024",
         "dek": "60 years. Still out there every Saturday with the mower. Time we did something for him.",
         "ledger": [["For", "Big Ray"], ["Occasion", "The Big 6-0"], ["From", "The Kids"]]
       }
     },
-    { "id": "s_grid", "kind": "giftgrid", "title": "The Haul", "data": { "intro": "work-order line items; check them off" } },
+    { "id": "s_grid", "kind": "giftgrid", "title": "The Haul", "data": { "layout": "checklist", "cardIds": ["c1", "c2", "c3"], "intro": "" } },
     {
       "id": "s_ticket", "kind": "custom", "title": "The Main Event",
       "data": {
-        "_why": "the bold move — a tear-off ticket stub the giftgrid can't express, so the model writes it against --peek-* vars",
-        "html": "<div style=\"background:var(--peek-accent);color:var(--peek-surface);border-radius:10px;padding:20px;font-family:var(--peek-font-display)\"><div style=\"font-family:var(--peek-font-accent);font-size:10px;letter-spacing:.18em;opacity:.8\">ADMIT TWO · THE MAIN EVENT</div><div style=\"font-size:28px;text-transform:uppercase;margin:6px 0\">Steak Dinner, On Us</div><div style=\"font-family:var(--peek-font-accent);font-size:12px;opacity:.85\">Friday · 7:30 PM · that chophouse downtown he's been eyeing for a decade.</div></div>"
+        "_why": "the bold move — a tear-off ticket stub the giftgrid can't express, so the model writes it against --peek-* vars: punched notches both edges, dashed perforation, foot row",
+        "html": "<div style=\"position:relative;background:var(--peek-accent);color:var(--peek-surface);border-radius:10px;padding:20px;overflow:hidden;font-family:var(--peek-font-display)\"><span style=\"position:absolute;top:50%;left:-11px;width:22px;height:22px;border-radius:50%;background:var(--peek-bg);transform:translateY(-50%)\"></span><span style=\"position:absolute;top:50%;right:-11px;width:22px;height:22px;border-radius:50%;background:var(--peek-bg);transform:translateY(-50%)\"></span><div style=\"font-family:var(--peek-font-accent);font-size:10px;letter-spacing:.18em;opacity:.8\">ADMIT TWO · THE MAIN EVENT</div><div style=\"font-size:28px;text-transform:uppercase;margin:6px 0 4px;line-height:1.05\">Steak Dinner,<br>On Us</div><div style=\"font-family:var(--peek-font-accent);font-size:12px;opacity:.85;line-height:1.5\">Friday · 7:30 PM · that chophouse downtown he's been eyeing for a decade.</div><div style=\"border-top:2px dashed rgba(243,236,219,.4);margin:14px -20px 0;padding:12px 20px 0;display:flex;justify-content:space-between;align-items:center\"><span style=\"font-size:14px\">TABLE FOR 2</span><span style=\"font-family:var(--peek-font-accent);font-size:10px;letter-spacing:.18em;opacity:.8\">NO LAWN ALLOWED</span></div></div>"
       }
     },
     { "id": "s_note", "kind": "note", "data": {} },
@@ -93,7 +98,7 @@
       "title": "Leather Work Gloves", "description": "the good ones, finally",
       "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "premium leather work gloves product shot" } },
       "source_url": "https://www.duluthtrading.com/...", "source_retailer": "Duluth",
-      "value_cents": 4400, "reveal_value": false,
+      "value_cents": 4400, "reveal_value": true,
       "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
       "proposed_date": null, "location_hint": null, "metadata": {}
     },
@@ -102,7 +107,7 @@
       "title": "Heirloom Tomato Seeds", "description": "for the garden he won't stop talking about",
       "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "heirloom tomato seed packets" } },
       "source_url": "https://amazon.com/...", "source_retailer": "Amazon",
-      "value_cents": 1600, "reveal_value": false,
+      "value_cents": 1600, "reveal_value": true,
       "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
       "proposed_date": null, "location_hint": null, "metadata": {}
     },
@@ -111,7 +116,7 @@
       "title": "A Six-Pack of His Lager", "description": "you know the one",
       "media": { "url": null, "source": "pending", "directive": { "op": "search", "prompt": "amber lager six pack" } },
       "source_url": null, "source_retailer": "Local",
-      "value_cents": 1400, "reveal_value": false,
+      "value_cents": 1400, "reveal_value": true,
       "is_taunt": false, "taunt_text": null, "is_locked": false, "unlock_rule": {},
       "proposed_date": null, "location_hint": null, "metadata": {}
     },

@@ -37,7 +37,8 @@
       "motifs": ["sunburst", "star"],
       "frame": "plain",
       "radius": { "card": 8, "pill": 99 },
-      "space": { "sectionY": 30, "gutter": 20, "stack": 12 },
+      "space": { "sectionY": 26, "gutter": 20, "stack": 12 },
+      "loud": { "displayShadow": "3px 3px 0 accent2", "borderWeight": 3, "cardShadow": { "x": 4, "y": 4, "blur": 0, "spread": 0, "color": "ink" } },
       "motion": { "intensity": 0.4, "reduceMotionOK": true }
     },
 
@@ -74,6 +75,11 @@
     {
       "id": "s_details", "kind": "details", "title": "",
       "data": {
+        "variant": "panel",
+        "panelFill": "accent2",
+        "keyColor": "#F4A800",
+        "divider": "dashed",
+        "monogram": false,
         "rows": [
           ["Cuándo", "Saturday, 6 PM", "till the salsa runs out"],
           ["Dónde", "The backyard", "22 Almond St · gate's open"],
