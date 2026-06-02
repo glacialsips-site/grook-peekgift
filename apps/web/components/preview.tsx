@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type {
   RenderModel,
   SectionView,
@@ -504,6 +504,69 @@ function ActionBar({ model, interaction }: { model: RenderModel; interaction?: P
   );
 }
 
+// §1.1 — the themed top bar. Glass-from-the-start (Pattern B, the common case), absolute to the
+// root so it floats over the scrolling content inside the device frame. Wordmark left (the
+// occasion / who it's for), a themed motif glyph right. Solidifies its tint a touch once scrolled.
+function Nav({ model, scrolled }: { model: RenderModel; scrolled: boolean }) {
+  const mark = model.occasion ?? (model.recipientName ? `for ${model.recipientName}` : "peek");
+  const glyph = heroMotif(model);
+  return (
+    <nav
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 3,
+        height: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 18px",
+        background: `color-mix(in srgb, var(--peek-bg) ${scrolled ? 90 : 72}%, transparent)`,
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderBottom: `1px solid ${scrolled ? "var(--peek-line)" : "transparent"}`,
+        transition: "background .4s ease, border-color .4s ease",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--peek-font-display)",
+          fontSize: 15.5,
+          letterSpacing: "var(--peek-display-tracking)",
+          textTransform: HEADLINE_TT,
+          textShadow: scrolled ? "none" : "var(--peek-display-shadow)",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "78%",
+        }}
+      >
+        {mark}
+      </span>
+      {glyph ? <span style={{ color: "var(--peek-accent)", fontSize: 16, flex: "0 0 auto" }}>{glyph}</span> : null}
+    </nav>
+  );
+}
+
+// A thin scroll-progress rail at the very top (§1.1) — anchored to the internal scroller, not the
+// window, so it reads true inside the device frame.
+function ProgressRail({ progress }: { progress: number }) {
+  return (
+    <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 4, height: 2, pointerEvents: "none" }}>
+      <div
+        style={{
+          height: "100%",
+          width: `${Math.round(progress * 100)}%`,
+          background: "linear-gradient(90deg, var(--peek-accent), var(--peek-accent-2))",
+          transition: "width .1s linear",
+        }}
+      />
+    </div>
+  );
+}
+
 function Claim({ section, model }: { section: SectionView; model: RenderModel }) {
   const d = section.data;
   const heading = section.title ?? str(d, "heading") ?? "your move";
@@ -800,12 +863,30 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
     return () => window.removeEventListener("keydown", onKey);
   }, [openId]);
 
+  // §1.1 — scroll-progress + nav solidify, anchored to the internal scroller (not the window).
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const onScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollHeight - el.clientHeight;
+    setProgress(max > 0 ? Math.min(1, el.scrollTop / max) : 0);
+    setScrolled(el.scrollTop > 8);
+  };
+  const firstHero = model.sections.find((s) => s.kind === "hero");
+  const fullBleed = Boolean(firstHero && str(firstHero.data, "variant") === "full-bleed-photo" && model.hero);
+
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
       <Scene kind={sceneKind(model)} mode={model.mode} intensity={intensity(model)} />
       <style>{PREVIEW_CSS}</style>
-      <div style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingBottom: 96 }}>
+      <div
+        ref={scrollRef}
+        onScroll={onScroll}
+        style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingTop: empty || fullBleed ? 0 : 50, paddingBottom: 96 }}
+      >
         {empty ? <EmptyState /> : null}
         {model.sections.map((s) => {
           const block = (
@@ -820,6 +901,8 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
           <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={setOpenId} />
         ) : null}
       </div>
+      {!empty ? <Nav model={model} scrolled={scrolled || fullBleed} /> : null}
+      {!empty ? <ProgressRail progress={progress} /> : null}
       {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
       <CardSheet card={held} open={openId !== null} model={model} interaction={interaction} onClose={() => setOpenId(null)} />
     </div>
