@@ -138,20 +138,64 @@ export default function Studio() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ doc, messages: apiMessages }),
       });
-      const data = (await res.json().catch(() => ({}))) as { doc?: unknown; text?: string; error?: string };
       if (res.status === 503) {
         setMessages((m) => [...m, { role: "assistant", content: "(the curator model isn't keyed here yet — set ANTHROPIC_API_KEY. everything else is live.)" }]);
         return;
       }
-      if (!res.ok) {
-        setMessages((m) => [...m, { role: "assistant", content: `(error: ${data.error ?? res.status})` }]);
+      if (!res.ok || !res.body) {
+        const e = (await res.json().catch(() => ({}))) as { error?: string };
+        setMessages((m) => [...m, { role: "assistant", content: `(error: ${e.error ?? res.status})` }]);
         return;
       }
-      if (data.doc) {
-        const v = validatePeekIR(data.doc);
-        if (v.ok) setDoc(v.value);
+      // Stream: append an assistant bubble and fill it as text + page snapshots arrive,
+      // so the page builds itself in real time.
+      setMessages((m) => [...m, { role: "assistant", content: "" }]);
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      let acc = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          let ev: { type: string; delta?: string; doc?: unknown; error?: string };
+          try {
+            ev = JSON.parse(line.slice(5).trim());
+          } catch {
+            continue;
+          }
+          if (ev.type === "text" && ev.delta) {
+            acc += ev.delta;
+            setMessages((m) => {
+              const c = m.slice();
+              c[c.length - 1] = { role: "assistant", content: acc };
+              return c;
+            });
+          } else if ((ev.type === "page" || ev.type === "done") && ev.doc) {
+            const v = validatePeekIR(ev.doc);
+            if (v.ok) setDoc(v.value);
+          } else if (ev.type === "error" && ev.error) {
+            acc += `\n(${ev.error})`;
+            setMessages((m) => {
+              const c = m.slice();
+              c[c.length - 1] = { role: "assistant", content: acc };
+              return c;
+            });
+          }
+        }
       }
-      setMessages((m) => [...m, { role: "assistant", content: data.text?.trim() || "(updated the page)" }]);
+      if (!acc.trim()) {
+        setMessages((m) => {
+          const c = m.slice();
+          c[c.length - 1] = { role: "assistant", content: "(updated the page)" };
+          return c;
+        });
+      }
     } catch {
       setMessages((m) => [...m, { role: "assistant", content: "(network hiccup — try again)" }]);
     } finally {

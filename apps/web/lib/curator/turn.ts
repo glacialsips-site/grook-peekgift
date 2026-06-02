@@ -115,3 +115,97 @@ export async function runCuratorTurn(
 
   return { doc, text, events, tools };
 }
+
+export type StreamEvent =
+  | { type: "text"; delta: string }
+  | { type: "page"; doc: PeekIR }
+  | { type: "tool"; name: string; ok: boolean; error?: string }
+  | { type: "done"; doc: PeekIR }
+  | { type: "error"; error: string };
+
+/**
+ * Streaming variant: emits text deltas as the model speaks and a `page` snapshot after each
+ * command applies, so the preview builds itself in real time. Same maker-checker routing.
+ */
+export async function runCuratorTurnStreaming(
+  client: Anthropic,
+  input: { doc: PeekIR; messages: TurnMessage[] },
+  emit: (e: StreamEvent) => void,
+): Promise<PeekIR> {
+  let doc = input.doc;
+  const ctx = defaultCtx();
+  const system = [
+    { type: "text" as const, text: PEEK_STUDIO_SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } },
+  ];
+  const anthropicTools = PEEK_STUDIO_TOOLS as unknown as Anthropic.Tool[];
+  const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
+
+  try {
+    for (let hop = 0; hop < MAX_HOPS; hop++) {
+      const params = {
+        model: MODEL,
+        max_tokens: 8192,
+        thinking: { type: "adaptive" },
+        system,
+        tools: anthropicTools,
+        messages,
+      } as unknown as Anthropic.MessageStreamParams;
+
+      const stream = client.messages.stream(params);
+      stream.on("text", (delta: string) => {
+        if (delta) emit({ type: "text", delta });
+      });
+      const msg = await stream.finalMessage();
+
+      const toolUses = msg.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
+      messages.push({ role: "assistant", content: msg.content });
+      if (msg.stop_reason !== "tool_use" || toolUses.length === 0) break;
+
+      const results: Anthropic.ToolResultBlockParam[] = [];
+      for (const tu of toolUses) {
+        if (tu.name === "resolve_card") {
+          emit({ type: "tool", name: tu.name, ok: false, error: "resolver not configured" });
+          results.push({
+            type: "tool_result",
+            tool_use_id: tu.id,
+            content: "the resolver isn't wired yet — infer the details and call add_card directly.",
+            is_error: true,
+          });
+          continue;
+        }
+        const cmd = commandFromTool(tu.name, tu.input);
+        if (cmd.isErr()) {
+          emit({ type: "tool", name: tu.name, ok: false, error: cmd.error.message });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
+          continue;
+        }
+        const r = execute(doc, cmd.value, ctx);
+        if (r.isErr()) {
+          emit({ type: "tool", name: tu.name, ok: false, error: r.error.message });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${r.error.message}`, is_error: true });
+          continue;
+        }
+        doc = r.value.doc;
+        emit({ type: "tool", name: tu.name, ok: true });
+        emit({ type: "page", doc });
+        const ids: Record<string, string> = {};
+        for (const e of r.value.events) {
+          if (e.type === "card_added") ids.card_id = e.card.id;
+          else if (e.type === "variant_group_added") ids.variant_group_id = e.group.id;
+          else if (e.type === "section_inserted") ids.section_id = e.section.id;
+        }
+        results.push({
+          type: "tool_result",
+          tool_use_id: tu.id,
+          content: JSON.stringify({ ok: true, ...ids, applied: r.value.events.map((e) => e.type) }),
+        });
+      }
+      messages.push({ role: "user", content: results });
+    }
+  } catch (e) {
+    emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
+  }
+
+  emit({ type: "done", doc });
+  return doc;
+}
