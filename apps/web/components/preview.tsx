@@ -19,7 +19,17 @@ import { Frame } from "@/components/frames";
 import { Reveal } from "@/components/reveal";
 
 const PREVIEW_CSS =
-  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none}}";
+  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} @keyframes peekrise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}} .peek-rise{animation:peekrise .85s cubic-bezier(.2,.7,.2,1) both} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none} .peek-rise{animation:none}}";
+
+// The hero's children cascade in on first paint (SHELL_SPEC §1.5B — the "title types itself in"
+// beat). One class + a per-child delay; reduced-motion zeroes it via PREVIEW_CSS above.
+function Rise({ d, children }: { d: number; children: ReactNode }) {
+  return (
+    <div className="peek-rise" style={{ animationDelay: `${d}ms` }}>
+      {children}
+    </div>
+  );
+}
 
 export interface PickInteraction {
   picked: string[];
@@ -163,12 +173,14 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
         </div>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, color-mix(in srgb, var(--peek-bg) 88%, transparent), transparent 58%)" }} />
         <div style={{ position: "relative", padding: "0 20px 30px", width: "100%" }}>
-          {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
-          <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
-            {headline}
-          </h1>
-          {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, margin: 0 }}>{dek}</p> : null}
-          <HeroMeta rows={ledger} />
+          {eyebrow ? <Rise d={60}><Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow></Rise> : null}
+          <Rise d={160}>
+            <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
+              {headline}
+            </h1>
+          </Rise>
+          {dek ? <Rise d={300}><p style={{ color: "var(--peek-muted)", fontSize: 16, margin: 0 }}>{dek}</p></Rise> : null}
+          {ledger.length > 0 ? <Rise d={440}><HeroMeta rows={ledger} /></Rise> : null}
         </div>
       </header>
     );
@@ -177,29 +189,33 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
   return (
     <header style={{ padding: "30px 20px 12px", textAlign: variant === "centered" ? "center" : "left" }}>
       {model.hero && !big ? (
-        <div style={{ marginBottom: 18 }}>
-          <Frame kind={frameKind(model)}>
-            <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
-          </Frame>
-        </div>
+        <Rise d={0}>
+          <div style={{ marginBottom: 18 }}>
+            <Frame kind={frameKind(model)}>
+              <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
+            </Frame>
+          </div>
+        </Rise>
       ) : null}
-      {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
-      <h1
-        style={{
-          fontFamily: "var(--peek-font-display)",
-          fontSize: big ? "clamp(46px, 14vw, 92px)" : "clamp(34px, 9vw, 52px)",
-          lineHeight: big ? 0.94 : 1.03,
-          letterSpacing: "var(--peek-display-tracking)",
-          textTransform: HEADLINE_TT,
-          textShadow: "var(--peek-display-shadow)",
-          whiteSpace: "pre-line",
-          margin: "10px 0 8px",
-        }}
-      >
-        {headline}
-      </h1>
-      {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{dek}</p> : null}
-      <HeroMeta rows={ledger} />
+      {eyebrow ? <Rise d={60}><Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow></Rise> : null}
+      <Rise d={160}>
+        <h1
+          style={{
+            fontFamily: "var(--peek-font-display)",
+            fontSize: big ? "clamp(46px, 14vw, 92px)" : "clamp(34px, 9vw, 52px)",
+            lineHeight: big ? 0.94 : 1.03,
+            letterSpacing: "var(--peek-display-tracking)",
+            textTransform: HEADLINE_TT,
+            textShadow: "var(--peek-display-shadow)",
+            whiteSpace: "pre-line",
+            margin: "10px 0 8px",
+          }}
+        >
+          {headline}
+        </h1>
+      </Rise>
+      {dek ? <Rise d={300}><p style={{ color: "var(--peek-muted)", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{dek}</p></Rise> : null}
+      {ledger.length > 0 ? <Rise d={440}><HeroMeta rows={ledger} /></Rise> : null}
     </header>
   );
 }
@@ -619,13 +635,15 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
       <style>{PREVIEW_CSS}</style>
       <div style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingBottom: 96 }}>
         {empty ? <EmptyState /> : null}
-        {model.sections.map((s) => (
-          <Reveal key={s.id}>
+        {model.sections.map((s) => {
+          const block = (
             <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined}>
               <SectionBlock section={s} model={model} interaction={interaction} />
             </div>
-          </Reveal>
-        ))}
+          );
+          // The hero runs its own on-load cascade (§1.5B); everything below rises on scroll-in (§1.5A).
+          return s.kind === "hero" ? <div key={s.id}>{block}</div> : <Reveal key={s.id}>{block}</Reveal>;
+        })}
         {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
       </div>
       {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
