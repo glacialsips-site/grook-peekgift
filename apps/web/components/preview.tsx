@@ -100,14 +100,75 @@ function Eyebrow({ children }: { children: ReactNode }) {
   );
 }
 
+function pairs(v: unknown): [string, string][] {
+  return Array.isArray(v)
+    ? v
+        .filter(Array.isArray)
+        .map((r) => [String((r as unknown[])[0] ?? ""), String((r as unknown[])[1] ?? "")] as [string, string])
+    : [];
+}
+
+function HeroMeta({ rows }: { rows: [string, string][] }) {
+  if (rows.length === 0) return null;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        border: "1px solid var(--peek-line)",
+        borderRadius: "var(--peek-radius-card)",
+        overflow: "hidden",
+        margin: "18px 0 0",
+      }}
+    >
+      {rows.slice(0, 6).map(([k, v], i) => (
+        <div key={i} style={{ flex: "1 0 33%", minWidth: 100, padding: "10px 12px", borderRight: "1px solid var(--peek-line)" }}>
+          <div style={{ color: "var(--peek-accent)", fontSize: 10.5, textTransform: "uppercase", letterSpacing: "var(--peek-eyebrow-tracking)" }}>{k}</div>
+          <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 14, marginTop: 2 }}>{v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const HEADLINE_TT = "var(--peek-display-case)" as CSSProperties["textTransform"];
+
 function Hero({ section, model }: { section: SectionView; model: RenderModel }) {
   const d = section.data;
   const headline = str(d, "headline") ?? model.occasion ?? model.recipientName ?? "A little something";
   const eyebrow = str(d, "eyebrow") ?? model.occasion ?? (model.recipientName ? `for ${model.recipientName}` : undefined);
   const dek = str(d, "dek") ?? str(d, "sub");
+  const ledger = pairs(d.ledger ?? d.meta);
+  const variant = str(d, "variant") ?? (model.hero ? "framed-media" : "type-mega");
+  const big = variant === "type-mega";
+
+  if (variant === "full-bleed-photo" && model.hero) {
+    return (
+      <header style={{ position: "relative", minHeight: "78vh", display: "flex", alignItems: "flex-end", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0 }}>
+          {model.hero.url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={model.hero.url} alt={model.hero.alt ?? ""} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, var(--peek-accent), var(--peek-accent-2))" }} />
+          )}
+        </div>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, color-mix(in srgb, var(--peek-bg) 88%, transparent), transparent 58%)" }} />
+        <div style={{ position: "relative", padding: "0 20px 30px", width: "100%" }}>
+          {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+          <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
+            {headline}
+          </h1>
+          {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, margin: 0 }}>{dek}</p> : null}
+          <HeroMeta rows={ledger} />
+        </div>
+      </header>
+    );
+  }
+
   return (
-    <header style={{ padding: "26px 20px 10px" }}>
-      {model.hero ? (
+    <header style={{ padding: "30px 20px 12px", textAlign: variant === "centered" ? "center" : "left" }}>
+      {model.hero && !big ? (
         <div style={{ marginBottom: 18 }}>
           <Frame kind={frameKind(model)}>
             <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
@@ -118,10 +179,10 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
       <h1
         style={{
           fontFamily: "var(--peek-font-display)",
-          fontSize: "clamp(34px, 9vw, 52px)",
-          lineHeight: 1.03,
+          fontSize: big ? "clamp(46px, 14vw, 92px)" : "clamp(34px, 9vw, 52px)",
+          lineHeight: big ? 0.94 : 1.03,
           letterSpacing: "var(--peek-display-tracking)",
-          textTransform: "var(--peek-display-case)" as CSSProperties["textTransform"],
+          textTransform: HEADLINE_TT,
           textShadow: "var(--peek-display-shadow)",
           whiteSpace: "pre-line",
           margin: "10px 0 8px",
@@ -130,6 +191,7 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
         {headline}
       </h1>
       {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{dek}</p> : null}
+      <HeroMeta rows={ledger} />
     </header>
   );
 }
