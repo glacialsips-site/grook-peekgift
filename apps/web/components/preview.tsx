@@ -353,16 +353,39 @@ function SectionBlock({ section, model }: { section: SectionView; model: RenderM
   }
 }
 
+function EmptyState() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        textAlign: "center",
+        padding: 28,
+        pointerEvents: "none",
+      }}
+    >
+      <div>
+        <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 24, marginBottom: 8 }}>your page builds here</div>
+        <div style={{ color: "var(--peek-muted)", fontSize: 15 }}>tell Claude who it&apos;s for — it appears as you talk.</div>
+      </div>
+    </div>
+  );
+}
+
 export function PeekPreview({ model }: { model: RenderModel }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
+  const empty = model.sections.length === 0 && model.cardGroups.length === 0;
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
+      {empty ? <EmptyState /> : null}
       {model.sections.map((s) => (
         <SectionBlock key={s.id} section={s} model={model} />
       ))}
       {/* If cards exist but no giftgrid section declared them, still surface them. */}
       {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} /> : null}
-      <ActionBar model={model} />
+      {!empty ? <ActionBar model={model} /> : null}
     </div>
   );
 }
