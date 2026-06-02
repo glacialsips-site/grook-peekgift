@@ -1738,3 +1738,30 @@ all behind `ports.cardResolver` (retailer_api → url_scrape → research) + the
    authoring a strong theme off the hero + occasion.
 4. **Single-page confirm:** the old 6 steps are fully **collapsed** into the one chat+preview page (Look/Items/Rules
    as optional drawers), correct? — not retained as a step wizard.
+
+---
+
+# Addendum XXI — Inherited-PR CI status (#8, #9) + the atelier CI fix (2026-06-01)
+
+> From subscribing to PR #8/#9 activity. FACTUAL. Both PRs are **superseded by the XVII decision** (they're
+> the old lean-single-app / packet-41 PRs), but **atelier's CI health now matters** because atelier is the
+> framework base. ↪ feeds BUILD-BOOK Ch 0/Ch 1.
+
+- **PR #8** (`bold-feynman` → `atelier-integration`, "Milestone 0 deploy"): **no CI checks, no review comments**
+  (`get_status` = pending/0, `get_check_runs` = 0). Clean but **moot** under the decision — its purpose
+  (merge feynman to deploy) is replaced by "build on a branch off atelier; feynman = salvage." Frank's call
+  whether to close it.
+- **PR #9** (`atelier-integration` → `youthful-ramanujan`, "packet 41"): the **`typecheck + lint + test + build`
+  Actions check FAILED** (2026-05-28, run `26554365365`). Root cause is **not a real type error** — the job sets
+  **`NODE_ENV=production`**, so `npm install` **omits devDependencies**, and then `npm run typecheck`
+  (`tsc --noEmit` in `atelier/`) can't resolve dev-only modules: ~28× `TS2307 Cannot find module` for **`vitest`
+  / `vitest/config`** (every `tests/*.test.ts` + `vitest.config.ts` + `tests/setup.ts`), **`drizzle-kit`**
+  (`drizzle.config.ts`), **`tailwindcss`** (`tailwind.config.ts`).
+- **Fix (small, confident — for the build chat to apply on atelier; I can't push it, my scope is `gallant-planck`):**
+  install dev deps in CI — drop `NODE_ENV=production` from the install/typecheck job **or** use
+  `npm ci --include=dev` / `npm install --include=dev`. (Don't "fix" it by excluding tests from tsconfig — you
+  want the tests type-checked.) This is a **BUILD-BOOK Ch 0/Ch 1 item**: when the build chat stands up the
+  foundation on the atelier lineage, get this check green early (and note the workflow also warns of the
+  Node 20→24 actions deprecation — bump `actions/checkout`/`setup-node` while there).
+- **Action taken:** investigated + documented; **no PR comment posted** (frugal — both PRs are superseded and
+  I can't push to their branches; the fix belongs to the build chat). Surfaced to Frank in chat.
