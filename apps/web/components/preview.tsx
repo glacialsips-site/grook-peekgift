@@ -1,9 +1,9 @@
 // The preview renderer: paints the core's framework-agnostic RenderModel into themed
-// React, driven entirely by the --peek-* custom properties (no Tailwind). This is the
-// "page that builds behind the chat" and the published recipient page — one renderer,
-// one view-model. When `interaction` is supplied (the recipient surface), cards become
-// tappable pick targets; without it the page is static (the studio preview, the demo).
-// Server-component safe except where `interaction` makes a subtree interactive.
+// React, driven entirely by the --peek-* custom properties (no Tailwind). One renderer for
+// the studio preview, the recipient page, and the demo. SHELL_SPEC §0 structure: a
+// self-contained root holds a full-bleed Scene backdrop (z0), an internal scroll layer
+// (z1), and a floating action bar (z2). When `interaction` is supplied (recipient surface),
+// cards become tappable pick targets.
 
 import type { CSSProperties, ReactNode } from "react";
 import type {
@@ -14,6 +14,8 @@ import type {
   ItineraryStepView,
   VariantGroup,
 } from "@peek/core";
+import { Scene } from "@/components/scenes";
+import { Frame } from "@/components/frames";
 
 export interface PickInteraction {
   picked: string[];
@@ -39,16 +41,25 @@ function fmtTotal(cents: number): string {
   return cents % 100 === 0 ? `$${cents / 100}` : `$${(cents / 100).toFixed(2)}`;
 }
 
+function sceneKind(model: RenderModel): string {
+  return model.cssVars["--peek-scene"] ?? "none";
+}
+function frameKind(model: RenderModel): string {
+  return model.cssVars["--peek-frame"] ?? "plain";
+}
+function intensity(model: RenderModel): number {
+  return Number(model.cssVars["--peek-motion-intensity"] ?? "0.5");
+}
+
 function rootStyle(model: RenderModel): CSSProperties {
   return {
     ...(model.cssVars as unknown as CSSProperties),
     position: "relative",
     height: "100%",
-    overflowY: "auto",
+    overflow: "hidden",
     background: "var(--peek-bg-wash)",
     color: "var(--peek-ink)",
     fontFamily: "var(--peek-font-body)",
-    paddingBottom: 96,
   };
 }
 
@@ -93,8 +104,10 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
   return (
     <header style={{ padding: "26px 20px 10px" }}>
       {model.hero ? (
-        <div style={{ borderRadius: "var(--peek-radius-lg)", overflow: "hidden", marginBottom: 18, border: "1px solid var(--peek-line)" }}>
-          <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
+        <div style={{ marginBottom: 18 }}>
+          <Frame kind={frameKind(model)}>
+            <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
+          </Frame>
         </div>
       ) : null}
       {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
@@ -210,7 +223,7 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
 }
 
 // gap-a made visible: a variant group renders as a labeled, ruled cluster carrying its
-// selection rule; ungrouped cards stand alone. Never flat uniform tiles with one badge.
+// selection rule; ungrouped cards stand alone.
 function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interaction?: PickInteraction }) {
   if (groups.length === 0) return null;
   return (
@@ -319,8 +332,8 @@ function GenericSection({ section }: { section: SectionView }) {
       ) : null}
       {steps ? (
         <ol style={{ display: "grid", gap: 10, paddingLeft: 0, listStyle: "none", margin: 0 }}>
-          {steps.map((st, i) => {
-            const pair = Array.isArray(st) ? (st as unknown[]) : [st];
+          {steps.map((stp, i) => {
+            const pair = Array.isArray(stp) ? (stp as unknown[]) : [stp];
             return (
               <li key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "baseline" }}>
                 <span style={{ color: "var(--peek-accent)", fontFamily: "var(--peek-font-display)", fontSize: 20 }}>{String(pair[0] ?? i + 1)}</span>
@@ -343,10 +356,11 @@ function ActionBar({ model, interaction }: { model: RenderModel; interaction?: P
   return (
     <div
       style={{
-        position: "sticky",
+        position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
+        zIndex: 2,
         display: "flex",
         alignItems: "center",
         gap: 12,
@@ -426,9 +440,7 @@ function EmptyState() {
 }
 
 // The characterful display face is the #1 anti-generic lever, so the renderer loads the
-// Google families the theme actually names (extracted from the --peek-font-* vars) via one
-// css2 stylesheet link. React hoists + dedupes the <link>. No wght axis = robust across
-// single- and multi-weight families (Google 400s an unavailable weight otherwise).
+// Google families the theme names (extracted from the --peek-font-* vars) via one css2 link.
 function familyFromVar(v: string | undefined): string | null {
   if (!v) return null;
   const m = /^"([^"]+)"/.exec(v);
@@ -442,7 +454,6 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
   const unique = Array.from(new Set(families));
   if (unique.length === 0) return null;
   const query = unique.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+")}`).join("&");
-  // precedence makes React 19 treat this as a managed (render-blocking, deduped) stylesheet.
   return <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${query}&display=swap`} precedence="high" />;
 }
 
@@ -452,12 +463,14 @@ export function PeekPreview({ model, interaction }: { model: RenderModel; intera
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
-      {empty ? <EmptyState /> : null}
-      {model.sections.map((s) => (
-        <SectionBlock key={s.id} section={s} model={model} interaction={interaction} />
-      ))}
-      {/* If cards exist but no giftgrid section declared them, still surface them. */}
-      {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
+      <Scene kind={sceneKind(model)} mode={model.mode} intensity={intensity(model)} />
+      <div style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingBottom: 96 }}>
+        {empty ? <EmptyState /> : null}
+        {model.sections.map((s) => (
+          <SectionBlock key={s.id} section={s} model={model} interaction={interaction} />
+        ))}
+        {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
+      </div>
       {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
     </div>
   );
