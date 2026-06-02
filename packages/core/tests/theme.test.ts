@@ -60,4 +60,11 @@ describe("runtime token system (themeToCSSVars)", () => {
     expect(vars["--peek-accent"]).toBe("#abcdef");
     expect(vars["--evil"]).toBeUndefined();
   });
+
+  it("emits --peek-display-case as a valid CSS text-transform value", () => {
+    expect(themeToCSSVars(themeOf())["--peek-display-case"]).toBe("none");
+    expect(
+      themeToCSSVars(themeOf((t) => (t.type.displayCase = "upper")))["--peek-display-case"],
+    ).toBe("uppercase");
+  });
 });

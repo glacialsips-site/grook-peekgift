@@ -161,7 +161,7 @@ export function themeToCSSVars(theme: ThemeSpec): Record<string, string> {
     "--peek-ease-sheet": t.easeSheet,
     "--peek-ease-reveal": t.easeReveal,
     "--peek-display-tracking": t.displayTracking,
-    "--peek-display-case": t.displayCase,
+    "--peek-display-case": t.displayCase === "upper" ? "uppercase" : "none",
     "--peek-eyebrow-tracking": t.eyebrowTracking,
     "--peek-scale-ratio": String(t.scaleRatio),
     "--peek-mode": t.mode,
