@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { emptyDocument, render, validatePeekIR, type PeekIR } from "@peek/core";
 import { PeekPreview } from "@/components/preview";
-import { PublishCheckout } from "@/components/publish-checkout";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -24,13 +23,10 @@ export default function Studio() {
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
   const [kb, setKb] = useState(0);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const model = useMemo(() => render(doc), [doc]);
-  const hasContent = model.cardGroups.length > 0 || model.sections.length > 0;
 
   useEffect(() => {
     const vv = typeof window !== "undefined" ? window.visualViewport : null;
@@ -86,59 +82,11 @@ export default function Studio() {
     }
   }
 
-  async function publish() {
-    if (publishing) return;
-    setPublishing(true);
-    try {
-      const res = await fetch("/api/publish", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ peekId: doc.peek.id }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { clientSecret?: string; error?: string };
-      if (res.ok && data.clientSecret) {
-        setCheckoutSecret(data.clientSecret);
-      } else {
-        setMessages((m) => [...m, { role: "assistant", content: `(publish: ${data.error ?? res.status})` }]);
-      }
-    } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "(publish: network hiccup)" }]);
-    } finally {
-      setPublishing(false);
-    }
-  }
-
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "#000" }}>
       <div style={{ position: "absolute", inset: 0 }}>
         <PeekPreview model={model} />
       </div>
-
-      {hasContent ? (
-        <button
-          onClick={() => void publish()}
-          disabled={publishing}
-          style={{
-            position: "absolute",
-            top: "calc(12px + env(safe-area-inset-top, 0px))",
-            right: 14,
-            zIndex: 20,
-            border: "0.5px solid rgba(255,255,255,0.4)",
-            cursor: "pointer",
-            borderRadius: 999,
-            padding: "8px 16px",
-            fontSize: 14,
-            fontWeight: 600,
-            color: "#111",
-            background: "rgba(255,255,255,0.92)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
-          }}
-        >
-          {publishing ? "opening…" : "publish · $12"}
-        </button>
-      ) : null}
 
       <div
         style={{
@@ -221,8 +169,6 @@ export default function Studio() {
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>peek.gift · the page builds as you talk</span>
         </div>
       </div>
-
-      {checkoutSecret ? <PublishCheckout clientSecret={checkoutSecret} onClose={() => setCheckoutSecret(null)} /> : null}
     </div>
   );
 }
