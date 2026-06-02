@@ -270,10 +270,21 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
       ) : null}
       {!card.isTaunt ? <Media url={card.media?.url ?? null} alt={card.media?.alt} /> : null}
       <div style={{ padding: 13 }}>
-        {card.isLocked ? <Eyebrow>🔒 locked</Eyebrow> : null}
+        {card.isLocked ? (
+          <Eyebrow>🔒 locked</Eyebrow>
+        ) : card.type === "aspirational" ? (
+          <Eyebrow>★ the dream</Eyebrow>
+        ) : card.type === "digital" ? (
+          <Eyebrow>digital</Eyebrow>
+        ) : null}
         <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 16.5, lineHeight: 1.15, marginBottom: 4 }}>{card.title}</div>
         {card.description ? (
           <p style={{ color: "var(--peek-muted)", fontSize: 13, lineHeight: 1.45, margin: "0 0 8px" }}>{card.description}</p>
+        ) : null}
+        {card.type === "activity" && (card.proposedDate || card.locationHint) ? (
+          <div style={{ color: "var(--peek-accent)", fontSize: 12, margin: "0 0 8px" }}>
+            {[fmtDate(card.proposedDate), card.locationHint].filter(Boolean).join(" · ")}
+          </div>
         ) : null}
         {card.isTaunt && card.tauntText ? (
           <div style={{ color: "var(--peek-accent)", fontStyle: "italic", fontSize: 13 }}>{card.tauntText}</div>
