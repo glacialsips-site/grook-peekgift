@@ -374,11 +374,33 @@ function EmptyState() {
   );
 }
 
+// The characterful display face is the #1 anti-generic lever, so the renderer loads the
+// Google families the theme actually names (extracted from the --peek-font-* vars) via one
+// css2 stylesheet link. React hoists + dedupes the <link>. No wght axis = robust across
+// single- and multi-weight families (Google 400s an unavailable weight otherwise).
+function familyFromVar(v: string | undefined): string | null {
+  if (!v) return null;
+  const m = /^"([^"]+)"/.exec(v);
+  return m && m[1] ? m[1] : null;
+}
+
+function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
+  const families = [cssVars["--peek-font-display"], cssVars["--peek-font-body"], cssVars["--peek-font-accent"]]
+    .map(familyFromVar)
+    .filter((f): f is string => f !== null && f.toLowerCase() !== "inter");
+  const unique = Array.from(new Set(families));
+  if (unique.length === 0) return null;
+  const query = unique.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+")}`).join("&");
+  // precedence makes React 19 treat this as a managed (render-blocking, deduped) stylesheet.
+  return <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${query}&display=swap`} precedence="high" />;
+}
+
 export function PeekPreview({ model }: { model: RenderModel }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
+      <FontLink cssVars={model.cssVars} />
       {empty ? <EmptyState /> : null}
       {model.sections.map((s) => (
         <SectionBlock key={s.id} section={s} model={model} />
