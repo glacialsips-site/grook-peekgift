@@ -223,6 +223,7 @@ export default function Studio() {
       <div
         style={{
           position: "absolute",
+          zIndex: 50,
           left: 0,
           right: 0,
           bottom: kb,
