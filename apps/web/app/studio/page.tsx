@@ -59,6 +59,7 @@ export default function Studio() {
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [kb, setKb] = useState(0);
   const [pinged, setPinged] = useState<string[]>([]);
+  const [collapsed, setCollapsed] = useState(false);
   const pingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -134,6 +135,7 @@ export default function Studio() {
     setInput("");
     setPendingImage(null);
     setBusy(true);
+    setCollapsed(false);
     try {
       const res = await fetch("/api/curator", {
         method: "POST",
@@ -241,7 +243,24 @@ export default function Studio() {
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 50px rgba(0,0,0,0.45)",
           }}
         >
-          <div ref={scrollerRef} style={{ maxHeight: "30vh", overflowY: "auto", padding: "14px 16px 6px", display: "grid", gap: 10 }}>
+          <div
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "show chat" : "hide chat — reveal the page"}
+            style={{ display: "flex", justifyContent: "center", padding: "8px 0 2px", cursor: "pointer" }}
+          >
+            <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(255,255,255,0.32)" }} />
+          </div>
+          <div
+            ref={scrollerRef}
+            style={{
+              maxHeight: collapsed ? 0 : "30vh",
+              overflowY: "auto",
+              padding: collapsed ? "0 16px" : "8px 16px 6px",
+              display: "grid",
+              gap: 10,
+              transition: "max-height .25s ease, padding .25s ease",
+            }}
+          >
             {messages.map((m, i) => (
               <div
                 key={i}
