@@ -72,6 +72,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: 0.65.0
+        version: 0.65.0(zod@4.4.3)
       '@peek/core':
         specifier: workspace:*
         version: link:../../packages/core
