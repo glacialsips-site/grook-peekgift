@@ -400,6 +400,65 @@ function ActionBar({ model, interaction }: { model: RenderModel; interaction?: P
   );
 }
 
+function Claim({ section, model }: { section: SectionView; model: RenderModel }) {
+  const d = section.data;
+  const heading = section.title ?? str(d, "heading") ?? "your move";
+  const dek = str(d, "dek") ?? str(d, "sub");
+  const cta = str(d, "cta") ?? model.ctaLabel ?? "Count me in";
+  const field = d.field && typeof d.field === "object" ? (d.field as Record<string, unknown>) : null;
+  return (
+    <section style={{ padding: 20 }}>
+      <div
+        style={{
+          borderRadius: "var(--peek-radius-lg)",
+          border: "1px solid var(--peek-line)",
+          background: "var(--peek-accent-faint)",
+          padding: "28px 22px",
+          textAlign: "center",
+        }}
+      >
+        <Eyebrow>{str(d, "label") ?? "rsvp"}</Eyebrow>
+        <h2 style={{ fontFamily: "var(--peek-font-display)", fontSize: 26, margin: "8px 0 6px", textShadow: "var(--peek-display-shadow)" }}>{heading}</h2>
+        {dek ? <p style={{ color: "var(--peek-muted)", margin: "0 0 16px", fontSize: 15 }}>{dek}</p> : null}
+        {field ? (
+          <input
+            disabled
+            placeholder={str(field, "placeholder") ?? "your name"}
+            style={{
+              width: "100%",
+              maxWidth: 320,
+              padding: "11px 14px",
+              borderRadius: "var(--peek-radius-pill)",
+              border: "1px solid var(--peek-line)",
+              background: "var(--peek-surface)",
+              color: "var(--peek-ink)",
+              margin: "0 0 12px",
+              textAlign: "center",
+            }}
+          />
+        ) : null}
+        <div>
+          <button
+            style={{
+              border: "none",
+              cursor: "pointer",
+              background: "var(--peek-accent)",
+              color: "var(--peek-btn-ink)",
+              fontFamily: "var(--peek-font-display)",
+              fontSize: 15,
+              padding: "12px 24px",
+              borderRadius: "var(--peek-radius-pill)",
+              boxShadow: "var(--peek-glow)",
+            }}
+          >
+            {cta}
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SectionBlock({
   section,
   model,
@@ -418,6 +477,8 @@ function SectionBlock({
       return <GiftGrid groups={model.cardGroups} interaction={interaction} />;
     case "flightplan":
       return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <GenericSection section={section} />;
+    case "claim":
+      return <Claim section={section} model={model} />;
     default:
       return <GenericSection section={section} />;
   }
