@@ -8,6 +8,7 @@
 // absent, dead-coding the hero headline's glow fallback.
 
 import type { ThemeSpec } from "../document/contract";
+import { ensureReadable } from "./contrast";
 
 /** A flat, pre-resolved view of the theme. */
 export interface Tokens {
@@ -60,7 +61,9 @@ function mixAlpha(color: string, alpha: number): string {
 }
 
 export function toTokens(theme: ThemeSpec): Tokens {
-  const p = theme.palette;
+  // The contrast safety-net runs under the model's free authoring: body text is guaranteed
+  // AA-readable against the background (brand colors untouched).
+  const p = ensureReadable(theme.palette);
   const ty = theme.type;
   const accent2 = p.accent2 || p.accent;
   const loud = theme.loud || {};
@@ -175,6 +178,11 @@ export function themeToCSSVars(theme: ThemeSpec): Record<string, string> {
     "--peek-card-shadow": t.cardShadow,
     "--peek-border-weight": `${t.borderWeight}px`,
     "--peek-texture-strength": String(t.textureStrength),
+    "--peek-scene": t.scene,
+    "--peek-frame": t.frame,
+    "--peek-motifs": t.motifs.join(" "),
+    "--peek-texture": t.texture ? "1" : "0",
+    "--peek-glow-on": t.glow ? "1" : "0",
     "--peek-bg-wash": backgroundWash(t),
     "--peek-safe-b": "env(safe-area-inset-bottom, 0px)",
     "--peek-safe-t": "env(safe-area-inset-top, 0px)",
