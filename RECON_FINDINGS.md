@@ -1655,3 +1655,86 @@ the **Checkout Session** approach (this branch's route as the reference), not th
 ## XIX.3 — Launch kit
 The turnkey "stand up the build chat" kit (exact setup-screen values + the exact kickoff prompt + git/branch
 steps + Frank's pre-flight checklist) is at **`recon-assets/BUILD-CHAT-LAUNCH-KIT.md`**.
+
+---
+
+# Addendum XX — Product-intent reconciliation (the old 6-step brief, used additively) (2026-06-01)
+
+> Frank shared an **older** product-orientation brief (the 6-step-wizard era) — explicitly **not gospel**;
+> his concept has moved past it. Used **additively** to (a) confirm nothing's been lost, (b) ground the
+> input-method rationale, (c) lock the current mission. ↪ = body pointer; **ADDITIVE** = new/sharpened intent.
+
+## XX.1 — The wizard → single-page chat (the key translation)
+The old brief is a **6-step wizard**: Landing → Auth/guest → **1 Basics** (hero, recipient, occasion, from, note,
+optional recipient email/phone) → **2 The Look** → **3 The Picks** → **4 The Rules** → **5 What They'll See** →
+**6 Checkout** → Done/share → recipient slug. **The current direction collapses that wizard into ONE page: the
+transparent chat over the live-building preview.** So the 6 steps are **NOT pages** — they're (a) the chat's
+**collection inventory** (what the model must elicit: basics, look, picks, rules) and (b) **optional deep-control
+drawers** (Look / Items / Rules) on the single page; **the live preview IS "What They'll See"**; checkout is the
+publish gate. The build chat must read the wizard as *what to collect + the drawers*, never as a step-flow to
+rebuild. (This matches DESIGN_PROJECT_BRIEF §2's three parts over the IR + the studio surface.)
+
+## XX.2 — The current mission + the card/carousel/itinerary layout  ↪ sharpens §6/A5, Add. II GAP 1/2
+Frank's immediate mission: **input + preview in one page with the transparent chat, and the preview at the
+SAMPLE optics** (it drifted toward "schedulers" when the design chat worked on event cards — pull it back to
+**gift cards**). The layout intent, concretely: as the Creator adds picks they **fall into the page**; items that
+fit a **category** (Creator-indicated or obvious) get wrapped in a **horizontal carousel with the rules applied at
+the carousel level**; **beneath it, the next category** (different item type); **experiences render as an
+itinerary** treatment (not a card, not a scheduler-for-everything). Maps cleanly to the existing build: a category
+carousel = an IR **section** (`giftgrid` carousel / `rail`) over a **`variant_group`** with its selection rule
+(`pick_one`/`pick_any` + caps); the experience = an **`activity` card rendered as itinerary** (the Add. II **GAP 2**
+fix) or a `flightplan` section; "rules applied there" = the **rules engine** (GAP 1 — render rule-aware affordances,
+not a uniform badge). So the current mission ≈ the feynman **studio** (single-page chat-over-preview) + **`lib/peek-render`** at caliber + **GAP 1/2 fixes** + the **parts-bin** optics (Add. IV/VII.1). "Drift to schedulers" = a renderer/treatment regression: experiences must be the *only* itinerary; everything else stays carousel'd gift cards.
+
+## XX.3 — Why the multimodal inputs + the model tiering exist (confirmed)  ↪ grounds §6/A8, §7/C6
+The **Add-Item hub** routes one Creator intent ("add something") through four paths that normalize into an editable
+card: **URL lookup** (scrape) · **screenshot/image lookup** (vision extraction) · **search/API** (LLM/web search) ·
+**manual entry** (the path for non-retail: IOU/donation/joke/experience/handmade/personal offer). **Camera input** =
+photograph a product/thing → **vision** extracts it into a card. **Microphone** = the Creator **talks** to the chat
+instead of typing (mobile-first, low-friction). **Cost ladder:** prefer URL/screenshot **before** expensive API/LLM.
+**Model tiering (confirms C6):** **Opus** authors the *design/page*; **cheaper models (Sonnet/Haiku)** do the
+*vision/screenshot/camera extraction + classification* (product-from-image, occasion-classify) where Opus is
+overkill. This is exactly why the stack has scrapers (ZenRows/Browserbase) + vision + the cascade + a Haiku tier —
+all behind `ports.cardResolver` (retailer_api → url_scrape → research) + the multimodal chat inputs.
+
+## XX.4 — Additive concepts to carry forward (so they're not lost)
+- **ADDITIVE — Service levels = FULFILLMENT TIERS** (Studio / Concierge / Atelier): **Studio** = self-serve (Creator
+  fulfills); **Concierge** = peek.gift orders/ships from retailers on the Creator's behalf; **Atelier** = peek.gift
+  assembles a physical package + ships. Affects **pricing, checkout, contact/shipping capture, notifications,
+  fulfillment**. This is the business-model expansion toward PerfectPurchase fulfillment (BUILD-BOOK Ch 5 catalog +
+  the §8 fulfillment) — much bigger than the page builder. **Likely v1 = Studio; Concierge/Atelier later.** (Open Q in XX.5.)
+- **ADDITIVE — Hero image → palette extraction → style seed** (the "Look"): the hero image's extracted palette +
+  the occasion **seed** the page style. Reconciled with model-is-resolver: the palette is an **input** the Opus chat
+  uses when authoring the `ThemeSpec` (a seed, not a deterministic engine). Hero image is a **primary** style driver,
+  not decoration. (Needs `node-vibrant`/fal palette extraction behind a port.)
+- **ADDITIVE — The design drawer** (manual style control: ink/paper/accent, type style, font, corners/shape,
+  density) — the optional deep layer over the auto-style; = direct `ThemeSpec` edits (via chat or a UI drawer).
+- **ADDITIVE — Rules richness:** a recipient-facing **fill bar / thermometer**; fill **by $ / by count / by both**;
+  **hard-stop vs allow-over vs allow-over-with-note (request)**; show/hide value. This **extends** the rules engine
+  beyond pick_one/pick_any (Add. II GAP 1) with **caps + a live progress meter + over-cap requests**. Rule defaults
+  should be **item-aware** (a $900 item shouldn't get a blind $200 cap).
+- **ADDITIVE — Notification taxonomy:** recipient **opens / selects / submits over-cap request / finalizes**; page
+  **about-to-expire / expired**. Curator-configurable; email + SMS (Resend + Twilio). (Maps to Inngest jobs + the
+  publish→notify loop, BUILD-BOOK Ch 7.4/7.5.)
+- **ADDITIVE — Recipient growth loop:** after finalizing, the Recipient may be invited to **make an account → send
+  their own page → credits/discounts** (the viral mechanic). Product/config, not core identity — but a real growth lever.
+- **ADDITIVE — Dashboard / saved drafts + guest flow:** authenticated Creators **resume saved drafts**; guests build
+  with low friction (deferred auth). (Confirms Add. III bookend-isolation + the deferred-auth call.)
+- **CONFIRMS the architecture:** Frank's mental model = a **build-flow spine + pluggable modules/boltons** (auth,
+  draft-persistence, image-upload, palette-extract, style-gen, design-drawer, URL-scrape, screenshot-extract,
+  API-search, manual-entry, card-render, rules, notifications, checkout, share, slug). This maps **exactly** onto the
+  decided architecture: the **event-sourced core = the spine**, the **ports/adapters = the modules**. And his
+  **persistent-draft** model (move back/forward without losing state) is **native to event-sourcing** (the document is
+  the fold of its events) — a nice confirmation the XVII decision fits his intent.
+
+## XX.5 — Open questions for Frank (translator catching gaps)
+1. **Service-level scope for v1:** is v1 = **Studio (self-serve)** only, with Concierge/Atelier (peek-fulfilled /
+   peek-assembled) as later tiers? They add a whole ordering/shipping/packaging operations layer.
+2. **Category grouping — who decides?** When picks get wrapped into a category carousel ("these 3 are shoes →
+   pick-one"), is the **model** responsible for forming the groups (auto-detect "obvious" categories → `variant_group`
+   + a rule), or only on the **Creator's** explicit instruction? (Drives chat behavior + IR structure.)
+3. **Hero-as-style-seed:** confirm the hero image's extracted palette is a **primary seed** the Opus chat
+   art-directs from (not the deterministic style source) — so "do nothing and it already looks good" = the model
+   authoring a strong theme off the hero + occasion.
+4. **Single-page confirm:** the old 6 steps are fully **collapsed** into the one chat+preview page (Look/Items/Rules
+   as optional drawers), correct? — not retained as a step wizard.
