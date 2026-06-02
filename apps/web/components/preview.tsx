@@ -133,6 +133,14 @@ function HeroMeta({ rows }: { rows: [string, string][] }) {
 
 const HEADLINE_TT = "var(--peek-display-case)" as CSSProperties["textTransform"];
 
+const MOTIF_GLYPH: Record<string, string> = {
+  sparkle: "✦", star: "★", crown: "♛", suit: "♠", leaf: "❧", rule: "—", dots: "···", sunburst: "✺", hanko: "❖", chrome: "◆", stamp: "✲",
+};
+function heroMotif(model: RenderModel): string {
+  const first = (model.cssVars["--peek-motifs"] ?? "").split(" ").filter(Boolean)[0];
+  return first ? MOTIF_GLYPH[first] ?? "" : "";
+}
+
 function Hero({ section, model }: { section: SectionView; model: RenderModel }) {
   const d = section.data;
   const headline = str(d, "headline") ?? model.occasion ?? model.recipientName ?? "A little something";
@@ -155,7 +163,7 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
         </div>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, color-mix(in srgb, var(--peek-bg) 88%, transparent), transparent 58%)" }} />
         <div style={{ position: "relative", padding: "0 20px 30px", width: "100%" }}>
-          {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+          {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
           <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
             {headline}
           </h1>
@@ -175,7 +183,7 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
           </Frame>
         </div>
       ) : null}
-      {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+      {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
       <h1
         style={{
           fontFamily: "var(--peek-font-display)",
