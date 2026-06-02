@@ -1,5 +1,13 @@
 # RECON_FINDINGS.md — peek.gift repo reconnaissance
 
+> **⚠️ ARCHIVE / PROVENANCE (2026-06-01).** This is the full recon + the complete decision/correction trail
+> (the original §3–§9 answers + 22 addenda). **For BUILDING, read `recon-assets/PEEK_GIFT_BUILD_BRIEF.md`** —
+> the consolidated, de-duplicated, *settled current state*. This file is kept only for the **why** behind a
+> decision; it contains superseded interim claims (each later corrected by a subsequent addendum — e.g. early
+> "feynman is canonical / single-app" answers were superseded by the BUILD-BOOK-monorepo decision in XVII; the
+> "single-currency/no-tax checkout" read was corrected in XIX). Don't build from it directly. To start the
+> build session: `recon-assets/BUILD-CHAT-LAUNCH-KIT.md`.
+
 > Read-only investigation of `glacialsips-site/grook-peekgift`, run 2026-06-01 from a fresh
 > clone. Headings mirror the brief §3–§9; every numbered item (G#/F#/V#/A#/C#/P#/X#) is
 > answered in order. Large verbatim file dumps live in **`RECON_RAW.md`**; the three small

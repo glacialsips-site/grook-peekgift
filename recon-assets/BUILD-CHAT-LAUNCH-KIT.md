@@ -66,10 +66,12 @@ You are building peek.gift. These rules override your defaults for this entire s
 # REPO / BRANCH
 - Repo: glacialsips-site/grook-peekgift. You work on branch `build/peek-vnext` (cut from `atelier-integration`). Push only to it; it is the branch Netlify deploys.
 - This is a MULTI-BRANCH repo from many prior iterations. Your canonical inputs live on specific branches — read them with `git show <branch>:<path>` (do not assume the current branch has them):
-  • THE PLAN + THE MAP (read first):
-    - git show origin/claude/gallant-planck-pu51x:recon-assets/peek-gift-BUILD-BOOK.md        (the build plan, Ch 0–2)
-    - git show origin/claude/gallant-planck-pu51x:recon-assets/BUILD-BOOK-Ch3-8.md            (the build plan, Ch 3–8)
-    - git show origin/claude/gallant-planck-pu51x:RECON_FINDINGS.md                            (the full recon + every decision; read Addenda XV–XIX)
+  • THE BUILD BRIEF — read this FIRST (the single settled source of truth; everything below is detail/plan/provenance):
+    - git show origin/claude/gallant-planck-pu51x:recon-assets/PEEK_GIFT_BUILD_BRIEF.md
+  • THE PLAN (the gated build cascade):
+    - git show origin/claude/gallant-planck-pu51x:recon-assets/peek-gift-BUILD-BOOK.md        (Ch 0–2)
+    - git show origin/claude/gallant-planck-pu51x:recon-assets/BUILD-BOOK-Ch3-8.md            (Ch 3–8)
+    - git show origin/claude/gallant-planck-pu51x:RECON_FINDINGS.md                            (ARCHIVE — full recon + provenance; only if you want the "why" behind a decision)
   • THE PRODUCT SPEC (authoritative — NOT "dated"):
     - git show origin/claude/bold-feynman-SZzaO:peek-jumpoff/reference/vision/REQUIREMENTS_SPEC.md
     - git show origin/claude/gallant-planck-pu51x:recon-assets/DESIGN_PROJECT_BRIEF.md
@@ -86,6 +88,7 @@ You are building peek.gift. These rules override your defaults for this entire s
 - THE CHAT: the model is the resolver — a LEAN Opus chat (minimal prompt = what to collect + guardrails + the design method), NOT a rigid rulebook and NOT a deterministic design engine. Any "vibe engine" is a validation/repair/aesthetic safety-net + a cached pantry under the model's free authoring, never a generator.
 - MODEL: Opus 4.8 for the in-app chat from day one. (A Sonnet 4.6 step-down is a later A/B behind the LLM port, once the flow is functional — not now.)
 - CHECKOUT: full international from day one via a Stripe CHECKOUT SESSION (adaptive_pricing + automatic_tax + tax_id_collection + billing_address_collection + allow_promotion_codes) — Stripe handles every country/currency/tax/coupon. Do NOT build a custom currency/tax/coupon layer. The standalone Google Places API is redundant (Stripe's Address Element has it). Reference: the feat-stripe-embedded-checkout route above.
+- PRODUCT/UX: ONE page — a transparent chat over a live preview; NO step-wizard and NO drawers/manual controls (the old 6-step wizard is legacy). The conversation is the ONLY interface: the Creator gives sparse input (text/URL/image/camera/voice) + preferences; the CHAT does the artwork AND the arranging — it forms the categories, wraps same-category items into horizontal carousels, and applies the rules itself (minimal user effort, "something a typical user could never make"). The Creator refines by just asking. Experiences render as an itinerary, not a card/scheduler. The hero image's palette SEEDS the model-authored theme. v1 = "Studio" (self-serve, Creator fulfills); Concierge/Atelier (peek-fulfilled / peek-assembled) are later tiers.
 - NO Tailwind (runtime CSS-variable theming). Never paraphrase the IR/document model.
 
 # IGNORE (rejected / superseded — do not build on these)
