@@ -1426,3 +1426,41 @@ wiring feynman's core to them via the ports, plus moving their direct `peek_v2` 
   — the route maps `succeeded→ports.persistence publish`, `failed→revert to draft` (atelier currently
   does the publish write inside the webhook via direct Supabase; on the lean app move it behind
   `ports.persistence`).
+
+---
+
+# Addendum XVI — The BUILD-BOOK + the briefs → THE architecture decision (2026-06-01)
+
+> FACTUAL synthesis of the three not-in-git docs Frank sent (preserved verbatim in
+> `recon-assets/`): `peek-gift-BUILD-BOOK.md` (217 ln), `CODE_PROJECT_SUMMARY` (68), `DESIGN_PROJECT_BRIEF`
+> (146). (`REQUIREMENTS-SPEC (1)` + `backendservices-revised` re-sends = byte-identical to copies I
+> already had.) This completes the revisitation and surfaces the pivotal decision my report foreclosed.
+> The recommendation in XVI.4 is the only opinion here; ↪ = body pointer.
+
+## XVI.1 — `BUILD-BOOK.md` = the authoritative top-down, GATED build plan  ↪ revises §7/C4, supersedes Add. X
+This is the "top-down plan" Frank repeatedly says chats never make. Structure:
+- **OPERATING CONTRACT** (paste once): prove-never-claim; **every prompt ends in a GATE — if it can't pass, STOP, don't edit the gate, report and wait**; no skeletons/lorem/TODO; small diffs (one concern/commit); "when in doubt, do less and stop." (= REQUIREMENTS §13, operationalized.)
+- **STACK LOCK ("decided — do not re-litigate"):** Turborepo+pnpm monorepo; a **framework-agnostic `packages/core`** (document model + chat-op schema + token/VibeSpec model + item/cap logic + typed service-client interfaces; a lint/dependency-cruiser rule **fails the build if core imports a framework**); **the gate at the data level = chat emits Zod-validated `Command`s → `Event`s → state (event-sourcing)**, `decide(doc,cmd)→Result<Event[],Err>` (neverthrow) + pure `apply(doc,event)→doc` (undo/history/replay free — "maker-checker done right"); pure `render(document,theme)`; Next App Router **PWA**; **tRPC**; Supabase+**Drizzle**+pgvector; Yjs later; full Anthropic surface; **Braintrust** evals; Expo later.
+- **The 9-chapter cascade** (Ch 0–2 written in full as droppable gated prompts; 3–8 are named prompt-slots): **Ch 0 Ground-Truth** (verify every service VERIFIED-LIVE/WIRED-BUT-NOOP/BLOCKED/UNVERIFIED — don't trust, verify), **Ch 1 Foundation** (the monorepo core + command→event gate + pure render + runtime token system w/ **anti-Tailwind CI check** + typed service interfaces), **Ch 2 The Chat** (translucent-over-live-preview, `visualViewport` keyboard-collapse, multimodal rail, curator turn = Anthropic→tool-use→**commands validated through `decide()` before any event applies**, "pinged the sections I touched"), **Ch 3 Vibe engine + the AESTHETIC EVAL GATE** (Braintrust **human-rated** per occasion — "valid but ugly loses"), **Ch 4 Recipient page** (HEMLOCK hero, bundled carousels, badges, threaded-link, caps, `next/og` unfurl), **Ch 5 Catalog moat** (`pg_products`/`pg_offers`, entity resolution, CLIP retrieval, freshness gate, feeds), **Ch 6 MCP**, **Ch 7 Gates** (Braintrust+aesthetic+Sentry+$12 publish), **Ch 8 Cutover**.
+- Services state (≈ backendservices/IX): Anthropic org `ebe4a13c`, Clerk `ins_3D5Va…`/`clerk.peek.gift`, Stripe **NJ tax active** + webhook→`vnext.peek.gift/api/stripe/webhook`, Supabase "13 RLS tables" (vs 14 elsewhere — counts `curator_memory` or not), fal LIVE (`lib/image-gen/fal.ts`), Upstash LIVE, **Sentry BLOCKED (no DSN)**, Twilio/Inngest TBD. Default chat model in Ch 2.4 = **Sonnet 4.6, Opus 4.8 opt-in** (cf. feynman's Opus-primary).
+
+## XVI.2 — The two 06-01 briefs (the lean-single-app view)
+- **`DESIGN_PROJECT_BRIEF.md`** — clean factual spec of the **lean/IR** architecture: three parts over the IR spine (**Landing/Auth · Chat-Builder · Checkout**, communicating only through the IR — the bookend isolation, ↪ Add. III); model-is-resolver (§3); IR versioned, never HTML (§5); ports/adapters (§6); the card-fulfillment cascade (§6a); transparent-overlay chat (§7); the design method (§11). **No monorepo/tRPC/event-sourcing mentioned** — it's the feynman shape.
+- **`CODE_PROJECT_SUMMARY`** ≈ the repo's `docs/PROJECT_SUMMARY_2026-06-01.md` — the code seat's feynman summary; carries the "Repo vision docs are dated" line (which XI corrected) and the PR #9 error (which §9/X1 corrected).
+
+## XVI.3 — THE decision my report foreclosed: over-built framework vs lean single-app  ↪ CORRECTS §3/G7, §7/C1, XIV.3
+Two Frank-associated architectures, ~3 days apart, both endorsed at their time:
+
+| Axis | (A) BUILD-BOOK + REQUIREMENTS §10 (05-29) | (B) feynman + DESIGN_BRIEF + CODE_SUMMARY + DECISIONS (06-01) |
+|---|---|---|
+| Repo shape | **Turborepo monorepo** + `packages/core` | **single Next app** (`lib/ir`, `app/`) |
+| Doc/state | **command→event→state (event-sourced)**, `decide`/`apply` | `PeekIR` + `reduceTool` (validate-then-apply, **not** event-sourced) |
+| Transport | **tRPC** | Next API route (`/api/peek-studio` SSE) |
+| Data access | **Drizzle** + pgvector | raw `pg` / direct supabase-js; pgvector not installed |
+| Surface | PWA + Expo-later | web app (no PWA wiring) |
+| Status | a *plan* (Ch 0–2 written) — **not built** | **built**, tsc-clean, runs on stubs |
+
+**They AGREE on**: the lean Opus chat (model-is-resolver, minimal prompt + design-method + guardrails), IR/document as validated structured data, the parametric renderer (kinds not pages), ports/adapters, bookend isolation, the design method, the aesthetic-quality concern. **They DIFFER only on the FRAMEWORK.** My report (following the brief + the 06-01 "vision docs dated" framing) asserted feynman canonical and labeled the monorepo "rejected" — **that conflated two separate axes.** What was actually rejected was the **rigid Sonnet chat + governed design templates**, *not* the over-built framework. The settled principle is literally "**overbuild the framework, keep the chat loose**" — (A) is the over-built framework + lean chat; (B) is a lean chat on a lean framework. So **which framework is the target is an open, Frank-only call**, not the closed question my report implied.
+
+## XVI.4 — My read (the single opinion here) + why it's still Frank's call
+My read: the **BUILD-BOOK is the authoritative top-down plan** (it's the gated cascade Frank keeps asking for, it operationalizes his hard rules, and its **event-sourced command→event gate is the maker-checker he's passionate about** — feynman has no equivalent). So I lean: **follow the BUILD-BOOK's framework (A)**, and **port feynman's proven assets into it** — the lean chat/system-prompt, the design method + the parts-bin (Add. IV), and the renderer (`lib/peek-render` is a strict superset of everything, ↪ VI.3) become the contents of Ch 2/Ch 3/Ch 4 inside the monorepo core; the atelier bookends (Add. XV) attach as the Landing/Auth/Checkout parts. **But it is genuinely Frank's call**: `DECISIONS.md` (06-01, design-greenlit) explicitly chose (B) and may reflect a deliberate "shed the monorepo to ship faster" pivot after the BUILD-BOOK. The two authorities Frank himself produced point different ways on the framework — so I'm asking rather than foreclosing it a second time. Everything downstream (canonical base branch, the entire build sequence) hinges on this one answer.
