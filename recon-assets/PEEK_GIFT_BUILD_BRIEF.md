@@ -138,8 +138,9 @@ atelier/app/api/checkout/route.ts`. Do **not** build a custom currency/tax/coupo
   CSS/tokens, trivially liftable.
 - **Bookend isolation (Frank's deliberate strategy):** the core imports Clerk/Stripe **only** via
   `AuthPort` / `PaymentPort`; the bookends attach at those ports + the `mark_ready` seam; the core **builds,
-  deploys, and demos without them** (stub auth, `PAY_MODE=mock`). This prevents the break-fix cycle where
-  touching the core broke auth/checkout and vice-versa. These bookends live on the atelier lineage,
+  builds and deploys independently of them** (it depends only on the port interfaces, not on Clerk/Stripe
+  internals). This decoupling — not a mock mode — prevents the break-fix cycle where touching the core broke
+  auth/checkout and vice-versa. These bookends live on the atelier lineage,
   **low-coupled** (they hit Supabase `peek_v2` directly, no entanglement with the scrapped engine) → lift them
   onto the build, moving their direct DB writes behind `ports.persistence`. A **recipient growth loop**
   (Recipient invited to make an account → send their own page → credits/discounts) is a later mechanic.
@@ -152,7 +153,8 @@ atelier/app/api/checkout/route.ts`. Do **not** build a custom currency/tax/coupo
 URL/screenshot **before** paid API/LLM. **Model tiering:** **Opus 4.8** is the artist (authors the page) —
 **day one**, with a Sonnet step-down as a later A/B behind the LLM port once it's functional; **Sonnet/Haiku**
 are the cheap hands for **vision/screenshot/camera extraction + classification** (don't burn Opus to read a
-price tag). Every external capability is a **typed port + stub**; the app runs end-to-end on stubs with no keys.
+price tag). Every external capability is a **typed port + adapter** — wire the **live** adapters from day one; a
+stub exists only as a zero-key fallback, never the plan.
 
 ## 10. The source map — build from these, drop those
 **Framework base = the `atelier-integration` lineage** (it already has Drizzle, the **event-sourced
@@ -171,7 +173,7 @@ single Next 16 app under `atelier/` (npm) — **BUILD-BOOK Ch 1.1 monorepo-izes 
   effort) · `ARCHITECTURE.md`'s Kafka/K8s fantasy (its companion `STACK_INTEGRATION.md` is the corrected stack).
 
 ## 11. Services + environment (real status)
-**Live (keys in the Netlify vault — the canonical secret store; never commit them):** Anthropic · Clerk
+**Live (keyed and running in the deploy environment):** Anthropic · Clerk
 (`clerk.peek.gift`) · Stripe (`acct_1T4xnbCEKPUsVee1`, $12 gate, NJ tax active, webhook → `vnext.peek.gift/api/
 stripe/webhook`) · Supabase (`ewqpujqerdnrkjqlpobo`, schema `peek_v2`, ~14 RLS tables incl. `cards`/
 `variant_groups`/`picks`/`peek_collaborators`/`relationships`/`curator_memory`; bucket `peek-v2-assets`;
@@ -180,8 +182,10 @@ stripe/webhook`) · Supabase (`ewqpujqerdnrkjqlpobo`, schema `peek_v2`, ~14 RLS 
 PostHog · Upstash. **In flight:** Sentry (DSN blocked — code no-ops until keyed), Inngest (jobs:
 `nudge-relationships`/`scrape-worker`/`webhook-logger`). **Gates (not started; needed for public launch):**
 **Turnstile** before the first guest LLM call (open chat = open wallet), **image moderation** before public
-publish, **multimodal embeddings** (Voyage/Cohere-v4/Jina-CLIP — *not* text-only) for the catalog. **Keys are
-Frank's domain — do not raise key handling;** the build runs on stubs.
+publish, **multimodal embeddings** (Voyage/Cohere-v4/Jina-CLIP — *not* text-only) for the catalog. **Keys:**
+the build chat may request a key a feature genuinely needs; it must **not** lecture about secret best-practices
+(rotation/vaults/"don't commit") or send the owner re-fetching keys. Build **live**, not on stubs. All live-prod
+work (git, deploys, the final URL cutover) is **Claude's via the connectors** — Frank touches nothing live.
 
 ## 12. The build plan + deploy
 **The plan is the BUILD-BOOK**, a gated top-down cascade (`recon-assets/peek-gift-BUILD-BOOK.md` = the operating
@@ -220,8 +224,10 @@ legacy `peek.gift` → `vnext.peek.gift`.
 artifact (test / deploy / diff) is the only evidence. **Every step ends in a gate; a gate that can't pass is a
 STOP.** **Small diffs**, one concern per commit, show the diff. **Avoid the word "always"** in instruction
 docs. **No Tailwind.** **The model is the resolver** (the *chat*, not the framework — keep the chat lean, the
-framework robust). **Never paraphrase the IR / document** — it's the shared language. **Keys/secrets are
-Frank's call — don't mommy him about them.** Frank's current instruction outranks anything written here.
+framework robust). **Never paraphrase the IR / document** — it's the shared language. **Keys:** request what a
+feature needs; **never nag about secret best-practices** (rotation, vaults, "don't commit") — the owner manages
+hygiene. **Build live (no mock); Claude does all live-prod/git/Netlify work via the connectors, not Frank.**
+Frank's current instruction outranks anything written here.
 
 ---
 *Provenance for any decision above is in `RECON_FINDINGS.md` (archive). To start the build session, use
