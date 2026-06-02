@@ -1765,3 +1765,29 @@ all behind `ports.cardResolver` (retailer_api → url_scrape → research) + the
   Node 20→24 actions deprecation — bump `actions/checkout`/`setup-node` while there).
 - **Action taken:** investigated + documented; **no PR comment posted** (frugal — both PRs are superseded and
   I can't push to their branches; the fix belongs to the build chat). Surfaced to Frank in chat.
+
+---
+
+# Addendum XXII — Frank's answers to XX.5 + the NO-DRAWERS refinement (2026-06-01)
+
+> Resolves the XX.5 open questions and sharpens the UX. ↪ updates XX (esp. XX.1/XX.4) and reinforces
+> the model-is-resolver + lean-prompt direction.
+
+- **Q1 — Service scope:** **v1 = Studio (self-serve) only.** Concierge (peek-fulfilled) and Atelier
+  (peek-assembled) are **later** fulfillment tiers. So the build scopes the self-serve loop (Creator fulfills);
+  the ordering/shipping/packaging operations layer is deferred (it's the PerfectPurchase/Ch 5+ horizon).
+- **Q2 — Category grouping = the CHAT's job, automatically.** The model detects the "obvious" categories, forms
+  the carousels, and applies the rules — **minimal user effort** ("something a typical user could never make on
+  their own"). NOT Creator-explicit. So the model owns arrangement: it emits `add_variant_group` + the selection
+  rule + section ordering as part of authoring; the Creator never hand-groups.
+- **Q3 — Hero-as-style-seed:** confirmed. The hero image's extracted palette **seeds** the theme the Opus chat
+  then art-directs ("do nothing and it already looks good" = a strong auto-theme off hero + occasion).
+- **Q4 — Single page, and NO DRAWERS.**  ↪ REMOVES the "design drawer" from XX.4; supersedes the old brief's
+  Look/Items/Rules drawers. The user's **only** interface is the conversation. They give inputs + preferences →
+  the chat produces the full art-directed page (theme, categories, carousels, rules, copy) → they request tweaks
+  in natural language → the chat does them. "**Users don't want to have to actually do anything.**" Frank's
+  point: the design seat's sample pages (animations + great fonts) came out **far better than his vibe engine,
+  drawer selections, or anything a user would conceive** — so the chat + the design method + the parts-bin is the
+  whole authoring surface; there are **no manual style/category/rule controls** to build.
+
+**Build implications:** (a) the **studio is just the transparent chat + the live preview — no control panels/drawers** (simpler than the old `app/studio`; cf. VI.4 — the keyboard-collapse reveal is the only chrome). (b) ALL refinement is **conversational** — the chat must turn "darker / different font / group these / make it pick-one / add a soup option" into Commands (this is exactly the lean system-prompt's "refine from plain language" job, ↪ A11/XX.3). (c) the renderer must **auto-arrange** what the model emits (categories → carousels → rules → itinerary-for-experiences, XX.2) at sample caliber. Net: removing the drawers **reduces** build scope and **increases** reliance on the lean chat + renderer caliber — both already the plan.
