@@ -12,6 +12,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "0.65.0",
     "@peek/core": "workspace:*",
+    "@supabase/supabase-js": "^2.45.0",
     "next": "15.5.4",
     "react": "19.2.0",
     "react-dom": "19.2.0",

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { validatePeekIR, emptyDocument } from "@peek/core";
 import { runCuratorTurn, type TurnMessage } from "@/lib/curator/turn";
+import { savePeekDocument } from "@/lib/persistence/store";
 
 // Server-only. The Anthropic call never reaches the client. Live, no mock: without a key
 // it returns an honest 503 rather than a fake turn.
@@ -49,6 +50,12 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const client = new Anthropic();
     const result = await runCuratorTurn(client, { doc: parsed.value, messages });
+    // Best-effort persist of the new snapshot; a storage miss never fails the turn.
+    try {
+      await savePeekDocument(result.doc);
+    } catch {
+      /* persistence is optional here; deploy has the Supabase service-role key */
+    }
     return Response.json({ doc: result.doc, text: result.text, tools: result.tools });
   } catch (e) {
     return Response.json({ error: (e as Error).message ?? "curator turn failed" }, { status: 500 });
