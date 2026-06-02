@@ -58,6 +58,8 @@ export default function Studio() {
   const [listening, setListening] = useState(false);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [kb, setKb] = useState(0);
+  const [pinged, setPinged] = useState<string[]>([]);
+  const pingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -163,7 +165,7 @@ export default function Studio() {
         for (const part of parts) {
           const line = part.trim();
           if (!line.startsWith("data:")) continue;
-          let ev: { type: string; delta?: string; doc?: unknown; error?: string };
+          let ev: { type: string; delta?: string; doc?: unknown; error?: string; pinged?: string[] };
           try {
             ev = JSON.parse(line.slice(5).trim());
           } catch {
@@ -179,6 +181,11 @@ export default function Studio() {
           } else if ((ev.type === "page" || ev.type === "done") && ev.doc) {
             const v = validatePeekIR(ev.doc);
             if (v.ok) setDoc(v.value);
+            if (ev.pinged && ev.pinged.length) {
+              setPinged(ev.pinged);
+              if (pingRef.current) clearTimeout(pingRef.current);
+              pingRef.current = setTimeout(() => setPinged([]), 1600);
+            }
           } else if (ev.type === "error" && ev.error) {
             acc += `\n(${ev.error})`;
             setMessages((m) => {
@@ -206,7 +213,7 @@ export default function Studio() {
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "#000" }}>
       <div style={{ position: "absolute", inset: 0 }}>
-        <PeekPreview model={model} />
+        <PeekPreview model={model} pinged={pinged} />
       </div>
 
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />

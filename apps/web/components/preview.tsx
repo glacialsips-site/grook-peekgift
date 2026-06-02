@@ -19,7 +19,7 @@ import { Frame } from "@/components/frames";
 import { Reveal } from "@/components/reveal";
 
 const PREVIEW_CSS =
-  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none}}";
+  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none}}";
 
 export interface PickInteraction {
   picked: string[];
@@ -609,7 +609,7 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
   return <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${query}&display=swap`} precedence="high" />;
 }
 
-export function PeekPreview({ model, interaction }: { model: RenderModel; interaction?: PickInteraction }) {
+export function PeekPreview({ model, interaction, pinged }: { model: RenderModel; interaction?: PickInteraction; pinged?: string[] }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
   return (
@@ -621,7 +621,9 @@ export function PeekPreview({ model, interaction }: { model: RenderModel; intera
         {empty ? <EmptyState /> : null}
         {model.sections.map((s) => (
           <Reveal key={s.id}>
-            <SectionBlock section={s} model={model} interaction={interaction} />
+            <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined}>
+              <SectionBlock section={s} model={model} interaction={interaction} />
+            </div>
           </Reveal>
         ))}
         {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
