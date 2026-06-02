@@ -368,42 +368,47 @@ function GenericSection({ section }: { section: SectionView }) {
       ) : null}
       {quote ? <p style={{ fontFamily: "var(--peek-font-accent)", fontSize: 19, lineHeight: 1.5, margin: 0 }}>“{quote}”</p> : null}
       {items ? (
-        <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 28, flexWrap: "wrap", justifyContent: "center", textAlign: "center", padding: "6px 0" }}>
           {items.map((it, i) => {
             const o = (it ?? {}) as Record<string, unknown>;
             return (
               <div key={i}>
-                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 30, color: "var(--peek-accent)" }}>
+                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 42, lineHeight: 1, color: "var(--peek-accent)", textShadow: "var(--peek-display-shadow)" }}>
                   {str(o, "pre") ?? ""}
                   {String(o.value ?? "")}
                   {str(o, "suf") ?? ""}
                 </div>
-                <div style={{ color: "var(--peek-muted)", fontSize: 13 }}>{str(o, "label")}</div>
+                <div style={{ color: "var(--peek-muted)", fontSize: 11.5, textTransform: "uppercase", letterSpacing: "var(--peek-eyebrow-tracking)", marginTop: 6 }}>
+                  {str(o, "label")}
+                </div>
               </div>
             );
           })}
         </div>
       ) : null}
       {rows ? (
-        <div style={{ display: "grid", gap: 8 }}>
+        <div style={{ border: "1px solid var(--peek-line)", borderRadius: "var(--peek-radius-card)", overflow: "hidden" }}>
           {rows.map((r, i) => {
             const pair = Array.isArray(r) ? (r as unknown[]) : [];
             return (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--peek-line)", paddingBottom: 6 }}>
-                <Eyebrow>{String(pair[0] ?? "")}</Eyebrow>
-                <span style={{ fontFamily: "var(--peek-font-display)" }}>{String(pair[1] ?? "")}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderTop: i ? "1px solid var(--peek-line)" : "none" }}>
+                <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--peek-accent)", flex: "0 0 auto" }} />
+                <span style={{ flex: 1, color: "var(--peek-accent)", fontSize: 11, textTransform: "uppercase", letterSpacing: "var(--peek-eyebrow-tracking)" }}>{String(pair[0] ?? "")}</span>
+                <span style={{ fontFamily: "var(--peek-font-display)", fontSize: 15 }}>{String(pair[1] ?? "")}</span>
               </div>
             );
           })}
         </div>
       ) : null}
       {steps ? (
-        <ol style={{ display: "grid", gap: 10, paddingLeft: 0, listStyle: "none", margin: 0 }}>
+        <ol style={{ display: "grid", gap: 12, paddingLeft: 0, listStyle: "none", margin: 0 }}>
           {steps.map((stp, i) => {
             const pair = Array.isArray(stp) ? (stp as unknown[]) : [stp];
             return (
-              <li key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 10, alignItems: "baseline" }}>
-                <span style={{ color: "var(--peek-accent)", fontFamily: "var(--peek-font-display)", fontSize: 20 }}>{String(pair[0] ?? i + 1)}</span>
+              <li key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 12, alignItems: "center" }}>
+                <span style={{ width: 30, height: 30, borderRadius: 999, display: "grid", placeItems: "center", background: "var(--peek-accent-soft)", color: "var(--peek-accent)", fontFamily: "var(--peek-font-display)", fontSize: 15, flex: "0 0 auto" }}>
+                  {String(pair[0] ?? i + 1)}
+                </span>
                 <span>{String(pair[1] ?? pair[0] ?? "")}</span>
               </li>
             );
