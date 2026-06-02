@@ -23,15 +23,19 @@ never completed** (`picks`=0); pgvector available-not-installed; **Netlify produ
   variant groups + itinerary). One renderer for preview + recipient page.
 - **The curator turn** (`POST /api/curator`): Opus 4.8 tool loop, every `tool_use` routed through
   `commandFromTool → execute(decide+apply)` — the model can only change the document via validated commands.
-  Tool schemas generated from core `Inputs` (DRY). Live, key-gated (honest 503 without a key; no mock).
+  Tool schemas generated from core `Inputs` (DRY). Live, key-gated. **VERIFIED LIVE** (real Opus 4.8 turn):
+  authored a full hardware-store work-order concept — theme (Oswald, rust), hero directive, sections, a
+  pick-one variant group, grouped cards, and a locked card with a beg rule — and the **maker-checker
+  correctly rejected a malformed op** (a guessed card id) while keeping the document valid. The model is fed
+  resolved ids so it can target what it just created.
 - **The studio screen** (`/studio`): one page — translucent glass chat over the live preview, `visualViewport`
   keyboard reveal, input rail; posts to the curator route and applies the returned document. Teaching empty state.
 
 Screenshots delivered to Frank: `/demo` (three rendered samples) and `/studio` (the chat-over-preview screen).
 
 ## Next
-- **Live verify Ch 2.4** — the only unproven bit: the actual Anthropic turn (create→build loop). Needs
-  `ANTHROPIC_API_KEY` in the build session, or it verifies on deploy.
+- **The rest of the loop** — persist the document (PersistencePort→Supabase), then the recipient page +
+  publish ($12) → pick → notify (the half that has never completed). Create now works end-to-end.
 - **Ch 3 / Ch 4** — the aesthetic safety-net + eval gate, and the renderer to **full SHELL_SPEC caliber**
   (real Google fonts via a loader, scenes/frames/motifs, the bottom sheet + live running total, og unfurl).
   Today's renderer is a sound v1, not yet the mockup bar.
