@@ -1346,3 +1346,83 @@ moat, but it's the scrapped lineage, not the lean path.
 - **feynman:** `tsc`-clean + `next build`-green (verified, §5/V1–V2); real Opus streaming tool-loop; **runs entirely on stubs** (persistence/payment/scrape/image all stub); `opus-4-8` never billed; recipient `/g/[slug]` still old-v0 (not on the IR renderer); `lib/peek/*` first-cut still present (DQ-11).
 - **jolly:** real `/api/generate` Opus call + a real OKLCH renderer, but the "chat" is one-shot and no auth/persistence/payment wired; **its `pnpm` monorepo build is UNVERIFIED here** (sandbox can't `pnpm install`). 
 - **Net:** keep `bold-feynman` as canonical (XIII). Salvage from jolly is narrow: only its OKLCH color math (`vibe-harmony`) is worth referencing, and only if wanted — never the engine or the genome as authority.
+
+---
+
+# Addendum XV — The real bookends on `atelier-integration` (auth/checkout/landing) (2026-06-01)
+
+> FACTUAL, from reading the actual code on `origin/atelier-integration` (the deployed lineage),
+> under `atelier/`. This **resolves the "bookends unreachable" gap** (VIII/VII.10 — they were in
+> git all along) and **corrects** inferences in IX.2, V.5, VII.2, A10. Where the as-built code
+> diverges from Frank's stated intent, I flag it plainly (verify-don't-claim). ↪ = body pointer.
+
+## XV.1 — Auth: real and complete (fully headless Clerk)  ↪ corrects §6/A10, closes VIII/VII.10
+`atelier/components/auth/*` + `app/{sign-in,sign-up,forgot-password,sso-callback}` + `lib/auth/server.ts`
++ `app/api/webhooks/clerk/route.ts` + root `middleware.ts`. It's the modern headless Clerk API
+(`useSignIn`/`useSignUp`, not the `<SignIn/>` drop-in): **email+password, email-code passwordless,
+Google OAuth, 2FA (TOTP/phone/email), full forgot-password reset**, Smart-CAPTCHA mount, an
+anon-session cookie minted in middleware, `ensureCuratorRow()` upsert into `peek_v2.users`, and a
+svix-verified Clerk→Supabase user webhook. (Only **Google** OAuth is wired; Apple/GitHub glyphs in
+`oauth-button.tsx` are unused.) **Fits the lean `AuthPort` with no interface change** — the atelier
+`getUserId()` = `(await auth()).userId` just ignores the port's `req` arg.
+
+## XV.2 — Checkout: the corrections (this is the big one)  ↪ CORRECTS IX.2, V.5, VII.2
+`atelier/app/api/checkout/route.ts` (+ `coupon/route.ts`, `app/api/stripe/webhook/route.ts`,
+`lib/stripe/*`, `components/build/{payment-element-form,coupon-input}.tsx`). As built:
+- **Mechanism = a CUSTOM Stripe Payment Element, NOT a Checkout Session.** The route creates a
+  **PaymentIntent** and returns its **`client_secret`**; the client confirms with
+  `@stripe/react-stripe-js` (`stripe.confirmPayment({redirect:'if_required'})`); publish is finalized
+  server-side by the **webhook** on `payment_intent.succeeded`. Verbatim PI params:
+  `amount, currency, customer, automatic_payment_methods:{enabled:true,allow_redirects:'always'},
+  setup_future_usage:'off_session', receipt_email, metadata:{peek_id, curator_clerk_id, price_id, base_amount}`.
+- **Currency = single-currency (USD).** `finalCurrency = currencyOverride ?? price.currency`; the UI never
+  overrides. **No Adaptive Pricing, no presentment currency.** The Payment Element localizes the
+  *methods/UI*, not the settlement currency.
+- **Tax: NONE on the publish fee.** `automatic_tax:{enabled:true}` is set **only** on a subscription
+  branch; the one-time publish PaymentIntent has no tax (PaymentIntents can't do `automatic_tax`).
+- **Coupons: fully custom and genuinely complete** — `/api/checkout/coupon` → `stripe.promotionCodes.list({code,active:true,expand:['data.promotion.coupon']})`, then `applyDiscount` recomputes the PI `amount` + stamps `coupon_*` metadata. (Does **not** use `allow_promotion_codes` — that's a Session-only flag.)
+- **Country/address: client-side only** (`fields.billingDetails.address.country:'auto'`); no server country logic.
+- **The chat tools `propose_checkout` / `propose_payment_method` are STUBS** (`not_implemented_yet`) — atelier has **no model-driven paywall**; payment is a deterministic `/build/[peekId]/publish/checkout` page+route. The lean core's `mark_ready→{next_step:'paywall'}` intent is the correct shape; atelier just never built the tool. (NB the stub's description says "Checkout Session" while the route does a PaymentIntent — residue.)
+
+**⟹ Correction to IX.2:** I concluded from `backendservices-revised.md` ("Tax, Adaptive Pricing" +
+`STRIPE_ADAPTIVE_PRICING`) that "every country/currency/tax is Stripe-native/resolved." **The actual
+deployed code does not implement Adaptive Pricing or publish-fee tax** — I over-trusted a doc over the
+code (the exact failure mode this re-grounding is meant to catch). **As-built: single-currency USD,
+untaxed publish fee, custom coupons.** Frank's stated "every country/currency/tax/coupon" is, on this
+lineage, **partially built (coupons ✓) and otherwise aspirational** — OR lives in a checkout version not
+in this lineage/feynman (both of which I've now read; neither has it). Flag for Frank to confirm where
+the full-i18n checkout lives, if it exists.
+
+## XV.3 — Landing: real, isolated, trivially liftable  ↪ corrects §6/A10
+`atelier/app/page.tsx` + `components/landing/{hero,how-it-works,showcase,why-different,final-cta,landing-footer,scroll-to-button}`. Six server components + one tiny client button. **Pure Tailwind** (radial/clip-text gradients, `blur-3xl`, hover/transition micro-interactions), lucide icons, `--peek-*` tokens; **zero data/auth/Stripe imports.** Honest note on "animations": **`framer-motion` is a dep but UNUSED here**, and there's no scroll-reveal — the motion is CSS hover/transition only. (If Frank has an *animated* landing version, it's not this one.) Easiest of the three to lift: drop the 7 files + ensure the CSS tokens exist.
+
+## XV.4 — Coupling/liftability: LOW — the bookends are NOT entangled with the scrapped engine  ↪ revises §3/G3, Add. III
+Grep-confirmed: none of `atelier/{app/api/checkout,lib/stripe,lib/auth,components/auth,components/landing}`
+import **Drizzle, the event-sourced mutation-log, Inngest-core, or atelier's IR** — they hit Supabase
+**`peek_v2` directly via `supabase-js`**. The only drag is a thin cross-cutting layer the checkout/webhook
+import (`lib/env`, `lib/logger`, `lib/analytics/facade` [posthog+supabase], `lib/rate-limit/redis`
+[Upstash], `lib/security/{origin,idempotency}`, `lib/inngest/client` [webhook logging]) — all
+swappable/droppable or re-expressible through the lean `ports.*`. **So the bookends CAN be lifted onto
+the lean `bold-feynman` app**, or attached to it pointing at the same `peek_v2`. This reframes the whole
+bookend question (Add. III, VII.2): they are **built and liftable, not unbuilt** — the integration task is
+wiring feynman's core to them via the ports, plus moving their direct `peek_v2` writes behind
+`ports.persistence`.
+
+## XV.5 — Corrected seam deltas (code-grounded; supersedes the inferred shapes in V.5/VII.2)
+- **`AuthPort`**: no interface change; atelier adapter ignores `req`. Optionally add
+  `currentUser?(req?): Promise<{id,email?,name?}|null>` so the payment adapter builds the Stripe customer
+  without re-importing Clerk (atelier resolves email via `clerkClient` itself).
+- **`PaymentPort.createCheckout` RESULT must change** — the lean `Result<{url,session_id}>` assumes a
+  hosted redirect; the real checkout returns a **`client_secret`** (Payment Element). Result must be a
+  union carrying `client_secret + amount_cents + base_amount_cents + savings_cents + currency +
+  applied_coupon + payment_intent_id` (keep a `{url}` variant only if you also want a Session fallback).
+  REQUEST: `priceRef` (Stripe `price_id`) is the **real publish path** (amount+currency derived from it),
+  not raw `amount_cents`; `promotionCode` + `currency?` + `customer?` + `metadata?` match; but
+  `billingAddress`/`taxId`/`allowPromotionCodes`/`successUrl`/`cancelUrl`/request-side `idempotencyKey`
+  are **aspirational/N-A** to the as-built Payment Element (keep in the contract for the end-state, flag
+  that atelier ignores them; atelier dedupes idempotency **webhook-side** via Upstash).
+- **`verifyWebhook` must return richer** to publish + handle async-failure:
+  `{event, peekId?, curatorId?, paymentIntentId?, sessionId?, amount_cents?, currency?, outcome?:'succeeded'|'failed'|'ignored'}`
+  — the route maps `succeeded→ports.persistence publish`, `failed→revert to draft` (atelier currently
+  does the publish write inside the webhook via direct Supabase; on the lean app move it behind
+  `ports.persistence`).
