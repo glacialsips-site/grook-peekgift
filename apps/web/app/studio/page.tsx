@@ -3,24 +3,35 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { emptyDocument, render, validatePeekIR, type PeekIR } from "@peek/core";
 import { PeekPreview } from "@/components/preview";
+import { PublishCheckout } from "@/components/publish-checkout";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const GREETING =
   "hey — who are we making something for? give me the person + the occasion in a line, however sloppy. a url, a photo, or a voice note works too.";
 
+function newPeekId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `peek-${Math.random().toString(36).slice(2, 12)}`;
+}
+
 export default function Studio() {
-  const [doc, setDoc] = useState<PeekIR>(() => emptyDocument({ id: "draft", slug: "draft", curator_id: "anon" }));
+  const [doc, setDoc] = useState<PeekIR>(() => {
+    const id = newPeekId();
+    return emptyDocument({ id, slug: id.slice(0, 8), curator_id: "anon" });
+  });
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
   const [kb, setKb] = useState(0);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const model = useMemo(() => render(doc), [doc]);
+  const hasContent = model.cardGroups.length > 0 || model.sections.length > 0;
 
-  // Keyboard-collapse reveal: dock the chat above the on-screen keyboard, then let the full
-  // preview show when it dismisses. (SHELL_SPEC §0 / chat-live-docked.jsx.)
   useEffect(() => {
     const vv = typeof window !== "undefined" ? window.visualViewport : null;
     if (!vv) return;
@@ -55,11 +66,7 @@ export default function Studio() {
       if (res.status === 503) {
         setMessages((m) => [
           ...m,
-          {
-            role: "assistant",
-            content:
-              "(the curator model isn't keyed in this environment yet — set ANTHROPIC_API_KEY to switch me on. everything else is live.)",
-          },
+          { role: "assistant", content: "(the curator model isn't keyed here yet — set ANTHROPIC_API_KEY. everything else is live.)" },
         ]);
         return;
       }
@@ -79,11 +86,59 @@ export default function Studio() {
     }
   }
 
+  async function publish() {
+    if (publishing) return;
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ peekId: doc.peek.id }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { clientSecret?: string; error?: string };
+      if (res.ok && data.clientSecret) {
+        setCheckoutSecret(data.clientSecret);
+      } else {
+        setMessages((m) => [...m, { role: "assistant", content: `(publish: ${data.error ?? res.status})` }]);
+      }
+    } catch {
+      setMessages((m) => [...m, { role: "assistant", content: "(publish: network hiccup)" }]);
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "#000" }}>
       <div style={{ position: "absolute", inset: 0 }}>
         <PeekPreview model={model} />
       </div>
+
+      {hasContent ? (
+        <button
+          onClick={() => void publish()}
+          disabled={publishing}
+          style={{
+            position: "absolute",
+            top: "calc(12px + env(safe-area-inset-top, 0px))",
+            right: 14,
+            zIndex: 20,
+            border: "0.5px solid rgba(255,255,255,0.4)",
+            cursor: "pointer",
+            borderRadius: 999,
+            padding: "8px 16px",
+            fontSize: 14,
+            fontWeight: 600,
+            color: "#111",
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+          }}
+        >
+          {publishing ? "opening…" : "publish · $12"}
+        </button>
+      ) : null}
 
       <div
         style={{
@@ -108,10 +163,7 @@ export default function Studio() {
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 50px rgba(0,0,0,0.45)",
           }}
         >
-          <div
-            ref={scrollerRef}
-            style={{ maxHeight: "32vh", overflowY: "auto", padding: "14px 16px 6px", display: "grid", gap: 10 }}
-          >
+          <div ref={scrollerRef} style={{ maxHeight: "32vh", overflowY: "auto", padding: "14px 16px 6px", display: "grid", gap: 10 }}>
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -169,6 +221,8 @@ export default function Studio() {
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>peek.gift · the page builds as you talk</span>
         </div>
       </div>
+
+      {checkoutSecret ? <PublishCheckout clientSecret={checkoutSecret} onClose={() => setCheckoutSecret(null)} /> : null}
     </div>
   );
 }
