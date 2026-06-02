@@ -118,7 +118,7 @@ export async function runCuratorTurn(
 
 export type StreamEvent =
   | { type: "text"; delta: string }
-  | { type: "page"; doc: PeekIR }
+  | { type: "page"; doc: PeekIR; pinged?: string[] }
   | { type: "tool"; name: string; ok: boolean; error?: string }
   | { type: "done"; doc: PeekIR }
   | { type: "error"; error: string };
@@ -187,7 +187,16 @@ export async function runCuratorTurnStreaming(
         }
         doc = r.value.doc;
         emit({ type: "tool", name: tu.name, ok: true });
-        emit({ type: "page", doc });
+        const pinged: string[] = [];
+        for (const e of r.value.events) {
+          if (e.type === "section_inserted") pinged.push(e.section.id);
+          else if (e.type === "section_patched") pinged.push(e.id);
+          else if (e.type === "card_added" || e.type === "card_updated" || e.type === "card_rule_set" || e.type === "card_removed") {
+            const grid = doc.sections.find((s) => s.kind === "giftgrid");
+            if (grid && !pinged.includes(grid.id)) pinged.push(grid.id);
+          }
+        }
+        emit({ type: "page", doc, pinged });
         const ids: Record<string, string> = {};
         for (const e of r.value.events) {
           if (e.type === "card_added") ids.card_id = e.card.id;
