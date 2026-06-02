@@ -218,3 +218,42 @@ export async function runCuratorTurnStreaming(
   emit({ type: "done", doc });
   return doc;
 }
+
+const SAFEWORD_REPORT_SYSTEM = `The user just sent the private founder handshake word. You are NO LONGER "peek" — you are talking to the founder building this product, not a customer. Drop the persona completely and report straight, concise, and candid. This is for tuning you, so be honest:
+
+- THE BRIEF you inferred from the conversation (recipient, occasion, the feeling under the facts).
+- THE CONCEPT you committed to and the key choices (type, palette, scene, sections, copy voice) — each with its one-line "because".
+- WHAT FOUGHT YOU: where a tool, the renderer, or the IR couldn't express what you wanted; anything you had to stub, fake, simplify, or skip.
+- WHAT THE PANTRY / PROMPT LACKED — what would have made this easier or better.
+- WHAT WOULD MAKE THE NEXT ONE GNARLIER — your honest take on how to push the output further.
+
+Plain text, tight, no markdown headers needed. Do not author the page, do not call tools, do not stay in character.`;
+
+/**
+ * The founder handshake. When the host detects the safeword, it calls this instead of the
+ * normal turn: the model drops the peek persona and streams a structured self-report (the
+ * tuning "gold"), authoring nothing. Same SSE text/done protocol as the normal turn.
+ */
+export async function runSafewordReport(
+  client: Anthropic,
+  input: { doc: PeekIR; messages: TurnMessage[] },
+  emit: (e: StreamEvent) => void,
+): Promise<PeekIR> {
+  const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
+  try {
+    const stream = client.messages.stream({
+      model: MODEL,
+      max_tokens: 4096,
+      system: [{ type: "text" as const, text: SAFEWORD_REPORT_SYSTEM }],
+      messages,
+    } as unknown as Anthropic.MessageStreamParams);
+    stream.on("text", (delta: string) => {
+      if (delta) emit({ type: "text", delta });
+    });
+    await stream.finalMessage();
+  } catch (e) {
+    emit({ type: "error", error: (e as Error).message ?? "report failed" });
+  }
+  emit({ type: "done", doc: input.doc });
+  return input.doc;
+}
