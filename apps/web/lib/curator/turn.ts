@@ -5,9 +5,25 @@
 // corrupting the page. The document the model sees only ever moves through decide().
 
 import type Anthropic from "@anthropic-ai/sdk";
-import { execute, commandFromTool, defaultCtx, type PeekIR, type PeekEvent } from "@peek/core";
+import { execute, commandFromTool, defaultCtx, type PeekIR, type PeekEvent, type CardData, type ResolveConstraints } from "@peek/core";
+import { cardResolver } from "@/lib/ports/card-resolver";
 import { PEEK_STUDIO_SYSTEM_PROMPT } from "./system-prompt";
 import { PEEK_STUDIO_TOOLS } from "./tools";
+
+// A resolver CardData → add_card tool input, so a resolved product is appended through the
+// SAME core gate (commandFromTool → decide → apply) as any hand-authored card.
+function cardDataToAddCard(d: CardData): Record<string, unknown> {
+  return {
+    type: "product",
+    title: d.title,
+    ...(d.description ? { description: d.description } : {}),
+    ...(d.source_url ? { source_url: d.source_url } : {}),
+    ...(d.retailer ? { source_retailer: d.retailer } : {}),
+    ...(typeof d.value_cents === "number" ? { value_cents: d.value_cents } : {}),
+    ...(d.value_display ? { value_display: d.value_display } : {}),
+    ...(d.image_url ? { media: { url: d.image_url, source: "external", alt: d.title } } : {}),
+  };
+}
 
 export interface TurnMessage {
   role: "user" | "assistant";
@@ -69,13 +85,33 @@ export async function runCuratorTurn(
       // resolve_card is app-orchestration, not a core command. The resolver cascade isn't
       // wired in v1, so steer the model to add_card directly (honest, keeps it productive).
       if (tu.name === "resolve_card") {
-        tools.push({ name: tu.name, ok: false, error: "resolver not configured" });
-        results.push({
-          type: "tool_result",
-          tool_use_id: tu.id,
-          content: "the resolver isn't wired yet — infer the details you can and call add_card directly.",
-          is_error: true,
-        });
+        const a = (tu.input ?? {}) as { text?: string; constraints?: ResolveConstraints; images?: string[]; screenshot?: string };
+        const resolved = a.text
+          ? await cardResolver.resolve({ text: a.text, constraints: a.constraints, images: a.images, screenshot: a.screenshot })
+          : ({ ok: false, error: "resolve_card needs a url or a description" } as const);
+        if (!resolved.ok) {
+          tools.push({ name: tu.name, ok: false, error: resolved.error });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: `couldn't auto-resolve (${resolved.error}). infer what you can and call add_card directly.`, is_error: true });
+          continue;
+        }
+        const cmd = commandFromTool("add_card", cardDataToAddCard(resolved.card));
+        if (cmd.isErr()) {
+          tools.push({ name: tu.name, ok: false, error: cmd.error.message });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
+          continue;
+        }
+        const rr = execute(doc, cmd.value, ctx);
+        if (rr.isErr()) {
+          tools.push({ name: tu.name, ok: false, error: rr.error.message });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${rr.error.message}`, is_error: true });
+          continue;
+        }
+        doc = rr.value.doc;
+        events.push(...rr.value.events);
+        tools.push({ name: tu.name, ok: true });
+        let resolvedCardId: string | undefined;
+        for (const e of rr.value.events) if (e.type === "card_added") resolvedCardId = e.card.id;
+        results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, card_id: resolvedCardId, via: resolved.via }) });
         continue;
       }
 
@@ -164,13 +200,34 @@ export async function runCuratorTurnStreaming(
       const results: Anthropic.ToolResultBlockParam[] = [];
       for (const tu of toolUses) {
         if (tu.name === "resolve_card") {
-          emit({ type: "tool", name: tu.name, ok: false, error: "resolver not configured" });
-          results.push({
-            type: "tool_result",
-            tool_use_id: tu.id,
-            content: "the resolver isn't wired yet — infer the details and call add_card directly.",
-            is_error: true,
-          });
+          const a = (tu.input ?? {}) as { text?: string; constraints?: ResolveConstraints; images?: string[]; screenshot?: string };
+          const resolved = a.text
+            ? await cardResolver.resolve({ text: a.text, constraints: a.constraints, images: a.images, screenshot: a.screenshot })
+            : ({ ok: false, error: "resolve_card needs a url or a description" } as const);
+          if (!resolved.ok) {
+            emit({ type: "tool", name: tu.name, ok: false, error: resolved.error });
+            results.push({ type: "tool_result", tool_use_id: tu.id, content: `couldn't auto-resolve (${resolved.error}). infer what you can and call add_card directly.`, is_error: true });
+            continue;
+          }
+          const cmd = commandFromTool("add_card", cardDataToAddCard(resolved.card));
+          if (cmd.isErr()) {
+            emit({ type: "tool", name: tu.name, ok: false, error: cmd.error.message });
+            results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
+            continue;
+          }
+          const rr = execute(doc, cmd.value, ctx);
+          if (rr.isErr()) {
+            emit({ type: "tool", name: tu.name, ok: false, error: rr.error.message });
+            results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${rr.error.message}`, is_error: true });
+            continue;
+          }
+          doc = rr.value.doc;
+          emit({ type: "tool", name: tu.name, ok: true });
+          let resolvedCardId: string | undefined;
+          for (const e of rr.value.events) if (e.type === "card_added") resolvedCardId = e.card.id;
+          const grid = doc.sections.find((s) => s.kind === "giftgrid");
+          emit({ type: "page", doc, pinged: grid ? [grid.id] : [] });
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, card_id: resolvedCardId, via: resolved.via }) });
           continue;
         }
         const cmd = commandFromTool(tu.name, tu.input);
