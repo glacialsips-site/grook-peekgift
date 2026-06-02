@@ -19,7 +19,7 @@ import { Frame } from "@/components/frames";
 import { Reveal } from "@/components/reveal";
 
 const PREVIEW_CSS =
-  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none}}";
+  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} .peek-rail{scrollbar-width:none} .peek-rail::-webkit-scrollbar{display:none} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none}}";
 
 export interface PickInteraction {
   picked: string[];
@@ -308,35 +308,85 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
   );
 }
 
-// gap-a made visible: a variant group renders as a labeled, ruled cluster carrying its
-// selection rule; ungrouped cards stand alone.
+// A horizontal snap-carousel of cards with edge-peek — the mockups' universal mobile shape
+// (every gift grid collapses to this). Scrollbar hidden via .peek-rail in PREVIEW_CSS.
+function CardCarousel({ cards, interaction, basis = "70%" }: { cards: CardView[]; interaction?: PickInteraction; basis?: string }) {
+  return (
+    <div
+      className="peek-rail"
+      style={{
+        display: "flex",
+        gap: 12,
+        overflowX: "auto",
+        scrollSnapType: "x mandatory",
+        scrollPadding: "0 20px",
+        margin: "0 -20px",
+        padding: "4px 20px 12px",
+      }}
+    >
+      {cards.map((c) => (
+        <div key={c.id} style={{ flex: `0 0 ${basis}`, scrollSnapAlign: "start" }}>
+          <CardTile card={c} interaction={interaction} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// gap-a made visible: ungrouped cards ride one horizontal carousel; each variant group is a
+// labeled wrapper carrying its selection rule, with its own carousel — page order preserved.
 function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interaction?: PickInteraction }) {
   if (groups.length === 0) return null;
-  return (
-    <section style={{ display: "grid", gap: 16, padding: "8px 20px" }}>
-      {groups.map((g, i) =>
-        g.group ? (
-          <fieldset
-            key={g.group.id}
-            style={{ border: "1px dashed var(--peek-line)", borderRadius: "var(--peek-radius-card)", padding: "8px 12px 14px", margin: 0 }}
+  const blocks: ReactNode[] = [];
+  let solo: CardView[] = [];
+  const flushSolo = () => {
+    if (solo.length === 0) return;
+    const cards = solo;
+    solo = [];
+    const key = `solo-${cards[0]!.id}`;
+    blocks.push(
+      cards.length === 1 ? (
+        <div key={key} style={{ padding: "0 20px" }}>
+          <CardTile card={cards[0]!} interaction={interaction} />
+        </div>
+      ) : (
+        <CardCarousel key={key} cards={cards} interaction={interaction} />
+      ),
+    );
+  };
+  groups.forEach((g) => {
+    if (!g.group) {
+      solo.push(...g.cards);
+      return;
+    }
+    flushSolo();
+    blocks.push(
+      <div key={g.group.id}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, padding: "0 20px 6px" }}>
+          <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 17, lineHeight: 1.1 }}>{g.group.title}</div>
+          <span
+            style={{
+              flex: "0 0 auto",
+              fontSize: 10.5,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "var(--peek-eyebrow-tracking)",
+              color: "var(--peek-accent)",
+              border: "1px solid var(--peek-line)",
+              borderRadius: "var(--peek-radius-pill)",
+              padding: "3px 9px",
+              whiteSpace: "nowrap",
+            }}
           >
-            <legend style={{ padding: "0 8px" }}>
-              <Eyebrow>
-                {g.group.title} · {selectionLabel(g.selection)}
-              </Eyebrow>
-            </legend>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              {g.cards.map((c) => (
-                <CardTile key={c.id} card={c} interaction={interaction} />
-              ))}
-            </div>
-          </fieldset>
-        ) : (
-          <CardTile key={g.cards[0]?.id ?? `solo-${i}`} card={g.cards[0]!} interaction={interaction} />
-        ),
-      )}
-    </section>
-  );
+            {selectionLabel(g.selection)}
+          </span>
+        </div>
+        <CardCarousel cards={g.cards} interaction={interaction} basis="64%" />
+      </div>,
+    );
+  });
+  flushSolo();
+  return <section style={{ display: "grid", gap: 18, padding: "8px 0" }}>{blocks}</section>;
 }
 
 // gap-b made visible: activity cards render as a timeline/itinerary with a node spine.
