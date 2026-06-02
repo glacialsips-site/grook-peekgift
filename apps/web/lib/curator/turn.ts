@@ -96,10 +96,18 @@ export async function runCuratorTurn(
       doc = r.value.doc;
       events.push(...r.value.events);
       tools.push({ name: tu.name, ok: true });
+      // Feed the resolved ids back so the model can target what it just created
+      // (e.g. set_card_rule / update_card by id, add_card into a variant group).
+      const ids: Record<string, string> = {};
+      for (const e of r.value.events) {
+        if (e.type === "card_added") ids.card_id = e.card.id;
+        else if (e.type === "variant_group_added") ids.variant_group_id = e.group.id;
+        else if (e.type === "section_inserted") ids.section_id = e.section.id;
+      }
       results.push({
         type: "tool_result",
         tool_use_id: tu.id,
-        content: JSON.stringify({ ok: true, applied: r.value.events.map((e) => e.type) }),
+        content: JSON.stringify({ ok: true, ...ids, applied: r.value.events.map((e) => e.type) }),
       });
     }
     messages.push({ role: "user", content: results });
