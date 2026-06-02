@@ -1612,3 +1612,46 @@ PR needed. Verify on day one with a trivial commit → confirm a Netlify build f
 The as-built atelier checkout is **single-currency USD + custom coupons + no tax on the publish fee**
 (recon Add. XV.2) — not the "every country/currency/tax" intent. Before Ch 7.4/8.2, confirm whether full
 i18n/tax is in scope for v1 (Stripe Adaptive Pricing + `automatic_tax` would need adding) or deferred.
+
+---
+
+# Addendum XIX — Decisions: model + the REAL i18n checkout (corrects XV.2) (2026-06-01)
+
+> Frank's two calls + a correction his instinct forced. ↪ = body pointer.
+
+## XIX.1 — In-app chat model: Opus 4.8 day one  ↪ settles §7/C6, overrides BUILD-BOOK Ch 2.4 default
+Start the in-app curator chat on **Opus 4.8** (the sample-page caliber hasn't been tried at Sonnet at this
+level). Keep the **step-down to Sonnet 4.6 as a later A/B behind the LLM port**, once the flow is functional,
+to measure whether there's a real practical difference. So: override the BUILD-BOOK Ch 2.4 "Sonnet default /
+Opus opt-in" → **Opus default**, Sonnet experiment later. (Build seat stays Opus 4.8; a cheap model — Haiku —
+behind the port for classification/moderation as before.)
+
+## XIX.2 — CORRECTION: the full i18n checkout exists; it's a Stripe Checkout Session  ↪ CORRECTS XV.2, XV.5, VII.2, IX.2
+Frank: "you're not looking at the right one… I want it all from day one… it may look single-country/no-tax
+because it's flowing from Stripe." **Confirmed against code.** There are multiple checkout implementations; the
+full-i18n one is on **`claude/feat-stripe-embedded-checkout: atelier/app/api/checkout/route.ts`** — a Stripe
+**Checkout Session** (not the PaymentIntent my subagent read in XV.2):
+```ts
+const session = await stripe.checkout.sessions.create({
+  ui_mode: 'embedded_page', mode: 'payment',
+  line_items: [{ price: env.STRIPE_PRICE_ID, quantity: 1 }],
+  return_url: `${env.APP_URL}/build/${peekId}/publish?session_id={CHECKOUT_SESSION_ID}`,
+  automatic_tax: { enabled: true },          // Stripe Tax — every jurisdiction
+  tax_id_collection: { enabled: true },      // business tax IDs
+  billing_address_collection: 'auto',        // Stripe Address Element (Google Places built in)
+  adaptive_pricing: { enabled: true },       // local-currency presentment — every currency
+  allow_promotion_codes: true,               // native coupons
+});
+```
+So **every country / currency / tax / coupon flows from Stripe natively** via the Checkout Session — exactly
+Frank's read. **Corrections:** (a) XV.2's "single-currency USD / no tax on publish" was reading the wrong
+(PaymentIntent) variant — the **Session** variant is the target; (b) the custom `/api/checkout/coupon` route +
+the `client_secret`-Payment-Element port widening I recommended (XV.5/VII.2) are **unnecessary** — a Checkout
+Session with `allow_promotion_codes`/`adaptive_pricing`/`automatic_tax` does it; (c) **drop the standalone
+`GOOGLE_PLACES_API_KEY`** — `billing_address_collection` uses Stripe's Address Element, which has Google Places
+autocomplete built in. **Decision: full i18n/tax/coupon from day one, Stripe-native.** Build-chat note: target
+the **Checkout Session** approach (this branch's route as the reference), not the PaymentIntent one; `PaymentPort.createCheckout` returns the session (`url` for hosted, or `client_secret` for `ui_mode:'embedded'`), and Stripe owns currency/tax/address/coupons. (The exact "right" prior file may also live in Frank's undeployed rebuild — neither of us is certain — so build to this spec rather than porting one file blindly. The `feat-stripe-embedded-checkout` route is a known-good reference.)
+
+## XIX.3 — Launch kit
+The turnkey "stand up the build chat" kit (exact setup-screen values + the exact kickoff prompt + git/branch
+steps + Frank's pre-flight checklist) is at **`recon-assets/BUILD-CHAT-LAUNCH-KIT.md`**.
