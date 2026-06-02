@@ -5,7 +5,9 @@
 // (z1), and a floating action bar (z2). When `interaction` is supplied (recipient surface),
 // cards become tappable pick targets.
 
-import type { CSSProperties, ReactNode } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type {
   RenderModel,
   SectionView,
@@ -242,15 +244,15 @@ function Note({ section, model }: { section: SectionView; model: RenderModel }) 
   );
 }
 
-function CardTile({ card, interaction }: { card: CardView; interaction?: PickInteraction }) {
-  const dimmed = card.isTaunt;
-  const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
+function CardTile({ card, interaction, onOpen }: { card: CardView; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   const picked = interaction?.picked.includes(card.id) ?? false;
+  const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
+  const dimmed = card.isTaunt || picked; // claimed cards dim, per §1.4
+  const openable = Boolean(onOpen) && !card.isTaunt;
   return (
     <div
-      onClick={pickable ? () => interaction!.onToggle(card.id) : undefined}
-      role={pickable ? "button" : undefined}
-      aria-pressed={pickable ? picked : undefined}
+      onClick={openable ? () => onOpen!(card.id) : undefined}
+      role={openable ? "button" : undefined}
       className="peek-card"
       style={{
         background: "var(--peek-surface)",
@@ -326,7 +328,7 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
 
 // gap-a made visible: a variant group renders as a labeled, ruled cluster carrying its
 // selection rule; ungrouped cards stand alone.
-function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interaction?: PickInteraction }) {
+function GiftGrid({ groups, interaction, onOpen }: { groups: CardGroupView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (groups.length === 0) return null;
   return (
     <section style={{ display: "grid", gap: 16, padding: "8px 20px" }}>
@@ -343,12 +345,12 @@ function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interactio
             </legend>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {g.cards.map((c) => (
-                <CardTile key={c.id} card={c} interaction={interaction} />
+                <CardTile key={c.id} card={c} interaction={interaction} onOpen={onOpen} />
               ))}
             </div>
           </fieldset>
         ) : (
-          <CardTile key={g.cards[0]?.id ?? `solo-${i}`} card={g.cards[0]!} interaction={interaction} />
+          <CardTile key={g.cards[0]?.id ?? `solo-${i}`} card={g.cards[0]!} interaction={interaction} onOpen={onOpen} />
         ),
       )}
     </section>
@@ -561,14 +563,161 @@ function Claim({ section, model }: { section: SectionView; model: RenderModel })
   );
 }
 
+// §1.4 — the bottom sheet every card resolves into. Tap a card → it slides up populated from
+// that card's data → the claim button toggles the pick (server-validated upstream) and the
+// sheet auto-closes. Lives inside the root (position:absolute), not fixed to the viewport, so
+// it stays inside the device frame. `card` is held through the close transition so the contents
+// don't vanish mid-slide.
+function CardSheet({
+  card,
+  open,
+  model,
+  interaction,
+  onClose,
+}: {
+  card: CardView | null;
+  open: boolean;
+  model: RenderModel;
+  interaction?: PickInteraction;
+  onClose: () => void;
+}) {
+  const picked = Boolean(card && interaction?.picked.includes(card.id));
+  const claimable = Boolean(interaction) && !!card && !card.isLocked && !card.isTaunt;
+  const claimLabel = picked ? "Picked ✓" : card?.isLocked ? "Locked" : model.ctaLabel ?? "Pick this";
+
+  function claim() {
+    if (!card) return;
+    if (claimable && !picked) {
+      interaction!.onToggle(card.id);
+      window.setTimeout(onClose, 950); // let the pick register + the card badge land, then close (§1.4)
+    } else {
+      onClose();
+    }
+  }
+
+  const beg =
+    card?.isLocked && card.unlockRule?.kind === "beg" && card.unlockRule.beg_prompt ? card.unlockRule.beg_prompt : null;
+  const when = card ? [fmtDate(card.proposedDate), card.locationHint].filter(Boolean).join(" · ") : "";
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 97,
+          background: "color-mix(in srgb, var(--peek-ink) 58%, transparent)",
+          opacity: open ? 1 : 0,
+          visibility: open ? "visible" : "hidden",
+          transition: "opacity .35s ease, visibility .35s ease",
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 98,
+          background: "var(--peek-surface)",
+          borderTop: "1px solid var(--peek-line)",
+          borderRadius: "22px 22px 0 0",
+          transform: open ? "none" : "translateY(101%)",
+          transition: "transform .45s cubic-bezier(.3,.85,.2,1)",
+          padding: "10px 22px calc(26px + var(--peek-safe-b))",
+          maxHeight: "88%",
+          overflowY: "auto",
+          boxShadow: "0 -30px 80px color-mix(in srgb, var(--peek-ink) 38%, transparent)",
+        }}
+      >
+        <div style={{ width: 46, height: 5, borderRadius: 999, background: "var(--peek-line)", margin: "6px auto 16px" }} />
+        {card ? (
+          <>
+            {!card.isTaunt ? (
+              <div style={{ borderRadius: "var(--peek-radius-card)", overflow: "hidden", marginBottom: 14 }}>
+                <Media url={card.media?.url ?? null} alt={card.media?.alt} ratio="16 / 10" />
+              </div>
+            ) : null}
+            {card.isLocked ? (
+              <Eyebrow>🔒 locked</Eyebrow>
+            ) : card.type === "aspirational" ? (
+              <Eyebrow>★ the dream</Eyebrow>
+            ) : card.type === "digital" ? (
+              <Eyebrow>digital</Eyebrow>
+            ) : null}
+            <h3 style={{ fontFamily: "var(--peek-font-display)", fontSize: 26, lineHeight: 1.12, margin: "6px 0 8px", textShadow: "var(--peek-display-shadow)" }}>
+              {card.title}
+            </h3>
+            {card.description ? (
+              <p style={{ color: "var(--peek-muted)", fontSize: 14.5, lineHeight: 1.55, margin: "0 0 12px" }}>{card.description}</p>
+            ) : null}
+            {when ? <div style={{ color: "var(--peek-accent)", fontSize: 13, margin: "0 0 12px" }}>{when}</div> : null}
+            {card.isTaunt && card.tauntText ? (
+              <p style={{ color: "var(--peek-accent)", fontStyle: "italic", fontSize: 15, margin: "0 0 12px" }}>{card.tauntText}</p>
+            ) : null}
+            {card.valueText ? (
+              <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 21, color: "var(--peek-accent)", margin: "0 0 14px" }}>{card.valueText}</div>
+            ) : null}
+            {beg ? <div style={{ color: "var(--peek-muted)", fontStyle: "italic", fontSize: 13.5, margin: "0 0 14px" }}>“{beg}”</div> : null}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={onClose}
+                style={{
+                  flex: "0 0 auto",
+                  border: "1px solid var(--peek-line)",
+                  background: "transparent",
+                  color: "var(--peek-ink)",
+                  borderRadius: "var(--peek-radius-pill)",
+                  padding: "12px 18px",
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+              {!card.isTaunt ? (
+                <button
+                  onClick={claim}
+                  disabled={picked || card.isLocked}
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    background: "var(--peek-accent)",
+                    color: "var(--peek-btn-ink)",
+                    fontFamily: "var(--peek-font-display)",
+                    fontSize: 15,
+                    borderRadius: "var(--peek-radius-pill)",
+                    padding: "12px 18px",
+                    cursor: picked || card.isLocked ? "default" : "pointer",
+                    opacity: picked || card.isLocked ? 0.6 : 1,
+                    boxShadow: "var(--peek-glow)",
+                  }}
+                >
+                  {claimLabel}
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 function SectionBlock({
   section,
   model,
   interaction,
+  onOpen,
 }: {
   section: SectionView;
   model: RenderModel;
   interaction?: PickInteraction;
+  onOpen?: (id: string) => void;
 }) {
   switch (section.kind) {
     case "hero":
@@ -576,7 +725,7 @@ function SectionBlock({
     case "note":
       return <Note section={section} model={model} />;
     case "giftgrid":
-      return <GiftGrid groups={model.cardGroups} interaction={interaction} />;
+      return <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={onOpen} />;
     case "flightplan":
       return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <GenericSection section={section} />;
     case "claim":
@@ -628,6 +777,29 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
 export function PeekPreview({ model, interaction, pinged }: { model: RenderModel; interaction?: PickInteraction; pinged?: string[] }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
+
+  // The §1.4 sheet: which card is open, and the card held through the close transition.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const allCards = model.cardGroups.flatMap((g) => g.cards);
+  const liveCard = allCards.find((c) => c.id === openId) ?? null;
+  const [held, setHeld] = useState<CardView | null>(null);
+
+  useEffect(() => {
+    if (liveCard) setHeld(liveCard);
+  }, [liveCard]);
+  useEffect(() => {
+    // A streamed edit can delete the open card out from under the sheet — close if it's gone.
+    if (openId !== null && !liveCard) setOpenId(null);
+  }, [openId, liveCard]);
+  useEffect(() => {
+    if (openId === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openId]);
+
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
@@ -638,15 +810,18 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
         {model.sections.map((s) => {
           const block = (
             <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined}>
-              <SectionBlock section={s} model={model} interaction={interaction} />
+              <SectionBlock section={s} model={model} interaction={interaction} onOpen={setOpenId} />
             </div>
           );
           // The hero runs its own on-load cascade (§1.5B); everything below rises on scroll-in (§1.5A).
           return s.kind === "hero" ? <div key={s.id}>{block}</div> : <Reveal key={s.id}>{block}</Reveal>;
         })}
-        {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
+        {!hasGiftgrid && model.cardGroups.length > 0 ? (
+          <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={setOpenId} />
+        ) : null}
       </div>
       {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
+      <CardSheet card={held} open={openId !== null} model={model} interaction={interaction} onClose={() => setOpenId(null)} />
     </div>
   );
 }
