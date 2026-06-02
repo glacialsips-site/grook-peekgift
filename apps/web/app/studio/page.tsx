@@ -304,7 +304,7 @@ export default function Studio() {
                   void send();
                 }
               }}
-              placeholder={busy ? "thinking…" : listening ? "listening…" : "tell Claude what to make…"}
+              placeholder={busy ? "thinking…" : listening ? "listening…" : "tell Peek what to make…"}
               disabled={busy}
               style={{ flex: 1, border: "none", outline: "none", background: "transparent", color: "#fff", fontSize: 16, fontFamily: "inherit" }}
             />

@@ -585,7 +585,7 @@ function EmptyState() {
     >
       <div>
         <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 24, marginBottom: 8 }}>your page builds here</div>
-        <div style={{ color: "var(--peek-muted)", fontSize: 15 }}>tell Claude who it&apos;s for — it appears as you talk.</div>
+        <div style={{ color: "var(--peek-muted)", fontSize: 15 }}>tell Peek who it&apos;s for — it appears as you talk.</div>
       </div>
     </div>
   );
