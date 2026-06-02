@@ -5,8 +5,8 @@ import { emptyDocument, render, validatePeekIR, type PeekIR } from "@peek/core";
 import { PeekPreview } from "@/components/preview";
 
 type Msg = { role: "user" | "assistant"; content: string };
-type PendingImage = { media_type: string; data: string; preview: string };
-type ApiBlock = { type: "text"; text: string } | { type: "image"; source: { type: "base64"; media_type: string; data: string } };
+type PendingImage = { file: File; preview: string };
+type ApiBlock = { type: "text"; text: string } | { type: "image"; source: { type: "url"; url: string } };
 
 const GREETING =
   "hey — who are we making something for? give me the person + the occasion in a line, however sloppy. snap a photo of the thing, paste a link, or just talk — whatever's easiest.";
@@ -87,13 +87,8 @@ export default function Studio() {
     const f = e.target.files?.[0];
     e.target.value = "";
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const url = String(reader.result);
-      const m = /^data:(.+?);base64,(.+)$/.exec(url);
-      if (m && m[1] && m[2]) setPendingImage({ media_type: m[1], data: m[2], preview: url });
-    };
-    reader.readAsDataURL(f);
+    if (pendingImage) URL.revokeObjectURL(pendingImage.preview);
+    setPendingImage({ file: f, preview: URL.createObjectURL(f) });
   }
 
   function startMic() {
@@ -124,16 +119,14 @@ export default function Studio() {
     setBusy(true);
     setCollapsed(false);
 
-    // Host the photo so it has a real, renderable URL the model can place (hero or card).
-    // The base64 still rides along for vision; the URL is what actually becomes the image.
+    // Host the photo so it has a real URL — no base64. The model reads it BY URL (vision)
+    // and uses that same url for the hero or a card's media.
     let hostedUrl: string | null = null;
     if (img) {
       try {
-        const up = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ data: img.data, media_type: img.media_type }),
-        });
+        const fd = new FormData();
+        fd.append("file", img.file);
+        const up = await fetch("/api/upload", { method: "POST", body: fd });
         const uj = (await up.json().catch(() => ({}))) as { url?: string; error?: string };
         if (up.ok && uj.url) {
           hostedUrl = uj.url;
@@ -147,15 +140,17 @@ export default function Studio() {
         setBusy(false);
         return;
       }
+      URL.revokeObjectURL(img.preview);
     }
 
-    const apiContent: string | ApiBlock[] = img
-      ? [
-          ...(text ? [{ type: "text" as const, text }] : []),
-          { type: "text" as const, text: `[the curator just uploaded a photo, now hosted at ${hostedUrl} — set it as the hero via set_hero_media with this exact url if it's the recipient/scene/vibe, or add it as a card's media if it's a product. read it for art-direction either way.]` },
-          { type: "image" as const, source: { type: "base64" as const, media_type: img.media_type, data: img.data } },
-        ]
-      : text;
+    const apiContent: string | ApiBlock[] =
+      img && hostedUrl
+        ? [
+            ...(text ? [{ type: "text" as const, text }] : []),
+            { type: "text" as const, text: `[the curator just uploaded a photo, now at ${hostedUrl} — set it as the hero via set_hero_media with this exact url if it's the recipient/scene/vibe, or add it as a card's media if it's a product. read it for art-direction either way.]` },
+            { type: "image" as const, source: { type: "url" as const, url: hostedUrl } },
+          ]
+        : text;
     const apiMessages = [
       ...messages.map((m) => ({ role: m.role, content: m.content })),
       { role: "user" as const, content: apiContent },
@@ -310,7 +305,7 @@ export default function Studio() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={pendingImage.preview} alt="" style={{ width: 42, height: 42, borderRadius: 8, objectFit: "cover" }} />
               <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>photo attached</span>
-              <button onClick={() => setPendingImage(null)} style={{ marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 13 }}>
+              <button onClick={() => { URL.revokeObjectURL(pendingImage.preview); setPendingImage(null); }} style={{ marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 13 }}>
                 remove
               </button>
             </div>
