@@ -3,8 +3,8 @@
 
 ## ▶ HOW TO LAUNCH (Frank — 3 things)
 1. **Cloud environment:** Name = `peek.gift build` · Network = **Full** · Environment variables = *(blank)* ·
-   **Setup script** — the entire script is this one line: `cd atelier 2>/dev/null; npm install`
-   *(installs the app's deps; it lives under `atelier/`. This line never errors even if that folder isn't there yet.)*
+   **Setup script** — the entire script is this one line: `cd atelier 2>/dev/null; npm install || true`
+   *(installs the app's deps — it lives under `atelier/`; the `|| true` guarantees the session still starts even if install hiccups, and the build chat redoes install/build in Chapter 0.)*
 2. **Start a fresh build chat** and either **drop this file into it**, or — if it can reach git — tell it to read
    `recon-assets/PEEK_GIFT_BUILD.md` on branch `claude/gallant-planck-pu51x`. (Same content either way.)
 3. **Paste this as the first message** (this is all you paste):
