@@ -1,6 +1,6 @@
-import { render } from "@peek/core";
-import { PeekPreview } from "@/components/preview";
 import { loadPeekBySlug, persistenceConfigured } from "@/lib/persistence/store";
+import { loadPicks } from "@/lib/persistence/picks";
+import { RecipientView } from "@/components/recipient-view";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,9 +22,6 @@ export default async function RecipientPage({ params }: { params: Promise<{ slug
     );
   }
 
-  return (
-    <div style={{ position: "fixed", inset: 0 }}>
-      <PeekPreview model={render(doc)} />
-    </div>
-  );
+  const picks = await loadPicks(doc.peek.id);
+  return <RecipientView doc={doc} initialPicks={picks} />;
 }

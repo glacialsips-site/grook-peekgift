@@ -1,9 +1,9 @@
 // The preview renderer: paints the core's framework-agnostic RenderModel into themed
 // React, driven entirely by the --peek-* custom properties (no Tailwind). This is the
 // "page that builds behind the chat" and the published recipient page — one renderer,
-// one view-model. v1 covers hero / note / the rule-aware giftgrid / itinerary / the
-// common section kinds + the money bar; richer shell (nav, bottom sheet, scenes, motion)
-// is the Ch4 pass. Server-component safe (no hooks): it renders a snapshot of the model.
+// one view-model. When `interaction` is supplied (the recipient surface), cards become
+// tappable pick targets; without it the page is static (the studio preview, the demo).
+// Server-component safe except where `interaction` makes a subtree interactive.
 
 import type { CSSProperties, ReactNode } from "react";
 import type {
@@ -14,6 +14,12 @@ import type {
   ItineraryStepView,
   VariantGroup,
 } from "@peek/core";
+
+export interface PickInteraction {
+  picked: string[];
+  onToggle: (cardId: string) => void;
+  pending?: boolean;
+}
 
 function str(o: Record<string, unknown>, k: string): string | undefined {
   const v = o[k];
@@ -26,7 +32,6 @@ function selectionLabel(sel: VariantGroup["selection"] | null): string {
 
 function fmtDate(iso: string | null): string | null {
   if (!iso) return null;
-  // Deterministic (no locale/timezone) so server + client agree: trim the ISO string.
   return iso.replace("T", " · ").replace(/:\d{2}(\.\d+)?Z?$/, "").slice(0, 22);
 }
 
@@ -134,20 +139,47 @@ function Note({ section, model }: { section: SectionView; model: RenderModel }) 
   );
 }
 
-function CardTile({ card }: { card: CardView }) {
+function CardTile({ card, interaction }: { card: CardView; interaction?: PickInteraction }) {
   const dimmed = card.isTaunt;
+  const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
+  const picked = interaction?.picked.includes(card.id) ?? false;
   return (
     <div
+      onClick={pickable ? () => interaction!.onToggle(card.id) : undefined}
+      role={pickable ? "button" : undefined}
+      aria-pressed={pickable ? picked : undefined}
       style={{
         background: "var(--peek-surface)",
-        border: "var(--peek-border-weight) solid var(--peek-line)",
+        border: picked ? "2px solid var(--peek-accent)" : "var(--peek-border-weight) solid var(--peek-line)",
         borderRadius: "var(--peek-radius-card)",
         overflow: "hidden",
-        boxShadow: "var(--peek-card-shadow)",
+        boxShadow: picked ? "0 0 0 3px var(--peek-accent-soft)" : "var(--peek-card-shadow)",
         opacity: dimmed ? 0.66 : 1,
         position: "relative",
+        cursor: pickable ? "pointer" : "default",
+        transition: "border-color .15s ease, box-shadow .15s ease",
       }}
     >
+      {picked ? (
+        <div
+          style={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            zIndex: 2,
+            background: "var(--peek-accent)",
+            color: "var(--peek-btn-ink)",
+            borderRadius: 999,
+            width: 24,
+            height: 24,
+            display: "grid",
+            placeItems: "center",
+            fontSize: 14,
+          }}
+        >
+          ✓
+        </div>
+      ) : null}
       {!card.isTaunt ? <Media url={card.media?.url ?? null} alt={card.media?.alt} /> : null}
       <div style={{ padding: 13 }}>
         {card.isLocked ? <Eyebrow>🔒 locked</Eyebrow> : null}
@@ -160,7 +192,13 @@ function CardTile({ card }: { card: CardView }) {
         ) : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             {card.valueText ? <span style={{ color: "var(--peek-accent)", fontWeight: 700 }}>{card.valueText}</span> : <span />}
-            {!card.isLocked ? <span style={{ color: "var(--peek-muted)", fontSize: 12.5 }}>view →</span> : null}
+            {pickable ? (
+              <span style={{ color: picked ? "var(--peek-accent)" : "var(--peek-muted)", fontSize: 12.5, fontWeight: 600 }}>
+                {picked ? "picked ✓" : "pick →"}
+              </span>
+            ) : !card.isLocked ? (
+              <span style={{ color: "var(--peek-muted)", fontSize: 12.5 }}>view →</span>
+            ) : null}
           </div>
         )}
         {card.isLocked && card.unlockRule?.kind === "beg" && card.unlockRule.beg_prompt ? (
@@ -173,7 +211,7 @@ function CardTile({ card }: { card: CardView }) {
 
 // gap-a made visible: a variant group renders as a labeled, ruled cluster carrying its
 // selection rule; ungrouped cards stand alone. Never flat uniform tiles with one badge.
-function GiftGrid({ groups }: { groups: CardGroupView[] }) {
+function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interaction?: PickInteraction }) {
   if (groups.length === 0) return null;
   return (
     <section style={{ display: "grid", gap: 16, padding: "8px 20px" }}>
@@ -190,12 +228,12 @@ function GiftGrid({ groups }: { groups: CardGroupView[] }) {
             </legend>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {g.cards.map((c) => (
-                <CardTile key={c.id} card={c} />
+                <CardTile key={c.id} card={c} interaction={interaction} />
               ))}
             </div>
           </fieldset>
         ) : (
-          <CardTile key={g.cards[0]?.id ?? `solo-${i}`} card={g.cards[0]!} />
+          <CardTile key={g.cards[0]?.id ?? `solo-${i}`} card={g.cards[0]!} interaction={interaction} />
         ),
       )}
     </section>
@@ -296,8 +334,12 @@ function GenericSection({ section }: { section: SectionView }) {
   );
 }
 
-function ActionBar({ model }: { model: RenderModel }) {
+function ActionBar({ model, interaction }: { model: RenderModel; interaction?: PickInteraction }) {
+  const pickedCount = interaction?.picked.length ?? 0;
   const total = model.totalValueCents > 0 ? fmtTotal(model.totalValueCents) : null;
+  const left = interaction
+    ? { k: pickedCount > 0 ? "your picks" : "your move", v: pickedCount > 0 ? `${pickedCount} picked` : "tap what speaks to you" }
+    : { k: total ? "in the bundle" : "your move", v: total ?? "pick what speaks to you" };
   return (
     <div
       style={{
@@ -316,8 +358,8 @@ function ActionBar({ model }: { model: RenderModel }) {
       }}
     >
       <div style={{ flex: 1 }}>
-        <Eyebrow>{total ? "in the bundle" : "your move"}</Eyebrow>
-        <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 18 }}>{total ?? "pick what speaks to you"}</div>
+        <Eyebrow>{left.k}</Eyebrow>
+        <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 18 }}>{left.v}</div>
       </div>
       <button
         style={{
@@ -330,22 +372,31 @@ function ActionBar({ model }: { model: RenderModel }) {
           padding: "12px 20px",
           borderRadius: "var(--peek-radius-pill)",
           boxShadow: "var(--peek-glow)",
+          opacity: interaction?.pending ? 0.6 : 1,
         }}
       >
-        {model.ctaLabel ?? "Pick yours →"}
+        {interaction ? (pickedCount > 0 ? "Send my picks →" : "Pick yours") : model.ctaLabel ?? "Pick yours →"}
       </button>
     </div>
   );
 }
 
-function SectionBlock({ section, model }: { section: SectionView; model: RenderModel }) {
+function SectionBlock({
+  section,
+  model,
+  interaction,
+}: {
+  section: SectionView;
+  model: RenderModel;
+  interaction?: PickInteraction;
+}) {
   switch (section.kind) {
     case "hero":
       return <Hero section={section} model={model} />;
     case "note":
       return <Note section={section} model={model} />;
     case "giftgrid":
-      return <GiftGrid groups={model.cardGroups} />;
+      return <GiftGrid groups={model.cardGroups} interaction={interaction} />;
     case "flightplan":
       return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <GenericSection section={section} />;
     default:
@@ -395,7 +446,7 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
   return <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${query}&display=swap`} precedence="high" />;
 }
 
-export function PeekPreview({ model }: { model: RenderModel }) {
+export function PeekPreview({ model, interaction }: { model: RenderModel; interaction?: PickInteraction }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
   return (
@@ -403,11 +454,11 @@ export function PeekPreview({ model }: { model: RenderModel }) {
       <FontLink cssVars={model.cssVars} />
       {empty ? <EmptyState /> : null}
       {model.sections.map((s) => (
-        <SectionBlock key={s.id} section={s} model={model} />
+        <SectionBlock key={s.id} section={s} model={model} interaction={interaction} />
       ))}
       {/* If cards exist but no giftgrid section declared them, still surface them. */}
-      {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} /> : null}
-      {!empty ? <ActionBar model={model} /> : null}
+      {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
+      {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
     </div>
   );
 }
