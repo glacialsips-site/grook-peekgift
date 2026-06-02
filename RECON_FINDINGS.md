@@ -1544,3 +1544,71 @@ no-Tailwind; model-is-resolver (the *chat*, not the framework); never-paraphrase
 > Net under the decision: the report's lean-single-app conclusions (G7/C1/X/XIV.3/A1/A2/C2) are **superseded by
 > XVII**; the lean-CHAT, renderer, design-method, ports, bookend-isolation, and gap findings all **carry
 > forward** as salvage into the BUILD-BOOK framework. The factual addenda (II/IV/V/VI/IX/XV) stand.
+
+---
+
+# Addendum XVIII — Standing up the build chat (config, branch, push scope, context) (2026-06-01)
+
+> Frank: "do both, use whichever branch you think best." The fleshed BUILD-BOOK Ch 3–8 is at
+> `recon-assets/BUILD-BOOK-Ch3-8.md`. This is the **setup** for the session that runs it — under the
+> BUILD-BOOK-monorepo decision (XVII). Also answers the "how do environments/repos/branches tie
+> together" question concretely.
+
+## XVIII.1 — Repo · branch · environment
+- **Repo:** `glacialsips-site/grook-peekgift` (the one repo; the private `glacialsips-site` is the
+  separate water vertical — leave it out of scope).
+- **Branch:** build on the **`atelier-integration` lineage** (it carries the framework + bookends the
+  decision keeps; XVII.1). Two viable setups:
+  - **(rec.) A dedicated build branch off `atelier-integration`** (e.g. `build/peek-vnext`), with Netlify
+    **branch-deploys** as the preview surface; **promote it to the Netlify production branch at Ch 8
+    cutover.** Safer: prod isn't touched until the end-to-end gate (Ch 8.2) is green.
+  - **(simpler) Work `atelier-integration` directly** — it's already the production branch, so every push
+    auto-deploys (push = the deploy gate). Faster feedback, but a broken push hits prod; only do this once
+    Ch 0–1 are solid.
+  - Either way the key is **branch built on == branch Netlify deploys** (that's what removes the old
+    dead-end; XVII.4). Don't build on a branch Netlify doesn't watch.
+- **Cloud environment** (the "Peek.Gift 8.0" form you screenshotted): **Network = Full** (needs
+  pnpm/npm install + Anthropic/Supabase/Stripe/Google-Fonts + later the feeds). **Setup script** for the
+  monorepo: `corepack enable && pnpm install` (it's a Turborepo/pnpm workspace, not npm). **Environment
+  variables field:** per its own warning ("visible to anyone — don't add secrets"), put only non-secret
+  vars here (`NODE_ENV`, `GIT_AUTHOR_NAME`, maybe `PAY_MODE=mock` for local). **All real keys stay in the
+  Netlify env vault** (per `backendservices`/IX) — the app reads them at deploy; the build chat runs on
+  port **stubs** with no keys (the ports design makes this work), and proves real paths at deploy/Ch 7–8.
+
+> **Environments vs repos vs branches (your question):** a *repo* is the code; a *branch* is one history
+> line in it; a *cloud environment* ("Peek.Gift 8.0") is just a runtime sandbox config (which repo to
+> clone, network, env vars, setup script) that each web session boots from. One environment can check out
+> any branch. So: **one environment → grook-peekgift, Full network, pnpm-install setup → each build
+> session checks out the build branch.** You don't need a separate environment per branch.
+
+## XVIII.2 — Push scope (THE fix for the prior dead-end)  ↪ resolves §7/C9, §8/P1
+The old failure: the push-proxy confined a session's commits to a *work* branch that was **not** the
+branch Netlify deployed, so code never reached prod. **Fix:** configure the build session's allowed push
+branch to be **the build/deploy branch itself** (the one Netlify watches). Concretely: the session's
+git scope = `build/peek-vnext` (or `atelier-integration`), and that same branch is the Netlify production
+(or promoted-at-cutover) branch. Then the build chat commits → pushes → Netlify auto-builds, with no relay
+PR needed. Verify on day one with a trivial commit → confirm a Netlify build fires.
+
+## XVIII.3 — Context budget: load vs ignore for the build chat  ↪ re-issue of §7/C4 under the decision
+**LOAD as canonical:**
+- **The plan:** `recon-assets/peek-gift-BUILD-BOOK.md` (Ch 0–2) + `recon-assets/BUILD-BOOK-Ch3-8.md` (Ch 3–8). Paste the **OPERATING CONTRACT + STACK LOCK** first, every session.
+- **The spec:** `peek-jumpoff/reference/vision/REQUIREMENTS_SPEC.md` + `recon-assets/DESIGN_PROJECT_BRIEF.md` (the product truth; **not** "dated" — XI.1).
+- **The design method (crown jewels):** `peek-jumpoff/{JUMPOFF,00_MAP,FOR_CODE,TIPS}.md` + `reference/SHELL_SPEC.md` + the **parts-bin** (toolkit §1–§9, to be cached — Ch 3.4) + the **mockups** (`reference/original-mockups/*` + `mockups/*`) + the **samples** as the caliber bar + few-shots. `DECISIONS.md` for the DQ resolutions.
+- **Salvage pointers:** `bold-feynman:lib/peek-chat/*` (lean chat), `lib/peek-render/*` (renderer superset), `lib/ir/*` (the content model → event-sourced `PeekDocument`); `atelier-integration:` the Turborepo, Drizzle, the event-sourced `peek_mutation_log`, the **bookends** (`atelier/components/{auth,landing}`, `atelier/app/api/checkout/*`), `_packets/SPINE/*`.
+- **This report:** `RECON_FINDINGS.md` (the map; Addenda XV/XVI/XVII especially) + `recon-assets/`.
+
+**IGNORE / mark stale:**
+- The **"feynman is canonical / vision docs are dated"** framing (`CODE_PROJECT_SUMMARY` / `WAKEUP.md`) — it's the misdirection that started this; superseded by XVII.
+- The **rejected design engines:** `peek-jumpoff/reference/engine-parametric-REJECTED/`, `jolly-mccarthy:packages/vibe-resolve` (+ its `vibe-genome` enumerated armory), and `atelier`'s rigid Sonnet chat + the governed `atelier/lib/vibe/*` grammar/template engine.
+- `design_handoff_mobile_chat_sites/ARCHITECTURE.md`'s Kafka/K8s/event-store fantasy (XIV/IV.4) — its companion `STACK_INTEGRATION.md` is the corrected version.
+- `peek-jumpoff/reference/CHECKPOINT.md` (describes the rejected engine as live).
+
+## XVIII.4 — First moves, models, subagents
+- **First moves:** paste OPERATING CONTRACT → run **Ch 0** (ground-truth on the atelier framework — verify, don't trust) → **Ch 0.3 BUILD-MAP** (what already works vs what to build, so nothing working gets rebuilt) → **Ch 1** foundation → **Ch 2** port feynman's lean chat. Don't skip Ch 0 — it's the anti-tail-spin opener.
+- **Models:** build seat = **Opus 4.8**. In-app chat: the BUILD-BOOK Ch 2.4 defaults **Sonnet 4.6 / Opus 4.8 opt-in**, but Frank has leaned Opus for authoring — **confirm with Frank**; a sound tiering is Opus-authoring + **Haiku** for classification/moderation (matches the ledger split), all behind the LLM port + prompt-cached.
+- **Subagents:** partition by BUILD-BOOK chapter with **disjoint file ownership**, lead commits by path. Gotchas to carry: it's **pnpm** (not npm); large files via `Write`/heredoc not `Edit`; confirm whether a Stop-hook is actually active (the committed `.claude/settings.json` on feynman had only a SessionStart hook — Z-series/X2); puppeteer pruning if any agent runs `npm install`.
+
+## XVIII.5 — One thing to confirm with Frank before Ch 7–8
+The as-built atelier checkout is **single-currency USD + custom coupons + no tax on the publish fee**
+(recon Add. XV.2) — not the "every country/currency/tax" intent. Before Ch 7.4/8.2, confirm whether full
+i18n/tax is in scope for v1 (Stripe Adaptive Pricing + `automatic_tax` would need adding) or deferred.
