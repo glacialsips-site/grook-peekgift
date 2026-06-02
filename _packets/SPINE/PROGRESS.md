@@ -33,9 +33,17 @@ never completed** (`picks`=0); pgvector available-not-installed; **Netlify produ
 
 Screenshots delivered to Frank: `/demo` (three rendered samples) and `/studio` (the chat-over-preview screen).
 
+## Also done (the create→persist→recipient slice)
+- **Persistence** — `peek_v2.peek_documents` (folded-PeekIR jsonb snapshot, RLS service-role-only),
+  created live + round-trip verified via the Supabase connector (+ a repo migration). The curator turn
+  persists the snapshot each turn (best-effort, key-gated).
+- **Recipient page** `/g/[slug]` — loads a published document and renders it read-only via the one renderer.
+- **Font loader** — the themed Google display faces load via a css2 link (the anti-generic lever).
+
 ## Next
-- **The rest of the loop** — persist the document (PersistencePort→Supabase), then the recipient page +
-  publish ($12) → pick → notify (the half that has never completed). Create now works end-to-end.
+- **Finish the loop** — publish ($12 Stripe Checkout Session) → webhook publishes → recipient pick
+  (server-validated, within caps) → notify (Resend/Twilio). This is the half that has never completed;
+  create now runs end-to-end and persists.
 - **Ch 3 / Ch 4** — the aesthetic safety-net + eval gate, and the renderer to **full SHELL_SPEC caliber**
   (real Google fonts via a loader, scenes/frames/motifs, the bottom sheet + live running total, og unfurl).
   Today's renderer is a sound v1, not yet the mockup bar.
