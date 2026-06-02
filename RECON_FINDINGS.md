@@ -1464,3 +1464,83 @@ Two Frank-associated architectures, ~3 days apart, both endorsed at their time:
 
 ## XVI.4 — My read (the single opinion here) + why it's still Frank's call
 My read: the **BUILD-BOOK is the authoritative top-down plan** (it's the gated cascade Frank keeps asking for, it operationalizes his hard rules, and its **event-sourced command→event gate is the maker-checker he's passionate about** — feynman has no equivalent). So I lean: **follow the BUILD-BOOK's framework (A)**, and **port feynman's proven assets into it** — the lean chat/system-prompt, the design method + the parts-bin (Add. IV), and the renderer (`lib/peek-render` is a strict superset of everything, ↪ VI.3) become the contents of Ch 2/Ch 3/Ch 4 inside the monorepo core; the atelier bookends (Add. XV) attach as the Landing/Auth/Checkout parts. **But it is genuinely Frank's call**: `DECISIONS.md` (06-01, design-greenlit) explicitly chose (B) and may reflect a deliberate "shed the monorepo to ship faster" pivot after the BUILD-BOOK. The two authorities Frank himself produced point different ways on the framework — so I'm asking rather than foreclosing it a second time. Everything downstream (canonical base branch, the entire build sequence) hinges on this one answer.
+
+---
+
+# Addendum XVII — DECISION: BUILD-BOOK monorepo + the re-issued hand-off (Frank, 2026-06-01)
+
+> Frank chose **(A) the BUILD-BOOK monorepo**: Turborepo + framework-agnostic `packages/core` +
+> the event-sourced `command→event→state` gate + tRPC + Drizzle, built via the gated Ch 0→8
+> cascade, with feynman's lean chat/design-method/renderer + the atelier bookends ported in.
+> This re-issues the parts of the report that assumed the lean single-app. ↪ = body pointer it updates.
+
+## XVII.1 — Reframed canonical base: the framework is the atelier monorepo; feynman is SALVAGE  ↪ SUPERSEDES §3/G7, §7/C1, XIV.3
+Under (A), the base is **not feynman as an app**. The framework the BUILD-BOOK locks — Turborepo +
+event-sourcing + Drizzle + the bookends + the `_packets/SPINE/` docs the BUILD-BOOK Ch 0 reads — already
+exists on the **`atelier-integration` lineage** (Drizzle, Inngest, the event-sourced `peek_mutation_log`
+[PR #6 = the command→event gate], the auth/checkout/landing bookends [Add. XV], `_packets/SPINE/SERVICES.md`,
+edge chat). **What was scrapped on atelier was its CHAT (rigid Sonnet) + its governed vibe/grammar template
+engine — not its framework.** So the BUILD-BOOK path is a **marriage**: keep atelier's *framework*, replace
+its *chat + design engine* with feynman's lean Opus chat + the model-is-resolver renderer. Net: **feynman is
+demoted from "canonical base" to "salvage source"** (its chat, renderer, design package), and the framework
+base is the atelier monorepo (or a fresh Turborepo seeded from it). The BUILD-BOOK's **Ch 0 (Ground-Truth)
+is precisely where the next chat verifies atelier's foundation** and finalizes fresh-vs-build-on-atelier —
+don't pre-judge it; run it. (jolly's `workspace/` is a cleaner Turborepo but has the *rejected* engine and
+none of the bookends/event-sourcing — inferior scaffold.)
+
+## XVII.2 — The salvage / marriage map (what comes from where)
+- **From `atelier-integration` (the framework + the bookends):** the Turborepo monorepo shape; Drizzle +
+  Supabase `peek_v2`; the **event-sourced `peek_mutation_log`** (→ becomes the BUILD-BOOK `command→event`
+  gate); the **auth/checkout/landing bookends** (Add. XV — low-coupled, liftable); Upstash/Inngest/edge
+  wiring; `_packets/SPINE/` docs. **Drop:** atelier's rigid Sonnet chat + the governed vibe/grammar template
+  engine (`atelier/lib/vibe/*` grammar presets).
+- **From `bold-feynman` (the chat + renderer + design):** `lib/peek-chat/*` (lean Opus streaming chat +
+  the LEAN system-prompt + the tool set) → becomes Ch 2's curator turn (tools → Commands through `decide()`);
+  `lib/peek-render/*` (the renderer — a strict superset of every prior renderer, ↪ VI.3) → becomes the pure
+  `render(document,theme)` of Ch 1.4/Ch 4; `lib/ir/{contract,schema}` (the PeekIR) → reconciled into the
+  event-sourced `PeekDocument` (XVII.3); the whole `peek-jumpoff/` design package + samples + mockups.
+- **From the design export zip (Add. IV):** the parts-bin (toolkit §1–§9) as **cached** design vocabulary
+  for the chat (the #1 quality lever, ↪ VII.1) — feeds Ch 2/Ch 3.
+- **Drop entirely:** `jolly`'s `vibe-resolve` deterministic engine; `peek-jumpoff/reference/engine-parametric-REJECTED/`; feynman's `lib/peek/*` DQ-11 first-cut.
+
+## XVII.3 — IR ↔ event-sourced document reconciliation  ↪ UPDATES §6/A2, §6/A1
+Under the BUILD-BOOK the canonical state is **`PeekDocument`** authored via a Zod **`Command`** union
+(`SET_HERO/ADD_SET/ADD_ITEM/MOVE_ITEM/SET_CAP/APPLY_THEME/SET_BADGE/LINK_SET…`) → **`Event`s** → folded state,
+with `decide(doc,cmd)→Result<Event[],Err>` (neverthrow) + pure `apply`. Feynman's `PeekIR` + `reduceTool`
+**port directly onto this**: feynman's 16 authoring tools become the `Command` union; `reduceTool`'s
+validate-then-apply becomes `decide`+`apply` with the event log added; `validatePeekIR` is the Command/Document
+Zod gate. So **A2 updates**: the canonical name under (A) is **`PeekDocument`** (the chat speaks *Commands*,
+never mutates directly); the feynman `PeekIR` shape is the document's content model. **A1 updates**: persistence
+= the **event log + the folded `PeekDocument` snapshot** (Drizzle on `peek_v2` + a `*_versions`/event table) —
+event-sourcing gives the versioning/undo/replay A1 wanted, natively.
+
+## XVII.4 — Deploy implication (the deploy problem may dissolve)  ↪ UPDATES §7/C2, §8/P2-P3, §9/X1
+If the build continues the **atelier monorepo lineage**, the Netlify production branch is **already**
+`atelier-integration` — so `git push` auto-deploys, and the "code never reached the deploy branch" problem
+(P2/P3) **dissolves**: the next chat commits to the deployed branch directly. (The repoint fix is only needed
+if the build starts a *fresh* repo/branch off atelier.) This is a point in favor of building on atelier rather
+than fresh. Confirm the git↔Netlify link is live (X.1) and that `atelier-integration` is still the production
+branch (Netlify → Build & deploy), then the BUILD-BOOK Ch 8 cutover handles legacy→vnext.
+
+## XVII.5 — Sequence = the BUILD-BOOK itself  ↪ SUPERSEDES Add. X
+The build plan is the BUILD-BOOK's gated Ch 0→8 (it IS the top-down cascade), not my Addendum X sketch:
+**Ch 0** verify reality → **Ch 1** the monorepo core + event gate + pure render + token system (anti-Tailwind
+CI) → **Ch 2** the lean chat over live preview (port feynman's chat; tools→Commands→`decide()`) → **Ch 3**
+vibe engine + the **aesthetic eval gate** (Braintrust human-rated — the moat, ↪ XI.4) → **Ch 4** recipient
+page (+caps, `next/og` unfurl) → **Ch 5** catalog moat (PerfectPurchase substrate) → **Ch 6** MCP → **Ch 7**
+gates ($12 publish + Sentry + the eval gates) → **Ch 8** cutover. The **atelier bookends** (Add. XV) attach as
+the Landing/Auth + Checkout parts (Ch 2 shell + Ch 7.4/Ch 8). Ch 0–2 are written as droppable gated prompts;
+**ask Frank to flesh Ch 3–8** (the BUILD-BOOK offers this) before those chapters.
+
+## XVII.6 — CLAUDE.md for the build chat (re-issue of C3 under the decision)
+Propose (don't apply): make **`peek-gift-BUILD-BOOK.md` the operative plan** (commit it + REQUIREMENTS_SPEC +
+the briefs into the repo, e.g. `_packets/SPINE/` or `/docs/`); encode the **monorepo + event-sourced** target
+(XVII.1/3) and the **command→event gate**; promote REQUIREMENTS §13 hard rules (top-down, no-skeletons,
+prove-don't-claim, no-"always", the gate) into CLAUDE.md (↪ XI.2); **drop the "vision docs are dated / feynman
+canonical" framing** (CODE_PROJECT_SUMMARY line) — it's the framing that misdirected this whole effort; fix the
+dangling `SPEC.md` pointer → BUILD-BOOK. Keep: Frank's instruction outranks the repo; terse/no-flattery;
+no-Tailwind; model-is-resolver (the *chat*, not the framework); never-paraphrase-the-IR.
+
+> Net under the decision: the report's lean-single-app conclusions (G7/C1/X/XIV.3/A1/A2/C2) are **superseded by
+> XVII**; the lean-CHAT, renderer, design-method, ports, bookend-isolation, and gap findings all **carry
+> forward** as salvage into the BUILD-BOOK framework. The factual addenda (II/IV/V/VI/IX/XV) stand.
