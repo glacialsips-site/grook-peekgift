@@ -16,6 +16,10 @@ import type {
 } from "@peek/core";
 import { Scene } from "@/components/scenes";
 import { Frame } from "@/components/frames";
+import { Reveal } from "@/components/reveal";
+
+const PREVIEW_CSS =
+  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none}}";
 
 export interface PickInteraction {
   picked: string[];
@@ -161,6 +165,7 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
       onClick={pickable ? () => interaction!.onToggle(card.id) : undefined}
       role={pickable ? "button" : undefined}
       aria-pressed={pickable ? picked : undefined}
+      className="peek-card"
       style={{
         background: "var(--peek-surface)",
         border: picked ? "2px solid var(--peek-accent)" : "var(--peek-border-weight) solid var(--peek-line)",
@@ -464,10 +469,13 @@ export function PeekPreview({ model, interaction }: { model: RenderModel; intera
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
       <Scene kind={sceneKind(model)} mode={model.mode} intensity={intensity(model)} />
+      <style>{PREVIEW_CSS}</style>
       <div style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingBottom: 96 }}>
         {empty ? <EmptyState /> : null}
         {model.sections.map((s) => (
-          <SectionBlock key={s.id} section={s} model={model} interaction={interaction} />
+          <Reveal key={s.id}>
+            <SectionBlock section={s} model={model} interaction={interaction} />
+          </Reveal>
         ))}
         {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
       </div>
