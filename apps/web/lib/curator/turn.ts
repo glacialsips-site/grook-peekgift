@@ -9,6 +9,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { ResolveConstraints } from "@peek/core";
 import { cardResolver } from "@/lib/ports/card-resolver";
 import { generateHero } from "@/lib/ports/image";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { PEEK_STUDIO_SYSTEM_PROMPT } from "./system-prompt";
 import { PEEK_STUDIO_TOOLS } from "./tools";
 
@@ -80,14 +81,14 @@ export async function runCuratorTurnStreaming(
           case "set_page": {
             const html = str("html");
             if (!html) { fail("set_page needs html"); break; }
-            emit({ type: "page", html });
+            emit({ type: "page", html: sanitizeHtml(html, true) });
             ok({ ok: true });
             break;
           }
           case "edit_region": {
             const selector = str("selector"), html = str("html");
             if (!selector || !html) { fail("edit_region needs selector + html"); break; }
-            emit({ type: "patch", selector, html });
+            emit({ type: "patch", selector, html: sanitizeHtml(html, false) });
             ok({ ok: true });
             break;
           }
