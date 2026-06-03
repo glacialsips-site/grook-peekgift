@@ -507,7 +507,7 @@ function GenericSection({ section }: { section: SectionView }) {
   );
 }
 
-function ActionBar({ model, interaction }: { model: RenderModel; interaction?: PickInteraction }) {
+function ActionBar({ model, interaction, onCta }: { model: RenderModel; interaction?: PickInteraction; onCta?: () => void }) {
   const pickedCount = interaction?.picked.length ?? 0;
   const total = model.totalValueCents > 0 ? fmtTotal(model.totalValueCents) : null;
   const left = interaction
@@ -536,6 +536,8 @@ function ActionBar({ model, interaction }: { model: RenderModel; interaction?: P
         <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 18 }}>{left.v}</div>
       </div>
       <button
+        type="button"
+        onClick={onCta}
         style={{
           border: "none",
           cursor: "pointer",
@@ -822,14 +824,312 @@ function CardSheet({
   );
 }
 
+// ── live ticking clock (§ DQ-3). Counts down to data.target in big themed numerals; when the
+// moment passes it flips to doneText. Self-ticking, so it carries live state a static page can't.
+function Countdown({ section }: { section: SectionView }) {
+  const d = section.data;
+  const target = str(d, "target");
+  const targetMs = target ? Date.parse(target) : NaN;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!target || Number.isNaN(targetMs)) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [target, targetMs]);
+  if (!target || Number.isNaN(targetMs)) return null;
+  const label = str(d, "label") ?? section.title ?? "counting down";
+  const done = targetMs - now <= 0;
+  const secsLeft = Math.max(0, Math.floor((targetMs - now) / 1000));
+  const cells: [number, string][] = [
+    [Math.floor(secsLeft / 86400), "days"],
+    [Math.floor((secsLeft % 86400) / 3600), "hrs"],
+    [Math.floor((secsLeft % 3600) / 60), "min"],
+    [secsLeft % 60, "sec"],
+  ];
+  return (
+    <section style={{ padding: 20 }}>
+      <div style={{ border: "1px solid var(--peek-line)", borderRadius: "var(--peek-radius-lg)", background: "var(--peek-accent-faint)", padding: "26px 18px", textAlign: "center" }}>
+        <Eyebrow>{label}</Eyebrow>
+        {done ? (
+          <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 34, marginTop: 12, textShadow: "var(--peek-display-shadow)" }}>{str(d, "doneText") ?? "it's time"}</div>
+        ) : (
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 16 }}>
+            {cells.map(([n, l]) => (
+              <div key={l} style={{ minWidth: 54 }}>
+                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(34px, 11vw, 46px)", lineHeight: 1, color: "var(--peek-accent)", textShadow: "var(--peek-display-shadow)", fontVariantNumeric: "tabular-nums" }}>
+                  {String(n).padStart(2, "0")}
+                </div>
+                <div style={{ color: "var(--peek-muted)", fontSize: 10.5, textTransform: "uppercase", letterSpacing: "var(--peek-eyebrow-tracking)", marginTop: 6 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ── photo/moment strip (DQ-3). A horizontal snap-rail of images from data.images.
+function Gallery({ section }: { section: SectionView }) {
+  const imgs = Array.isArray(section.data.images) ? (section.data.images as Record<string, unknown>[]) : [];
+  const urls = imgs.map((m) => str(m, "url")).filter((u): u is string => Boolean(u));
+  if (urls.length === 0) return null;
+  return (
+    <section style={{ padding: "10px 0" }}>
+      {section.title ? <h2 style={{ fontFamily: "var(--peek-font-display)", fontSize: 20, margin: "0 20px 10px", textShadow: "var(--peek-display-shadow)" }}>{section.title}</h2> : null}
+      <div className="peek-rail" style={{ display: "flex", gap: 10, overflowX: "auto", scrollSnapType: "x mandatory", margin: "0 -20px", padding: "2px 20px 8px" }}>
+        {urls.map((u, i) => (
+          <div key={i} style={{ flex: "0 0 72%", scrollSnapAlign: "start", borderRadius: "var(--peek-radius-card)", overflow: "hidden", border: "1px solid var(--peek-line)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={u} alt="" style={{ width: "100%", aspectRatio: "4 / 5", objectFit: "cover", display: "block" }} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── centered editorial pull-quote (+ optional body), one word accented (the magazine spine).
+function Lede({ section }: { section: SectionView }) {
+  const d = section.data;
+  const quote = str(d, "quote");
+  const body = str(d, "body");
+  const accent = str(d, "accentWord");
+  if (!quote && !body) return null;
+  let q: ReactNode = quote;
+  if (quote && accent && quote.includes(accent)) {
+    const parts = quote.split(accent);
+    q = (
+      <>
+        {parts[0]}
+        <span style={{ color: "var(--peek-accent)", fontStyle: "italic" }}>{accent}</span>
+        {parts.slice(1).join(accent)}
+      </>
+    );
+  }
+  return (
+    <section style={{ padding: "22px 24px", textAlign: "center" }}>
+      {quote ? (
+        <p style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(22px, 6vw, 30px)", lineHeight: 1.25, margin: 0, textShadow: "var(--peek-display-shadow)" }}>{q}</p>
+      ) : null}
+      {body ? <p style={{ color: "var(--peek-muted)", fontSize: 15, lineHeight: 1.6, margin: "14px auto 0", maxWidth: 460 }}>{body}</p> : null}
+    </section>
+  );
+}
+
+function SectionHead({ title }: { title: string | null }) {
+  if (!title) return null;
+  return (
+    <h2 style={{ fontFamily: "var(--peek-font-display)", fontSize: 21, margin: "0 0 12px", textShadow: "var(--peek-display-shadow)" }}>{title}</h2>
+  );
+}
+
+function cardMeta(card: CardView): string {
+  return [fmtDate(card.proposedDate), card.locationHint].filter(Boolean).join(" · ");
+}
+
+// ── rail: a titled horizontal carousel of the card set (the universal mobile shape).
+function Rail({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  const title = section.title ?? str(section.data, "title") ?? null;
+  return (
+    <section style={{ padding: "8px 0" }}>
+      {title ? <div style={{ padding: "0 20px" }}><SectionHead title={title} /></div> : null}
+      <CardCarousel cards={cards} interaction={interaction} onOpen={onOpen} />
+    </section>
+  );
+}
+
+// ── lookbook: an editorial figure stack — big alternating images with caption + price.
+function Lookbook({ section, cards, onOpen }: { section: SectionView; cards: CardView[]; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  const title = section.title ?? str(section.data, "title") ?? null;
+  return (
+    <section style={{ padding: "8px 20px", display: "grid", gap: 20 }}>
+      <SectionHead title={title} />
+      {cards.map((c, i) => (
+        <figure
+          key={c.id}
+          onClick={onOpen && !c.isTaunt ? () => onOpen(c.id) : undefined}
+          role={onOpen && !c.isTaunt ? "button" : undefined}
+          style={{ margin: 0, cursor: onOpen && !c.isTaunt ? "pointer" : "default" }}
+        >
+          <div style={{ borderRadius: "var(--peek-radius-card)", overflow: "hidden", border: "1px solid var(--peek-line)" }}>
+            <Media url={c.media?.url ?? null} alt={c.media?.alt} ratio={i % 3 === 0 ? "4 / 5" : "16 / 10"} />
+          </div>
+          <figcaption style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, marginTop: 9 }}>
+            <span style={{ fontFamily: "var(--peek-font-display)", fontSize: 18, lineHeight: 1.15 }}>{c.title}</span>
+            {c.valueText ? <span style={{ color: "var(--peek-accent)", fontWeight: 700, flex: "0 0 auto" }}>{c.valueText}</span> : null}
+          </figcaption>
+          {c.description ? <p style={{ color: "var(--peek-muted)", fontSize: 13.5, lineHeight: 1.5, margin: "5px 0 0" }}>{c.description}</p> : null}
+        </figure>
+      ))}
+    </section>
+  );
+}
+
+// ── tracklist: a numbered list over the cards (album/side-A shape).
+function Tracklist({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  const side = str(section.data, "side");
+  return (
+    <section style={{ padding: "12px 20px" }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+        <SectionHead title={section.title} />
+        {side ? <Eyebrow>{side}</Eyebrow> : null}
+      </div>
+      <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {cards.map((c, i) => {
+          const picked = interaction?.picked.includes(c.id) ?? false;
+          return (
+            <li
+              key={c.id}
+              onClick={onOpen && !c.isTaunt ? () => onOpen(c.id) : undefined}
+              role={onOpen && !c.isTaunt ? "button" : undefined}
+              style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center", padding: "12px 0", borderTop: i ? "1px solid var(--peek-line)" : "none", cursor: onOpen && !c.isTaunt ? "pointer" : "default", opacity: picked ? 0.6 : 1 }}
+            >
+              <span style={{ fontFamily: "var(--peek-font-display)", color: "var(--peek-accent)", fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{picked ? "✓" : String(i + 1).padStart(2, "0")}</span>
+              <span style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 16, lineHeight: 1.15 }}>{c.title}</div>
+                {c.description ? <div style={{ color: "var(--peek-muted)", fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.description}</div> : null}
+              </span>
+              {c.valueText ? <span style={{ color: "var(--peek-muted)", fontSize: 13, flex: "0 0 auto" }}>{c.valueText}</span> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+// ── courses: a tasting-menu list — name with a dotted leader to price, description beneath.
+function Courses({ section, cards, onOpen }: { section: SectionView; cards: CardView[]; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  return (
+    <section style={{ padding: "14px 22px", textAlign: "center" }}>
+      <SectionHead title={section.title} />
+      <div style={{ display: "grid", gap: 16, textAlign: "left" }}>
+        {cards.map((c) => (
+          <div key={c.id} onClick={onOpen && !c.isTaunt ? () => onOpen(c.id) : undefined} role={onOpen && !c.isTaunt ? "button" : undefined} style={{ cursor: onOpen && !c.isTaunt ? "pointer" : "default" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "var(--peek-font-display)", fontSize: 18 }}>{c.title}</span>
+              <span style={{ flex: 1, borderBottom: "1px dotted var(--peek-line)", transform: "translateY(-4px)" }} />
+              {c.valueText ? <span style={{ color: "var(--peek-accent)", fontFamily: "var(--peek-font-display)", fontSize: 16, flex: "0 0 auto" }}>{c.valueText}</span> : null}
+            </div>
+            {c.description ? <p style={{ color: "var(--peek-muted)", fontSize: 13.5, lineHeight: 1.5, margin: "3px 0 0", fontStyle: "italic" }}>{c.description}</p> : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── tiers: stacked level/price panels (the first reads as the headline tier).
+function Tiers({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  return (
+    <section style={{ padding: "12px 20px" }}>
+      <SectionHead title={section.title} />
+      <div style={{ display: "grid", gap: 12 }}>
+        {cards.map((c, i) => {
+          const picked = interaction?.picked.includes(c.id) ?? false;
+          const headline = i === 0;
+          return (
+            <div
+              key={c.id}
+              onClick={onOpen && !c.isTaunt ? () => onOpen(c.id) : undefined}
+              role={onOpen && !c.isTaunt ? "button" : undefined}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                border: picked ? "2px solid var(--peek-accent)" : "1px solid var(--peek-line)",
+                borderRadius: "var(--peek-radius-card)",
+                background: headline ? "var(--peek-accent-faint)" : "var(--peek-surface)",
+                padding: "16px 18px",
+                cursor: onOpen && !c.isTaunt ? "pointer" : "default",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {headline ? <Eyebrow>top tier</Eyebrow> : null}
+                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 18, lineHeight: 1.15, marginTop: headline ? 2 : 0 }}>{c.title}</div>
+                {c.description ? <p style={{ color: "var(--peek-muted)", fontSize: 13, lineHeight: 1.45, margin: "4px 0 0" }}>{c.description}</p> : null}
+              </div>
+              {c.valueText ? <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 22, color: "var(--peek-accent)", flex: "0 0 auto" }}>{c.valueText}</div> : null}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ── stubs: a ticket-stub line-up — perforated edges, "admit one", date/place + price.
+function Stubs({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
+  if (cards.length === 0) return null;
+  return (
+    <section style={{ padding: "12px 20px" }}>
+      <SectionHead title={section.title} />
+      <div style={{ display: "grid", gap: 14 }}>
+        {cards.map((c) => {
+          const picked = interaction?.picked.includes(c.id) ?? false;
+          const meta = cardMeta(c);
+          return (
+            <div
+              key={c.id}
+              onClick={onOpen && !c.isTaunt ? () => onOpen(c.id) : undefined}
+              role={onOpen && !c.isTaunt ? "button" : undefined}
+              style={{
+                position: "relative",
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                alignItems: "center",
+                gap: 12,
+                border: "1px dashed var(--peek-line)",
+                borderRadius: "var(--peek-radius-card)",
+                background: "var(--peek-surface)",
+                padding: "15px 18px",
+                cursor: onOpen && !c.isTaunt ? "pointer" : "default",
+                opacity: picked ? 0.62 : 1,
+                overflow: "hidden",
+              }}
+            >
+              <span style={{ position: "absolute", left: -8, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: "var(--peek-bg-wash)", border: "1px dashed var(--peek-line)" }} />
+              <span style={{ position: "absolute", right: -8, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, borderRadius: "50%", background: "var(--peek-bg-wash)", border: "1px dashed var(--peek-line)" }} />
+              <div style={{ minWidth: 0 }}>
+                <Eyebrow>{picked ? "claimed ✓" : "admit one"}</Eyebrow>
+                <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 18, lineHeight: 1.15, marginTop: 3 }}>{c.title}</div>
+                {meta ? <div style={{ color: "var(--peek-muted)", fontSize: 12.5, marginTop: 3 }}>{meta}</div> : null}
+              </div>
+              {c.valueText ? <div style={{ fontFamily: "var(--peek-font-display)", color: "var(--peek-accent)", fontSize: 17, flex: "0 0 auto" }}>{c.valueText}</div> : null}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ── custom: model-authored themed markup for a signature move no archetype fits. The html is
+// sanitized server-side (curator turn) before it ever enters the doc, so this just paints it.
+function Custom({ section }: { section: SectionView }) {
+  const html = str(section.data, "html");
+  if (!html) return null;
+  return (
+    <section style={{ padding: "8px 20px" }} dangerouslySetInnerHTML={{ __html: html }} />
+  );
+}
+
 function SectionBlock({
   section,
   model,
+  cards,
   interaction,
   onOpen,
 }: {
   section: SectionView;
   model: RenderModel;
+  cards: CardView[];
   interaction?: PickInteraction;
   onOpen?: (id: string) => void;
 }) {
@@ -840,10 +1140,30 @@ function SectionBlock({
       return <Note section={section} model={model} />;
     case "giftgrid":
       return <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={onOpen} />;
+    case "rail":
+      return <Rail section={section} cards={cards} interaction={interaction} onOpen={onOpen} />;
+    case "lookbook":
+      return <Lookbook section={section} cards={cards} onOpen={onOpen} />;
+    case "tracklist":
+      return <Tracklist section={section} cards={cards} interaction={interaction} onOpen={onOpen} />;
+    case "courses":
+      return <Courses section={section} cards={cards} onOpen={onOpen} />;
+    case "tiers":
+      return <Tiers section={section} cards={cards} interaction={interaction} onOpen={onOpen} />;
+    case "stubs":
+      return <Stubs section={section} cards={cards} interaction={interaction} onOpen={onOpen} />;
     case "flightplan":
-      return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <GenericSection section={section} />;
+      return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <Rail section={section} cards={cards} interaction={interaction} onOpen={onOpen} />;
+    case "gallery":
+      return <Gallery section={section} />;
+    case "countdown":
+      return <Countdown section={section} />;
+    case "lede":
+      return <Lede section={section} />;
     case "claim":
       return <Claim section={section} model={model} />;
+    case "custom":
+      return <Custom section={section} />;
     default:
       return <GenericSection section={section} />;
   }
@@ -889,7 +1209,9 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
 }
 
 export function PeekPreview({ model, interaction, pinged }: { model: RenderModel; interaction?: PickInteraction; pinged?: string[] }) {
-  const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
+  // Any kind that paints the card set (giftgrid/rail/lookbook/tracklist/courses/tiers/stubs/
+  // flightplan) suppresses the standalone fallback grid below, so cards never double-render.
+  const hasCardSection = model.sections.some((s) => s.bearsCards);
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
 
   // The §1.4 sheet: which card is open, and the card held through the close transition.
@@ -897,6 +1219,9 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
   const allCards = model.cardGroups.flatMap((g) => g.cards);
   const liveCard = allCards.find((c) => c.id === openId) ?? null;
   const [held, setHeld] = useState<CardView | null>(null);
+  // Show the live card the instant it's tapped (computed this render); only fall back to the
+  // held copy while the sheet slides closed — otherwise the sheet flashes empty on first open.
+  const shown = liveCard ?? held;
 
   useEffect(() => {
     if (liveCard) setHeld(liveCard);
@@ -928,6 +1253,14 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
   const firstHero = model.sections.find((s) => s.kind === "hero");
   const fullBleed = Boolean(firstHero && str(firstHero.data, "variant") === "full-bleed-photo" && model.hero);
 
+  // The floating CTA jumps to the gifts (the first card-bearing block), offset below the nav —
+  // a real action for what was an inert button, identical in the studio preview and on the page.
+  const scrollToGifts = () => {
+    const sc = scrollRef.current;
+    const grid = sc?.querySelector<HTMLElement>("[data-peek-grid]");
+    if (sc && grid) sc.scrollTo({ top: Math.max(0, grid.offsetTop - 58), behavior: "smooth" });
+  };
+
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
@@ -941,21 +1274,23 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
         {empty ? <EmptyState /> : null}
         {model.sections.map((s) => {
           const block = (
-            <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined}>
-              <SectionBlock section={s} model={model} interaction={interaction} onOpen={setOpenId} />
+            <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined} data-peek-grid={s.bearsCards ? "" : undefined}>
+              <SectionBlock section={s} model={model} cards={allCards} interaction={interaction} onOpen={setOpenId} />
             </div>
           );
           // The hero runs its own on-load cascade (§1.5B); everything below rises on scroll-in (§1.5A).
           return s.kind === "hero" ? <div key={s.id}>{block}</div> : <Reveal key={s.id}>{block}</Reveal>;
         })}
-        {!hasGiftgrid && model.cardGroups.length > 0 ? (
-          <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={setOpenId} />
+        {!hasCardSection && model.cardGroups.length > 0 ? (
+          <div data-peek-grid="">
+            <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={setOpenId} />
+          </div>
         ) : null}
       </div>
       {!empty ? <Nav model={model} scrolled={scrolled || fullBleed} /> : null}
       {!empty ? <ProgressRail progress={progress} /> : null}
-      {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
-      <CardSheet card={held} open={openId !== null} model={model} interaction={interaction} onClose={() => setOpenId(null)} />
+      {!empty ? <ActionBar model={model} interaction={interaction} onCta={scrollToGifts} /> : null}
+      <CardSheet card={shown} open={openId !== null} model={model} interaction={interaction} onClose={() => setOpenId(null)} />
     </div>
   );
 }

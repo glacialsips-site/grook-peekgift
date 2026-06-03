@@ -52,9 +52,13 @@ export async function POST(req: Request): Promise<Response> {
   if (!parsed.ok) {
     return Response.json({ error: `invalid document: ${parsed.error}` }, { status: 400 });
   }
-  const messages = Array.isArray(body.messages) ? body.messages : [];
-  if (messages.length === 0) {
-    return Response.json({ error: "messages is required" }, { status: 400 });
+  let messages = Array.isArray(body.messages) ? body.messages : [];
+  // The Anthropic API requires the first message to be a user turn. The studio seeds an
+  // assistant greeting in the UI; drop any leading non-user messages before the first user.
+  const firstUser = messages.findIndex((m) => m.role === "user");
+  if (firstUser > 0) messages = messages.slice(firstUser);
+  if (messages.length === 0 || firstUser === -1) {
+    return Response.json({ error: "messages must include a user turn" }, { status: 400 });
   }
 
   // Founder handshake detection (config, never inline in the system prompt).
@@ -65,7 +69,17 @@ export async function POST(req: Request): Promise<Response> {
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const emit = (e: StreamEvent) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
+      // If the client navigates away mid-turn, enqueue throws; swallow it so the work unwinds
+      // cleanly instead of surfacing a phantom "curator turn failed" on a dead connection.
+      let closed = false;
+      const emit = (e: StreamEvent) => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
+        } catch {
+          closed = true;
+        }
+      };
       try {
         if (isSafeword) {
           // The founder handshake — report, don't author; nothing to persist.
@@ -81,7 +95,11 @@ export async function POST(req: Request): Promise<Response> {
       } catch (e) {
         emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
       }
-      controller.close();
+      try {
+        controller.close();
+      } catch {
+        /* already closed by client disconnect */
+      }
     },
   });
 

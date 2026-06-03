@@ -7,8 +7,22 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { execute, commandFromTool, defaultCtx, type PeekIR, type PeekEvent, type CardData, type ResolveConstraints } from "@peek/core";
 import { cardResolver } from "@/lib/ports/card-resolver";
+import { generateHero } from "@/lib/ports/image";
+import { sanitizeCustomHtml } from "@/lib/sanitize";
 import { PEEK_STUDIO_SYSTEM_PROMPT } from "./system-prompt";
 import { PEEK_STUDIO_TOOLS } from "./tools";
+
+// A custom section carries model-authored html. Sanitize it HERE — at the boundary, before it
+// becomes a command and enters the document — so the stored doc (and every later render of it)
+// only ever holds safe markup. Other tools pass through untouched.
+function sanitizeToolInput(name: string, input: unknown): unknown {
+  if (name !== "upsert_section") return input;
+  const inp = input as { kind?: unknown; data?: Record<string, unknown> } | null;
+  if (inp && inp.kind === "custom" && inp.data && typeof inp.data.html === "string") {
+    return { ...inp, data: { ...inp.data, html: sanitizeCustomHtml(inp.data.html) } };
+  }
+  return input;
+}
 
 // A resolver CardData → add_card tool input, so a resolved product is appended through the
 // SAME core gate (commandFromTool → decide → apply) as any hand-authored card.
@@ -29,128 +43,9 @@ export interface TurnMessage {
   role: "user" | "assistant";
   content: unknown;
 }
-export interface ToolOutcome {
-  name: string;
-  ok: boolean;
-  error?: string;
-}
-export interface TurnResult {
-  doc: PeekIR;
-  text: string;
-  events: PeekEvent[];
-  tools: ToolOutcome[];
-}
 
 const MODEL = "claude-opus-4-8";
 const MAX_HOPS = 12;
-
-export async function runCuratorTurn(
-  client: Anthropic,
-  input: { doc: PeekIR; messages: TurnMessage[] },
-): Promise<TurnResult> {
-  let doc = input.doc;
-  const ctx = defaultCtx();
-  const events: PeekEvent[] = [];
-  const tools: ToolOutcome[] = [];
-  let text = "";
-
-  // System + tools render before messages, so a cache breakpoint on system caches both.
-  const system = [
-    { type: "text" as const, text: PEEK_STUDIO_SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } },
-  ];
-  const anthropicTools = PEEK_STUDIO_TOOLS as unknown as Anthropic.Tool[];
-  const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
-
-  for (let hop = 0; hop < MAX_HOPS; hop++) {
-    // Opus 4.8 wants adaptive thinking; SDK 0.65 types predate it, so build then cast.
-    const params = {
-      model: MODEL,
-      max_tokens: 8192,
-      thinking: { type: "adaptive" },
-      system,
-      tools: anthropicTools,
-      messages,
-    } as unknown as Anthropic.MessageCreateParamsNonStreaming;
-
-    const msg = await client.messages.create(params);
-    for (const b of msg.content) if (b.type === "text") text += b.text;
-
-    const toolUses = msg.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-    messages.push({ role: "assistant", content: msg.content });
-
-    if (msg.stop_reason !== "tool_use" || toolUses.length === 0) break;
-
-    const results: Anthropic.ToolResultBlockParam[] = [];
-    for (const tu of toolUses) {
-      // resolve_card is app-orchestration, not a core command. The resolver cascade isn't
-      // wired in v1, so steer the model to add_card directly (honest, keeps it productive).
-      if (tu.name === "resolve_card") {
-        const a = (tu.input ?? {}) as { text?: string; constraints?: ResolveConstraints; images?: string[]; screenshot?: string };
-        const resolved = a.text
-          ? await cardResolver.resolve({ text: a.text, constraints: a.constraints, images: a.images, screenshot: a.screenshot })
-          : ({ ok: false, error: "resolve_card needs a url or a description" } as const);
-        if (!resolved.ok) {
-          tools.push({ name: tu.name, ok: false, error: resolved.error });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `couldn't auto-resolve (${resolved.error}). infer what you can and call add_card directly.`, is_error: true });
-          continue;
-        }
-        const cmd = commandFromTool("add_card", cardDataToAddCard(resolved.card));
-        if (cmd.isErr()) {
-          tools.push({ name: tu.name, ok: false, error: cmd.error.message });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
-          continue;
-        }
-        const rr = execute(doc, cmd.value, ctx);
-        if (rr.isErr()) {
-          tools.push({ name: tu.name, ok: false, error: rr.error.message });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${rr.error.message}`, is_error: true });
-          continue;
-        }
-        doc = rr.value.doc;
-        events.push(...rr.value.events);
-        tools.push({ name: tu.name, ok: true });
-        let resolvedCardId: string | undefined;
-        for (const e of rr.value.events) if (e.type === "card_added") resolvedCardId = e.card.id;
-        results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, card_id: resolvedCardId, via: resolved.via }) });
-        continue;
-      }
-
-      const cmd = commandFromTool(tu.name, tu.input);
-      if (cmd.isErr()) {
-        tools.push({ name: tu.name, ok: false, error: cmd.error.message });
-        results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
-        continue;
-      }
-
-      const r = execute(doc, cmd.value, ctx);
-      if (r.isErr()) {
-        tools.push({ name: tu.name, ok: false, error: r.error.message });
-        results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${r.error.message}`, is_error: true });
-        continue;
-      }
-
-      doc = r.value.doc;
-      events.push(...r.value.events);
-      tools.push({ name: tu.name, ok: true });
-      // Feed the resolved ids back so the model can target what it just created
-      // (e.g. set_card_rule / update_card by id, add_card into a variant group).
-      const ids: Record<string, string> = {};
-      for (const e of r.value.events) {
-        if (e.type === "card_added") ids.card_id = e.card.id;
-        else if (e.type === "variant_group_added") ids.variant_group_id = e.group.id;
-        else if (e.type === "section_inserted") ids.section_id = e.section.id;
-      }
-      results.push({
-        type: "tool_result",
-        tool_use_id: tu.id,
-        content: JSON.stringify({ ok: true, ...ids, applied: r.value.events.map((e) => e.type) }),
-      });
-    }
-    messages.push({ role: "user", content: results });
-  }
-
-  return { doc, text, events, tools };
-}
 
 export type StreamEvent =
   | { type: "text"; delta: string }
@@ -230,7 +125,32 @@ export async function runCuratorTurnStreaming(
           results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, card_id: resolvedCardId, via: resolved.via }) });
           continue;
         }
-        const cmd = commandFromTool(tu.name, tu.input);
+        // generate_hero_image: the core command only leaves a *pending* ai_generated directive.
+        // When fal is keyed we fulfil it here — actually render the image and pin the real url —
+        // so the hero is a finished picture, not a placeholder. No key / a failure falls through
+        // to the normal command below, which leaves the pending directive → themed gradient.
+        if (tu.name === "generate_hero_image") {
+          const a = (tu.input ?? {}) as { prompt?: string; aspect?: string };
+          const gen = a.prompt
+            ? await generateHero(a.prompt, a.aspect)
+            : ({ ok: false, error: "generate_hero_image needs a prompt" } as const);
+          if (gen.ok && gen.url) {
+            const cmd = commandFromTool("set_hero_media", { url: gen.url, source: "ai_generated", alt: a.prompt?.slice(0, 140) });
+            if (cmd.isOk()) {
+              const rr = execute(doc, cmd.value, ctx);
+              if (rr.isOk()) {
+                doc = rr.value.doc;
+                emit({ type: "tool", name: tu.name, ok: true });
+                const hero = doc.sections.find((s) => s.kind === "hero");
+                emit({ type: "page", doc, pinged: hero ? [hero.id] : [] });
+                results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, hero_url: gen.url, provider: gen.provider }) });
+                continue;
+              }
+            }
+          }
+          // fall through: leave the pending directive (renderer paints a themed gradient).
+        }
+        const cmd = commandFromTool(tu.name, sanitizeToolInput(tu.name, tu.input));
         if (cmd.isErr()) {
           emit({ type: "tool", name: tu.name, ok: false, error: cmd.error.message });
           results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
