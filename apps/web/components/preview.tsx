@@ -5,7 +5,9 @@
 // (z1), and a floating action bar (z2). When `interaction` is supplied (recipient surface),
 // cards become tappable pick targets.
 
-import type { CSSProperties, ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type {
   RenderModel,
   SectionView,
@@ -19,7 +21,17 @@ import { Frame } from "@/components/frames";
 import { Reveal } from "@/components/reveal";
 
 const PREVIEW_CSS =
-  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} .peek-rail{scrollbar-width:none} .peek-rail::-webkit-scrollbar{display:none} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none}}";
+  ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} .peek-rail{scrollbar-width:none} .peek-rail::-webkit-scrollbar{display:none} @keyframes peekrise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}} .peek-rise{animation:peekrise .85s cubic-bezier(.2,.7,.2,1) both} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none} .peek-rise{animation:none}}";
+
+// The hero's children cascade in on first paint (SHELL_SPEC §1.5B — the "title types itself in"
+// beat). One class + a per-child delay; reduced-motion zeroes it via PREVIEW_CSS above.
+function Rise({ d, children }: { d: number; children: ReactNode }) {
+  return (
+    <div className="peek-rise" style={{ animationDelay: `${d}ms` }}>
+      {children}
+    </div>
+  );
+}
 
 export interface PickInteraction {
   picked: string[];
@@ -163,12 +175,14 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
         </div>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, color-mix(in srgb, var(--peek-bg) 88%, transparent), transparent 58%)" }} />
         <div style={{ position: "relative", padding: "0 20px 30px", width: "100%" }}>
-          {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
-          <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
-            {headline}
-          </h1>
-          {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, margin: 0 }}>{dek}</p> : null}
-          <HeroMeta rows={ledger} />
+          {eyebrow ? <Rise d={60}><Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow></Rise> : null}
+          <Rise d={160}>
+            <h1 style={{ fontFamily: "var(--peek-font-display)", fontSize: "clamp(40px, 12vw, 72px)", lineHeight: 0.98, letterSpacing: "var(--peek-display-tracking)", textTransform: HEADLINE_TT, textShadow: "var(--peek-display-shadow)", whiteSpace: "pre-line", margin: "8px 0" }}>
+              {headline}
+            </h1>
+          </Rise>
+          {dek ? <Rise d={300}><p style={{ color: "var(--peek-muted)", fontSize: 16, margin: 0 }}>{dek}</p></Rise> : null}
+          {ledger.length > 0 ? <Rise d={440}><HeroMeta rows={ledger} /></Rise> : null}
         </div>
       </header>
     );
@@ -177,29 +191,33 @@ function Hero({ section, model }: { section: SectionView; model: RenderModel }) 
   return (
     <header style={{ padding: "30px 20px 12px", textAlign: variant === "centered" ? "center" : "left" }}>
       {model.hero && !big ? (
-        <div style={{ marginBottom: 18 }}>
-          <Frame kind={frameKind(model)}>
-            <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
-          </Frame>
-        </div>
+        <Rise d={0}>
+          <div style={{ marginBottom: 18 }}>
+            <Frame kind={frameKind(model)}>
+              <Media url={model.hero.url} alt={model.hero.alt} ratio="16 / 10" />
+            </Frame>
+          </div>
+        </Rise>
       ) : null}
-      {eyebrow ? <Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow> : null}
-      <h1
-        style={{
-          fontFamily: "var(--peek-font-display)",
-          fontSize: big ? "clamp(46px, 14vw, 92px)" : "clamp(34px, 9vw, 52px)",
-          lineHeight: big ? 0.94 : 1.03,
-          letterSpacing: "var(--peek-display-tracking)",
-          textTransform: HEADLINE_TT,
-          textShadow: "var(--peek-display-shadow)",
-          whiteSpace: "pre-line",
-          margin: "10px 0 8px",
-        }}
-      >
-        {headline}
-      </h1>
-      {dek ? <p style={{ color: "var(--peek-muted)", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{dek}</p> : null}
-      <HeroMeta rows={ledger} />
+      {eyebrow ? <Rise d={60}><Eyebrow>{heroMotif(model) ? `${heroMotif(model)}  ` : ""}{eyebrow}{heroMotif(model) ? `  ${heroMotif(model)}` : ""}</Eyebrow></Rise> : null}
+      <Rise d={160}>
+        <h1
+          style={{
+            fontFamily: "var(--peek-font-display)",
+            fontSize: big ? "clamp(46px, 14vw, 92px)" : "clamp(34px, 9vw, 52px)",
+            lineHeight: big ? 0.94 : 1.03,
+            letterSpacing: "var(--peek-display-tracking)",
+            textTransform: HEADLINE_TT,
+            textShadow: "var(--peek-display-shadow)",
+            whiteSpace: "pre-line",
+            margin: "10px 0 8px",
+          }}
+        >
+          {headline}
+        </h1>
+      </Rise>
+      {dek ? <Rise d={300}><p style={{ color: "var(--peek-muted)", fontSize: 16, lineHeight: 1.5, margin: 0 }}>{dek}</p></Rise> : null}
+      {ledger.length > 0 ? <Rise d={440}><HeroMeta rows={ledger} /></Rise> : null}
     </header>
   );
 }
@@ -226,15 +244,15 @@ function Note({ section, model }: { section: SectionView; model: RenderModel }) 
   );
 }
 
-function CardTile({ card, interaction }: { card: CardView; interaction?: PickInteraction }) {
-  const dimmed = card.isTaunt;
-  const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
+function CardTile({ card, interaction, onOpen }: { card: CardView; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   const picked = interaction?.picked.includes(card.id) ?? false;
+  const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
+  const dimmed = card.isTaunt || picked; // claimed cards dim, per §1.4
+  const openable = Boolean(onOpen) && !card.isTaunt;
   return (
     <div
-      onClick={pickable ? () => interaction!.onToggle(card.id) : undefined}
-      role={pickable ? "button" : undefined}
-      aria-pressed={pickable ? picked : undefined}
+      onClick={openable ? () => onOpen!(card.id) : undefined}
+      role={openable ? "button" : undefined}
       className="peek-card"
       style={{
         background: "var(--peek-surface)",
@@ -310,7 +328,7 @@ function CardTile({ card, interaction }: { card: CardView; interaction?: PickInt
 
 // A horizontal snap-carousel of cards with edge-peek — the mockups' universal mobile shape
 // (every gift grid collapses to this). Scrollbar hidden via .peek-rail in PREVIEW_CSS.
-function CardCarousel({ cards, interaction, basis = "70%" }: { cards: CardView[]; interaction?: PickInteraction; basis?: string }) {
+function CardCarousel({ cards, interaction, onOpen, basis = "70%" }: { cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void; basis?: string }) {
   return (
     <div
       className="peek-rail"
@@ -326,7 +344,7 @@ function CardCarousel({ cards, interaction, basis = "70%" }: { cards: CardView[]
     >
       {cards.map((c) => (
         <div key={c.id} style={{ flex: `0 0 ${basis}`, scrollSnapAlign: "start" }}>
-          <CardTile card={c} interaction={interaction} />
+          <CardTile card={c} interaction={interaction} onOpen={onOpen} />
         </div>
       ))}
     </div>
@@ -335,7 +353,8 @@ function CardCarousel({ cards, interaction, basis = "70%" }: { cards: CardView[]
 
 // gap-a made visible: ungrouped cards ride one horizontal carousel; each variant group is a
 // labeled wrapper carrying its selection rule, with its own carousel — page order preserved.
-function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interaction?: PickInteraction }) {
+// Tapping a card opens the §1.4 bottom sheet via onOpen.
+function GiftGrid({ groups, interaction, onOpen }: { groups: CardGroupView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (groups.length === 0) return null;
   const blocks: ReactNode[] = [];
   let solo: CardView[] = [];
@@ -347,10 +366,10 @@ function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interactio
     blocks.push(
       cards.length === 1 ? (
         <div key={key} style={{ padding: "0 20px" }}>
-          <CardTile card={cards[0]!} interaction={interaction} />
+          <CardTile card={cards[0]!} interaction={interaction} onOpen={onOpen} />
         </div>
       ) : (
-        <CardCarousel key={key} cards={cards} interaction={interaction} />
+        <CardCarousel key={key} cards={cards} interaction={interaction} onOpen={onOpen} />
       ),
     );
   };
@@ -381,7 +400,7 @@ function GiftGrid({ groups, interaction }: { groups: CardGroupView[]; interactio
             {selectionLabel(g.selection)}
           </span>
         </div>
-        <CardCarousel cards={g.cards} interaction={interaction} basis="64%" />
+        <CardCarousel cards={g.cards} interaction={interaction} onOpen={onOpen} basis="64%" />
       </div>,
     );
   });
@@ -536,6 +555,69 @@ function ActionBar({ model, interaction }: { model: RenderModel; interaction?: P
   );
 }
 
+// §1.1 — the themed top bar. Glass-from-the-start (Pattern B, the common case), absolute to the
+// root so it floats over the scrolling content inside the device frame. Wordmark left (the
+// occasion / who it's for), a themed motif glyph right. Solidifies its tint a touch once scrolled.
+function Nav({ model, scrolled }: { model: RenderModel; scrolled: boolean }) {
+  const mark = model.occasion ?? (model.recipientName ? `for ${model.recipientName}` : "peek");
+  const glyph = heroMotif(model);
+  return (
+    <nav
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 3,
+        height: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 18px",
+        background: `color-mix(in srgb, var(--peek-bg) ${scrolled ? 90 : 72}%, transparent)`,
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        borderBottom: `1px solid ${scrolled ? "var(--peek-line)" : "transparent"}`,
+        transition: "background .4s ease, border-color .4s ease",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--peek-font-display)",
+          fontSize: 15.5,
+          letterSpacing: "var(--peek-display-tracking)",
+          textTransform: HEADLINE_TT,
+          textShadow: scrolled ? "none" : "var(--peek-display-shadow)",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "78%",
+        }}
+      >
+        {mark}
+      </span>
+      {glyph ? <span style={{ color: "var(--peek-accent)", fontSize: 16, flex: "0 0 auto" }}>{glyph}</span> : null}
+    </nav>
+  );
+}
+
+// A thin scroll-progress rail at the very top (§1.1) — anchored to the internal scroller, not the
+// window, so it reads true inside the device frame.
+function ProgressRail({ progress }: { progress: number }) {
+  return (
+    <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 4, height: 2, pointerEvents: "none" }}>
+      <div
+        style={{
+          height: "100%",
+          width: `${Math.round(progress * 100)}%`,
+          background: "linear-gradient(90deg, var(--peek-accent), var(--peek-accent-2))",
+          transition: "width .1s linear",
+        }}
+      />
+    </div>
+  );
+}
+
 function Claim({ section, model }: { section: SectionView; model: RenderModel }) {
   const d = section.data;
   const heading = section.title ?? str(d, "heading") ?? "your move";
@@ -595,14 +677,161 @@ function Claim({ section, model }: { section: SectionView; model: RenderModel })
   );
 }
 
+// §1.4 — the bottom sheet every card resolves into. Tap a card → it slides up populated from
+// that card's data → the claim button toggles the pick (server-validated upstream) and the
+// sheet auto-closes. Lives inside the root (position:absolute), not fixed to the viewport, so
+// it stays inside the device frame. `card` is held through the close transition so the contents
+// don't vanish mid-slide.
+function CardSheet({
+  card,
+  open,
+  model,
+  interaction,
+  onClose,
+}: {
+  card: CardView | null;
+  open: boolean;
+  model: RenderModel;
+  interaction?: PickInteraction;
+  onClose: () => void;
+}) {
+  const picked = Boolean(card && interaction?.picked.includes(card.id));
+  const claimable = Boolean(interaction) && !!card && !card.isLocked && !card.isTaunt;
+  const claimLabel = picked ? "Picked ✓" : card?.isLocked ? "Locked" : model.ctaLabel ?? "Pick this";
+
+  function claim() {
+    if (!card) return;
+    if (claimable && !picked) {
+      interaction!.onToggle(card.id);
+      window.setTimeout(onClose, 950); // let the pick register + the card badge land, then close (§1.4)
+    } else {
+      onClose();
+    }
+  }
+
+  const beg =
+    card?.isLocked && card.unlockRule?.kind === "beg" && card.unlockRule.beg_prompt ? card.unlockRule.beg_prompt : null;
+  const when = card ? [fmtDate(card.proposedDate), card.locationHint].filter(Boolean).join(" · ") : "";
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 97,
+          background: "color-mix(in srgb, var(--peek-ink) 58%, transparent)",
+          opacity: open ? 1 : 0,
+          visibility: open ? "visible" : "hidden",
+          transition: "opacity .35s ease, visibility .35s ease",
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 98,
+          background: "var(--peek-surface)",
+          borderTop: "1px solid var(--peek-line)",
+          borderRadius: "22px 22px 0 0",
+          transform: open ? "none" : "translateY(101%)",
+          transition: "transform .45s cubic-bezier(.3,.85,.2,1)",
+          padding: "10px 22px calc(26px + var(--peek-safe-b))",
+          maxHeight: "88%",
+          overflowY: "auto",
+          boxShadow: "0 -30px 80px color-mix(in srgb, var(--peek-ink) 38%, transparent)",
+        }}
+      >
+        <div style={{ width: 46, height: 5, borderRadius: 999, background: "var(--peek-line)", margin: "6px auto 16px" }} />
+        {card ? (
+          <>
+            {!card.isTaunt ? (
+              <div style={{ borderRadius: "var(--peek-radius-card)", overflow: "hidden", marginBottom: 14 }}>
+                <Media url={card.media?.url ?? null} alt={card.media?.alt} ratio="16 / 10" />
+              </div>
+            ) : null}
+            {card.isLocked ? (
+              <Eyebrow>🔒 locked</Eyebrow>
+            ) : card.type === "aspirational" ? (
+              <Eyebrow>★ the dream</Eyebrow>
+            ) : card.type === "digital" ? (
+              <Eyebrow>digital</Eyebrow>
+            ) : null}
+            <h3 style={{ fontFamily: "var(--peek-font-display)", fontSize: 26, lineHeight: 1.12, margin: "6px 0 8px", textShadow: "var(--peek-display-shadow)" }}>
+              {card.title}
+            </h3>
+            {card.description ? (
+              <p style={{ color: "var(--peek-muted)", fontSize: 14.5, lineHeight: 1.55, margin: "0 0 12px" }}>{card.description}</p>
+            ) : null}
+            {when ? <div style={{ color: "var(--peek-accent)", fontSize: 13, margin: "0 0 12px" }}>{when}</div> : null}
+            {card.isTaunt && card.tauntText ? (
+              <p style={{ color: "var(--peek-accent)", fontStyle: "italic", fontSize: 15, margin: "0 0 12px" }}>{card.tauntText}</p>
+            ) : null}
+            {card.valueText ? (
+              <div style={{ fontFamily: "var(--peek-font-display)", fontSize: 21, color: "var(--peek-accent)", margin: "0 0 14px" }}>{card.valueText}</div>
+            ) : null}
+            {beg ? <div style={{ color: "var(--peek-muted)", fontStyle: "italic", fontSize: 13.5, margin: "0 0 14px" }}>“{beg}”</div> : null}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={onClose}
+                style={{
+                  flex: "0 0 auto",
+                  border: "1px solid var(--peek-line)",
+                  background: "transparent",
+                  color: "var(--peek-ink)",
+                  borderRadius: "var(--peek-radius-pill)",
+                  padding: "12px 18px",
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+              {!card.isTaunt ? (
+                <button
+                  onClick={claim}
+                  disabled={picked || card.isLocked}
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    background: "var(--peek-accent)",
+                    color: "var(--peek-btn-ink)",
+                    fontFamily: "var(--peek-font-display)",
+                    fontSize: 15,
+                    borderRadius: "var(--peek-radius-pill)",
+                    padding: "12px 18px",
+                    cursor: picked || card.isLocked ? "default" : "pointer",
+                    opacity: picked || card.isLocked ? 0.6 : 1,
+                    boxShadow: "var(--peek-glow)",
+                  }}
+                >
+                  {claimLabel}
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 function SectionBlock({
   section,
   model,
   interaction,
+  onOpen,
 }: {
   section: SectionView;
   model: RenderModel;
   interaction?: PickInteraction;
+  onOpen?: (id: string) => void;
 }) {
   switch (section.kind) {
     case "hero":
@@ -610,7 +839,7 @@ function SectionBlock({
     case "note":
       return <Note section={section} model={model} />;
     case "giftgrid":
-      return <GiftGrid groups={model.cardGroups} interaction={interaction} />;
+      return <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={onOpen} />;
     case "flightplan":
       return model.itinerary.length > 0 ? <Itinerary steps={model.itinerary} /> : <GenericSection section={section} />;
     case "claim":
@@ -662,23 +891,71 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
 export function PeekPreview({ model, interaction, pinged }: { model: RenderModel; interaction?: PickInteraction; pinged?: string[] }) {
   const hasGiftgrid = model.sections.some((s) => s.kind === "giftgrid");
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
+
+  // The §1.4 sheet: which card is open, and the card held through the close transition.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const allCards = model.cardGroups.flatMap((g) => g.cards);
+  const liveCard = allCards.find((c) => c.id === openId) ?? null;
+  const [held, setHeld] = useState<CardView | null>(null);
+
+  useEffect(() => {
+    if (liveCard) setHeld(liveCard);
+  }, [liveCard]);
+  useEffect(() => {
+    // A streamed edit can delete the open card out from under the sheet — close if it's gone.
+    if (openId !== null && !liveCard) setOpenId(null);
+  }, [openId, liveCard]);
+  useEffect(() => {
+    if (openId === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openId]);
+
+  // §1.1 — scroll-progress + nav solidify, anchored to the internal scroller (not the window).
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const onScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollHeight - el.clientHeight;
+    setProgress(max > 0 ? Math.min(1, el.scrollTop / max) : 0);
+    setScrolled(el.scrollTop > 8);
+  };
+  const firstHero = model.sections.find((s) => s.kind === "hero");
+  const fullBleed = Boolean(firstHero && str(firstHero.data, "variant") === "full-bleed-photo" && model.hero);
+
   return (
     <div style={rootStyle(model)} data-peek-mode={model.mode}>
       <FontLink cssVars={model.cssVars} />
       <Scene kind={sceneKind(model)} mode={model.mode} intensity={intensity(model)} />
       <style>{PREVIEW_CSS}</style>
-      <div style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingBottom: 96 }}>
+      <div
+        ref={scrollRef}
+        onScroll={onScroll}
+        style={{ position: "absolute", inset: 0, overflowY: "auto", zIndex: 1, paddingTop: empty || fullBleed ? 0 : 50, paddingBottom: 96 }}
+      >
         {empty ? <EmptyState /> : null}
-        {model.sections.map((s) => (
-          <Reveal key={s.id}>
+        {model.sections.map((s) => {
+          const block = (
             <div className={pinged?.includes(s.id) ? "peek-pinged" : undefined}>
-              <SectionBlock section={s} model={model} interaction={interaction} />
+              <SectionBlock section={s} model={model} interaction={interaction} onOpen={setOpenId} />
             </div>
-          </Reveal>
-        ))}
-        {!hasGiftgrid && model.cardGroups.length > 0 ? <GiftGrid groups={model.cardGroups} interaction={interaction} /> : null}
+          );
+          // The hero runs its own on-load cascade (§1.5B); everything below rises on scroll-in (§1.5A).
+          return s.kind === "hero" ? <div key={s.id}>{block}</div> : <Reveal key={s.id}>{block}</Reveal>;
+        })}
+        {!hasGiftgrid && model.cardGroups.length > 0 ? (
+          <GiftGrid groups={model.cardGroups} interaction={interaction} onOpen={setOpenId} />
+        ) : null}
       </div>
+      {!empty ? <Nav model={model} scrolled={scrolled || fullBleed} /> : null}
+      {!empty ? <ProgressRail progress={progress} /> : null}
       {!empty ? <ActionBar model={model} interaction={interaction} /> : null}
+      <CardSheet card={held} open={openId !== null} model={model} interaction={interaction} onClose={() => setOpenId(null)} />
     </div>
   );
 }
