@@ -1,19 +1,34 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { validatePeekIR, emptyDocument } from "@peek/core";
-import { runCuratorTurnStreaming, type TurnMessage, type StreamEvent } from "@/lib/curator/turn";
-import { savePeekDocument } from "@/lib/persistence/store";
+import { runCuratorTurnStreaming, runSafewordReport, type TurnMessage, type StreamEvent } from "@/lib/curator/turn";
 
-// Server-only. The Anthropic call never reaches the client. Live, no mock: without a key
-// it returns an honest 503. Streams the turn as Server-Sent Events so the preview builds in
-// real time; persists the final snapshot.
+// Server-only. The Anthropic call never reaches the client. Live, no mock: without a key it
+// returns an honest 503. Streams the turn as Server-Sent Events so the preview iframe builds in
+// real time. The page is the model's HTML — persistence happens at publish (client serializes the
+// rendered iframe), so the turn just streams ops.
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 interface Body {
-  doc?: unknown;
   messages?: TurnMessage[];
   peekId?: string;
   curatorId?: string;
+}
+
+// The founder handshake: when the last user message is exactly the safeword, the turn drops the
+// peek persona and streams a structured self-report instead of authoring the page.
+function lastUserText(messages: TurnMessage[]): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (!m || m.role !== "user") continue;
+    const c = m.content;
+    if (typeof c === "string") return c;
+    if (Array.isArray(c)) {
+      const t = c.find((b) => (b as { type?: string }).type === "text") as { text?: string } | undefined;
+      return t?.text ?? "";
+    }
+    return "";
+  }
+  return "";
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -28,34 +43,45 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "invalid JSON body" }, { status: 400 });
   }
 
-  const seedDoc =
-    body.doc ??
-    emptyDocument({ id: body.peekId ?? "draft", slug: body.peekId ?? "draft", curator_id: body.curatorId ?? "anon" });
-  const parsed = validatePeekIR(seedDoc);
-  if (!parsed.ok) {
-    return Response.json({ error: `invalid document: ${parsed.error}` }, { status: 400 });
+  let messages = Array.isArray(body.messages) ? body.messages : [];
+  // The Anthropic API requires the first message to be a user turn. The studio seeds an assistant
+  // greeting in the UI; drop any leading non-user messages before the first user.
+  const firstUser = messages.findIndex((m) => m.role === "user");
+  if (firstUser > 0) messages = messages.slice(firstUser);
+  if (messages.length === 0 || firstUser === -1) {
+    return Response.json({ error: "messages must include a user turn" }, { status: 400 });
   }
-  const messages = Array.isArray(body.messages) ? body.messages : [];
-  if (messages.length === 0) {
-    return Response.json({ error: "messages is required" }, { status: 400 });
-  }
+
+  // Founder handshake detection (config, never inline in the system prompt).
+  const safeword = (process.env.PEEK_SAFEWORD ?? "bananahead").trim().toLowerCase();
+  const isSafeword = lastUserText(messages).trim().toLowerCase() === safeword;
 
   const client = new Anthropic();
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const emit = (e: StreamEvent) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
-      try {
-        const finalDoc = await runCuratorTurnStreaming(client, { doc: parsed.value, messages }, emit);
+      // If the client navigates away mid-turn, enqueue throws; swallow it so the work unwinds
+      // cleanly instead of surfacing a phantom failure on a dead connection.
+      let closed = false;
+      const emit = (e: StreamEvent) => {
+        if (closed) return;
         try {
-          await savePeekDocument(finalDoc);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
         } catch {
-          /* persistence optional here; deploy holds the Supabase key */
+          closed = true;
         }
+      };
+      try {
+        if (isSafeword) await runSafewordReport(client, { messages }, emit);
+        else await runCuratorTurnStreaming(client, { messages }, emit);
       } catch (e) {
         emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
       }
-      controller.close();
+      try {
+        controller.close();
+      } catch {
+        /* already closed by client disconnect */
+      }
     },
   });
 
