@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { emptyDocument, render, validatePeekIR, type PeekIR } from "@peek/core";
-import { PeekPreview } from "@/components/preview";
+import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type PendingImage = { file: File; preview: string };
 type ApiBlock = { type: "text"; text: string } | { type: "image"; source: { type: "url"; url: string } };
+type PeekWindow = Window & { __PEEK__?: { rescan?: () => void } };
 
 const GREETING =
   "hey — who are we making something for? give me the person + the occasion in a line, however sloppy. snap a photo of the thing, paste a link, or just talk — whatever's easiest.";
@@ -29,42 +28,38 @@ function IconBtn({ d, label, onClick, active }: { d: string; label: string; onCl
       aria-label={label}
       onClick={onClick}
       style={{
-        width: 36,
-        height: 36,
-        borderRadius: 999,
-        display: "grid",
-        placeItems: "center",
-        cursor: "pointer",
+        width: 36, height: 36, borderRadius: 999, display: "grid", placeItems: "center", cursor: "pointer",
         background: active ? "rgba(255,120,90,0.9)" : "rgba(255,255,255,0.14)",
-        border: "0.5px solid rgba(255,255,255,0.32)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)",
+        border: "0.5px solid rgba(255,255,255,0.32)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)",
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
-        <path d={d} />
-      </svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d={d} /></svg>
     </button>
   );
 }
 
+// Inject the host runtime + preview-mode flag into the model's authored (sanitized) page.
+function frameDoc(html: string): string {
+  const inject = '\n<script>window.__PEEK__={mode:"preview"};</script>\n<script src="/peek-runtime.js"></script>\n';
+  return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, inject + "</body>") : html + inject;
+}
+
 export default function Studio() {
-  const [doc, setDoc] = useState<PeekIR>(() => {
-    const id = newPeekId();
-    return emptyDocument({ id, slug: id.slice(0, 8), curator_id: "anon" });
-  });
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
   const [kb, setKb] = useState(0);
-  const [pinged, setPinged] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState(false);
-  const pingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hasPage, setHasPage] = useState(false);
+
+  const peekId = useRef(newPeekId());
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const frameReady = useRef(false);
+  const pendingOps = useRef<Array<() => void>>([]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  const model = useMemo(() => render(doc), [doc]);
 
   useEffect(() => {
     const vv = typeof window !== "undefined" ? window.visualViewport : null;
@@ -73,15 +68,59 @@ export default function Studio() {
     vv.addEventListener("resize", onResize);
     vv.addEventListener("scroll", onResize);
     onResize();
-    return () => {
-      vv.removeEventListener("resize", onResize);
-      vv.removeEventListener("scroll", onResize);
-    };
+    return () => { vv.removeEventListener("resize", onResize); vv.removeEventListener("scroll", onResize); };
   }, []);
 
   useEffect(() => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight });
   }, [messages]);
+
+  // ── iframe ops (patches keep scroll + pick state; ops before load are queued) ──
+  function runOrQueue(op: () => void) {
+    if (frameReady.current && frameRef.current?.contentDocument) op();
+    else pendingOps.current.push(op);
+  }
+  function onFrameLoad() {
+    frameReady.current = true;
+    const ops = pendingOps.current;
+    pendingOps.current = [];
+    ops.forEach((op) => { try { op(); } catch { /* ignore */ } });
+  }
+  function setPage(html: string) {
+    const f = frameRef.current;
+    if (!f) return;
+    frameReady.current = false;
+    pendingOps.current = [];
+    f.srcdoc = frameDoc(html);
+    setHasPage(true);
+  }
+  function patchRegion(selector: string, html: string) {
+    runOrQueue(() => {
+      const d = frameRef.current?.contentDocument;
+      const el = d?.querySelector(selector);
+      if (el) {
+        el.outerHTML = html;
+        (frameRef.current?.contentWindow as PeekWindow | null)?.__PEEK__?.rescan?.();
+      }
+    });
+  }
+  function addStyle(css: string) {
+    runOrQueue(() => {
+      const d = frameRef.current?.contentDocument;
+      if (!d) return;
+      const s = d.createElement("style");
+      s.textContent = css;
+      d.head.appendChild(s);
+    });
+  }
+  function setMedia(selector: string, url: string) {
+    runOrQueue(() => {
+      const el = frameRef.current?.contentDocument?.querySelector(selector) as HTMLElement | null;
+      if (!el) return;
+      if (el.tagName === "IMG") (el as HTMLImageElement).src = url;
+      else el.style.backgroundImage = `url("${url}")`;
+    });
+  }
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -119,8 +158,8 @@ export default function Studio() {
     setBusy(true);
     setCollapsed(false);
 
-    // Host the photo so it has a real URL — no base64. The model reads it BY URL (vision)
-    // and uses that same url for the hero or a card's media.
+    // Host the photo so it has a real URL (no base64). The model reads it by url (vision) and
+    // uses that same url in the page markup (an <img> hero) or a card via set_media.
     let hostedUrl: string | null = null;
     if (img) {
       try {
@@ -147,7 +186,7 @@ export default function Studio() {
       img && hostedUrl
         ? [
             ...(text ? [{ type: "text" as const, text }] : []),
-            { type: "text" as const, text: `[the curator just uploaded a photo, now at ${hostedUrl} — set it as the hero via set_hero_media with this exact url if it's the recipient/scene/vibe, or add it as a card's media if it's a product. read it for art-direction either way.]` },
+            { type: "text" as const, text: `[the curator uploaded a photo, now hosted at ${hostedUrl} — read it for art-direction (who's in it, the mood, the palette) and USE it: as the hero put an <img src="${hostedUrl}"> in your set_page, or drop it into a card slot via set_media. it's a real url, use it exactly.]` },
             { type: "image" as const, source: { type: "url" as const, url: hostedUrl } },
           ]
         : text;
@@ -155,11 +194,12 @@ export default function Studio() {
       ...messages.map((m) => ({ role: m.role, content: m.content })),
       { role: "user" as const, content: apiContent },
     ];
+
     try {
       const res = await fetch("/api/curator", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ doc, messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, peekId: peekId.current }),
       });
       if (res.status === 503) {
         setMessages((m) => [...m, { role: "assistant", content: "(the curator model isn't keyed here yet — set ANTHROPIC_API_KEY. everything else is live.)" }]);
@@ -170,13 +210,13 @@ export default function Studio() {
         setMessages((m) => [...m, { role: "assistant", content: `(error: ${e.error ?? res.status})` }]);
         return;
       }
-      // Stream: append an assistant bubble and fill it as text + page snapshots arrive,
-      // so the page builds itself in real time.
       setMessages((m) => [...m, { role: "assistant", content: "" }]);
       const reader = res.body.getReader();
       const dec = new TextDecoder();
       let buf = "";
       let acc = "";
+      const setLast = (content: string) =>
+        setMessages((m) => { const c = m.slice(); c[c.length - 1] = { role: "assistant", content }; return c; });
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -186,7 +226,7 @@ export default function Studio() {
         for (const part of parts) {
           const line = part.trim();
           if (!line.startsWith("data:")) continue;
-          let ev: { type: string; delta?: string; doc?: unknown; error?: string; pinged?: string[] };
+          let ev: { type: string; delta?: string; html?: string; selector?: string; css?: string; url?: string; error?: string };
           try {
             ev = JSON.parse(line.slice(5).trim());
           } catch {
@@ -194,36 +234,22 @@ export default function Studio() {
           }
           if (ev.type === "text" && ev.delta) {
             acc += ev.delta;
-            setMessages((m) => {
-              const c = m.slice();
-              c[c.length - 1] = { role: "assistant", content: acc };
-              return c;
-            });
-          } else if ((ev.type === "page" || ev.type === "done") && ev.doc) {
-            const v = validatePeekIR(ev.doc);
-            if (v.ok) setDoc(v.value);
-            if (ev.pinged && ev.pinged.length) {
-              setPinged(ev.pinged);
-              if (pingRef.current) clearTimeout(pingRef.current);
-              pingRef.current = setTimeout(() => setPinged([]), 1600);
-            }
+            setLast(acc);
+          } else if (ev.type === "page" && typeof ev.html === "string") {
+            setPage(ev.html);
+          } else if (ev.type === "patch" && ev.selector && typeof ev.html === "string") {
+            patchRegion(ev.selector, ev.html);
+          } else if (ev.type === "style" && typeof ev.css === "string") {
+            addStyle(ev.css);
+          } else if (ev.type === "media" && ev.selector && ev.url) {
+            setMedia(ev.selector, ev.url);
           } else if (ev.type === "error" && ev.error) {
             acc += `\n(${ev.error})`;
-            setMessages((m) => {
-              const c = m.slice();
-              c[c.length - 1] = { role: "assistant", content: acc };
-              return c;
-            });
+            setLast(acc);
           }
         }
       }
-      if (!acc.trim()) {
-        setMessages((m) => {
-          const c = m.slice();
-          c[c.length - 1] = { role: "assistant", content: "(updated the page)" };
-          return c;
-        });
-      }
+      if (!acc.trim()) setLast("(updated the page)");
     } catch {
       setMessages((m) => [...m, { role: "assistant", content: "(network hiccup — try again)" }]);
     } finally {
@@ -233,34 +259,36 @@ export default function Studio() {
 
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", background: "#000" }}>
-      <div style={{ position: "absolute", inset: 0 }}>
-        <PeekPreview model={model} pinged={pinged} />
-      </div>
+      <iframe
+        ref={frameRef}
+        onLoad={onFrameLoad}
+        title="preview"
+        sandbox="allow-scripts allow-same-origin"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0, background: "#0b0b0f" }}
+      />
+
+      {!hasPage ? (
+        <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", textAlign: "center", padding: 28, pointerEvents: "none", color: "#fff" }}>
+          <div>
+            <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>your page builds here</div>
+            <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 15 }}>tell Peek who it&apos;s for — it appears as you talk.</div>
+          </div>
+        </div>
+      ) : null}
 
       <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
 
       <div
         style={{
-          position: "absolute",
-          zIndex: 50,
-          left: 0,
-          right: 0,
-          bottom: kb,
-          padding: "0 12px calc(14px + env(safe-area-inset-bottom, 0px))",
-          transition: "bottom 0.18s ease-out",
+          position: "absolute", zIndex: 50, left: 0, right: 0, bottom: kb,
+          padding: "0 12px calc(14px + env(safe-area-inset-bottom, 0px))", transition: "bottom 0.18s ease-out",
         }}
       >
         <div
           style={{
-            margin: "0 auto",
-            maxWidth: 560,
-            borderRadius: 24,
-            overflow: "hidden",
-            background: "rgba(18,16,20,0.5)",
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
-            border: "0.5px solid rgba(255,255,255,0.16)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 50px rgba(0,0,0,0.45)",
+            margin: "0 auto", maxWidth: 560, borderRadius: 24, overflow: "hidden",
+            background: "rgba(18,16,20,0.5)", backdropFilter: "blur(28px) saturate(180%)", WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            border: "0.5px solid rgba(255,255,255,0.16)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 50px rgba(0,0,0,0.45)",
           }}
         >
           <div
@@ -273,26 +301,18 @@ export default function Studio() {
           <div
             ref={scrollerRef}
             style={{
-              maxHeight: collapsed ? 0 : "30vh",
-              overflowY: "auto",
-              padding: collapsed ? "0 16px" : "8px 16px 6px",
-              display: "grid",
-              gap: 10,
-              transition: "max-height .25s ease, padding .25s ease",
+              maxHeight: collapsed ? 0 : "30vh", overflowY: "auto", padding: collapsed ? "0 16px" : "8px 16px 6px",
+              display: "grid", gap: 10, transition: "max-height .25s ease, padding .25s ease",
             }}
           >
             {messages.map((m, i) => (
               <div
                 key={i}
                 style={{
-                  justifySelf: m.role === "user" ? "end" : "start",
-                  maxWidth: "86%",
-                  fontSize: 15,
-                  lineHeight: 1.45,
+                  justifySelf: m.role === "user" ? "end" : "start", maxWidth: "86%", fontSize: 15, lineHeight: 1.45,
                   color: m.role === "user" ? "#fff" : "rgba(255,255,255,0.92)",
                   background: m.role === "user" ? "rgba(255,255,255,0.16)" : "transparent",
-                  padding: m.role === "user" ? "8px 12px" : "0 2px",
-                  borderRadius: 16,
+                  padding: m.role === "user" ? "8px 12px" : "0 2px", borderRadius: 16, whiteSpace: "pre-wrap",
                 }}
               >
                 {m.content}
@@ -317,12 +337,7 @@ export default function Studio() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void send();
-                }
-              }}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }}
               placeholder={busy ? "thinking…" : listening ? "listening…" : "tell Peek what to make…"}
               disabled={busy}
               style={{ flex: 1, border: "none", outline: "none", background: "transparent", color: "#fff", fontSize: 16, fontFamily: "inherit" }}
@@ -332,16 +347,10 @@ export default function Studio() {
               disabled={busy || (!input.trim() && !pendingImage)}
               aria-label="send"
               style={{
-                border: "none",
-                cursor: busy || (!input.trim() && !pendingImage) ? "default" : "pointer",
-                width: 38,
-                height: 38,
-                borderRadius: 999,
+                border: "none", cursor: busy || (!input.trim() && !pendingImage) ? "default" : "pointer",
+                width: 38, height: 38, borderRadius: 999,
                 background: (input.trim() || pendingImage) && !busy ? "#fff" : "rgba(255,255,255,0.2)",
-                color: "#111",
-                fontSize: 17,
-                display: "grid",
-                placeItems: "center",
+                color: "#111", fontSize: 17, display: "grid", placeItems: "center",
               }}
             >
               ↑
