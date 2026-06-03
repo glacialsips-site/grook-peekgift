@@ -1,43 +1,16 @@
-// The curator turn: the streaming-capable Anthropic tool loop that authors a PeekDocument.
-// Every tool_use is routed through the core gate — commandFromTool → execute(decide+apply)
-// — so the model can ONLY change the document through validated commands; a malformed or
-// invariant-breaking op bounces at the boundary and the model is told why, instead of
-// corrupting the page. The document the model sees only ever moves through decide().
+// The curator turn: the streaming Anthropic tool loop. The model authors a freeform HTML page
+// (set_page) and refines it surgically (edit_region / set_style / set_media); each page op is
+// relayed to the preview iframe over SSE, where the host runtime (peek-runtime.js) gives the
+// tagged markup its behavior. resolve_card / generate_hero_image call the real ports and hand the
+// product data / image url back to the model to author into the markup. No IR, no renderer — the
+// caliber lives in the model's markup; the host owns only behavior.
 
 import type Anthropic from "@anthropic-ai/sdk";
-import { execute, commandFromTool, defaultCtx, type PeekIR, type PeekEvent, type CardData, type ResolveConstraints } from "@peek/core";
+import type { ResolveConstraints } from "@peek/core";
 import { cardResolver } from "@/lib/ports/card-resolver";
 import { generateHero } from "@/lib/ports/image";
-import { sanitizeCustomHtml } from "@/lib/sanitize";
 import { PEEK_STUDIO_SYSTEM_PROMPT } from "./system-prompt";
 import { PEEK_STUDIO_TOOLS } from "./tools";
-
-// A custom section carries model-authored html. Sanitize it HERE — at the boundary, before it
-// becomes a command and enters the document — so the stored doc (and every later render of it)
-// only ever holds safe markup. Other tools pass through untouched.
-function sanitizeToolInput(name: string, input: unknown): unknown {
-  if (name !== "upsert_section") return input;
-  const inp = input as { kind?: unknown; data?: Record<string, unknown> } | null;
-  if (inp && inp.kind === "custom" && inp.data && typeof inp.data.html === "string") {
-    return { ...inp, data: { ...inp.data, html: sanitizeCustomHtml(inp.data.html) } };
-  }
-  return input;
-}
-
-// A resolver CardData → add_card tool input, so a resolved product is appended through the
-// SAME core gate (commandFromTool → decide → apply) as any hand-authored card.
-function cardDataToAddCard(d: CardData): Record<string, unknown> {
-  return {
-    type: "product",
-    title: d.title,
-    ...(d.description ? { description: d.description } : {}),
-    ...(d.source_url ? { source_url: d.source_url } : {}),
-    ...(d.retailer ? { source_retailer: d.retailer } : {}),
-    ...(typeof d.value_cents === "number" ? { value_cents: d.value_cents } : {}),
-    ...(d.value_display ? { value_display: d.value_display } : {}),
-    ...(d.image_url ? { media: { url: d.image_url, source: "external", alt: d.title } } : {}),
-  };
-}
 
 export interface TurnMessage {
   role: "user" | "assistant";
@@ -49,22 +22,25 @@ const MAX_HOPS = 12;
 
 export type StreamEvent =
   | { type: "text"; delta: string }
-  | { type: "page"; doc: PeekIR; pinged?: string[] }
+  | { type: "page"; html: string } // set_page — replace the whole document
+  | { type: "patch"; selector: string; html: string } // edit_region — replace one node
+  | { type: "style"; css: string } // set_style — inject a style block
+  | { type: "media"; selector: string; url: string } // set_media — set an image
   | { type: "tool"; name: string; ok: boolean; error?: string }
-  | { type: "done"; doc: PeekIR }
+  | { type: "ready" } // publish — flag ready for the $12 checkout
+  | { type: "done" }
   | { type: "error"; error: string };
 
 /**
- * Streaming variant: emits text deltas as the model speaks and a `page` snapshot after each
- * command applies, so the preview builds itself in real time. Same maker-checker routing.
+ * Streaming curator turn: emits text deltas as the model speaks and page ops as it authors, so
+ * the preview builds itself live. Page ops are relayed (not applied server-side) — the iframe is
+ * the rendered source of truth; persistence captures its HTML at publish time.
  */
 export async function runCuratorTurnStreaming(
   client: Anthropic,
-  input: { doc: PeekIR; messages: TurnMessage[] },
+  input: { messages: TurnMessage[] },
   emit: (e: StreamEvent) => void,
-): Promise<PeekIR> {
-  let doc = input.doc;
-  const ctx = defaultCtx();
+): Promise<void> {
   const system = [
     { type: "text" as const, text: PEEK_STUDIO_SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } },
   ];
@@ -75,7 +51,7 @@ export async function runCuratorTurnStreaming(
     for (let hop = 0; hop < MAX_HOPS; hop++) {
       const params = {
         model: MODEL,
-        max_tokens: 8192,
+        max_tokens: 32000, // a full bespoke page can be large
         thinking: { type: "adaptive" },
         system,
         tools: anthropicTools,
@@ -94,128 +70,106 @@ export async function runCuratorTurnStreaming(
 
       const results: Anthropic.ToolResultBlockParam[] = [];
       for (const tu of toolUses) {
-        if (tu.name === "resolve_card") {
-          const a = (tu.input ?? {}) as { text?: string; constraints?: ResolveConstraints; images?: string[]; screenshot?: string };
-          const resolved = a.text
-            ? await cardResolver.resolve({ text: a.text, constraints: a.constraints, images: a.images, screenshot: a.screenshot })
-            : ({ ok: false, error: "resolve_card needs a url or a description" } as const);
-          if (!resolved.ok) {
-            emit({ type: "tool", name: tu.name, ok: false, error: resolved.error });
-            results.push({ type: "tool_result", tool_use_id: tu.id, content: `couldn't auto-resolve (${resolved.error}). infer what you can and call add_card directly.`, is_error: true });
-            continue;
+        const a = (tu.input ?? {}) as Record<string, unknown>;
+        const str = (k: string): string => (typeof a[k] === "string" ? (a[k] as string) : "");
+        const ok = (payload: unknown) =>
+          results.push({ type: "tool_result", tool_use_id: tu.id, content: typeof payload === "string" ? payload : JSON.stringify(payload) });
+        const fail = (m: string) => results.push({ type: "tool_result", tool_use_id: tu.id, content: m, is_error: true });
+
+        switch (tu.name) {
+          case "set_page": {
+            const html = str("html");
+            if (!html) { fail("set_page needs html"); break; }
+            emit({ type: "page", html });
+            ok({ ok: true });
+            break;
           }
-          const cmd = commandFromTool("add_card", cardDataToAddCard(resolved.card));
-          if (cmd.isErr()) {
-            emit({ type: "tool", name: tu.name, ok: false, error: cmd.error.message });
-            results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
-            continue;
+          case "edit_region": {
+            const selector = str("selector"), html = str("html");
+            if (!selector || !html) { fail("edit_region needs selector + html"); break; }
+            emit({ type: "patch", selector, html });
+            ok({ ok: true });
+            break;
           }
-          const rr = execute(doc, cmd.value, ctx);
-          if (rr.isErr()) {
-            emit({ type: "tool", name: tu.name, ok: false, error: rr.error.message });
-            results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${rr.error.message}`, is_error: true });
-            continue;
+          case "set_style": {
+            const css = str("css");
+            if (!css) { fail("set_style needs css"); break; }
+            emit({ type: "style", css });
+            ok({ ok: true });
+            break;
           }
-          doc = rr.value.doc;
-          emit({ type: "tool", name: tu.name, ok: true });
-          let resolvedCardId: string | undefined;
-          for (const e of rr.value.events) if (e.type === "card_added") resolvedCardId = e.card.id;
-          const grid = doc.sections.find((s) => s.kind === "giftgrid");
-          emit({ type: "page", doc, pinged: grid ? [grid.id] : [] });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, card_id: resolvedCardId, via: resolved.via }) });
-          continue;
-        }
-        // generate_hero_image: the core command only leaves a *pending* ai_generated directive.
-        // When fal is keyed we fulfil it here — actually render the image and pin the real url —
-        // so the hero is a finished picture, not a placeholder. No key / a failure falls through
-        // to the normal command below, which leaves the pending directive → themed gradient.
-        if (tu.name === "generate_hero_image") {
-          const a = (tu.input ?? {}) as { prompt?: string; aspect?: string };
-          const gen = a.prompt
-            ? await generateHero(a.prompt, a.aspect)
-            : ({ ok: false, error: "generate_hero_image needs a prompt" } as const);
-          if (gen.ok && gen.url) {
-            const cmd = commandFromTool("set_hero_media", { url: gen.url, source: "ai_generated", alt: a.prompt?.slice(0, 140) });
-            if (cmd.isOk()) {
-              const rr = execute(doc, cmd.value, ctx);
-              if (rr.isOk()) {
-                doc = rr.value.doc;
-                emit({ type: "tool", name: tu.name, ok: true });
-                const hero = doc.sections.find((s) => s.kind === "hero");
-                emit({ type: "page", doc, pinged: hero ? [hero.id] : [] });
-                results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true, hero_url: gen.url, provider: gen.provider }) });
-                continue;
-              }
+          case "set_media": {
+            const selector = str("selector"), url = str("url");
+            if (!selector || !url) { fail("set_media needs selector + url"); break; }
+            emit({ type: "media", selector, url });
+            ok({ ok: true });
+            break;
+          }
+          case "resolve_card": {
+            const text = str("text");
+            const constraints = a.constraints as ResolveConstraints | undefined;
+            const images = Array.isArray(a.images) ? (a.images as string[]) : undefined;
+            const resolved = text
+              ? await cardResolver.resolve({ text, constraints, images })
+              : ({ ok: false, error: "resolve_card needs a url or a description" } as const);
+            if (resolved.ok) {
+              emit({ type: "tool", name: tu.name, ok: true });
+              ok({ ok: true, card: resolved.card, via: resolved.via });
+            } else {
+              emit({ type: "tool", name: tu.name, ok: false, error: resolved.error });
+              fail(`couldn't auto-resolve (${resolved.error}). infer what you can and author the card yourself with whatever's real.`);
             }
+            break;
           }
-          // fall through: leave the pending directive (renderer paints a themed gradient).
-        }
-        const cmd = commandFromTool(tu.name, sanitizeToolInput(tu.name, tu.input));
-        if (cmd.isErr()) {
-          emit({ type: "tool", name: tu.name, ok: false, error: cmd.error.message });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${cmd.error.message}`, is_error: true });
-          continue;
-        }
-        const r = execute(doc, cmd.value, ctx);
-        if (r.isErr()) {
-          emit({ type: "tool", name: tu.name, ok: false, error: r.error.message });
-          results.push({ type: "tool_result", tool_use_id: tu.id, content: `rejected: ${r.error.message}`, is_error: true });
-          continue;
-        }
-        doc = r.value.doc;
-        emit({ type: "tool", name: tu.name, ok: true });
-        const pinged: string[] = [];
-        for (const e of r.value.events) {
-          if (e.type === "section_inserted") pinged.push(e.section.id);
-          else if (e.type === "section_patched") pinged.push(e.id);
-          else if (e.type === "card_added" || e.type === "card_updated" || e.type === "card_rule_set" || e.type === "card_removed") {
-            const grid = doc.sections.find((s) => s.kind === "giftgrid");
-            if (grid && !pinged.includes(grid.id)) pinged.push(grid.id);
+          case "generate_hero_image": {
+            const prompt = str("prompt");
+            const aspect = str("aspect") || undefined;
+            const gen = prompt ? await generateHero(prompt, aspect) : ({ ok: false, error: "needs a prompt" } as const);
+            if (gen.ok && gen.url) {
+              emit({ type: "tool", name: tu.name, ok: true });
+              ok({ ok: true, url: gen.url, provider: gen.provider });
+            } else {
+              emit({ type: "tool", name: tu.name, ok: false, error: gen.error });
+              fail(`image generation failed (${gen.error ?? "unknown"}). leave a treated slot + caption instead.`);
+            }
+            break;
           }
+          case "publish": {
+            emit({ type: "ready" });
+            ok({ ok: true });
+            break;
+          }
+          default:
+            fail(`unknown tool: ${tu.name}`);
         }
-        emit({ type: "page", doc, pinged });
-        const ids: Record<string, string> = {};
-        for (const e of r.value.events) {
-          if (e.type === "card_added") ids.card_id = e.card.id;
-          else if (e.type === "variant_group_added") ids.variant_group_id = e.group.id;
-          else if (e.type === "section_inserted") ids.section_id = e.section.id;
-        }
-        results.push({
-          type: "tool_result",
-          tool_use_id: tu.id,
-          content: JSON.stringify({ ok: true, ...ids, applied: r.value.events.map((e) => e.type) }),
-        });
       }
       messages.push({ role: "user", content: results });
     }
   } catch (e) {
     emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
   }
-
-  emit({ type: "done", doc });
-  return doc;
+  emit({ type: "done" });
 }
 
-const SAFEWORD_REPORT_SYSTEM = `The user just sent the private founder handshake word. You are NO LONGER "peek" — you are talking to the founder building this product, not a customer. Drop the persona completely and report straight, concise, and candid. This is for tuning you, so be honest:
+const SAFEWORD_REPORT_SYSTEM = `The user just sent the private founder handshake word. You are NO LONGER "peek" — you are talking to the founder building this product, not a customer. Drop the persona and report straight, concise, and candid. This is for tuning you, so be honest:
 
-- THE BRIEF you inferred from the conversation (recipient, occasion, the feeling under the facts).
-- THE CONCEPT you committed to and the key choices (type, palette, scene, sections, copy voice) — each with its one-line "because".
-- WHAT FOUGHT YOU: where a tool, the renderer, or the IR couldn't express what you wanted; anything you had to stub, fake, simplify, or skip.
-- WHAT THE PANTRY / PROMPT LACKED — what would have made this easier or better.
+- THE BRIEF you inferred (recipient, occasion, the feeling under the facts).
+- THE OBJECT you committed to and the key choices (type, palette, signature move, sections, copy voice) — each with its one-line "because".
+- WHAT FOUGHT YOU: where a tool, the runtime, or the contract couldn't express what you wanted; anything you had to fake, stub, or skip.
+- WHAT THE PROMPT / PANTRY LACKED — what would have made this easier or better.
 - WHAT WOULD MAKE THE NEXT ONE GNARLIER — your honest take on how to push the output further.
 
-Plain text, tight, no markdown headers needed. Do not author the page, do not call tools, do not stay in character.`;
+Plain text, tight, no markdown headers needed. Do not author the page, do not call tools, do not stay in character. Resume in character only when the founder says "resume".`;
 
 /**
- * The founder handshake. When the host detects the safeword, it calls this instead of the
- * normal turn: the model drops the peek persona and streams a structured self-report (the
- * tuning "gold"), authoring nothing. Same SSE text/done protocol as the normal turn.
+ * The founder handshake. When the host detects the safeword it calls this instead of the normal
+ * turn: the model drops the peek persona and streams a structured self-report, authoring nothing.
  */
 export async function runSafewordReport(
   client: Anthropic,
-  input: { doc: PeekIR; messages: TurnMessage[] },
+  input: { messages: TurnMessage[] },
   emit: (e: StreamEvent) => void,
-): Promise<PeekIR> {
+): Promise<void> {
   const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
   try {
     const stream = client.messages.stream({
@@ -231,6 +185,5 @@ export async function runSafewordReport(
   } catch (e) {
     emit({ type: "error", error: (e as Error).message ?? "report failed" });
   }
-  emit({ type: "done", doc: input.doc });
-  return input.doc;
+  emit({ type: "done" });
 }
