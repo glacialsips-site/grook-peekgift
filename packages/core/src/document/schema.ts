@@ -21,7 +21,7 @@
 // ============================================================================
 
 import { z } from 'zod';
-import type { PeekIR } from './contract';
+import type { PeekIR, PeekDocument } from './contract';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 0. Primitives
@@ -322,6 +322,26 @@ export const PeekIRSchema = z
   .passthrough();
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 7.5 The document envelope (dual representation: presentation + spine)
+// ─────────────────────────────────────────────────────────────────────────────
+export const PresentationSchema = z
+  .object({
+    html: z.string(),
+    html_hash: z.string(),
+    runtime_version: z.string(),
+    authored_at: ISODate,
+  })
+  .passthrough();
+
+export const PeekDocumentSchema = z
+  .object({
+    schema_version: z.literal(2),
+    spine: PeekIRSchema,
+    presentation: PresentationSchema.nullable(),
+  })
+  .passthrough();
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 8. Pick (recipient side)
 // ─────────────────────────────────────────────────────────────────────────────
 export const PickSchema = z
@@ -361,6 +381,31 @@ export function validatePeekIR(x: unknown): ValidationResult<PeekIR> {
 /** Throwing variant for code paths that treat invalid IR as a bug, not a user error. */
 export function parsePeekIR(x: unknown): PeekIR {
   return PeekIRSchema.parse(x) as unknown as PeekIR;
+}
+
+/**
+ * Validate a stored document. Accepts BOTH the v2 envelope ({schema_version:2, spine,
+ * presentation}) AND a bare v1 PeekIR (older rows): a bare IR is wrapped as a
+ * presentation-less document so legacy persistence loads unchanged. Returns the parsed
+ * value with defaults filled — persist the returned value.
+ */
+export function validatePeekDocument(x: unknown): ValidationResult<PeekDocument> {
+  // Back-compat: a bare v1 PeekIR (has `peek`, no `spine`) → wrap, presentation-less.
+  if (x && typeof x === 'object' && !('spine' in x) && 'peek' in x) {
+    const ir = validatePeekIR(x);
+    if (!ir.ok) return ir;
+    return { ok: true, value: { schema_version: 2, spine: ir.value, presentation: null } };
+  }
+  const r = PeekDocumentSchema.safeParse(x);
+  if (r.success) return { ok: true, value: r.data as unknown as PeekDocument };
+  return { ok: false, error: z.prettifyError(r.error), issues: r.error.issues };
+}
+
+/** Throwing variant. */
+export function parsePeekDocument(x: unknown): PeekDocument {
+  const r = validatePeekDocument(x);
+  if (!r.ok) throw new Error(r.error);
+  return r.value;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

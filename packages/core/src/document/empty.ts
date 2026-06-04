@@ -1,5 +1,6 @@
 import type {
   PeekIR,
+  PeekDocument,
   Peek,
   ThemeSpec,
   Concept,
@@ -77,4 +78,12 @@ export function emptyDocument(seed: EmptyDocumentSeed = {}): PeekIR {
     updated_at: now,
   };
   return { schema_version: 1, peek, sections: [], variant_groups: [], cards: [] };
+}
+
+/**
+ * The same empty draft as the dual-representation envelope: a blank spine and no
+ * presentation yet (the chat authors the HTML, which fills `presentation` later).
+ */
+export function emptyPeekDocument(seed: EmptyDocumentSeed = {}): PeekDocument {
+  return { schema_version: 2, spine: emptyDocument(seed), presentation: null };
 }
