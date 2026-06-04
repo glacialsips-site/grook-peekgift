@@ -29,6 +29,7 @@ export type StreamEvent =
   | { type: "media"; selector: string; url: string } // set_media — set an image
   | { type: "tool"; name: string; ok: boolean; error?: string }
   | { type: "ready" } // publish — flag ready for the $12 checkout
+  | { type: "saved"; slug: string; peekId: string } // autosaved the draft (dual-rep envelope persisted)
   | { type: "done" }
   | { type: "error"; error: string };
 

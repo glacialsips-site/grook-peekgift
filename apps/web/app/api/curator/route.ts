@@ -1,10 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { runCuratorTurnStreaming, runSafewordReport, type TurnMessage, type StreamEvent } from "@/lib/curator/turn";
+import { applyPageOp } from "@/lib/curator/page-html";
+import { buildDraftDocument } from "@/lib/curator/draft";
+import { loadDocumentById, savePeekDocument } from "@/lib/persistence/store";
 
 // Server-only. The Anthropic call never reaches the client. Live, no mock: without a key it
 // returns an honest 503. Streams the turn as Server-Sent Events so the preview iframe builds in
-// real time. The page is the model's HTML — persistence happens at publish (client serializes the
-// rendered iframe), so the turn just streams ops.
+// real time. The server mirrors the page ops onto an authoritative HTML string and AUTOSAVES the
+// cumulative page (the HTML + the spine extracted from its data-peek-* tags) at the end of the
+// turn — key-gated, best-effort, surviving client disconnect.
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
@@ -63,7 +67,13 @@ export async function POST(req: Request): Promise<Response> {
       // If the client navigates away mid-turn, enqueue throws; swallow it so the work unwinds
       // cleanly instead of surfacing a phantom failure on a dead connection.
       let closed = false;
+      // The server's authoritative copy of the page, rebuilt from the streamed ops, so it can
+      // autosave even after a disconnect.
+      let currentHtml = "";
       const emit = (e: StreamEvent) => {
+        if (e.type === "page" || e.type === "patch" || e.type === "style" || e.type === "media") {
+          currentHtml = applyPageOp(currentHtml, e);
+        }
         if (closed) return;
         try {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(e)}\n\n`));
@@ -76,6 +86,23 @@ export async function POST(req: Request): Promise<Response> {
         else await runCuratorTurnStreaming(client, { messages }, emit);
       } catch (e) {
         emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
+      }
+      // Autosave the draft envelope (HTML + extracted spine). Best-effort: persistence no-ops
+      // without Supabase env, and any failure must not break the response.
+      if (!isSafeword && body.peekId && currentHtml.trim()) {
+        try {
+          const base = await loadDocumentById(body.peekId);
+          const doc = buildDraftDocument({
+            peekId: body.peekId,
+            curatorId: body.curatorId ?? null,
+            html: currentHtml,
+            base,
+          });
+          const saved = await savePeekDocument(doc);
+          if (saved.ok) emit({ type: "saved", slug: doc.spine.peek.slug, peekId: body.peekId });
+        } catch {
+          /* autosave is best-effort */
+        }
       }
       try {
         controller.close();
