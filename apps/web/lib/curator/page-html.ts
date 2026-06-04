@@ -14,6 +14,17 @@ export function htmlHash(html: string): string {
   return createHash("sha256").update(html).digest("hex");
 }
 
+/**
+ * Wrap an authored page for a host iframe: inject `window.__PEEK__` + the host runtime before
+ * </body>. `mode` is "preview" in the studio and "recipient" on the published page. On the
+ * recipient surface this runs inside a SANDBOXED, opaque-origin iframe (no allow-same-origin),
+ * so the runtime cannot reach the app's cookies/session even though it executes.
+ */
+export function frameDoc(html: string, mode: "preview" | "recipient"): string {
+  const inject = `\n<script>window.__PEEK__={mode:${JSON.stringify(mode)}};</script>\n<script src="/peek-runtime.js"></script>\n`;
+  return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${inject}</body>`) : html + inject;
+}
+
 // node-html-parser round-trips the body but can drop a leading <!doctype>; preserve it.
 function keepDoctype(original: string, rebuilt: string): string {
   const m = original.match(/^\s*<!doctype[^>]*>/i);

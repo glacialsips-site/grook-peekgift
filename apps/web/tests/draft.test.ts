@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validatePeekDocument } from "@peek/core";
-import { applyPageOp } from "@/lib/curator/page-html";
+import { applyPageOp, frameDoc } from "@/lib/curator/page-html";
 import { buildDraftDocument, mintSlug } from "@/lib/curator/draft";
 import { PEEK_FEWSHOT } from "@/lib/curator/exemplar";
 import type { StreamEvent } from "@/lib/curator/turn";
@@ -66,5 +66,20 @@ describe("buildDraftDocument — the autosave envelope", () => {
   it("mintSlug is a stable, alnum, ≤12-char derivation of the id", () => {
     expect(mintSlug("ABC-123-def")).toBe("abc123def");
     expect(mintSlug("x")).toBe(mintSlug("x"));
+  });
+});
+
+describe("frameDoc — host runtime injection for the iframe surfaces", () => {
+  it("injects the runtime + mode before </body>", () => {
+    const out = frameDoc("<html><body><h1>hi</h1></body></html>", "recipient");
+    expect(out).toContain('window.__PEEK__={mode:"recipient"}');
+    expect(out).toContain('<script src="/peek-runtime.js"></script>');
+    expect(out.indexOf("/peek-runtime.js")).toBeLessThan(out.indexOf("</body>"));
+  });
+
+  it("appends the runtime when there is no </body>", () => {
+    const out = frameDoc("<div>bare</div>", "preview");
+    expect(out).toContain('mode:"preview"');
+    expect(out).toContain("/peek-runtime.js");
   });
 });
