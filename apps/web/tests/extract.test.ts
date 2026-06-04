@@ -3,12 +3,6 @@ import { extractSpine, KIND_MAP, type ExtractedSpine } from "@/lib/curator/extra
 import { PEEK_FEWSHOT } from "@/lib/curator/exemplar";
 import type { Card } from "@peek/core";
 
-// The dual-rep extractor is the READ side of the same data-peek-* contract the
-// host runtime (apps/web/public/peek-runtime.js) enforces and the model is taught
-// in system-prompt.ts. These tests pin: the worked few-shot extracts to the right
-// spine; each authoring mechanic (group/rule, lock/unlock, the tab) lands on the
-// real core Card/VariantGroup fields; and every soft failure returns an issue
-// instead of throwing.
 
 const byId = (s: ExtractedSpine, id: string): Card => {
   const card = s.cards.find((c) => c.id === id);
@@ -65,10 +59,10 @@ describe("extractSpine(PEEK_FEWSHOT) — the worked 'For the Old Man' page", () 
 
   it("maps the experience to an activity card with no price", () => {
     const dinner = byId(spine, "steak-dinner-on-us");
-    expect(dinner.type).toBe("activity"); // experience → activity (KIND_MAP)
+    expect(dinner.type).toBe("activity");
     expect(dinner.title).toBe("Steak Dinner, On Us");
-    expect(dinner.value_cents).toBeNull(); // no data-price on the ticket
-    expect(dinner.metadata.kind).toBe("experience"); // raw kind preserved
+    expect(dinner.value_cents).toBeNull();
+    expect(dinner.metadata.kind).toBe("experience");
   });
 
   it("keeps the source/retailer labels (data-src → source_retailer)", () => {
@@ -85,12 +79,11 @@ describe("extractSpine(PEEK_FEWSHOT) — the worked 'For the Old Man' page", () 
   it("has no variant groups, no budget, and only the one free-price warn", () => {
     expect(spine.variant_groups).toEqual([]);
     expect(spine.budgetCents).toBeNull();
-    expect(codes(spine)).toEqual(["missing_price"]); // the dinner ticket
+    expect(codes(spine)).toEqual(["missing_price"]);
     expect(spine.issues[0].cardId).toBe("steak-dinner-on-us");
   });
 
   it("carries the CTA's stable ids so the page ↔ spine link round-trips", () => {
-    // the fixture's CTA is data-peek-action="claim"; the spine link is the id.
     expect(PEEK_FEWSHOT).toContain('data-peek-action="claim"');
     for (const card of spine.cards) {
       expect(PEEK_FEWSHOT).toContain(`data-peek-id="${card.id}"`);
@@ -147,7 +140,7 @@ describe("data-locked + data-unlock='after:kicks' → locked card + unlock rule"
 
   it("a taunt card folds to aspirational AND flips is_taunt", () => {
     const grail = byId(spine, "grail");
-    expect(grail.type).toBe("aspirational"); // taunt → aspirational (KIND_MAP)
+    expect(grail.type).toBe("aspirational");
     expect(grail.is_taunt).toBe(true);
     expect(grail.taunt_text).toBe("Unlocks when you pick the kicks.");
   });
@@ -162,7 +155,7 @@ describe("data-budget='250' → budgetCents 25000", () => {
       </main>`;
     const spine = extractSpine(html);
     expect(spine.budgetCents).toBe(25000);
-    expect(codes(spine)).not.toContain("unpriced_in_tab"); // both priced
+    expect(codes(spine)).not.toContain("unpriced_in_tab");
   });
 
   it("warns unpriced_in_tab when a priced tab has a card without a price", () => {
@@ -195,7 +188,7 @@ describe("a card missing data-peek-id → derived id + a warn issue", () => {
   it("falls back to a stable position+hash id when name is also absent", () => {
     const html = `<div data-peek-card data-kind="product" data-price="10">Mystery box</div>`;
     const a = extractSpine(html).cards[0].id;
-    const b = extractSpine(html).cards[0].id; // deterministic across runs
+    const b = extractSpine(html).cards[0].id;
     expect(a).toBe(b);
     expect(a).toMatch(/^[a-z0-9-]+$/);
   });
@@ -235,7 +228,7 @@ describe("robustness on messy / legacy / partial HTML", () => {
     const html = `<div data-peek-card data-peek-id="solo" data-name="Solo" data-price="5" data-group="only"></div>`;
     const spine = extractSpine(html);
     expect(spine.variant_groups).toHaveLength(1);
-    expect(spine.variant_groups[0].selection).toBe("pick_any"); // no rule → default
+    expect(spine.variant_groups[0].selection).toBe("pick_any");
     expect(codes(spine)).toEqual(expect.arrayContaining(["group_no_rule", "lone_group"]));
   });
 

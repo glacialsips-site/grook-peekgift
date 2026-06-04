@@ -4,9 +4,6 @@ import dad from "./fixtures/dad-60th.ir.json";
 import gala from "./fixtures/charity-gala.ir.json";
 import taquito from "./fixtures/el-taquito.ir.json";
 
-// The design seat's sample documents are the conformance bar: the schema must accept them
-// (incl. legacy-shape normalization) and the renderer must paint them. This is the honest
-// proof that the demo route renders real validated documents, not error fallbacks.
 const samples: ReadonlyArray<readonly [string, unknown]> = [
   ["dad-60th", dad],
   ["charity-gala", gala],

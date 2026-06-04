@@ -2,8 +2,6 @@ import type Stripe from "stripe";
 import { stripeClient } from "@/lib/payment/stripe";
 import { markPeekPublished } from "@/lib/persistence/store";
 
-// On a completed $12 checkout, publish the peek. Idempotent (publishing an already-published
-// peek is a no-op). The raw body + signature are verified against STRIPE_WEBHOOK_SECRET.
 export const runtime = "nodejs";
 
 export async function POST(req: Request): Promise<Response> {

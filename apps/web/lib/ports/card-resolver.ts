@@ -1,16 +1,3 @@
-// Card-resolution adapters for the studio, assembled into core's makeCardResolver cascade.
-//
-//  • url_scrape — LIVE. Reads a product page best-effort, richest source first: JSON-LD
-//    (schema.org Product — what most retailers embed for Google, the most reliable price/
-//    image/title) → OpenGraph/Twitter meta → <title>. A cheap direct fetch first, then a
-//    ZenRows fallback when a page withholds data from bots (gated on ZENROWS_API_KEY;
-//    js_render handles SPAs, and premium-proxy/antibot is opt-in via ZENROWS_PREMIUM=1 for the
-//    hard retailers — costs more credits). http image urls are upgraded to https.
-//  • retailer_api / research (web-search + vision) — honest stubs: they return not-ok so the
-//    cascade falls through and the turn lets the model author the card itself. The research
-//    tier (fuzzy ask → real products) is the PerfectPurchase core and is NOT built yet —
-//    wiring it is the next big lever, not a patch.
-
 import {
   makeCardResolver,
   type CardResolverPort,
@@ -51,8 +38,6 @@ function hostnameOf(url: string): string | undefined {
   }
 }
 
-// Resolve relative urls against the page, and upgrade http→https so the image doesn't get
-// blocked as mixed content on the https page.
 function httpsify(u: string | undefined, base: string): string | undefined {
   if (!u) return undefined;
   let abs = u;
@@ -66,15 +51,12 @@ function httpsify(u: string | undefined, base: string): string | undefined {
   return abs.replace(/^http:\/\//i, "https://");
 }
 
-// Price string ("$1,299.00", "1299") → integer cents, comma/symbol-safe. (Number.parseFloat
-// alone reads "1,299.00" as 1, since it stops at the comma — the bug this replaces.)
 function priceToCents(raw: unknown): number | undefined {
   if (raw == null) return undefined;
   const n = Number.parseFloat(String(raw).replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? Math.round(n * 100) : undefined;
 }
 
-// schema.org values are often arrays, or {url}/{name} objects — pull the first usable string.
 function firstString(v: unknown): string | undefined {
   if (typeof v === "string") return v;
   if (Array.isArray(v)) {
@@ -103,7 +85,6 @@ function offersPriceCents(offers: unknown): number | undefined {
   return priceToCents(o.price ?? o.lowPrice ?? spec?.price);
 }
 
-// Find the first schema.org Product across all ld+json blocks (handles arrays + @graph nesting).
 function pickJsonLdProduct(html: string): Record<string, unknown> | null {
   const blocks = html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
   for (const b of blocks) {
@@ -133,7 +114,6 @@ function pickJsonLdProduct(html: string): Record<string, unknown> | null {
   return null;
 }
 
-// JSON-LD first (richest + most reliable), then OG/Twitter meta, then <title>.
 function parseHtml(html: string, url: string): CardData | null {
   const ld = pickJsonLdProduct(html);
   const title =
@@ -182,9 +162,6 @@ const productSource: ProductSourcePort = {
     let html = await fetchHtml(url, true);
     let card = html ? parseHtml(html, url) : null;
     const zKey = process.env.ZENROWS_API_KEY;
-    // ZenRows fallback when the direct fetch was blocked/empty. js_render handles SPAs; the
-    // premium proxy + antibot (opt-in, costs more credits) is what actually gets through the
-    // hard retailers (Amazon/Nike/…). js_render can take >12s, so give it room.
     if (!card?.title && zKey) {
       const premium = process.env.ZENROWS_PREMIUM === "1" ? "&premium_proxy=true&antibot=true" : "";
       const zUrl = `https://api.zenrows.com/v1/?apikey=${encodeURIComponent(zKey)}&url=${encodeURIComponent(url)}&js_render=true${premium}`;

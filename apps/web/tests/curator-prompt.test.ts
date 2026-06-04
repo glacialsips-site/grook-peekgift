@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCuratorSystem } from "@/lib/curator/prompt";
 
-// Phase 1 gate: the curator system prefix must assemble as four byte-stable cached
-// blocks in the right order, ship the design vocabulary the model was missing, and
-// stay consistent with the sanitizer reality (tag-driven, never scripted).
 describe("curator system prompt", () => {
   const sys = buildCuratorSystem();
 
@@ -26,21 +23,21 @@ describe("curator system prompt", () => {
 
   it("ships the design vocabulary the bare prompt was missing", () => {
     const pantry = sys[1].text;
-    expect(pantry).toContain("FONTS"); // the font-personality taxonomy
-    expect(pantry).toContain("TYPE-ART"); // the loud type-art CSS the renderer lacked
-    expect(pantry).toMatch(/Oswald|Bodoni|Chakra|Bungee/); // real, varied display families
-    expect(pantry.length).toBeGreaterThan(30_000); // the whole §1–§9 catalog, not a stub
+    expect(pantry).toContain("FONTS");
+    expect(pantry).toContain("TYPE-ART");
+    expect(pantry).toMatch(/Oswald|Bodoni|Chakra|Bungee/);
+    expect(pantry.length).toBeGreaterThan(30_000);
   });
 
   it("drops the rejected deterministic design engine from the pantry", () => {
     expect(sys[1].text).not.toContain("THE ENGINE");
-    expect(sys[1].text).not.toContain("ThemeSpec"); // §10 resolver framing is gone
+    expect(sys[1].text).not.toContain("ThemeSpec");
   });
 
   it("the few-shot is a tag-driven page, not a scripted one", () => {
     const fewshot = sys[2].text;
     expect(fewshot).toContain("data-peek-card");
-    expect(fewshot).toContain("data-peek-id"); // the stable id that links HTML ↔ spine
+    expect(fewshot).toContain("data-peek-id");
     expect(fewshot).toContain('data-peek-action="claim"');
     expect(fewshot).not.toMatch(/<script\b/i);
     expect(fewshot).not.toMatch(/<form\b/i);

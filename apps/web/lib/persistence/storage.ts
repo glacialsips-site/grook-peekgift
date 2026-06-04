@@ -1,8 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Store image bytes in the public assets bucket → a permanent public URL. Used by the fal
-// hero-image adapter (fal urls are ephemeral) and available to any future asset writer.
-// Returns null when storage isn't configured or the upload fails — callers fall back.
 const BUCKET = process.env.PEEK_V2_STORAGE_BUCKET ?? process.env.SUPABASE_STORAGE_BUCKET ?? "peek-v2-assets";
 
 let _client: SupabaseClient | null = null;

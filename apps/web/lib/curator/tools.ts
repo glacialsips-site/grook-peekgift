@@ -1,9 +1,3 @@
-// The page-authoring tool surface the curator model calls. The model authors a freeform HTML
-// document and patches it surgically; the host runtime (peek-runtime.js) gives the tagged markup
-// behavior. resolve_card + generate_hero_image feed real products/images into the markup; publish
-// flags the $12 checkout. (These are app-orchestration tools, not core IR commands — the turn
-// relays page ops to the preview iframe and calls the resolver/image ports directly.)
-
 export interface ToolDef {
   name: string;
   description: string;

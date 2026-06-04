@@ -1,16 +1,6 @@
-// The runtime token system: ThemeSpec -> the --peek-* CSS custom-property contract.
-// Ported from lib/peek-render/theme.ts as a PURE, DOM-free producer (returns a record;
-// the web surface applies it to a root's style). Alpha washes use color-mix so any css
-// color the IR permits (hex / hsl / oklch / named) works without a hex parser.
-//
-// GAP-C FIX: `palette.glow: true` now produces a headline glow via --peek-display-shadow.
-// In the original renderer the var was hardcoded to 'none' whenever loud.displayShadow was
-// absent, dead-coding the hero headline's glow fallback.
-
 import type { ThemeSpec } from "../document/contract";
 import { ensureReadable } from "./contrast";
 
-/** A flat, pre-resolved view of the theme. */
 export interface Tokens {
   bg: string;
   surface: string;
@@ -54,15 +44,12 @@ export function fontStack(family?: string): string {
   return family ? `"${family}", ${fallback}` : fallback;
 }
 
-/** Alpha wash over any css color, no hex parsing required. */
 function mixAlpha(color: string, alpha: number): string {
   const pct = Math.round(Math.max(0, Math.min(1, alpha)) * 100);
   return `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 }
 
 export function toTokens(theme: ThemeSpec): Tokens {
-  // The contrast safety-net runs under the model's free authoring: body text is guaranteed
-  // AA-readable against the background (brand colors untouched).
   const p = ensureReadable(theme.palette);
   const ty = theme.type;
   const accent2 = p.accent2 || p.accent;
@@ -71,8 +58,6 @@ export function toTokens(theme: ThemeSpec): Tokens {
   const resolveColor = (c: string | undefined, fallback: string): string =>
     c === "accent" ? p.accent : c === "accent2" ? accent2 : c === "ink" ? p.ink : c || fallback;
 
-  // display-shadow: explicit loud value wins (with accent/accent2/ink keyword expansion);
-  // otherwise palette.glow:true derives a headline glow (the gap-c fix); else none.
   let displayShadow = "";
   if (typeof loud.displayShadow === "string" && loud.displayShadow.trim()) {
     displayShadow = loud.displayShadow
@@ -134,11 +119,6 @@ export function toTokens(theme: ThemeSpec): Tokens {
   };
 }
 
-/**
- * The full --peek-* contract as a record. Apply to a root element's style on the web
- * surface. Model-authored theme.cssVars (already filtered to the --peek-* namespace by
- * the command layer) are merged LAST so a `custom` effect can override any derived token.
- */
 export function themeToCSSVars(theme: ThemeSpec): Record<string, string> {
   const t = toTokens(theme);
   const vars: Record<string, string> = {
@@ -196,7 +176,6 @@ export function themeToCSSVars(theme: ThemeSpec): Record<string, string> {
   return vars;
 }
 
-/** A token-driven multi-stop page background wash, keyed to mode + accents. */
 export function backgroundWash(t: Tokens): string {
   const a = mixAlpha(t.accent, t.mode === "dark" ? 0.12 : 0.06);
   const a2 = mixAlpha(t.accent2, t.mode === "dark" ? 0.1 : 0.05);

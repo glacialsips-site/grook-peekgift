@@ -1,6 +1,3 @@
-// The recipient's selection, persisted (peek_v2.peek_picks: one row per peek, v1 single-
-// recipient). Server-only, service-role, key-gated.
-
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SCHEMA = "peek_v2";

@@ -2,9 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-// Scroll-reveal: a section rises + fades in as it enters view (SHELL_SPEC §1.5), with a
-// failsafe so content is never stuck hidden if the observer doesn't fire (e.g. inside the
-// device-frame's own scroll, or JS-light contexts). Honors prefers-reduced-motion.
 export function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);

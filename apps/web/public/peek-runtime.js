@@ -1,25 +1,3 @@
-/* peek-runtime.js — the fixed host layer for peek.gift pages.
- *
- * The chat authors a freeform, tagged HTML page; this layer (identical on every page, injected
- * at render into the preview iframe AND the recipient route) turns the tags into a rules-aware,
- * payable order. The model declares INTENT via data-* ; the host renders the affordance and
- * enforces the rule. Decoration stays in the page's own CSS/SVG — this file owns behavior only.
- *
- * Event-DELEGATED: all interaction is bound at the document level, so a live edit_region patch
- * (a replaced node) stays interactive with no re-init. State (order/picks) is keyed by a stable
- * id stamped per card, so it survives patches. The host may call window.__PEEK__.rescan() after a
- * patch to pick up new reveals.
- *
- * Contract (canonical data-peek-*, with legacy data-card/data-opt aliases so authored examples run):
- *   [data-peek-card] | [data-card]   data-kind, data-name, data-price, data-src, data-desc,
- *                                    data-group, data-rule="pick-one|pick-any", data-locked,
- *                                    data-unlock="after:<kind|group|name>"
- *   [data-opt]  pick-one sub-option inside a card: data-price, data-label
- *   data-budget="250"  the shared tab pool;  [data-peek-tab|-amount|-fill|-msg]  the meter
- *   [data-peek-action="publish|claim|rsvp|share"]  the primary CTA
- * Host sets data-peek-picked (+ legacy .chosen-on) on chosen cards — the model styles that state.
- * window.__PEEK__ = { mode:"preview"|"recipient", onAction(type, order) } set before load.
- */
 (function () {
   "use strict";
   var cfg = (window.__PEEK__ = window.__PEEK__ || {});
@@ -31,8 +9,8 @@
   var esc = function (s) { return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\\]]/g, "\\$&"); };
 
   var CARD = "[data-peek-card],[data-card]";
-  var order = {};    // id -> { price, name, kind, src, desc }
-  var groupSel = {}; // group -> id (current pick-one selection)
+  var order = {};
+  var groupSel = {};
   var uid = 0;
 
   function idOf(card) {
@@ -105,7 +83,6 @@
     });
   }
 
-  /* ── delegated interaction (survives patches) ── */
   doc.addEventListener("click", function (e) {
     var t = e.target;
     if (!t || t.nodeType !== 1) return;
@@ -127,14 +104,13 @@
     var card = t.closest(CARD);
     if (card) {
       if (sheetEl && sheetEl.contains(card)) return;
-      if ($all("[data-opt]", card).length) return; // option cards handle their own taps
+      if ($all("[data-opt]", card).length) return;
       if (isLocked(card)) return;
       openSheet(card);
     }
   });
   doc.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
 
-  /* ── bottom sheet: authored if present, else injected themed fallback ── */
   var sheetEl = $("[data-peek-sheet]") || $(".sheet");
   if (!sheetEl) {
     sheetEl = doc.createElement("div");
@@ -178,7 +154,6 @@
   }
   function closeSheet() { if (sheetEl) sheetEl.classList.remove("open"); body.classList.remove("sheet-open"); }
 
-  /* ── sticky order bar: authored if present, else injected ── */
   var bar = $("[data-peek-bar]") || $(".mbar");
   if (!bar) {
     bar = doc.createElement("div"); bar.setAttribute("data-peek-bar", "");
@@ -207,7 +182,6 @@
     else if (cfg.mode !== "recipient") { try { console.log("[peek] action:", type, summary); } catch (e) { void e; } }
   }
 
-  /* ── reveals + sticky-bar visibility (rescannable after patches) ── */
   function wireReveals() {
     if ("IntersectionObserver" in window) {
       var rvo = new IntersectionObserver(function (es) {

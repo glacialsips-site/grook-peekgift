@@ -24,11 +24,6 @@ export default async function RecipientPage({ params }: { params: Promise<{ slug
     );
   }
 
-  // Dual representation: serve the model's AUTHORED page (the design caliber the curator paid
-  // for) — re-sanitized on the way out, with the host runtime in recipient mode — inside a
-  // SANDBOXED, opaque-origin iframe. `sandbox="allow-scripts"` WITHOUT allow-same-origin means
-  // the page executes its own CSS/SVG/runtime but cannot reach this app's DOM, cookies, Clerk,
-  // or Stripe — so even a sanitizer miss can't compromise a recipient's session.
   if (doc.presentation?.html) {
     const recipient = doc.spine.peek.recipient_name;
     const srcDoc = frameDoc(sanitizeHtml(doc.presentation.html, true), "recipient");
@@ -42,8 +37,6 @@ export default async function RecipientPage({ params }: { params: Promise<{ slug
     );
   }
 
-  // Fallback: IR-only pages (older drafts, or no authored HTML) render through the typed
-  // renderer, which stays the deterministic surface for the share/og image too.
   const picks = await loadPicks(doc.spine.peek.id);
   return <RecipientView doc={doc.spine} initialPicks={picks} />;
 }

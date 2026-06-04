@@ -1,9 +1,3 @@
-// The command input schemas + the pure reducer machinery, lifted from the existing
-// lib/peek-chat/tools.ts (the canonical tool vocabulary) into framework-agnostic core.
-// Enum schemas are reused from ../document/schema so there is one source of truth and
-// no drift. The custom-html sanitizer is intentionally absent (a web/security-adapter
-// concern); css-var filtering stays here because it is pure string logic.
-
 import { z } from "zod";
 import {
   CardTypeSchema,
@@ -41,9 +35,6 @@ const zUnlockRuleInput = z
   })
   .passthrough();
 
-// The per-command input gate. Permissive on extras (.passthrough), strict on shape;
-// the reducer fills defaults. The section-kind enum is the FULL document set (18 kinds),
-// so stats/lede are authorable here even though the legacy tool enum omitted them.
 export const Inputs = {
   set_concept: z
     .object({
@@ -222,13 +213,10 @@ export const Inputs = {
 
 export type AddCardInput = z.infer<typeof Inputs.add_card>;
 
-// ── pure helpers (ported from the existing reducer; id-gen is now injected) ──────
 export function repackPositions<T extends { position: number }>(arr: readonly T[]): T[] {
   return arr.map((x, i) => ({ ...x, position: i }));
 }
 
-// Reorder an array of {id} by an explicit id list; ids not in the list keep their
-// relative order and are appended (never silently dropped).
 export function reorderById<T extends { id: string }>(arr: readonly T[], ids: readonly string[]): T[] {
   const byId = new Map(arr.map((x) => [x.id, x]));
   const seen = new Set<string>();
@@ -246,7 +234,7 @@ export function reorderById<T extends { id: string }>(arr: readonly T[], ids: re
 
 export function deepMerge<T>(base: T, patch: unknown): T {
   if (patch === null || patch === undefined) return base;
-  if (Array.isArray(patch)) return patch as unknown as T; // arrays REPLACE (e.g. motifs)
+  if (Array.isArray(patch)) return patch as unknown as T;
   if (typeof patch !== "object" || typeof base !== "object" || base === null) return patch as T;
   const out: Record<string, unknown> = { ...(base as Record<string, unknown>) };
   for (const [k, v] of Object.entries(patch as Record<string, unknown>)) {
@@ -259,7 +247,6 @@ export function deepMerge<T>(base: T, patch: unknown): T {
   return out as T;
 }
 
-// Pure --peek-* css-var filter (the non-DOM part of the old sanitizeCssVars).
 export function filterCssVars(vars?: Record<string, string>): Record<string, string> {
   if (!vars) return {};
   const out: Record<string, string> = {};
@@ -284,8 +271,6 @@ export function toMediaSlot(m: z.infer<typeof zMediaSlotInput>): MediaSlot {
   };
 }
 
-// Normalize a section's free-form data: coerce nested media/images into MediaSlots.
-// Does NOT touch custom html (the web adapter sanitizes that before render).
 export function normalizeSectionData(data?: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = { ...(data ?? {}) };
   if (out.media && typeof out.media === "object") {
@@ -301,8 +286,6 @@ export function normalizeSectionData(data?: Record<string, unknown>): Record<str
   return out;
 }
 
-// Build a fully-defaulted Card from add_card input. id + position are supplied by
-// the decider (so the produced event is a deterministic fact; apply never generates).
 export function buildCard(input: AddCardInput, id: string, position: number): Card {
   const media: MediaSlot | null = input.media
     ? {

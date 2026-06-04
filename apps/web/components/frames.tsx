@@ -1,28 +1,13 @@
-// frames.tsx — wraps a media child in the named frame treatment, driven entirely by
-// inherited --peek-* CSS custom properties. Server-component safe: no hooks, no
-// "use client", no Math.random. Unknown kind falls through to `plain`.
-
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 
-// ---------------------------------------------------------------------------
-// Shared helpers
-// ---------------------------------------------------------------------------
 
 type Style = CSSProperties;
 
-/** Merge an arbitrary number of style objects; later entries win. */
 function merge(...styles: (Style | undefined)[]): Style {
   return Object.assign({}, ...styles.filter(Boolean));
 }
 
-// ---------------------------------------------------------------------------
-// Individual frame implementations
-// ---------------------------------------------------------------------------
 
-/**
- * plain — rounded media + subtle inner border (the default / fallback).
- * Spec: "rounded media, optional inset sheen + border" (HEMLOCK cards).
- */
 function PlainFrame({ children }: { children: ReactNode }) {
   return (
     <div
@@ -35,7 +20,6 @@ function PlainFrame({ children }: { children: ReactNode }) {
         lineHeight: 0,
       }}
     >
-      {/* inset sheen — thin accent rim on top edge */}
       <div
         aria-hidden
         style={{
@@ -54,11 +38,6 @@ function PlainFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * arch — portrait arch shape.
- * Spec: `border-radius:300px 300px 22px 22px / 60% 60% 22px 22px` + inset double border.
- * Sources: Garden `.arch :69-73`, Princess `.frame :113-118`.
- */
 function ArchFrame({ children }: { children: ReactNode }) {
   const archRadius = "300px 300px 22px 22px / 60% 60% 22px 22px";
   return (
@@ -72,7 +51,6 @@ function ArchFrame({ children }: { children: ReactNode }) {
         width: "100%",
       }}
     >
-      {/* outer accent border */}
       <div
         aria-hidden
         style={{
@@ -84,7 +62,6 @@ function ArchFrame({ children }: { children: ReactNode }) {
           zIndex: 2,
         }}
       />
-      {/* inner double-border inset ring */}
       <div
         aria-hidden
         style={{
@@ -101,11 +78,6 @@ function ArchFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * locket — oval portrait with concentric box-shadow rings.
- * Spec: `border-radius:~48%` oval + concentric `box-shadow` rings (accent, surface).
- * Source: prior-gen `:81-82`.
- */
 function LocketFrame({ children }: { children: ReactNode }) {
   return (
     <div
@@ -116,7 +88,6 @@ function LocketFrame({ children }: { children: ReactNode }) {
         display: "inline-block",
         lineHeight: 0,
         width: "100%",
-        // concentric rings: accent ring + surface gap + accent ring
         boxShadow: [
           "0 0 0 3px var(--peek-accent)",
           "0 0 0 8px var(--peek-surface)",
@@ -131,16 +102,7 @@ function LocketFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * vinyl — a record disc frame.
- * Spec: `repeating-radial-gradient` grooves disc + center label hole + `conic-gradient`
- * sheen. Source: Disco `:116-135`.
- *
- * The disc is painted as a ::before-equivalent overlay on top of a circular container.
- * The center label hole shows the actual child (the photo).
- */
 function VinylFrame({ children }: { children: ReactNode }) {
-  // The child (typically a square photo) becomes the center label.
   const labelSize = "40%";
 
   return (
@@ -153,16 +115,12 @@ function VinylFrame({ children }: { children: ReactNode }) {
         aspectRatio: "1",
         borderRadius: "50%",
         overflow: "hidden",
-        // Groove rings radiating from center (dark disc body)
         background: [
-          // sheen highlight arc
           "conic-gradient(from 30deg, transparent 0deg 45deg, color-mix(in srgb, var(--peek-surface) 8%, transparent) 45deg 90deg, transparent 90deg 360deg)",
-          // groove rings
           "repeating-radial-gradient(circle at 50% 50%, #111 0px 2px, #0e0e10 2px 5px)",
         ].join(", "),
       }}
     >
-      {/* center label — circular cutout showing the child media */}
       <div
         style={{
           position: "absolute",
@@ -174,14 +132,12 @@ function VinylFrame({ children }: { children: ReactNode }) {
           borderRadius: "50%",
           overflow: "hidden",
           zIndex: 2,
-          // accent-tinted ring around the label
           boxShadow: "0 0 0 2px var(--peek-accent), 0 0 0 4px #111",
           lineHeight: 0,
         }}
       >
         {children}
       </div>
-      {/* spindle hole */}
       <div
         aria-hidden
         style={{
@@ -201,11 +157,6 @@ function VinylFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * porthole — circle with thick layered bezel rings.
- * Spec: circle, thick layered `box-shadow` bezel rings + inner shadow.
- * Source: Space `.porthole :102-127`.
- */
 function PortholeFrame({ children }: { children: ReactNode }) {
   return (
     <div
@@ -217,7 +168,6 @@ function PortholeFrame({ children }: { children: ReactNode }) {
         lineHeight: 0,
         width: "100%",
         aspectRatio: "1",
-        // layered bezel: tight accent ring → surface gap → ink ring → outer shadow
         boxShadow: [
           "0 0 0 4px var(--peek-surface)",
           "0 0 0 8px var(--peek-accent)",
@@ -227,7 +177,6 @@ function PortholeFrame({ children }: { children: ReactNode }) {
         ].join(", "),
       }}
     >
-      {/* inner shadow for depth */}
       <div
         aria-hidden
         style={{
@@ -244,15 +193,9 @@ function PortholeFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * polaroid — white card with generous bottom padding and slight rotation.
- * Spec: `white card padding:14px 14px 54px; border; box-shadow; transform:rotate(-3–4deg)`,
- * caption strip. Source: Totally Rad `:94-106`, prior-gen.
- */
 function PolaroidFrame({ children }: { children: ReactNode }) {
   return (
     <div
-      // slight rotation applied at the wrapper; the parent controls layout
       style={{
         display: "inline-block",
         transform: "rotate(-3deg)",
@@ -270,7 +213,6 @@ function PolaroidFrame({ children }: { children: ReactNode }) {
         boxSizing: "border-box" as const,
       }}
     >
-      {/* photo area */}
       <div
         style={{
           overflow: "hidden",
@@ -280,7 +222,6 @@ function PolaroidFrame({ children }: { children: ReactNode }) {
       >
         {children}
       </div>
-      {/* caption strip */}
       <div
         style={{
           display: "flex",
@@ -302,11 +243,6 @@ function PolaroidFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * idcard — a [photo | meta] bordered crew-pass card.
- * Spec: `grid [photo | meta]` bordered card, "BACKSTAGE / ALL ACCESS / NO. 0042" mono text,
- * inner hairline. Source: Bachelor `.crew :102-112`, prior-gen `:83-84`.
- */
 function IdcardFrame({ children }: { children: ReactNode }) {
   return (
     <div
@@ -321,7 +257,6 @@ function IdcardFrame({ children }: { children: ReactNode }) {
         boxShadow: "0 2px 12px color-mix(in srgb, var(--peek-ink) 12%, transparent)",
       }}
     >
-      {/* photo column */}
       <div
         style={{
           borderRight: "1px solid var(--peek-line)",
@@ -332,7 +267,6 @@ function IdcardFrame({ children }: { children: ReactNode }) {
       >
         {children}
       </div>
-      {/* meta column */}
       <div
         style={{
           padding: "12px 10px",
@@ -386,15 +320,6 @@ function IdcardFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * ticket / stub — dashed perforation edge + punched notch half-circles.
- * Spec: `dashed perforation + punched notch circles (::before/::after half-circles in bg
- * color straddling edges)`. Sources: For-the-Old-Man `.ticket :60-68`,
- * Bachelor `.stub :138-144`.
- *
- * The notches are rendered as sibling divs since we can't use pseudo-elements easily
- * in inline styles without a stylesheet; the visual is faithful.
- */
 function TicketFrame({ children }: { children: ReactNode }) {
   const notchSize = 18;
   const notchStyle: Style = {
@@ -402,7 +327,6 @@ function TicketFrame({ children }: { children: ReactNode }) {
     width: notchSize,
     height: notchSize,
     borderRadius: "50%",
-    // bg color circle punched out of the border line
     background: "var(--peek-bg)",
     border: "1px solid var(--peek-line)",
     zIndex: 2,
@@ -419,7 +343,6 @@ function TicketFrame({ children }: { children: ReactNode }) {
         lineHeight: 0,
       }}
     >
-      {/* perforation strip — right edge dashed divider */}
       <div
         aria-hidden
         style={{
@@ -433,7 +356,6 @@ function TicketFrame({ children }: { children: ReactNode }) {
           pointerEvents: "none",
         }}
       />
-      {/* top notch straddling the perforation line */}
       <div
         aria-hidden
         style={merge(notchStyle, {
@@ -441,7 +363,6 @@ function TicketFrame({ children }: { children: ReactNode }) {
           right: `calc(30% - ${notchSize / 2}px)`,
         })}
       />
-      {/* bottom notch straddling the perforation line */}
       <div
         aria-hidden
         style={merge(notchStyle, {
@@ -454,11 +375,6 @@ function TicketFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * stamp — dashed/double border box with slight rotation.
- * Spec: `dashed/double border box, slight rotate, "Finalized"-style typewriter overprint`.
- * Sources: Decree `.stamp :40-42`, prior-gen MOTIFS.stamp.
- */
 function StampFrame({ children }: { children: ReactNode }) {
   return (
     <div
@@ -472,7 +388,6 @@ function StampFrame({ children }: { children: ReactNode }) {
         position: "relative",
       }}
     >
-      {/* outer dashed border */}
       <div
         style={{
           border: "2px dashed var(--peek-accent)",
@@ -481,7 +396,6 @@ function StampFrame({ children }: { children: ReactNode }) {
           lineHeight: 0,
         }}
       >
-        {/* inner solid border */}
         <div
           style={{
             border: "1px solid var(--peek-accent)",
@@ -493,7 +407,6 @@ function StampFrame({ children }: { children: ReactNode }) {
           {children}
         </div>
       </div>
-      {/* overprint "APPROVED" bar — typewriter aesthetic */}
       <div
         aria-hidden
         style={{
@@ -523,9 +436,6 @@ function StampFrame({ children }: { children: ReactNode }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Public export
-// ---------------------------------------------------------------------------
 
 type FrameKind =
   | "plain"
@@ -536,20 +446,10 @@ type FrameKind =
   | "polaroid"
   | "idcard"
   | "ticket"
-  | "stub"  // alias for ticket
+  | "stub"
   | "stamp"
-  | (string & Record<never, never>); // open — unknown → plain
+  | (string & Record<never, never>);
 
-/**
- * Frame — wraps a media child in the named decorative frame treatment.
- *
- * All visual properties are driven by inherited CSS custom properties
- * (var(--peek-accent), --peek-accent-2, --peek-ink, --peek-bg, --peek-surface,
- * --peek-line, --peek-radius-card). No colors are hard-coded.
- *
- * Server-component safe: plain function, no hooks, no "use client", no Math.random.
- * Unknown `kind` values fall through to `plain`.
- */
 export function Frame({ kind, children }: { kind: FrameKind | string; children: ReactNode }): ReactElement {
   switch (kind) {
     case "arch":

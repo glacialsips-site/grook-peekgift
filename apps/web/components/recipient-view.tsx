@@ -4,9 +4,6 @@ import { useMemo, useState } from "react";
 import { render, type PeekIR } from "@peek/core";
 import { PeekPreview, type PickInteraction } from "@/components/preview";
 
-// The recipient surface: the published page, with cards as pick targets. Every toggle is
-// validated server-side by the SAME selection engine (decidePick) and persisted; this view
-// just reflects the server's returned selection, so the rules can't be bypassed client-side.
 export function RecipientView({ doc, initialPicks }: { doc: PeekIR; initialPicks: string[] }) {
   const [picked, setPicked] = useState<string[]>(initialPicks);
   const [pending, setPending] = useState(false);

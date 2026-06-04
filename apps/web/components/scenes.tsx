@@ -1,19 +1,5 @@
-/**
- * scenes.tsx — full-bleed themed atmosphere backdrops for peek.gift
- *
- * Server-component-safe (no hooks, no Math.random).
- * Driven entirely by inherited CSS custom properties.
- * All ambient animations gate on intensity>0 and prefers-reduced-motion.
- *
- * CSS vars consumed (set by the theme layer on the root):
- *   --peek-accent, --peek-accent-2, --peek-bg, --peek-ink, --peek-mode
- */
-
 import React, { type JSX } from "react";
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
 
 export interface SceneProps {
   kind: string;
@@ -26,7 +12,6 @@ export function Scene({
   mode,
   intensity = 0.5,
 }: SceneProps): JSX.Element | null {
-  // Shared wrapper styles — applied to the outer div of every scene
   const wrap: React.CSSProperties = {
     position: "absolute",
     inset: 0,
@@ -35,7 +20,7 @@ export function Scene({
     overflow: "hidden",
   };
 
-  const animate = intensity > 0; // gate all kinetic animations
+  const animate = intensity > 0;
 
   switch (kind) {
     case "none":
@@ -85,11 +70,7 @@ export function Scene({
   }
 }
 
-// ---------------------------------------------------------------------------
-// Deterministic pseudo-random helpers (seeded by a string, no Math.random)
-// ---------------------------------------------------------------------------
 
-/** Simple 32-bit integer hash of a string (djb2). */
 function hashStr(s: string): number {
   let h = 5381;
   for (let i = 0; i < s.length; i++) {
@@ -98,31 +79,20 @@ function hashStr(s: string): number {
   return h;
 }
 
-/** LCG PRNG that yields floats in [0, 1). Mutates the seed array so you get a
- *  sequence: const rng = makeRng("starfield"); rng(); rng(); … */
 function makeRng(seed: string): () => number {
   let state = hashStr(seed) >>> 0 || 1;
   return () => {
-    // LCG constants from Numerical Recipes
     state = (Math.imul(1664525, state) + 1013904223) >>> 0;
     return state / 0x100000000;
   };
 }
 
-// ---------------------------------------------------------------------------
-// Inline <style> helper
-// ---------------------------------------------------------------------------
 
 function Styles({ css }: { css: string }): JSX.Element {
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }
 
-// ---------------------------------------------------------------------------
-// Scene implementations
-// ---------------------------------------------------------------------------
 
-// ── grain ──────────────────────────────────────────────────────────────────
-// feTurbulence SVG data-URI overlay, mix-blend overlay/multiply, very low opacity.
 
 function GrainScene({
   wrap,
@@ -131,7 +101,6 @@ function GrainScene({
   wrap: React.CSSProperties;
   mode: "light" | "dark";
 }): JSX.Element {
-  // Inline SVG as a background-image data URI — no external fetch
   const svgNoise = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(#n)' opacity='1'/></svg>`;
   const encoded = encodeURIComponent(svgNoise);
   const blendMode = mode === "dark" ? "overlay" : "multiply";
@@ -151,8 +120,6 @@ function GrainScene({
   );
 }
 
-// ── rayfan ─────────────────────────────────────────────────────────────────
-// repeating-conic-gradient wedges with a radial fade mask.
 
 function RayfanScene({
   wrap,
@@ -178,8 +145,6 @@ function RayfanScene({
   );
 }
 
-// ── sunburst ───────────────────────────────────────────────────────────────
-// repeating-conic-gradient wedges + radial-gradient ring mask, centred.
 
 function SunburstScene({
   wrap,
@@ -205,10 +170,6 @@ function SunburstScene({
   );
 }
 
-// ── starfield ──────────────────────────────────────────────────────────────
-// Three parallax layers; each star is a box-shadow entry on a 1×1 element.
-// Generated deterministically from the seed "starfield-{layer}".
-// Twinkle animation gated on animate + prefers-reduced-motion.
 
 function buildStarShadows(
   seed: string,
@@ -224,7 +185,7 @@ function buildStarShadows(
     const x = Math.floor(rng() * areaW);
     const y = Math.floor(rng() * areaH);
     const alpha = alphaMin + rng() * (alphaMax - alphaMin);
-    const size = rng() < 0.15 ? 2 : 1; // occasional larger star
+    const size = rng() < 0.15 ? 2 : 1;
     shadows.push(
       `${x}px ${y}px 0 ${size > 1 ? `${size}px` : "0"} rgba(255,255,255,${alpha.toFixed(2)})`
     );
@@ -273,7 +234,6 @@ function StarfieldScene({
   return (
     <div style={wrap} aria-hidden="true">
       <Styles css={keyframes} />
-      {/* Layer 1 — small, mid-opacity */}
       <div
         className="peek-stars-l1"
         style={{
@@ -292,7 +252,6 @@ function StarfieldScene({
           }}
         />
       </div>
-      {/* Layer 2 — fewer, lower opacity, offset timing */}
       <div
         className="peek-stars-l2"
         style={{
@@ -311,7 +270,6 @@ function StarfieldScene({
           }}
         />
       </div>
-      {/* Layer 3 — bright accent stars */}
       <div
         className="peek-stars-l3"
         style={{
@@ -334,9 +292,6 @@ function StarfieldScene({
   );
 }
 
-// ── gridfloor ──────────────────────────────────────────────────────────────
-// Bottom band, perspective rotateX grid of accent lines that scrolls.
-// Masked to fade toward the horizon.
 
 function GridfloorScene({
   wrap,
@@ -360,7 +315,6 @@ function GridfloorScene({
     <div
       style={{
         ...wrap,
-        // Only occupy the bottom 55% — feels like a receding floor
         top: "45%",
         perspective: "340px",
       }}
@@ -393,9 +347,6 @@ function GridfloorScene({
   );
 }
 
-// ── mirrorball ─────────────────────────────────────────────────────────────
-// Radial-gradient sphere + two repeating-linear-gradient facet overlays
-// + a specular highlight + slow spin.
 
 function MirrorballScene({
   wrap,
@@ -430,7 +381,6 @@ function MirrorballScene({
       aria-hidden="true"
     >
       <Styles css={keyframes} />
-      {/* Outer container — keeps the ball centred */}
       <div
         style={{
           position: "relative",
@@ -438,7 +388,6 @@ function MirrorballScene({
           height: ballSize,
         }}
       >
-        {/* Sphere base */}
         <div
           style={{
             position: "absolute",
@@ -447,7 +396,6 @@ function MirrorballScene({
             background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, var(--peek-accent) 30%, rgba(0,0,0,0.85) 100%)`,
           }}
         />
-        {/* Rotating facet grid */}
         <div
           className={`${id}-disc`}
           style={{
@@ -465,7 +413,6 @@ function MirrorballScene({
             overflow: "hidden",
           }}
         />
-        {/* Specular highlight */}
         <div
           style={{
             position: "absolute",
@@ -478,7 +425,6 @@ function MirrorballScene({
               "radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)",
           }}
         />
-        {/* Scattered light reflections */}
         {[
           { top: "10%", left: "70%", size: 6, alpha: 0.7 },
           { top: "25%", left: "15%", size: 4, alpha: 0.5 },
@@ -506,8 +452,6 @@ function MirrorballScene({
   );
 }
 
-// ── confetti ───────────────────────────────────────────────────────────────
-// Deterministically-placed chips that fall + rotate.
 
 function buildConfettiPieces(
   count: number
@@ -575,7 +519,6 @@ function ConfettiScene({
             height: p.size,
             background: p.color,
             borderRadius: 2,
-            // CSS custom property for the rotation offset
             ["--cr" as string]: `${p.rotate}deg`,
             animation: animate
               ? `peek-confetti-fall ${p.dur} linear ${p.delay} infinite`
@@ -589,8 +532,6 @@ function ConfettiScene({
   );
 }
 
-// ── bubbles ────────────────────────────────────────────────────────────────
-// Bordered circles that rise.
 
 function buildBubbles(
   count: number
@@ -660,8 +601,6 @@ function BubblesScene({
   );
 }
 
-// ── halftone ───────────────────────────────────────────────────────────────
-// radial-gradient dot field; background-size drives the grid.
 
 function HalftoneScene({
   wrap,
@@ -670,7 +609,6 @@ function HalftoneScene({
   wrap: React.CSSProperties;
   mode: "light" | "dark";
 }): JSX.Element {
-  // Dot colour: ink at low opacity
   const dotAlpha = mode === "dark" ? 0.18 : 0.12;
 
   return (
@@ -686,8 +624,6 @@ function HalftoneScene({
   );
 }
 
-// ── blueprint ──────────────────────────────────────────────────────────────
-// Two linear-gradient 1px grids on a dark bg.
 
 function BlueprintScene({
   wrap,
@@ -710,8 +646,6 @@ function BlueprintScene({
   );
 }
 
-// ── topo ───────────────────────────────────────────────────────────────────
-// repeating-radial-gradient contour rings.
 
 function TopoScene({
   wrap,
@@ -733,8 +667,6 @@ function TopoScene({
   );
 }
 
-// ── mesh ───────────────────────────────────────────────────────────────────
-// Layered offset radial-gradient accent blobs; slow drift if animated.
 
 function MeshScene({
   wrap,
@@ -779,8 +711,6 @@ function MeshScene({
   );
 }
 
-// ── scanlines ──────────────────────────────────────────────────────────────
-// repeating-linear-gradient horizontal bands, mix-blend overlay.
 
 function ScanlinesScene({
   wrap,
