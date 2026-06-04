@@ -1,97 +1,102 @@
-# WAKEUP — read this first. Current truth as of 2026-06-03. Don't restart; don't rebuild the engine.
+# WAKEUP — read this first. Current truth as of 2026-06-04. Don't restart; don't rebuild.
 
-You (a fresh context) are continuing a long build. **It's real, deployed, and LIVE.** The #1 failure
-mode on this project is restarting from scratch — ~50 non-compounding tries. Do NOT re-derive or
-rebuild. Read this, move the **next step** — not the whole thing. If any other doc conflicts with this
-one, **this wins**; the rest (`_packets/*`, older WAKEUPs) is residue.
+You (a fresh context) are continuing a long build. The #1 failure mode on this project is restarting from
+scratch — ~50 non-compounding tries. Do NOT re-derive or rebuild. Read **this**, then `BUILDOUT-STATUS.md`
+(what's done + the exact next steps) and `IN-SITE-CHAT-MASTER-PLAN.md` (the architecture). Move the next
+step — don't re-mine the repo. If any other doc conflicts with this one, **this wins**; the rest is residue.
 
-## Live right now
-- **Deployed: https://vnext.peek.gift** (Netlify site `932646db-…`), serving commit `47fb836`.
-- **Branches that matter** (gallant-planck + the 80 other branches are OLD residue):
-  - `claude/studio-vnext` = **Netlify production branch** (what deploys). At `47fb836`.
-  - `claude/studio-integration` = **work branch**; canon + latest live here. **Push work here; deploy by
-    fast-forwarding `studio-vnext` onto it.**
-- Build green: `@peek/core` 53 tests · `@peek/web` `tsc --noEmit` + `next build`.
+## Where the work lives (the only branches that matter — ignore the other ~95)
+- **`claude/in-site-chat-buildout` = THE WORK BRANCH.** Latest code + canon live here (PR #13). Forked from
+  `studio-integration`. **Push work here. Start every session ON this branch** (else you won't see this work).
+- **`claude/studio-vnext` = the Netlify production branch** (deploys to vnext.peek.gift). Deploy by
+  fast-forwarding it onto the work branch: `git push origin claude/in-site-chat-buildout:claude/studio-vnext`.
+- `claude/studio-integration` = the prior line this forked from (reference). Everything else
+  (gallant-planck, atelier-integration, wizardly-mendel, the ~90 packet/wave/lt branches) = OLD residue.
+
+## State (2026-06-04)
+- **Green baseline, held at every commit:** `@peek/core` 57 tests · `@peek/web` 47 tests · both
+  `tsc --noEmit` clean · `next build` clean (11 routes). Toolchain: node 22, pnpm 10.33.
+- **Built this stretch (Phases 1–3a + a deploy fix) — do NOT redo** (full detail in `BUILDOUT-STATUS.md`):
+  1. **Chat caliber.** The model was vocabulary-starved (told to vary fonts with no materials → defaulted →
+     generic). Injected the design pantry (`apps/web/lib/curator/pantry.ts`), a tagged few-shot
+     (`exemplar.ts`), a concept→motion table, and a 10-axis self-critique gate — assembled as 4 cached
+     prompt blocks (`prompt.ts`).
+  2. **Dual representation.** `PeekDocument = spine (PeekIR, verbatim) + presentation (html)` (`packages/core`).
+     `extractSpine()` derives the structured spine from the page's `data-peek-*` tags. The curator route now
+     **autosaves** the page (html + spine) every turn — **the write-orphan is dead** (before, the chat's
+     output was never saved at all).
+  3. **Recipient + security.** `/g/[slug]` serves the AUTHORED page in a sandboxed opaque-origin iframe;
+     fixed the unsanitized `custom`-html path; hardened the sanitizer's CSS (`@import`/tabnabbing).
+  4. **Deploy fix.** Externalized `@anthropic-ai/sdk` + `node-html-parser` in `next.config.mjs` — Netlify's
+     function bundler chokes on the SDK's dynamic shims (curator route 500'd live, fine local + standalone).
+- **⚠ DEPLOY IS STUCK — needs Frank.** `studio-vnext` is at the fix (`4e8b226`), but Netlify has not published
+  a build since the FIRST one; the live build is still the old pre-fix one (`cgBk-…`), whose `/api/curator`
+  500s. The Netlify build pipeline is stalled and the Netlify MCP can't see this site (different team).
+  **Frank:** Netlify → `peek-gift-vnext` → Deploys → **"Clear cache and deploy site"**; if the latest build
+  shows *failed*, share the error. Also confirm `ANTHROPIC_API_KEY` is on the **Production** context (stray
+  503s seen). The fix goes live the moment a build completes — then verify the loop (drive a brief → inspect
+  the authored page → confirm the new `peek_v2.peek_documents` row → fetch `/g/[slug]`).
 
 ## What this is — the destination (don't lose it)
 peek.gift is **V0 of PerfectPurchase, deliberately minus fulfillment.**
 - **PerfectPurchase** = a *decision layer between intent and transaction*. User describes a need
   (text/voice/image) → it returns a transaction-ready **assembled bundle** of real products from many
-  retailers (masked), for high-friction **"projects, not products"** categories. (Reef-tank example: the
-  pain is *knowing what to buy + assembling it*, not the buying.) Own the moment uncertainty resolves —
-  not the catalog, not the logistics. Moat = **assembly intelligence** + a system that **compounds per
-  category**. Full thesis = Frank's PerfectPurchase Series A brief (Mar 2026); ask him for it — NOT
-  committed here, it's confidential.
-- **peek = the wedge**: gift-framed so you ship the proven-hard front-end (aggregate retailers + chat +
-  cool presentation) **without owning fulfillment yet** (curator/recipient closes the buy). Gifts are
-  emotional, shareable, **self-distributing**.
-- **Money model**: peek only needs to **cover COGS + ad spend** (break-even / self-funding) — the real
-  money is PerfectPurchase downstream. Unit economics close via **virality** (every published page lands
-  in a recipient's hands ≈ ~free CAC) + **controlled COGS** (cap/cache Opus). Both require the output be
-  good enough to forward.
-- **Fulfillment (auto multi-retailer buying) is DEFERRED** — it's the boss fight and today's agents
-  aren't reliable enough. Build the front-end now; add fulfillment when agent reliability catches up.
+  retailers (masked), for high-friction **"projects, not products"** categories. Own the moment uncertainty
+  resolves — not the catalog, not the logistics. Moat = **assembly intelligence** + a system that
+  **compounds per category**. Full thesis = Frank's PerfectPurchase Series A brief (confidential; ask him).
+- **peek = the wedge**: gift-framed so you ship the proven-hard front-end (aggregate retailers + chat + cool
+  presentation) **without owning fulfillment yet** (curator/recipient closes the buy). Gifts are emotional,
+  shareable, **self-distributing**.
+- **Money model**: peek only needs to **cover COGS + ad spend** (break-even) — the real money is
+  PerfectPurchase downstream. Unit economics close via **virality** (every published page ≈ ~free CAC) +
+  **controlled COGS** (cap/cache Opus). Both require the output be good enough to forward.
+- **Fulfillment (auto multi-retailer buying) is DEFERRED** — build the front-end now; add it when agent
+  reliability catches up.
 
 ## The V0 win condition — the only two things that matter
-1. **Resolution that doesn't break** — reliably turn *any* link or fuzzy ask ("a 40-gal reef setup")
-   into real products (image, price, title) across retailers. The `CardResolver` cascade (retailer API
-   → scrape/ZenRows → LLM web+vision) is the **foundation** — stress-test it to death; everything sits
-   on it.
-2. **Output people forward** — the eye-popping, non-generic quality bar. Generic = nobody forwards =
-   the loop dies. ("Generic is the only failure.")
+1. **Resolution that doesn't break** — reliably turn any link or fuzzy ask into real products (image, price,
+   title) across retailers. The `CardResolver` cascade (retailer API → scrape/ZenRows → LLM web+vision) is
+   the foundation — stress-test it; everything sits on it.
+2. **Output people forward** — the eye-popping, non-generic quality bar. Generic = nobody forwards = the loop
+   dies. ("Generic is the only failure.")
 
-Everything else is downstream or deferred.
-
-## Done this session (2026-06-03) — do NOT redo
-fal hero-image gen wired into the turn (real image → Supabase-hosted URL; degrades to themed gradient
-if `FAL_KEY` absent) · real per-kind section renderers (countdown/gallery/lede/rail/lookbook/tracklist/
-courses/tiers/stubs) so nothing renders blank · `custom` sections sanitized server-side (DOMPurify) then
-painted · bottom-sheet first-paint flash fixed (`live ?? held`) · action-bar CTA scrolls to gifts ·
-curator route hardened (emit/close disconnect guards + leading-non-user-message strip) · dead
-non-streaming `runCuratorTurn` removed · **deployed live to vnext.peek.gift.**
-
-## Next (when Frank says go)
-- **Harden the resolver** (win-condition #1) — reliability across real retailers. It's the foundation of
-  the entire business; if this is flaky, "easy + cool" is a house on sand.
-- **Concept-gate + reject loop** (win-condition #2) — model commits a concept FIRST (one line + the one
-  bold move); Frank one-taps `keep` / `too safe, again`; every keep/reject logs into a growing taste
-  corpus that feeds the system prompt. Turns "explain my taste" (failed for 2 months) into "react" — and
-  the rejections **compile** into the canon that makes output forwardable. (Frank owns the taste; Claude
-  builds the loop.)
+## Next (the precise, file-cited list is in `BUILDOUT-STATUS.md` § Remaining)
+- **Phase 3b — finish the loop:** publish ($12, now reachable thanks to autosave) → server-validated picks
+  (postMessage bridge from the recipient iframe → `/api/pick`, **passing caps** — today caps are never
+  passed, so server cap enforcement is dead) → notify (Resend) → `next/og` share card. Terminal gate: one
+  real create→publish→pick→notify run (it has never completed; `peek_picks` is empty).
+- **Phase 4 — remaining security (before any public launch):** gate `/api/curator` (Turnstile + Upstash
+  rate-limit + auth — `apps/web` has NO middleware), CSP, `url()`-host allowlist + image rehosting, SSRF
+  guard on `url_scrape`, image moderation.
+- **Phase 5 — eval + the concept-gate/reject taste loop** (capture taste as rejections). **Phase 6 —
+  PerfectPurchase seams** (log every `resolve_card` as a catalog row, GTINs, pgvector). Master plan §6–7.
 
 ## Practical reality
-- **Keys**: `.env*` is gitignored → NOT in a fresh container. Netlify env holds ANTHROPIC/SUPABASE/STRIPE,
-  so the deploy is fully live. To re-verify the turn in-session, ask Frank to re-drop `ANTHROPIC_API_KEY`.
-  `FAL_KEY` makes hero images real (else themed gradient). Don't nag about key hygiene.
-- **Setup**: node 22, pnpm 10.33. `pnpm install --filter @peek/web...` then `pnpm --filter @peek/web
-  build`. Core alone: `cd packages/core && pnpm install --ignore-workspace && pnpm test`.
-- **Deploy**: Netlify normally auto-builds on push to `studio-vnext`. If it stalls, Frank triggers
-  "Clear cache and deploy site" manually. Netlify MCP has been flaky/down — can't trigger from here.
-  Clear-cache after any dependency/lockfile/next.config change.
-- **Files**: `apps/web/components/{scenes,frames,reveal,preview,recipient-view}.tsx` = renderer + studio ·
-  `apps/web/lib/curator/*` = the SSE turn (system-prompt, tools, turn) · `apps/web/lib/ports/*` =
-  resolver + image(fal) · `apps/web/lib/persistence/*` = Supabase store + picks · `apps/web/lib/
-  sanitize.ts` = custom-html. `packages/core` = the spine (decide/apply maker-checker, PeekIR, render(),
-  tokens, selection engine, ports). **53 tests green.**
-- Headless screenshots don't paint webfonts (captures show fallback fonts); real browsers + deploy load
-  them. Don't chase font screenshots.
+- **Setup:** the SessionStart hook (`scripts/bootstrap.sh`) runs `corepack enable && pnpm install`, so deps
+  are ready on startup. It also prints the read-first pointer. Gates listed above.
+- **Keys:** `.env*` is gitignored → NOT in a fresh container. Build/tests/typecheck are green **without**
+  keys. Netlify holds ANTHROPIC/SUPABASE/STRIPE/etc → the deploy is fully live once it builds. To test the
+  curator turn in-session, ask Frank to drop `ANTHROPIC_API_KEY`. Don't nag about key hygiene.
+- **Files:** `apps/web/lib/curator/*` = the chat (system-prompt/pantry/exemplar/tools/turn/prompt/page-html/
+  draft/extract) · `apps/web/app/api/curator/route.ts` = the SSE turn + autosave · `apps/web/app/g/[slug]/
+  page.tsx` = recipient · `apps/web/lib/persistence/store.ts` = envelope persistence · `apps/web/lib/
+  sanitize.ts` = the sanitizer · `packages/core` = the spine (PeekDocument, decide/apply, render, picks,
+  ports). Tests in `packages/core/tests/` + `apps/web/tests/`.
+- Headless screenshots don't paint webfonts — verify caliber on the deploy, not local captures.
 
 ## Standing directives (Frank — override older docs)
 - Frank = product/taste/vision; Claude = mechanics/functionality. Work *with* him.
-- **No embedded checkout** — it's a later full-custom build. `/api/publish` + webhook are harmless
-  backend. **No landing page yet.** Build LIVE, no mock. Be terse; chatting costs ~50× working.
-- **Verify before asserting** — never claim missing/broken/stubbed without evidence. Frank loathes
-  base64. Frank does not read git.
+- **No embedded checkout** beyond the $12 publish path · **no landing page yet** · build LIVE, no mock · be
+  terse (chatting costs ~50× working).
+- **Verify before asserting** — never claim missing/broken/stubbed without evidence. Frank loathes base64.
+  Frank does not read git.
+- All live-prod work (git, deploys, the URL cutover) is Claude's via the connectors; Frank touches nothing live.
 
-## Operating truths (hard-won 2026-06-03 — the meta-fix)
-- **Don't restart. Don't rebuild the engine.** The disease was ~50 non-compounding tries; the cure is
-  one held line + this canon. Each session must *add*, not reset.
-- **Capture Frank's taste as rejections, not essays** — explaining it in prose failed for 2 months
-  (the model softens prose into generic mush). His "no"s are the spec.
-- **This file is the one source of truth.** Keep it current at the end of every session. Anything not
-  reflected here is residue until it is.
+## Operating truths (hard-won — the meta-fix)
+- **Don't restart. Don't rebuild.** The disease was ~50 non-compounding tries; the cure is one held line +
+  this canon. Each session must *add*, not reset.
+- **Capture Frank's taste as rejections, not essays** — prose softens into generic mush. His "no"s are the spec.
+- **This file is the one source of truth. Keep it current at the END of every session.** Anything not
+  reflected here is residue until it is. (Never put a model id in commits/PRs/artifacts.)
 
-Commit footer this session: `https://claude.ai/code/session_01JiokF2zrryfLtJwoGqyGM4`. Never put a model
-id in commits/PRs/artifacts.
-
-Go. It's live. Move the next step — don't rebuild what's already real.
+Go. The work is real and committed; the only thing between it and live is one stuck Netlify build.
