@@ -1,10 +1,3 @@
-// The WCAG-AA contrast safety-net. The model authors palettes freely; this guarantees the
-// rendered body text stays readable by nudging ink/muted toward black or white (whichever
-// raises contrast vs the background) until it clears the ratio. Pure; only adjusts colors
-// that fall below threshold — well-authored palettes pass through untouched. Brand colors
-// (accent, bg, surface) are never altered. Operates on hex; non-hex (hsl/oklch/named) pass
-// through unchanged (can't analyze without a color lib, and they're the author's call).
-
 import type { Palette } from "../document/contract";
 
 type RGB = { r: number; g: number; b: number };
@@ -38,7 +31,6 @@ function ratio(a: RGB, b: RGB): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** WCAG contrast ratio between two hex colors, or null if either isn't hex. */
 export function contrastRatio(fg: string, bg: string): number | null {
   const f = parseHex(fg);
   const b = parseHex(bg);
@@ -75,7 +67,6 @@ function fix(fg: string, bg: string, target: number): string {
   return ratio(f, b) >= target ? fg : toHex(repairFg(f, b, target));
 }
 
-/** A palette whose body/secondary text clears WCAG AA against the background. */
 export function ensureReadable(palette: Palette): Palette {
   const AA = 4.5;
   const AA_LARGE = 3;

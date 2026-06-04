@@ -1,24 +1,3 @@
-// ============================================================================
-// peek.gift — THE FEW-SHOT EXEMPLAR (one finished, interaction-tagged page)
-// ----------------------------------------------------------------------------
-// A frozen, byte-stable cached few-shot: the founder's own "For the Old Man"
-// mockup (dad's 60th, always out on the mower) — a hand-built kraft work-order
-// page — UPGRADED so every claimable/interactive bit carries the data-peek-*
-// contract the host runtime (peek-runtime.js) turns into selection, the sheet,
-// and checkout. Its design is untouched (Oswald + Roboto Mono, kraft palette,
-// "The Haul" supply list with retailer chips + prices, the perforated steak-
-// dinner ticket, the personal note, the running total, the "Send it to Dad" CTA).
-//
-// This is the BAR and the SHAPE — what a finished, screenshot-worthy, fully
-// tagged page looks like — NEVER a template to copy. Each gift earns its own
-// type, color, layout, and copy; the only thing portable here is the *caliber*
-// and the *tagging discipline*: real markup, decoration in CSS/SVG, behavior
-// declared via data-peek-* and left to the host. No <script>, no <form>, no
-// <input> — every affordance is a tag.
-//
-// FROZEN STRING — no interpolation, byte-stable (a cacheable suffix).
-// ============================================================================
-
 export const PEEK_FEWSHOT = `<!doctype html>
 <html lang="en">
 <head>

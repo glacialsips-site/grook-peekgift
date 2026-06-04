@@ -16,18 +16,15 @@ import {
   normalizeSectionData,
 } from "./inputs";
 
-/** Injected id generation, so `decide` is deterministic under a seeded ctx (and events are facts). */
 export interface DecideCtx {
   newId: (prefix: string) => string;
 }
 
-/** Deterministic counter ctx — for tests and replay. */
 export function counterCtx(start = 0): DecideCtx {
   let n = start;
   return { newId: (p) => `${p}_${(++n).toString(36)}` };
 }
 
-/** Collision-resistant readable ids for production (short time slice + monotonic counter). */
 export function defaultCtx(): DecideCtx {
   let n = 0;
   return {
@@ -253,12 +250,6 @@ function buildEvents(doc: PeekIR, cmd: Command, ctx: DecideCtx): Result<PeekEven
   }
 }
 
-/**
- * decide — the checker. Validate the command against the current document, enforce
- * invariants, and return the events it would produce. Never throws; never partially
- * applies. As a final safety net it folds the candidate events and re-validates the
- * whole document, so a command can never yield an invalid PeekIR.
- */
 export function decide(
   doc: PeekIR,
   cmd: Command,
@@ -272,7 +263,6 @@ export function decide(
   });
 }
 
-/** Decide, then fold — returns the events to persist plus the new canonical document. */
 export function execute(
   doc: PeekIR,
   cmd: Command,

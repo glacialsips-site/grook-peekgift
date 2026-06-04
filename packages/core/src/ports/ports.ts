@@ -1,21 +1,9 @@
-// THE PORT SURFACE — the typed contracts for every external capability the product
-// touches. Lifted from lib/ir/ports.ts into framework-agnostic core: the INTERFACES and
-// the pure makeCardResolver orchestration only. The stub adapters, the env-based registry,
-// and any vendor SDK wiring live in the web/adapters layer, NOT here — core depends on
-// contracts, never on a process.env read or a concrete network client.
-//
-// Ports never throw across the boundary; they return PortResult (named to avoid colliding
-// with neverthrow's Result, which the command layer uses). Adding the 14th or 50th backend
-// is one adapter that satisfies an existing interface — zero changes to core.
-
 import type { MediaSlot, PeekIR } from "../document/contract";
 
-// ── Shared result shape ────────────────────────────────────────────────────────
 export type PortOk<T> = { ok: true } & T;
 export type PortErr = { ok: false; error: string; retryable?: boolean };
 export type PortResult<T> = PortOk<T> | PortErr;
 
-// ── 1. LLM — the brain behind a port, so the model is swappable/versionable. ─────
 export interface LLMMessage {
   role: "user" | "assistant";
   content: unknown;
@@ -36,7 +24,6 @@ export interface LLMPort {
   }): Promise<PortResult<{ text: string }>>;
 }
 
-// ── 2. PRODUCT SOURCE — retailer APIs + URL/screenshot scrape behind one port. ───
 export interface CardData {
   title: string;
   description?: string;
@@ -51,7 +38,6 @@ export interface ProductSourcePort {
   search?(query: string, opts?: { limit?: number }): Promise<PortResult<{ cards: CardData[] }>>;
 }
 
-// ── 2b. RESEARCH — the agentic last-resort: web search + vision. ─────────────────
 export interface ResolveConstraints {
   maxPriceCents?: number;
   shipTo?: string;
@@ -65,7 +51,6 @@ export interface ResearchPort {
   }): Promise<PortResult<{ cards: CardData[] }>>;
 }
 
-// ── 2c. CARD RESOLVER — the configurable cascade. The tier ORDER is DATA. ────────
 export type ResolutionTier = "retailer_api" | "url_scrape" | "research" | (string & {});
 export interface CardResolverPort {
   resolve(args: {
@@ -81,11 +66,6 @@ export const DEFAULT_RESOLVER_ORDER: ResolutionTier[] = ["retailer_api", "url_sc
 
 const looksLikeUrl = (s: string): boolean => /^https?:\/\//i.test(s.trim());
 
-/**
- * The default CardResolver: iterate the tier order, dispatch per tier, return the FIRST
- * tier that yields a card (tagged with `via`). Pure orchestration over the source ports —
- * no vendor knowledge; swap any underlying port or reorder the tiers and it keeps working.
- */
 export function makeCardResolver(deps: {
   productSource: ProductSourcePort;
   research: ResearchPort;
@@ -128,7 +108,6 @@ export function makeCardResolver(deps: {
   };
 }
 
-// ── 3. IMAGE — generate / fetch-stock / edit / upscale / removeBg / relight. ─────
 export interface ImageRequest {
   op: "generate" | "search" | "edit" | "upscale" | "removeBg" | "relight";
   prompt?: string;
@@ -143,7 +122,6 @@ export interface ImagePort {
   }): Promise<PortResult<{ url: string; provider: string }>>;
 }
 
-// ── 4. PERSISTENCE — load/save the document + version history. ───────────────────
 export interface PersistencePort {
   load(peekId: string): Promise<PortResult<{ ir: PeekIR }>>;
   save(ir: PeekIR): Promise<PortResult<{ version: number }>>;
@@ -151,7 +129,6 @@ export interface PersistencePort {
   bySlug(slug: string): Promise<PortResult<{ ir: PeekIR }>>;
 }
 
-// ── 5. PAYMENT — the $12 publish (a Stripe Checkout Session) + contributions. ────
 export interface PaymentPort {
   createCheckout(args: {
     peekId: string;
@@ -161,7 +138,6 @@ export interface PaymentPort {
   verifyWebhook(rawBody: string, sig: string): Promise<PortResult<{ event: string; peekId?: string }>>;
 }
 
-// ── 6. The supporting cast — same pattern, smaller surfaces. ─────────────────────
 export interface AuthUser {
   id: string;
   email: string | null;
@@ -189,7 +165,6 @@ export interface BotGatePort {
   verify(token: string): Promise<PortResult<{ human: boolean }>>;
 }
 
-// ── 7. THE REGISTRY shape — one object the app assembles and the surfaces consume.
 export interface Ports {
   llm: LLMPort;
   productSource: ProductSourcePort;

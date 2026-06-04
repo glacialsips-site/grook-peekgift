@@ -1,13 +1,3 @@
-// The single rendering truth: a PURE function PeekIR -> a normalized, framework-agnostic
-// view-model. The web preview, the recipient page, the og-image, and any future surface
-// all consume this same model, so there is no drift. No DOM, no React, no Date.now, no
-// random — same (document, theme) in, byte-identical model out.
-//
-// Two normalizations live here on purpose (the data-level fixes for the renderer gaps):
-//  • gap-a: cards are GROUPED by variant_group with the selection rule surfaced, so the
-//    surface can render a rule-aware grouped control instead of flat uniform tiles.
-//  • gap-b: activity cards are derived into an ordered itinerary (date + place + steps).
-
 import type {
   PeekIR,
   ThemeSpec,
@@ -30,7 +20,6 @@ export interface CardView {
   title: string;
   description: string | null;
   media: MediaSlot | null;
-  /** Recipient-facing price text (an explicit value_display, or a formatted revealed value, else null). */
   valueText: string | null;
   valueCents: number | null;
   isTaunt: boolean;
@@ -43,7 +32,6 @@ export interface CardView {
 }
 
 export interface CardGroupView {
-  /** null = a solo (ungrouped) card rendered on its own. */
   group: VariantGroup | null;
   selection: VariantGroup["selection"] | null;
   cards: CardView[];
@@ -63,7 +51,6 @@ export interface SectionView {
   title: string | null;
   data: Record<string, unknown>;
   media: MediaSlot | null;
-  /** True for kinds that render the card set (giftgrid/rail/lookbook/tracklist/courses/tiers/stubs/flightplan). */
   bearsCards: boolean;
 }
 
@@ -80,11 +67,8 @@ export interface RenderModel {
   mode: "light" | "dark";
   cssVars: Record<string, string>;
   sections: SectionView[];
-  /** All cards grouped by variant_group, in page order (gap-a). */
   cardGroups: CardGroupView[];
-  /** Activity cards as an ordered itinerary (gap-b). */
   itinerary: ItineraryStepView[];
-  /** Sum of every card's value_cents (creator-side reference; not necessarily recipient-visible). */
   totalValueCents: number;
 }
 

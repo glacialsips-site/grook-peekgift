@@ -2,11 +2,6 @@ import type { PeekIR } from "../document/contract";
 import type { PeekEvent } from "./events";
 import { repackPositions, reorderById } from "./inputs";
 
-/**
- * The pure reducer: fold one event onto the document. No IO, no id-gen, no clock —
- * every value it needs is already resolved inside the event. This is what makes the
- * document the deterministic fold of its event log.
- */
 export function apply(doc: PeekIR, event: PeekEvent): PeekIR {
   switch (event.type) {
     case "concept_set":

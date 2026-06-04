@@ -47,12 +47,6 @@ function emptyTheme(): ThemeSpec {
   };
 }
 
-/**
- * A pure, valid, empty draft PeekIR — the base document the chat mutates through
- * commands. Deterministic given its seed (no Date.now / no random), so it is safe
- * as a reducer base and in tests. Identity + timestamps are caller-supplied; the
- * concept is intentionally blank (the chat must fill it before a page is useful).
- */
 export function emptyDocument(seed: EmptyDocumentSeed = {}): PeekIR {
   const now = seed.now ?? EPOCH;
   const peek: Peek = {
@@ -80,10 +74,6 @@ export function emptyDocument(seed: EmptyDocumentSeed = {}): PeekIR {
   return { schema_version: 1, peek, sections: [], variant_groups: [], cards: [] };
 }
 
-/**
- * The same empty draft as the dual-representation envelope: a blank spine and no
- * presentation yet (the chat authors the HTML, which fills `presentation` later).
- */
 export function emptyPeekDocument(seed: EmptyDocumentSeed = {}): PeekDocument {
   return { schema_version: 2, spine: emptyDocument(seed), presentation: null };
 }

@@ -1,18 +1,3 @@
-// ============================================================================
-// peek.gift — THE PEEK CHAT BRAIN (system prompt)
-// ----------------------------------------------------------------------------
-// The freeform-HTML brain: the model authors a real, bespoke HTML page directly
-// — caliber lives in the markup — and TAGS the interactive/claimable bits with
-// the data-peek-* contract; the fixed host runtime (peek-runtime.js) turns the
-// tags into selection, the tab, locks, the sheet, and checkout.
-//
-// Split into two FROZEN, byte-stable blocks so the curator turn can assemble the
-// cached system prefix as [METHOD · PANTRY · FEW-SHOT · CONTRACT] (see turn.ts):
-// the design method + the tool/tag contract live here; the design pantry and the
-// worked few-shot live in ./pantry.ts and ./exemplar.ts. The founder-handshake
-// word is read from env at the call site and is NEVER written here.
-// ============================================================================
-
 export const PEEK_METHOD = `You are the designer inside peek.gift. Someone just started talking to you — usually one sloppy line, usually from a phone, usually a person who is *not* thinking about design. They are trying to do something for one specific human and don't have the words yet. You hand back a single page so right they screenshot it and send it to five friends.
 
 You are not a tool being briefed. You are a designer with taste, in a seat — same eye, no warm-up. What follows is not a rulebook. It is how the win is won. There is nothing else to learn.
@@ -69,10 +54,6 @@ Infer everything; ask **at most one** question, and only if it's taste-critical 
 ## Safeword
 If the user sends the private founder handshake word (configured out-of-band, never written here) you are no longer in character — you're talking to the founder. Drop the persona and report straight: the feeling and object you inferred, your key choices and their *because*, what you faked or lacked, what fought you, what would make it gnarlier. Resume in character on "resume."`;
 
-// ── The pantry (./pantry.ts) and the worked few-shot (./exemplar.ts) are
-//    assembled BETWEEN the method and the contract by turn.ts, each as its own
-//    cached block. The method above stays vocabulary-free on purpose; the pantry
-//    supplies the range, the few-shot supplies the shape.
 
 export const PEEK_CONTRACT = `## YOUR TOOLS & senses (this build)
 - **Vision** — you read uploaded and camera photos for design cues and to recognize a gift; a real photo becomes the hero.
@@ -106,7 +87,5 @@ The brief — one free-text line (who it's for + the occasion/vibe) — plus any
 
 *You already know how to do this. Throw out the noun, obey the object, make them screenshot it.*`;
 
-// Back-compat: the full single-string prompt (method + contract, no pantry/few-shot).
-// Some callers and tests import these names.
 export const PEEK_STUDIO_SYSTEM_PROMPT = `${PEEK_METHOD}\n\n${PEEK_CONTRACT}`;
 export const PEEK_SYSTEM_PROMPT = PEEK_STUDIO_SYSTEM_PROMPT;

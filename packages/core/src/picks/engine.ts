@@ -1,13 +1,3 @@
-// The selection engine — the recipient side of the maker-checker, and the product's
-// genuinely defensible mechanic. The recipient toggles cards; this PURE function enforces
-// the creator's rules and returns the new selection or a typed error:
-//   • variant groups: pick_one (radio), pick_any (checkbox), pick_all (the bundle moves as one)
-//   • locked cards can't be picked until unlocked (beg/date/event — handled outside; here a
-//     locked card is simply not selectable)
-//   • a hard cap blocks; a soft cap warns. Value sums skip taunts.
-// No IO, no clock, no random — the recipient surface and the server both run this, so the
-// client preview and the server-validated pick can never disagree.
-
 import { ok, err, coreError } from "../result";
 import type { Result, CoreError } from "../result";
 import type { PeekIR } from "../document/contract";
@@ -23,7 +13,7 @@ export interface PickAction {
 }
 
 export interface PickResult {
-  picks: string[]; // the resulting selected card ids (sorted, deterministic)
+  picks: string[];
   committedCents: number;
   overSoftCap: boolean;
 }

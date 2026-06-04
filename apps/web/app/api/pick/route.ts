@@ -2,8 +2,6 @@ import { decidePick } from "@peek/core";
 import { loadPeekBySlug } from "@/lib/persistence/store";
 import { loadPicks, savePicks } from "@/lib/persistence/picks";
 
-// The recipient toggles a card. The selection engine (the SAME pure function the client
-// runs) validates against the creator's rules server-side, then the selection persists.
 export const runtime = "nodejs";
 
 export async function POST(req: Request): Promise<Response> {

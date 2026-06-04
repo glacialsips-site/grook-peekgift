@@ -4,9 +4,6 @@ import type { Result } from "neverthrow";
 import { coreError, type CoreError } from "../result";
 import { Inputs } from "./inputs";
 
-// Command = a validated intent the chat emits. The discriminant is the top-level
-// `type`; the tool input rides in `payload` (nested so a payload's own `type` field —
-// theme's TypeSystem, a card's CardType — never collides with the discriminant).
 export const COMMAND_TYPES = [
   "set_concept",
   "set_theme",
@@ -49,7 +46,6 @@ function isCommandType(t: unknown): t is CommandType {
   return typeof t === "string" && (COMMAND_TYPES as readonly string[]).includes(t);
 }
 
-/** Validate an unknown `{ type, payload }` into a typed Command, or a typed error. */
 export function parseCommand(raw: unknown): Result<Command, CoreError> {
   if (!raw || typeof raw !== "object") {
     return err(coreError("VALIDATION", "command must be an object"));
@@ -66,11 +62,6 @@ export function parseCommand(raw: unknown): Result<Command, CoreError> {
   return ok({ type, payload: parsed.data } as Command);
 }
 
-/**
- * Map a chat tool call to a Command. `resolve_card` is intentionally NOT a core
- * command — it is app orchestration: resolve via ports.cardResolver, then issue an
- * `add_card` with the result.
- */
 export function commandFromTool(name: string, input: unknown): Result<Command, CoreError> {
   if (name === "resolve_card") {
     return err(

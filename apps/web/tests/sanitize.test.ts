@@ -10,7 +10,6 @@ describe("sanitizeHtml — keep the design soul, strip the vectors", () => {
   });
 
   it("strips @import from a <style> block but keeps @keyframes + gradients (the soul)", () => {
-    // <style> lives in <head>, so this is the whole-document (set_page) path.
     const out = sanitizeHtml(
       `<html><head><style>@import url("//evil/x.css");@keyframes spin{to{transform:rotate(360deg)}}.h{background:linear-gradient(90deg,#f00,#00f)}</style></head><body><div class="h"></div></body></html>`,
       true,

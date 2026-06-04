@@ -1,10 +1,3 @@
-// The curator turn: the streaming Anthropic tool loop. The model authors a freeform HTML page
-// (set_page) and refines it surgically (edit_region / set_style / set_media); each page op is
-// relayed to the preview iframe over SSE, where the host runtime (peek-runtime.js) gives the
-// tagged markup its behavior. resolve_card / generate_hero_image call the real ports and hand the
-// product data / image url back to the model to author into the markup. No IR, no renderer — the
-// caliber lives in the model's markup; the host owns only behavior.
-
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ResolveConstraints } from "@peek/core";
 import { cardResolver } from "@/lib/ports/card-resolver";
@@ -23,27 +16,21 @@ const MAX_HOPS = 12;
 
 export type StreamEvent =
   | { type: "text"; delta: string }
-  | { type: "page"; html: string } // set_page — replace the whole document
-  | { type: "patch"; selector: string; html: string } // edit_region — replace one node
-  | { type: "style"; css: string } // set_style — inject a style block
-  | { type: "media"; selector: string; url: string } // set_media — set an image
+  | { type: "page"; html: string }
+  | { type: "patch"; selector: string; html: string }
+  | { type: "style"; css: string }
+  | { type: "media"; selector: string; url: string }
   | { type: "tool"; name: string; ok: boolean; error?: string }
-  | { type: "ready" } // publish — flag ready for the $12 checkout
-  | { type: "saved"; slug: string; peekId: string } // autosaved the draft (dual-rep envelope persisted)
+  | { type: "ready" }
+  | { type: "saved"; slug: string; peekId: string }
   | { type: "done" }
   | { type: "error"; error: string };
 
-/**
- * Streaming curator turn: emits text deltas as the model speaks and page ops as it authors, so
- * the preview builds itself live. Page ops are relayed (not applied server-side) — the iframe is
- * the rendered source of truth; persistence captures its HTML at publish time.
- */
 export async function runCuratorTurnStreaming(
   client: Anthropic,
   input: { messages: TurnMessage[] },
   emit: (e: StreamEvent) => void,
 ): Promise<void> {
-  // The cached system prefix: method · pantry · few-shot · contract (see ./prompt.ts).
   const system = buildCuratorSystem();
   const anthropicTools = PEEK_STUDIO_TOOLS as unknown as Anthropic.Tool[];
   const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
@@ -52,7 +39,7 @@ export async function runCuratorTurnStreaming(
     for (let hop = 0; hop < MAX_HOPS; hop++) {
       const params = {
         model: MODEL,
-        max_tokens: 32000, // a full bespoke page can be large
+        max_tokens: 32000,
         thinking: { type: "adaptive" },
         system,
         tools: anthropicTools,
@@ -162,10 +149,6 @@ const SAFEWORD_REPORT_SYSTEM = `The user just sent the private founder handshake
 
 Plain text, tight, no markdown headers needed. Do not author the page, do not call tools, do not stay in character. Resume in character only when the founder says "resume".`;
 
-/**
- * The founder handshake. When the host detects the safeword it calls this instead of the normal
- * turn: the model drops the peek persona and streams a structured self-report, authoring nothing.
- */
 export async function runSafewordReport(
   client: Anthropic,
   input: { messages: TurnMessage[] },

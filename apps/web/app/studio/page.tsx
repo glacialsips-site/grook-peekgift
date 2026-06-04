@@ -38,7 +38,6 @@ function IconBtn({ d, label, onClick, active }: { d: string; label: string; onCl
   );
 }
 
-// Inject the host runtime + preview-mode flag into the model's authored (sanitized) page.
 function frameDoc(html: string): string {
   const inject = '\n<script>window.__PEEK__={mode:"preview"};</script>\n<script src="/peek-runtime.js"></script>\n';
   return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, inject + "</body>") : html + inject;
@@ -75,7 +74,6 @@ export default function Studio() {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight });
   }, [messages]);
 
-  // ── iframe ops (patches keep scroll + pick state; ops before load are queued) ──
   function runOrQueue(op: () => void) {
     if (frameReady.current && frameRef.current?.contentDocument) op();
     else pendingOps.current.push(op);
@@ -84,7 +82,7 @@ export default function Studio() {
     frameReady.current = true;
     const ops = pendingOps.current;
     pendingOps.current = [];
-    ops.forEach((op) => { try { op(); } catch { /* ignore */ } });
+    ops.forEach((op) => { try { op(); } catch {  } });
   }
   function setPage(html: string) {
     const f = frameRef.current;
@@ -158,8 +156,6 @@ export default function Studio() {
     setBusy(true);
     setCollapsed(false);
 
-    // Host the photo so it has a real URL (no base64). The model reads it by url (vision) and
-    // uses that same url in the page markup (an <img> hero) or a card via set_media.
     let hostedUrl: string | null = null;
     if (img) {
       try {

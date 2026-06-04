@@ -18,7 +18,7 @@ describe("contrast safety-net", () => {
     const r = ensureReadable(p);
     expect(r.ink).toBe("#15161a");
     expect(r.bg).toBe("#ffffff");
-    expect(r.accent).toBe("#3b5bdb"); // brand color never altered
+    expect(r.accent).toBe("#3b5bdb");
   });
 
   it("repairs dark ink on a dark background to clear AA", () => {
@@ -26,7 +26,7 @@ describe("contrast safety-net", () => {
     const r = ensureReadable(p);
     expect(contrastRatio(r.ink, r.bg)!).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(r.muted, r.bg)!).toBeGreaterThanOrEqual(3);
-    expect(r.bg).toBe("#000000"); // background untouched; only text is nudged
+    expect(r.bg).toBe("#000000");
   });
 
   it("passes non-hex colors through unchanged", () => {

@@ -1,10 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Host an uploaded photo so it has a real, renderable URL. The studio POSTs the raw file
-// (multipart/form-data — no base64); we store it in the public peek-v2-assets bucket
-// (service-role) and return the public URL, which the model then reads by url and sets as
-// the hero or a card's media. Without Supabase env this 503s honestly (no silent fallback).
-// Bucket verified: public, 10MB cap, image mimes only.
 export const runtime = "nodejs";
 export const maxDuration = 30;
 

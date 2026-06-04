@@ -1,7 +1,6 @@
 import { createPublishCheckout, paymentConfigured } from "@/lib/payment/stripe";
 import { loadPeekById } from "@/lib/persistence/store";
 
-// Opens the $12 publish checkout for a persisted draft. The webhook does the actual publish.
 export const runtime = "nodejs";
 
 export async function POST(req: Request): Promise<Response> {

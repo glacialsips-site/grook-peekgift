@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { emptyDocument, execute, counterCtx, decidePick, type PeekIR, type Command } from "../src/index";
 
-// Build a doc with: a pick_one group (A,B), a pick_any group (C,D), a solo card (E $50),
-// a locked card (F), and a taunt (G).
 function doc(): PeekIR {
   let d = emptyDocument({ id: "p", slug: "p", curator_id: "u" });
   const ctx = counterCtx();
@@ -35,7 +33,7 @@ describe("the selection engine (decidePick)", () => {
     const after1 = r1._unsafeUnwrap().picks;
     expect(after1).toEqual([idOf(d, "A")]);
     const r2 = decidePick(d, after1, { type: "toggle", cardId: idOf(d, "B") });
-    expect(r2._unsafeUnwrap().picks).toEqual([idOf(d, "B")]); // A replaced by B
+    expect(r2._unsafeUnwrap().picks).toEqual([idOf(d, "B")]);
   });
 
   it("pick_any behaves like checkboxes: both can be selected, and toggle removes", () => {
@@ -59,11 +57,9 @@ describe("the selection engine (decidePick)", () => {
 
   it("sums committed value and enforces a hard cap (skipping taunts)", () => {
     const d = doc();
-    // E is $50; with a $40 hard cap, picking E is blocked.
     const blocked = decidePick(d, [], { type: "toggle", cardId: idOf(d, "E") }, { hardCents: 4000 });
     expect(blocked.isErr()).toBe(true);
     if (blocked.isErr()) expect(blocked.error.code).toBe("INVARIANT");
-    // With a $60 hard cap it goes through and reports the committed total.
     const okRes = decidePick(d, [], { type: "toggle", cardId: idOf(d, "E") }, { hardCents: 6000 });
     expect(okRes.isOk()).toBe(true);
     expect(okRes._unsafeUnwrap().committedCents).toBe(5000);

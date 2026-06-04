@@ -1,9 +1,5 @@
 import { storeImage } from "@/lib/persistence/storage";
 
-// Hero image generation via fal FLUX-schnell (the keyed provider), then persisted to our
-// public bucket so the URL is permanent (fal urls expire). Degrades honestly:
-//  • no FAL_KEY  → not-ok → caller leaves a pending directive → themed gradient placeholder.
-//  • fal ok but storage unconfigured → returns the raw fal url (works now, may expire later).
 const FAL_DIMS: Record<string, { width: number; height: number }> = {
   "16:9": { width: 1280, height: 720 },
   "4:3": { width: 1024, height: 768 },
@@ -43,7 +39,6 @@ export async function generateHero(prompt: string, aspect?: string): Promise<Gen
     const body = (await res.json()) as { images?: { url?: string }[] };
     const falUrl = body.images?.[0]?.url;
     if (!falUrl) return { ok: false, error: "fal returned no image" };
-    // Persist (fal urls are ephemeral). Fall back to the raw fal url if storage isn't set up.
     try {
       const img = await fetch(falUrl);
       if (img.ok) {
@@ -52,7 +47,6 @@ export async function generateHero(prompt: string, aspect?: string): Promise<Gen
         if (stored) return { ok: true, url: stored, provider: "fal" };
       }
     } catch {
-      /* fall back to the raw fal url */
     }
     return { ok: true, url: falUrl, provider: "fal" };
   } catch (e) {

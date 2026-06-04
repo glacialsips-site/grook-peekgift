@@ -13,7 +13,7 @@ describe("PeekIR document model", () => {
 
   it("normalizes a legacy numeric radius to { card, pill }", () => {
     const doc = emptyDocument({ id: "p", slug: "s", curator_id: "u" }) as unknown as Record<string, any>;
-    doc.peek.theme.radius = 6; // pre-DQ-2 legacy shape
+    doc.peek.theme.radius = 6;
     const r = validatePeekIR(doc);
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.peek.theme.radius).toEqual({ card: 6, pill: 6 });
@@ -100,7 +100,7 @@ describe("PeekDocument envelope (dual representation)", () => {
   });
 
   it("back-compat: a bare v1 PeekIR loads as a presentation-less document", () => {
-    const r = validatePeekDocument(emptyDocument(seed)); // schema_version:1, has `peek`, no `spine`
+    const r = validatePeekDocument(emptyDocument(seed));
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value.schema_version).toBe(2);

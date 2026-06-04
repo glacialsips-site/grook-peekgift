@@ -7,8 +7,6 @@ import {
   type ResearchPort,
 } from "../src/index";
 
-// Minimal test-doubles that satisfy the port interfaces. If this compiles, core's port
-// contracts are implementable without any network code (the Ch1.6 gate).
 const fakeProductSource: ProductSourcePort = {
   async fromUrl(url) {
     return { ok: true, card: { title: `scraped ${url}`, source_url: url } };

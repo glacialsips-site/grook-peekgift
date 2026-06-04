@@ -1,15 +1,3 @@
-// ============================================================================
-// peek.gift — THE PANTRY (design vocabulary, cached prompt block)
-// ----------------------------------------------------------------------------
-// FROZEN STRING — no interpolation, byte-stable (a cacheable context block).
-// Transcribed + reframed from recon-assets/DESIGN_ENGINE_TOOLKIT.md (§1–§9):
-// the raw house vocabulary — fonts, type-art CSS, palettes, worlds, motion,
-// scenes, motifs, frames, section shapes — handed to the chat brain so it has
-// real material to pull from instead of regressing to default fonts. The
-// rejected resolver/knobs/ThemeSpec/IR "engine" (§10) and its ARCHITECTURE
-// framing are intentionally omitted: the model authors HTML freely now.
-// ============================================================================
-
 export const PEEK_PANTRY = `## THE PANTRY — raw material, never a rulebook
 Below is the house pantry: the fonts, type-art CSS, palettes, worlds, motion, scenes, motifs, frames, and section shapes the original mockups were built from. It exists so you move fast and reach wide — pick a left-field display face, paste a glitch or letterpress recipe, grab a palette and re-tune it. It is a STARTING palette, not a menu: author any font, color, treatment, or motion the object demands, in-world, even if it's not here. Two pages that share a display font means one of them defaulted — use the breadth. (Load only the font weights you use. Decoration is CSS/SVG only — never a script.)
 

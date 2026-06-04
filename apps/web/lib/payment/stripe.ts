@@ -1,8 +1,3 @@
-// The payment adapter: the $12 publish via a Stripe Checkout Session (embedded). Stripe owns
-// every country/currency/tax/coupon — adaptive_pricing + automatic_tax + tax_id_collection +
-// billing_address_collection + allow_promotion_codes — so there is no custom currency/tax
-// layer. Server-only, key-gated. Params mirror the proven feat-stripe-embedded-checkout route.
-
 import Stripe from "stripe";
 
 let _stripe: Stripe | null = null;

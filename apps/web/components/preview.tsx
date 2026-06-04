@@ -1,10 +1,3 @@
-// The preview renderer: paints the core's framework-agnostic RenderModel into themed
-// React, driven entirely by the --peek-* custom properties (no Tailwind). One renderer for
-// the studio preview, the recipient page, and the demo. SHELL_SPEC §0 structure: a
-// self-contained root holds a full-bleed Scene backdrop (z0), an internal scroll layer
-// (z1), and a floating action bar (z2). When `interaction` is supplied (recipient surface),
-// cards become tappable pick targets.
-
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
@@ -24,8 +17,6 @@ import { sanitizeCustomHtml } from "@/lib/sanitize";
 const PREVIEW_CSS =
   ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} .peek-rail{scrollbar-width:none} .peek-rail::-webkit-scrollbar{display:none} @keyframes peekrise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}} .peek-rise{animation:peekrise .85s cubic-bezier(.2,.7,.2,1) both} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none} .peek-rise{animation:none}}";
 
-// The hero's children cascade in on first paint (SHELL_SPEC §1.5B — the "title types itself in"
-// beat). One class + a per-child delay; reduced-motion zeroes it via PREVIEW_CSS above.
 function Rise({ d, children }: { d: number; children: ReactNode }) {
   return (
     <div className="peek-rise" style={{ animationDelay: `${d}ms` }}>
@@ -248,7 +239,7 @@ function Note({ section, model }: { section: SectionView; model: RenderModel }) 
 function CardTile({ card, interaction, onOpen }: { card: CardView; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   const picked = interaction?.picked.includes(card.id) ?? false;
   const pickable = Boolean(interaction) && !card.isLocked && !card.isTaunt;
-  const dimmed = card.isTaunt || picked; // claimed cards dim, per §1.4
+  const dimmed = card.isTaunt || picked;
   const openable = Boolean(onOpen) && !card.isTaunt;
   return (
     <div
@@ -327,8 +318,6 @@ function CardTile({ card, interaction, onOpen }: { card: CardView; interaction?:
   );
 }
 
-// A horizontal snap-carousel of cards with edge-peek — the mockups' universal mobile shape
-// (every gift grid collapses to this). Scrollbar hidden via .peek-rail in PREVIEW_CSS.
 function CardCarousel({ cards, interaction, onOpen, basis = "70%" }: { cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void; basis?: string }) {
   return (
     <div
@@ -352,9 +341,6 @@ function CardCarousel({ cards, interaction, onOpen, basis = "70%" }: { cards: Ca
   );
 }
 
-// gap-a made visible: ungrouped cards ride one horizontal carousel; each variant group is a
-// labeled wrapper carrying its selection rule, with its own carousel — page order preserved.
-// Tapping a card opens the §1.4 bottom sheet via onOpen.
 function GiftGrid({ groups, interaction, onOpen }: { groups: CardGroupView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (groups.length === 0) return null;
   const blocks: ReactNode[] = [];
@@ -409,7 +395,6 @@ function GiftGrid({ groups, interaction, onOpen }: { groups: CardGroupView[]; in
   return <section style={{ display: "grid", gap: 18, padding: "8px 0" }}>{blocks}</section>;
 }
 
-// gap-b made visible: activity cards render as a timeline/itinerary with a node spine.
 function Itinerary({ steps }: { steps: ItineraryStepView[] }) {
   if (steps.length === 0) return null;
   return (
@@ -558,9 +543,6 @@ function ActionBar({ model, interaction, onCta }: { model: RenderModel; interact
   );
 }
 
-// §1.1 — the themed top bar. Glass-from-the-start (Pattern B, the common case), absolute to the
-// root so it floats over the scrolling content inside the device frame. Wordmark left (the
-// occasion / who it's for), a themed motif glyph right. Solidifies its tint a touch once scrolled.
 function Nav({ model, scrolled }: { model: RenderModel; scrolled: boolean }) {
   const mark = model.occasion ?? (model.recipientName ? `for ${model.recipientName}` : "peek");
   const glyph = heroMotif(model);
@@ -604,8 +586,6 @@ function Nav({ model, scrolled }: { model: RenderModel; scrolled: boolean }) {
   );
 }
 
-// A thin scroll-progress rail at the very top (§1.1) — anchored to the internal scroller, not the
-// window, so it reads true inside the device frame.
 function ProgressRail({ progress }: { progress: number }) {
   return (
     <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 4, height: 2, pointerEvents: "none" }}>
@@ -680,11 +660,6 @@ function Claim({ section, model }: { section: SectionView; model: RenderModel })
   );
 }
 
-// §1.4 — the bottom sheet every card resolves into. Tap a card → it slides up populated from
-// that card's data → the claim button toggles the pick (server-validated upstream) and the
-// sheet auto-closes. Lives inside the root (position:absolute), not fixed to the viewport, so
-// it stays inside the device frame. `card` is held through the close transition so the contents
-// don't vanish mid-slide.
 function CardSheet({
   card,
   open,
@@ -706,7 +681,7 @@ function CardSheet({
     if (!card) return;
     if (claimable && !picked) {
       interaction!.onToggle(card.id);
-      window.setTimeout(onClose, 950); // let the pick register + the card badge land, then close (§1.4)
+      window.setTimeout(onClose, 950);
     } else {
       onClose();
     }
@@ -825,8 +800,6 @@ function CardSheet({
   );
 }
 
-// ── live ticking clock (§ DQ-3). Counts down to data.target in big themed numerals; when the
-// moment passes it flips to doneText. Self-ticking, so it carries live state a static page can't.
 function Countdown({ section }: { section: SectionView }) {
   const d = section.data;
   const target = str(d, "target");
@@ -870,7 +843,6 @@ function Countdown({ section }: { section: SectionView }) {
   );
 }
 
-// ── photo/moment strip (DQ-3). A horizontal snap-rail of images from data.images.
 function Gallery({ section }: { section: SectionView }) {
   const imgs = Array.isArray(section.data.images) ? (section.data.images as Record<string, unknown>[]) : [];
   const urls = imgs.map((m) => str(m, "url")).filter((u): u is string => Boolean(u));
@@ -890,7 +862,6 @@ function Gallery({ section }: { section: SectionView }) {
   );
 }
 
-// ── centered editorial pull-quote (+ optional body), one word accented (the magazine spine).
 function Lede({ section }: { section: SectionView }) {
   const d = section.data;
   const quote = str(d, "quote");
@@ -929,7 +900,6 @@ function cardMeta(card: CardView): string {
   return [fmtDate(card.proposedDate), card.locationHint].filter(Boolean).join(" · ");
 }
 
-// ── rail: a titled horizontal carousel of the card set (the universal mobile shape).
 function Rail({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   const title = section.title ?? str(section.data, "title") ?? null;
@@ -941,7 +911,6 @@ function Rail({ section, cards, interaction, onOpen }: { section: SectionView; c
   );
 }
 
-// ── lookbook: an editorial figure stack — big alternating images with caption + price.
 function Lookbook({ section, cards, onOpen }: { section: SectionView; cards: CardView[]; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   const title = section.title ?? str(section.data, "title") ?? null;
@@ -969,7 +938,6 @@ function Lookbook({ section, cards, onOpen }: { section: SectionView; cards: Car
   );
 }
 
-// ── tracklist: a numbered list over the cards (album/side-A shape).
 function Tracklist({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   const side = str(section.data, "side");
@@ -1003,7 +971,6 @@ function Tracklist({ section, cards, interaction, onOpen }: { section: SectionVi
   );
 }
 
-// ── courses: a tasting-menu list — name with a dotted leader to price, description beneath.
 function Courses({ section, cards, onOpen }: { section: SectionView; cards: CardView[]; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   return (
@@ -1025,7 +992,6 @@ function Courses({ section, cards, onOpen }: { section: SectionView; cards: Card
   );
 }
 
-// ── tiers: stacked level/price panels (the first reads as the headline tier).
 function Tiers({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   return (
@@ -1065,7 +1031,6 @@ function Tiers({ section, cards, interaction, onOpen }: { section: SectionView; 
   );
 }
 
-// ── stubs: a ticket-stub line-up — perforated edges, "admit one", date/place + price.
 function Stubs({ section, cards, interaction, onOpen }: { section: SectionView; cards: CardView[]; interaction?: PickInteraction; onOpen?: (id: string) => void }) {
   if (cards.length === 0) return null;
   return (
@@ -1111,8 +1076,6 @@ function Stubs({ section, cards, interaction, onOpen }: { section: SectionView; 
   );
 }
 
-// ── custom: model-authored themed markup for a signature move no archetype fits. Sanitized at
-// paint (defense-in-depth — never trust that a stored section's html was cleaned upstream).
 function Custom({ section }: { section: SectionView }) {
   const html = str(section.data, "html");
   if (!html) return null;
@@ -1191,8 +1154,6 @@ function EmptyState() {
   );
 }
 
-// The characterful display face is the #1 anti-generic lever, so the renderer loads the
-// Google families the theme names (extracted from the --peek-font-* vars) via one css2 link.
 function familyFromVar(v: string | undefined): string | null {
   if (!v) return null;
   const m = /^"([^"]+)"/.exec(v);
@@ -1210,25 +1171,19 @@ function FontLink({ cssVars }: { cssVars: Record<string, string> }) {
 }
 
 export function PeekPreview({ model, interaction, pinged }: { model: RenderModel; interaction?: PickInteraction; pinged?: string[] }) {
-  // Any kind that paints the card set (giftgrid/rail/lookbook/tracklist/courses/tiers/stubs/
-  // flightplan) suppresses the standalone fallback grid below, so cards never double-render.
   const hasCardSection = model.sections.some((s) => s.bearsCards);
   const empty = model.sections.length === 0 && model.cardGroups.length === 0;
 
-  // The §1.4 sheet: which card is open, and the card held through the close transition.
   const [openId, setOpenId] = useState<string | null>(null);
   const allCards = model.cardGroups.flatMap((g) => g.cards);
   const liveCard = allCards.find((c) => c.id === openId) ?? null;
   const [held, setHeld] = useState<CardView | null>(null);
-  // Show the live card the instant it's tapped (computed this render); only fall back to the
-  // held copy while the sheet slides closed — otherwise the sheet flashes empty on first open.
   const shown = liveCard ?? held;
 
   useEffect(() => {
     if (liveCard) setHeld(liveCard);
   }, [liveCard]);
   useEffect(() => {
-    // A streamed edit can delete the open card out from under the sheet — close if it's gone.
     if (openId !== null && !liveCard) setOpenId(null);
   }, [openId, liveCard]);
   useEffect(() => {
@@ -1240,7 +1195,6 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
     return () => window.removeEventListener("keydown", onKey);
   }, [openId]);
 
-  // §1.1 — scroll-progress + nav solidify, anchored to the internal scroller (not the window).
   const scrollRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [scrolled, setScrolled] = useState(false);
@@ -1254,8 +1208,6 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
   const firstHero = model.sections.find((s) => s.kind === "hero");
   const fullBleed = Boolean(firstHero && str(firstHero.data, "variant") === "full-bleed-photo" && model.hero);
 
-  // The floating CTA jumps to the gifts (the first card-bearing block), offset below the nav —
-  // a real action for what was an inert button, identical in the studio preview and on the page.
   const scrollToGifts = () => {
     const sc = scrollRef.current;
     const grid = sc?.querySelector<HTMLElement>("[data-peek-grid]");
@@ -1279,7 +1231,6 @@ export function PeekPreview({ model, interaction, pinged }: { model: RenderModel
               <SectionBlock section={s} model={model} cards={allCards} interaction={interaction} onOpen={setOpenId} />
             </div>
           );
-          // The hero runs its own on-load cascade (§1.5B); everything below rises on scroll-in (§1.5A).
           return s.kind === "hero" ? <div key={s.id}>{block}</div> : <Reveal key={s.id}>{block}</Reveal>;
         })}
         {!hasCardSection && model.cardGroups.length > 0 ? (

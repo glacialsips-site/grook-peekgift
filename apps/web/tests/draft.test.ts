@@ -45,8 +45,8 @@ describe("buildDraftDocument — the autosave envelope", () => {
     expect(doc.schema_version).toBe(2);
     expect(doc.presentation?.html).toBe(PEEK_FEWSHOT);
     expect(doc.presentation?.html_hash).toMatch(/^[0-9a-f]{64}$/);
-    expect(doc.spine.cards.length).toBe(4); // 3 haul items + the dinner
-    expect(doc.spine.peek.curator_id).toBe("anon"); // anonymous draft sentinel
+    expect(doc.spine.cards.length).toBe(4);
+    expect(doc.spine.peek.curator_id).toBe("anon");
     expect(doc.spine.peek.updated_at).toBe(now);
   });
 

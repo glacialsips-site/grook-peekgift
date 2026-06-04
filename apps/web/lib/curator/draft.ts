@@ -1,15 +1,9 @@
-// Builds the dual-rep envelope (PeekDocument) for an autosave: the authored HTML becomes the
-// presentation, and its data-peek-* tags are extracted into the spine's cards/variant_groups.
-// Pure + deterministic (given `now`) so it's unit-testable without a DB; the route loads the
-// existing document as `base`, calls this, and saves the result.
-
 import { emptyPeekDocument, type PeekDocument } from "@peek/core";
 import { extractSpine } from "./extract";
 import { htmlHash, PEEK_RUNTIME_VERSION } from "./page-html";
 
 const ANON = "anon";
 
-/** A short, stable slug derived from the peek id (deterministic; same peek → same slug). */
 export function mintSlug(peekId: string): string {
   const cleaned = peekId.replace(/[^a-z0-9]/gi, "").toLowerCase();
   return (cleaned || Math.random().toString(36).slice(2)).slice(0, 12);
@@ -23,7 +17,6 @@ export interface DraftArgs {
   now?: string;
 }
 
-/** Build the envelope to persist: presentation = the html; spine = base + extracted cards. */
 export function buildDraftDocument(args: DraftArgs): PeekDocument {
   const now = args.now ?? new Date().toISOString();
   const base =

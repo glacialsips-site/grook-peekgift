@@ -7,9 +7,6 @@ import type {
   MediaSlot,
 } from "../document/contract";
 
-// Events are FACTS: each carries the fully-resolved result (ids/positions already
-// assigned by `decide`), so `apply` and replay are pure and deterministic. The
-// document is the fold of its events.
 export type PeekEvent =
   | { type: "concept_set"; concept: Concept }
   | { type: "theme_set"; theme: ThemeSpec }
