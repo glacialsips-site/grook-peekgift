@@ -46,9 +46,47 @@ const CONFIG = {
   ADD_ATTR: ["target"],
 };
 
+// ── CSS hardening ─────────────────────────────────────────────────────────────
+// DOMPurify validates HTML but does NOT sanitize CSS inside <style> or style="". We keep the
+// design's soul (keyframes, gradients, pseudo-elements, filters) but strip the CSS vectors with
+// no legitimate place in a model-authored page: @import (a phone-home / beacon + stylesheet-
+// injection vector — real fonts load via <link>), the legacy script-in-CSS hooks, and any
+// javascript: inside url(). (A url()-host allowlist for background images is the next step,
+// paired with rehosting all imagery onto the app's bucket so it can't double as an exfil host.)
+function sanitizeCssText(css: string): string {
+  return css
+    .replace(/@import[^;]*;?/gi, "")
+    .replace(/expression\s*\(/gi, "/*x*/(")
+    .replace(/(?:behavior|-moz-binding)\s*:[^;}]*/gi, "")
+    .replace(/url\(\s*(['"]?)\s*javascript:[^)]*\)/gi, "url()");
+}
+
+let _hooked = false;
+function ensureCssHooks(): void {
+  if (_hooked) return;
+  _hooked = true;
+  DOMPurify.addHook("uponSanitizeElement", (node, data) => {
+    if (data.tagName === "style" && node.textContent) {
+      node.textContent = sanitizeCssText(node.textContent);
+    }
+  });
+  DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+    const el = node as unknown as {
+      getAttribute?: (k: string) => string | null;
+      setAttribute?: (k: string, v: string) => void;
+    };
+    if (typeof el.getAttribute !== "function" || typeof el.setAttribute !== "function") return;
+    const style = el.getAttribute("style");
+    if (style) el.setAttribute("style", sanitizeCssText(style));
+    // reverse-tabnabbing: a model-authored target=_blank link can't keep a handle to window.opener
+    if (el.getAttribute("target") === "_blank") el.setAttribute("rel", "noopener noreferrer");
+  });
+}
+
 /** Sanitize a model-authored page. wholeDocument=true keeps <head>/<style>/<link> (set_page);
  *  false treats the input as a fragment (edit_region). */
 export function sanitizeHtml(dirty: string, wholeDocument = false): string {
+  ensureCssHooks();
   return DOMPurify.sanitize(dirty, { ...CONFIG, WHOLE_DOCUMENT: wholeDocument });
 }
 
