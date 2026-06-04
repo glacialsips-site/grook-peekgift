@@ -363,6 +363,30 @@ export interface PeekIR {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 7.5 THE DOCUMENT ENVELOPE — dual representation (presentation + spine).
+//    The chat authors a bespoke HTML page for design caliber; a structured PeekIR
+//    "spine" is derived from its data-peek-* tags and kept in lockstep for commerce,
+//    recipient state, and the product graph. The recipient is served `presentation.html`
+//    (+ peek-runtime.js); picks / checkout / caps read `spine`. The two join on the
+//    stable card id (the HTML's data-peek-id === Card.id). `presentation` is null for
+//    IR-only / fallback pages — then render(spine) paints them and `next/og` unfurls
+//    deterministically. schema_version 2 distinguishes the envelope from a bare v1
+//    PeekIR; validatePeekDocument() also accepts a bare v1 IR and wraps it (back-compat).
+// ─────────────────────────────────────────────────────────────────────────────
+export interface Presentation {
+  html: string;              // the sanitized, model-authored full document — the canonical look
+  html_hash: string;         // sha256 of `html` — lockstep/drift check + cache key
+  runtime_version: string;   // the peek-runtime.js contract version this HTML targets
+  authored_at: ISODate;
+}
+
+export interface PeekDocument {
+  schema_version: 2;
+  spine: PeekIR;             // the canonical commerce/state truth (the existing contract, verbatim)
+  presentation: Presentation | null; // the canonical look; null until HTML is authored
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 8. RECIPIENT SIDE — KEPT verbatim from existing types.
 // ─────────────────────────────────────────────────────────────────────────────
 export interface Pick {

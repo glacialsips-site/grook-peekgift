@@ -10,7 +10,7 @@ import type { ResolveConstraints } from "@peek/core";
 import { cardResolver } from "@/lib/ports/card-resolver";
 import { generateHero } from "@/lib/ports/image";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { PEEK_STUDIO_SYSTEM_PROMPT } from "./system-prompt";
+import { buildCuratorSystem } from "./prompt";
 import { PEEK_STUDIO_TOOLS } from "./tools";
 
 export interface TurnMessage {
@@ -29,6 +29,7 @@ export type StreamEvent =
   | { type: "media"; selector: string; url: string } // set_media — set an image
   | { type: "tool"; name: string; ok: boolean; error?: string }
   | { type: "ready" } // publish — flag ready for the $12 checkout
+  | { type: "saved"; slug: string; peekId: string } // autosaved the draft (dual-rep envelope persisted)
   | { type: "done" }
   | { type: "error"; error: string };
 
@@ -42,9 +43,8 @@ export async function runCuratorTurnStreaming(
   input: { messages: TurnMessage[] },
   emit: (e: StreamEvent) => void,
 ): Promise<void> {
-  const system = [
-    { type: "text" as const, text: PEEK_STUDIO_SYSTEM_PROMPT, cache_control: { type: "ephemeral" as const } },
-  ];
+  // The cached system prefix: method · pantry · few-shot · contract (see ./prompt.ts).
+  const system = buildCuratorSystem();
   const anthropicTools = PEEK_STUDIO_TOOLS as unknown as Anthropic.Tool[];
   const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
 

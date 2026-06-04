@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validatePeekIR, emptyDocument } from "../src/index";
+import { validatePeekIR, validatePeekDocument, emptyDocument, emptyPeekDocument } from "../src/index";
 
 describe("PeekIR document model", () => {
   it("emptyDocument() produces a valid draft PeekIR", () => {
@@ -68,5 +68,50 @@ describe("PeekIR document model", () => {
       doc.variant_groups = [{ id: "g1", title: "Pick", selection: "pick_some" }];
       expect(validatePeekIR(doc).ok).toBe(false);
     });
+  });
+});
+
+describe("PeekDocument envelope (dual representation)", () => {
+  const seed = { id: "p", slug: "s", curator_id: "u" };
+
+  it("emptyPeekDocument() is a valid v2 envelope: blank spine, no presentation", () => {
+    const r = validatePeekDocument(emptyPeekDocument(seed));
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.schema_version).toBe(2);
+      expect(r.value.presentation).toBeNull();
+      expect(r.value.spine.peek.status).toBe("draft");
+    }
+  });
+
+  it("validates a v2 envelope carrying an authored presentation", () => {
+    const withHtml = {
+      ...emptyPeekDocument(seed),
+      presentation: {
+        html: "<!doctype html><body data-peek-card>hi</body>",
+        html_hash: "deadbeef",
+        runtime_version: "1",
+        authored_at: "1970-01-01T00:00:00.000Z",
+      },
+    };
+    const r = validatePeekDocument(withHtml);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.presentation?.html).toContain("hi");
+  });
+
+  it("back-compat: a bare v1 PeekIR loads as a presentation-less document", () => {
+    const r = validatePeekDocument(emptyDocument(seed)); // schema_version:1, has `peek`, no `spine`
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.schema_version).toBe(2);
+      expect(r.value.presentation).toBeNull();
+      expect(r.value.spine.peek.id).toBe("p");
+    }
+  });
+
+  it("rejects an envelope whose spine is malformed", () => {
+    const doc = emptyPeekDocument(seed) as unknown as Record<string, any>;
+    delete doc.spine.peek.concept;
+    expect(validatePeekDocument(doc).ok).toBe(false);
   });
 });

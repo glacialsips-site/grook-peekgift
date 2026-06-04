@@ -19,6 +19,7 @@ import type {
 import { Scene } from "@/components/scenes";
 import { Frame } from "@/components/frames";
 import { Reveal } from "@/components/reveal";
+import { sanitizeCustomHtml } from "@/lib/sanitize";
 
 const PREVIEW_CSS =
   ".peek-card{transition:transform .18s ease, box-shadow .18s ease} .peek-card:hover{transform:translateY(-4px)} @keyframes peekping{0%{box-shadow:0 0 0 2px var(--peek-accent)}100%{box-shadow:0 0 0 12px transparent}} .peek-pinged{border-radius:var(--peek-radius-card);animation:peekping 1.5s ease-out} .peek-rail{scrollbar-width:none} .peek-rail::-webkit-scrollbar{display:none} @keyframes peekrise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}} .peek-rise{animation:peekrise .85s cubic-bezier(.2,.7,.2,1) both} @media (prefers-reduced-motion: reduce){.peek-card:hover{transform:none} .peek-pinged{animation:none} .peek-rise{animation:none}}";
@@ -1110,13 +1111,13 @@ function Stubs({ section, cards, interaction, onOpen }: { section: SectionView; 
   );
 }
 
-// ── custom: model-authored themed markup for a signature move no archetype fits. The html is
-// sanitized server-side (curator turn) before it ever enters the doc, so this just paints it.
+// ── custom: model-authored themed markup for a signature move no archetype fits. Sanitized at
+// paint (defense-in-depth — never trust that a stored section's html was cleaned upstream).
 function Custom({ section }: { section: SectionView }) {
   const html = str(section.data, "html");
   if (!html) return null;
   return (
-    <section style={{ padding: "8px 20px" }} dangerouslySetInnerHTML={{ __html: html }} />
+    <section style={{ padding: "8px 20px" }} dangerouslySetInnerHTML={{ __html: sanitizeCustomHtml(html) }} />
   );
 }
 
