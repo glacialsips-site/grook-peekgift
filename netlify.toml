@@ -1,23 +1,17 @@
-# Netlify persists /opt/build/repo across deploys. New uploads OVERLAY on the
-# previous tree instead of replacing it, so files I've deleted between deploys
-# (lib/supabase.ts, .env.local, etc.) keep haunting the build.
-#
-# We explicitly evict known-stale artifacts from prior deploys before running
-# next build. Add to this list if a deploy log ever again shows files dated
-# from a previous deploy that aren't in your current source.
+# Deploy the vNext studio: apps/web, a Next app inside the pnpm/Turborepo workspace.
+# To go live: point the Netlify site's PRODUCTION BRANCH at this branch
+# (claude/gallant-planck-pu51x). Every push then builds + deploys to vnext.peek.gift.
+# The site's existing env vars (ANTHROPIC_API_KEY, SUPABASE_*, STRIPE_*, NEXT_PUBLIC_*)
+# light up the curator turn, persistence, and publish live. See _packets/SPINE/DEPLOY.md.
+
 [build]
-  command = """
-    set -e
-    echo '=== EVICTING STALE FILES FROM PRIOR DEPLOYS ==='
-    rm -rf lib/supabase.ts .env.local .env tsconfig.tsbuildinfo deno.lock .next .netlify/functions-internal .netlify/.next .netlify/blobs-internal node_modules/.cache .turbo
-    echo '=== STATE AFTER PURGE ==='
-    ls lib/ | head -20
-    echo '--- find supabase remnant ---'
-    find . -name 'supabase.ts' -not -path './node_modules/*' 2>&1
-    echo '=== BUILD ==='
-    npm run build
-  """
+  base = "apps/web"
+  # base is apps/web, so cd up to install the whole pnpm workspace, then build just web.
+  command = "cd .. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @peek/web build"
   publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
