@@ -1,0 +1,12 @@
+# local-only — never commit / never deploy
+.localkey
+.keys.local.json
+serve.cjs
+dev-server.cjs
+public/__proof.html
+__lasttest.html
+__anthropic_test.cjs
+__*
+
+# Local Netlify folder
+.netlify

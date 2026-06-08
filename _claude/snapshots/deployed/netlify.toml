@@ -1,0 +1,11 @@
+[build]
+  base = "."
+  publish = "public"
+
+[[edge_functions]]
+  function = "generate"
+  path = "/api/generate"
+
+[[edge_functions]]
+  function = "image"
+  path = "/api/image"
