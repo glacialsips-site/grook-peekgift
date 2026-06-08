@@ -19,7 +19,8 @@ export async function POST(req: Request): Promise<Response> {
   if (!doc) return Response.json({ error: "peek not found" }, { status: 404 });
 
   const current = await loadPicks(doc.peek.id);
-  const r = decidePick(doc, current, { type: "toggle", cardId: body.cardId });
+  const caps = doc.peek.budget_cents != null ? { softCents: doc.peek.budget_cents } : undefined;
+  const r = decidePick(doc, current, { type: "toggle", cardId: body.cardId }, caps);
   if (r.isErr()) {
     return Response.json({ error: r.error.message, code: r.error.code }, { status: 409 });
   }

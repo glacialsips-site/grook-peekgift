@@ -171,6 +171,7 @@ export interface Peek {
   recipient_name: string | null;
   relationship: string | null;
   occasion: string | null;
+  budget_cents: number | null;
 
   concept: Concept;
   theme: ThemeSpec;

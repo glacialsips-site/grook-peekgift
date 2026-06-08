@@ -11,7 +11,6 @@ interface Body {
   messages?: TurnMessage[];
   peekId?: string;
   curatorId?: string;
-  currentHtml?: string;
 }
 
 function lastUserText(messages: TurnMessage[]): string {
@@ -56,7 +55,7 @@ export async function POST(req: Request): Promise<Response> {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
-      let currentHtml = typeof body.currentHtml === "string" ? body.currentHtml : "";
+      let currentHtml = "";
       try { controller.enqueue(encoder.encode(": warming up\n\n")); } catch { closed = true; }
       const ping = setInterval(() => {
         if (closed) return;
@@ -73,6 +72,8 @@ export async function POST(req: Request): Promise<Response> {
           closed = true;
         }
       };
+      const base = body.peekId ? await loadDocumentById(body.peekId) : null;
+      if (base?.presentation?.html) currentHtml = base.presentation.html;
       try {
         if (isSafeword) await runSafewordReport(client, { messages }, emit);
         else await runCuratorTurnStreaming(client, { messages, currentHtml: currentHtml || undefined }, emit);
@@ -81,7 +82,6 @@ export async function POST(req: Request): Promise<Response> {
       }
       if (!isSafeword && body.peekId && currentHtml.trim()) {
         try {
-          const base = await loadDocumentById(body.peekId);
           const doc = buildDraftDocument({
             peekId: body.peekId,
             curatorId: body.curatorId ?? null,

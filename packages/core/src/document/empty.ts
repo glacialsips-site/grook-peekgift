@@ -57,6 +57,7 @@ export function emptyDocument(seed: EmptyDocumentSeed = {}): PeekIR {
     recipient_name: null,
     relationship: null,
     occasion: null,
+    budget_cents: null,
     concept: emptyConcept(),
     theme: emptyTheme(),
     hero: null,

@@ -22,7 +22,7 @@ export function buildDraftDocument(args: DraftArgs): PeekDocument {
   const base =
     args.base ??
     emptyPeekDocument({ id: args.peekId, slug: mintSlug(args.peekId), curator_id: args.curatorId ?? ANON, now });
-  const { cards, variant_groups } = extractSpine(args.html);
+  const { cards, variant_groups, budgetCents } = extractSpine(args.html);
   return {
     schema_version: 2,
     spine: {
@@ -32,6 +32,7 @@ export function buildDraftDocument(args: DraftArgs): PeekDocument {
         id: args.peekId,
         slug: base.spine.peek.slug || mintSlug(args.peekId),
         curator_id: args.curatorId ?? base.spine.peek.curator_id ?? ANON,
+        budget_cents: budgetCents,
         updated_at: now,
       },
       cards,

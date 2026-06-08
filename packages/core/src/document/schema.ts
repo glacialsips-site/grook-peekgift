@@ -230,6 +230,7 @@ export const PeekSchema = z
     recipient_name: z.string().nullable(),
     relationship: z.string().nullable(),
     occasion: z.string().nullable(),
+    budget_cents: z.number().nullable().default(null),
     concept: ConceptSchema,
     theme: ThemeSpecSchema,
     hero: MediaSlotSchema.nullable(),

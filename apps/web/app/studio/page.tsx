@@ -52,6 +52,7 @@ export default function Studio() {
   const [kb, setKb] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
   const [hasPage, setHasPage] = useState(false);
+  const [slug, setSlug] = useState<string | null>(null);
 
   const peekId = useRef(newPeekId());
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -191,21 +192,11 @@ export default function Studio() {
       { role: "user" as const, content: apiContent },
     ];
 
-    let currentHtml: string | undefined;
-    if (hasPage) {
-      const root = frameRef.current?.contentDocument?.documentElement?.outerHTML;
-      if (root) {
-        currentHtml = ("<!doctype html>\n" + root)
-          .replace(/<script>\s*window\.__PEEK__=\{mode:"preview"\};\s*<\/script>\s*/i, "")
-          .replace(/<script src="\/peek-runtime\.js"><\/script>\s*/i, "");
-      }
-    }
-
     try {
       const res = await fetch("/api/curator", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, peekId: peekId.current, currentHtml }),
+        body: JSON.stringify({ messages: apiMessages, peekId: peekId.current }),
       });
       if (res.status === 503) {
         setMessages((m) => [...m, { role: "assistant", content: "(the curator model isn't keyed here yet — set ANTHROPIC_API_KEY. everything else is live.)" }]);
@@ -232,7 +223,7 @@ export default function Studio() {
         for (const part of parts) {
           const line = part.trim();
           if (!line.startsWith("data:")) continue;
-          let ev: { type: string; delta?: string; html?: string; selector?: string; css?: string; url?: string; error?: string };
+          let ev: { type: string; delta?: string; html?: string; selector?: string; css?: string; url?: string; error?: string; slug?: string };
           try {
             ev = JSON.parse(line.slice(5).trim());
           } catch {
@@ -249,6 +240,8 @@ export default function Studio() {
             addStyle(ev.css);
           } else if (ev.type === "media" && ev.selector && ev.url) {
             setMedia(ev.selector, ev.url);
+          } else if (ev.type === "saved" && ev.slug) {
+            setSlug(ev.slug);
           } else if (ev.type === "error" && ev.error) {
             acc += `\n(${ev.error})`;
             setLast(acc);
@@ -364,7 +357,13 @@ export default function Studio() {
           </div>
         </div>
         <div style={{ textAlign: "center", marginTop: 8 }}>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>peek.gift · the page builds as you talk</span>
+          {slug ? (
+            <a href={`/g/${slug}`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,200,160,0.95)", textDecoration: "none" }}>
+              preview the page they&apos;ll see → /g/{slug}
+            </a>
+          ) : (
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>peek.gift · the page builds as you talk</span>
+          )}
         </div>
       </div>
     </div>
