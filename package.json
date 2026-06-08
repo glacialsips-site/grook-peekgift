@@ -2,6 +2,7 @@
   "name": "peek-gift-vnext",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,16 +11,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "15.5.18",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
     "@anthropic-ai/sdk": "0.65.0",
     "@clerk/nextjs": "6.7.0",
     "@netlify/blobs": "8.1.2",
-    "stripe": "17.4.0",
+    "clsx": "2.1.1",
+    "isomorphic-dompurify": "^3.15.0",
+    "next": "15.5.18",
     "pg": "8.13.1",
     "posthog-node": "4.5.1",
-    "clsx": "2.1.1"
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "stripe": "17.4.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "22.9.0",

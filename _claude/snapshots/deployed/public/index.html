@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>peek — studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{ color-scheme:dark; }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background:radial-gradient(130% 120% at 50% -10%, #19141d 0%, #0a0a0c 62%);
+    font-family:'Source Serif 4', Georgia, serif; color:#f3ecee;
+    display:grid; place-items:center; min-height:100dvh; padding:24px;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .phone{
+    position:relative; width:min(384px, 94vw); aspect-ratio:384/832;
+    background:#050505; border-radius:54px; padding:11px;
+    box-shadow:0 0 0 2px #2b2832, 0 38px 84px -26px rgba(0,0,0,.85);
+  }
+  .screen{ position:relative; width:100%; height:100%; border-radius:43px; overflow:hidden; background:#fff; }
+  .island{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:32%; height:25px; background:#000; border-radius:999px; z-index:6; pointer-events:none; }
+  iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; display:block; background:#fff; }
+  .smoke,.smokeblur{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+  .smoke{ background:linear-gradient(180deg, transparent 0%, transparent 34%, rgba(14,8,5,.30) 64%, rgba(14,8,5,.56) 100%); }
+  .smokeblur{
+    backdrop-filter:blur(13px) saturate(132%); -webkit-backdrop-filter:blur(13px) saturate(132%);
+    -webkit-mask-image:linear-gradient(180deg, transparent 0%, transparent 44%, #000 74%, #000 100%);
+            mask-image:linear-gradient(180deg, transparent 0%, transparent 44%, #000 74%, #000 100%);
+  }
+  chat-overlay{ z-index:4; }
+  @media (max-width:480px){
+    body{ padding:0; }
+    .phone{ width:100vw; height:100dvh; aspect-ratio:auto; border-radius:0; padding:0; box-shadow:none; }
+    .screen{ border-radius:0; }
+    .island{ display:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <iframe id="preview" title="live preview"></iframe>
+      <div class="smoke"></div>
+      <div class="smokeblur"></div>
+      <chat-overlay style="position:absolute" placeholder="Tell me who it's for…" features="text camera attach mic"></chat-overlay>
+    </div>
+  </div>
+  <script type="module" src="/chat-overlay.js"></script>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
