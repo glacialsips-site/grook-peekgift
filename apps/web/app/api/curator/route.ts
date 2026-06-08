@@ -57,6 +57,11 @@ export async function POST(req: Request): Promise<Response> {
     async start(controller) {
       let closed = false;
       let currentHtml = typeof body.currentHtml === "string" ? body.currentHtml : "";
+      try { controller.enqueue(encoder.encode(": warming up\n\n")); } catch { closed = true; }
+      const ping = setInterval(() => {
+        if (closed) return;
+        try { controller.enqueue(encoder.encode(": ping\n\n")); } catch { closed = true; }
+      }, 15000);
       const emit = (e: StreamEvent) => {
         if (e.type === "page" || e.type === "patch" || e.type === "style" || e.type === "media") {
           currentHtml = applyPageOp(currentHtml, e);
@@ -88,6 +93,7 @@ export async function POST(req: Request): Promise<Response> {
         } catch {
         }
       }
+      clearInterval(ping);
       try {
         controller.close();
       } catch {
