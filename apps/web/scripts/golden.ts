@@ -1,11 +1,12 @@
 /**
- * Golden-brief harness: runs the real seat prompt against fixed briefs, captures
- * the authored page, and renders it headless to a PNG. Zero deploys — the
- * anti-micro-revision loop. Self-contained: only the no-import system prompt +
- * the Anthropic SDK + Playwright. Run with the env sourced from .env.local.
+ * Golden-brief harness v2 — ZIP-FAITHFUL.
+ * Uses the owner's literal seat.ts (the proven prompt) verbatim, the zip's exact
+ * set_page+publish tool surface, fills <img data-peek-img> slots with real fal
+ * images (like the zip's host does), then renders headless to PNG. Adaptive
+ * thinking is the only addition the zip lacked. Run with env sourced from .env.local.
  */
 import Anthropic from "@anthropic-ai/sdk";
-import { PEEK_STUDIO_SYSTEM_PROMPT } from "../lib/curator/system-prompt";
+import { SEAT } from "../../../_claude/snapshots/deployed/netlify/seat";
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "fs";
 
@@ -16,15 +17,10 @@ const TOOLS = [
   {
     name: "set_page",
     description:
-      "Author the WHOLE page as one freeform HTML document and show it. Call this FIRST. Include your own Google Fonts <link>, a <style> block, bespoke CSS, and CSS/SVG motion. Tag interactive/claimable things with data-peek-*. CSS/SVG only — never a <script>, <form>, <input>, or inline data:/base64.",
+      "Author the WHOLE page as one freeform HTML document and show it. Call this FIRST so the page appears at once. Include your own Google Fonts <link>, a <style> block, bespoke CSS, and CSS/SVG motion. Tag every interactive/claimable thing with the data-peek-* contract. CSS/SVG only — never a <script>, <form>, <input>, or an inline data:/base64 image; for an image you don't have, leave an <img data-peek-img data-peek-img-desc=\"vivid prompt\"> slot for the host to fill.",
     input_schema: { type: "object", properties: { html: { type: "string" } }, required: ["html"] },
   },
-  { name: "edit_region", description: "Replace one matched node's markup (smallest surgical edit).", input_schema: { type: "object", properties: { selector: { type: "string" }, html: { type: "string" } }, required: ["selector", "html"] } },
-  { name: "set_style", description: "Add/override a themed style block.", input_schema: { type: "object", properties: { css: { type: "string" } }, required: ["css"] } },
-  { name: "set_media", description: "Drop a resolved image url into a slot.", input_schema: { type: "object", properties: { selector: { type: "string" }, url: { type: "string" } }, required: ["selector", "url"] } },
-  { name: "resolve_card", description: "Resolve a URL or fuzzy ask to product data.", input_schema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] } },
-  { name: "generate_hero_image", description: "Paint a hero image from a vivid prompt.", input_schema: { type: "object", properties: { prompt: { type: "string" }, aspect: { type: "string" } }, required: ["prompt"] } },
-  { name: "publish", description: "Flag the page ready for checkout.", input_schema: { type: "object", properties: {} } },
+  { name: "publish", description: "Flag the page ready for the $12 checkout.", input_schema: { type: "object", properties: {} } },
 ];
 
 const BRIEFS = [
@@ -33,16 +29,45 @@ const BRIEFS = [
 ];
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+async function fal(desc: string): Promise<string | null> {
+  try {
+    const r = await fetch("https://fal.run/fal-ai/flux-pro/v1.1", {
+      method: "POST",
+      headers: { Authorization: `Key ${process.env.FAL_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({ prompt: desc || "a bespoke editorial illustration that fits the page", image_size: "square_hd", num_images: 1 }),
+    });
+    if (!r.ok) return null;
+    const j: any = await r.json();
+    return j?.images?.[0]?.url ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fillImages(html: string): Promise<string> {
+  const tags = html.match(/<img\b[^>]*\bdata-peek-img\b[^>]*>/gi) || [];
+  for (const tag of tags) {
+    const m = /data-peek-img-desc\s*=\s*"([^"]*)"/i.exec(tag) || /\balt\s*=\s*"([^"]*)"/i.exec(tag);
+    const url = await fal(m ? m[1] : "");
+    if (!url) continue;
+    const newTag = /\bsrc\s*=/.test(tag)
+      ? tag.replace(/\bsrc\s*=\s*"[^"]*"/i, `src="${url}"`)
+      : tag.replace(/<img\b/i, `<img src="${url}"`);
+    html = html.replace(tag, newTag);
+  }
+  return html;
+}
+
 async function generate(text: string): Promise<string> {
   const client = new Anthropic();
   const messages: any[] = [{ role: "user", content: text }];
   let html = "";
-  for (let hop = 0; hop < 6; hop++) {
+  for (let hop = 0; hop < 4; hop++) {
     const stream = client.messages.stream({
       model: MODEL,
       max_tokens: 32000,
       thinking: { type: "adaptive" },
-      system: PEEK_STUDIO_SYSTEM_PROMPT,
+      system: SEAT,
       tools: TOOLS as any,
       messages,
     } as any);
@@ -53,13 +78,7 @@ async function generate(text: string): Promise<string> {
     const results: any[] = [];
     for (const tu of toolUses) {
       if (tu.name === "set_page" && tu.input?.html) html = tu.input.html;
-      const content =
-        tu.name === "generate_hero_image"
-          ? "image generation is off in this harness — leave a treated image slot with a caption instead."
-          : tu.name === "resolve_card"
-            ? "resolver is off in this harness — author the card yourself with realistic title/price/source."
-            : JSON.stringify({ ok: true });
-      results.push({ type: "tool_result", tool_use_id: tu.id, content });
+      results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify({ ok: true }) });
     }
     messages.push({ role: "user", content: results });
   }
@@ -72,15 +91,17 @@ async function generate(text: string): Promise<string> {
   for (const b of BRIEFS) {
     try {
       const t0 = Date.now();
-      const html = await generate(b.text);
+      let html = await generate(b.text);
+      const imgs = (html.match(/data-peek-img\b/gi) || []).length;
+      html = await fillImages(html);
       writeFileSync(`${OUT}/${b.id}.html`, html);
       const page = await browser.newPage({ viewport: { width: 414, height: 896 }, deviceScaleFactor: 2 });
-      await page.setContent(html, { waitUntil: "networkidle", timeout: 30000 }).catch(() => {});
+      await page.setContent(html, { waitUntil: "networkidle", timeout: 45000 }).catch(() => {});
       await page.evaluate(() => (document as any).fonts?.ready).catch(() => {});
-      await page.waitForTimeout(1500);
+      await page.waitForTimeout(1800);
       await page.screenshot({ path: `${OUT}/${b.id}.png`, fullPage: true });
       await page.close();
-      console.log(`${b.id}: ${html.length}b html, ${(Date.now() - t0) / 1000}s -> ${OUT}/${b.id}.png`);
+      console.log(`${b.id}: ${html.length}b, ${imgs} img-slots, ${(Date.now() - t0) / 1000}s -> ${OUT}/${b.id}.png`);
     } catch (e) {
       console.error(`${b.id} FAILED:`, (e as Error).message);
     }
