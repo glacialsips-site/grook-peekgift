@@ -11,6 +11,7 @@ interface Body {
   messages?: TurnMessage[];
   peekId?: string;
   curatorId?: string;
+  currentHtml?: string;
 }
 
 function lastUserText(messages: TurnMessage[]): string {
@@ -55,7 +56,7 @@ export async function POST(req: Request): Promise<Response> {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
-      let currentHtml = "";
+      let currentHtml = typeof body.currentHtml === "string" ? body.currentHtml : "";
       const emit = (e: StreamEvent) => {
         if (e.type === "page" || e.type === "patch" || e.type === "style" || e.type === "media") {
           currentHtml = applyPageOp(currentHtml, e);
@@ -69,7 +70,7 @@ export async function POST(req: Request): Promise<Response> {
       };
       try {
         if (isSafeword) await runSafewordReport(client, { messages }, emit);
-        else await runCuratorTurnStreaming(client, { messages }, emit);
+        else await runCuratorTurnStreaming(client, { messages, currentHtml: currentHtml || undefined }, emit);
       } catch (e) {
         emit({ type: "error", error: (e as Error).message ?? "curator turn failed" });
       }

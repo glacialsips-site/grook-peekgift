@@ -28,10 +28,22 @@ export type StreamEvent =
 
 export async function runCuratorTurnStreaming(
   client: Anthropic,
-  input: { messages: TurnMessage[] },
+  input: { messages: TurnMessage[]; currentHtml?: string },
   emit: (e: StreamEvent) => void,
 ): Promise<void> {
-  const system = buildCuratorSystem();
+  const system: Array<{ type: "text"; text: string; cache_control?: { type: "ephemeral" } }> = [...buildCuratorSystem()];
+  if (input.currentHtml && input.currentHtml.trim()) {
+    system.push({
+      type: "text",
+      text:
+        `## THE PAGE THAT IS LIVE RIGHT NOW — the creator is looking at it\n` +
+        `You already authored the page below; the creator kept it and is now asking for a change in plain words. ` +
+        `Make the SMALLEST change that satisfies them: prefer edit_region with the tightest CSS selector, or set_style / set_media — ` +
+        `and keep the concept, layout, copy, and every other card EXACTLY as they are. ` +
+        `Call set_page (a full re-author) ONLY if they explicitly ask to start over or change the whole concept. ` +
+        `Re-authoring the whole page for a small tweak is a failure.\n\n<current_page>\n${input.currentHtml}\n</current_page>`,
+    });
+  }
   const anthropicTools = PEEK_STUDIO_TOOLS as unknown as Anthropic.Tool[];
   const messages = input.messages.map((m) => ({ role: m.role, content: m.content })) as Anthropic.MessageParam[];
 

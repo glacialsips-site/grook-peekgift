@@ -191,11 +191,21 @@ export default function Studio() {
       { role: "user" as const, content: apiContent },
     ];
 
+    let currentHtml: string | undefined;
+    if (hasPage) {
+      const root = frameRef.current?.contentDocument?.documentElement?.outerHTML;
+      if (root) {
+        currentHtml = ("<!doctype html>\n" + root)
+          .replace(/<script>\s*window\.__PEEK__=\{mode:"preview"\};\s*<\/script>\s*/i, "")
+          .replace(/<script src="\/peek-runtime\.js"><\/script>\s*/i, "");
+      }
+    }
+
     try {
       const res = await fetch("/api/curator", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, peekId: peekId.current }),
+        body: JSON.stringify({ messages: apiMessages, peekId: peekId.current, currentHtml }),
       });
       if (res.status === 503) {
         setMessages((m) => [...m, { role: "assistant", content: "(the curator model isn't keyed here yet — set ANTHROPIC_API_KEY. everything else is live.)" }]);
