@@ -73,6 +73,7 @@
     }
     markCard(card, on);
     refresh();
+    if (cfg.mode === "recipient") postToHost({ kind: "pick", cardId: id, on: !!on });
   }
 
   function maybeUnlock(trigger) {
@@ -179,7 +180,8 @@
     var items = []; for (var k in order) items.push(order[k]);
     var summary = { items: items, total: total(), budget: budget() };
     if (typeof cfg.onAction === "function") cfg.onAction(type, summary);
-    else if (cfg.mode !== "recipient") { try { console.log("[peek] action:", type, summary); } catch (e) { void e; } }
+    else if (cfg.mode === "recipient") postToHost({ kind: "action", type: type, summary: summary });
+    else { try { console.log("[peek] action:", type, summary); } catch (e) { void e; } }
   }
 
   function wireReveals() {
@@ -202,6 +204,34 @@
   } else if (bar) {
     bar.classList.add("show");
   }
+
+  function postToHost(msg) {
+    try {
+      if (window.parent && window.parent !== window) {
+        var out = { source: "peek", v: 1 };
+        for (var k in msg) out[k] = msg[k];
+        window.parent.postMessage(out, "*");
+      }
+    } catch (e) { void e; }
+  }
+  window.addEventListener("message", function (e) {
+    var d = e && e.data;
+    if (!d || d.source !== "peek-host" || d.kind !== "sync" || !Array.isArray(d.picks)) return;
+    Object.keys(order).forEach(function (id) { markCard(cardById(id), false); delete order[id]; });
+    groupSel = {};
+    d.picks.forEach(function (id) {
+      var c = cardById(id); if (!c) return;
+      order[id] = {
+        price: priceOf(c), name: c.getAttribute("data-name") || id,
+        kind: c.getAttribute("data-kind") || "product", src: c.getAttribute("data-src") || "", desc: c.getAttribute("data-desc") || "",
+      };
+      markCard(c, true);
+      var g = c.getAttribute("data-group");
+      if (g && c.getAttribute("data-rule") === "pick-one") groupSel[g] = id;
+      maybeUnlock(c);
+    });
+    refresh();
+  });
 
   wireReveals();
   refresh();

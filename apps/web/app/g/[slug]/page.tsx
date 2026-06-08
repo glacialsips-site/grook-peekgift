@@ -3,6 +3,7 @@ import { loadPicks } from "@/lib/persistence/picks";
 import { RecipientView } from "@/components/recipient-view";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { frameDoc } from "@/lib/curator/page-html";
+import { RecipientFrame } from "@/components/recipient-frame";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,11 +29,10 @@ export default async function RecipientPage({ params }: { params: Promise<{ slug
     const recipient = doc.spine.peek.recipient_name;
     const srcDoc = frameDoc(sanitizeHtml(doc.presentation.html, true), "recipient");
     return (
-      <iframe
-        title={recipient ? `A peek for ${recipient}` : "Your peek"}
+      <RecipientFrame
+        slug={slug}
         srcDoc={srcDoc}
-        sandbox="allow-scripts"
-        style={{ position: "fixed", inset: 0, width: "100%", height: "100%", border: 0, background: "#0b0b0f" }}
+        title={recipient ? `A peek for ${recipient}` : "Your peek"}
       />
     );
   }
