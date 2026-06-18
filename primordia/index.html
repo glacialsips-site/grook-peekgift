@@ -79,6 +79,24 @@
     letter-spacing:.08em;z-index:6;text-align:right;line-height:1.7;pointer-events:none}
   #hint b{color:var(--accent)}
 
+  /* show/hide controls — essential on touch where there's no keyboard */
+  #uiToggle{position:fixed;top:16px;right:170px;z-index:21;width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);color:var(--accent);pointer-events:auto;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.5);cursor:pointer}
+  #uiToggle:active{transform:scale(.92)}
+  #controls,#stats,#hint{transition:opacity .3s ease, transform .3s ease}
+  body.ui-hidden #controls{opacity:0;pointer-events:none;transform:translateX(-16px)}
+  body.ui-hidden #stats,body.ui-hidden #hint{opacity:0;pointer-events:none}
+
+  /* phones: panel is full-width, keyboard hints are useless, toggle moves clear of stats */
+  @media (pointer:coarse){ #hint{display:none} }
+  @media (max-width:760px){
+    #controls{width:min(92vw,340px)}
+    #uiToggle{top:auto;bottom:18px;right:16px;width:54px;height:54px;font-size:22px}
+    #stats{top:12px;right:12px;padding:8px 10px;min-width:0;font-size:9.5px}
+  }
+
   /* ---------- title screen ---------- */
   #title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;
     align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,
@@ -187,6 +205,8 @@
     <b>drag</b> attract · <b>shift+drag</b> repel · <b>space</b> pause · <b>G</b> genesis<br>
     <b>R</b> reseed · <b>N</b> rules · <b>M</b> mutate · <b>P</b> palette · <b>H</b> hide · <b>F</b> fullscreen
   </div>
+
+  <button id="uiToggle" title="Show / hide controls">☰</button>
 </div>
 
 <div id="about">
@@ -927,6 +947,7 @@ function wireControls(){
   $("#bPalette").onclick=cyclePalette;
   $("#bRecord").onclick=toggleRecord;
   $("#bGenesis").onclick=toggleGenesis;
+  $("#uiToggle").onclick=()=>toggleUI();
 
   // preset segment
   const seg=$("#presetSeg"); seg.innerHTML="";
@@ -947,6 +968,11 @@ function cyclePalette(){ paletteIdx=(paletteIdx+1)%PALETTE_NAMES.length;
   palette=PALETTES[PALETTE_NAMES[paletteIdx]]; buildPaletteFlat(); buildMatrixUI();
   toast("palette · "+PALETTE_NAMES[paletteIdx]); }
 function showAbout(s){ $("#about").classList.toggle("show", s); }
+function toggleUI(force){
+  const hide = force!==undefined ? force : !document.body.classList.contains("ui-hidden");
+  document.body.classList.toggle("ui-hidden", hide);
+  const b=$("#uiToggle"); if(b) b.textContent = hide ? "☰" : "✕";
+}
 
 /* ---------- matrix editor ---------- */
 function cellColor(v){
@@ -1085,10 +1111,7 @@ window.addEventListener("keydown", e=>{
     case "r": reseedPositions(); toast("reseeded"); break;
     case "n": rngMatrix(); reassignSpecies(); buildMatrixUI(); toast("new rules"); break;
     case "m": mutateMatrix(); buildMatrixUI(); toast("mutated"); break;
-    case "h": { const h=$("#controls"); const st=$("#stats"); const hd=$("#hint");
-      const hidden=h.style.opacity==="0";
-      [h,st,hd].forEach(el=>{ el.style.opacity=hidden?"1":"0"; el.style.pointerEvents=hidden?"auto":"none";});
-      break; }
+    case "h": toggleUI(); break;
     case "f": if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
       else document.exitFullscreen?.(); break;
     case "s": snapshot(); break;
@@ -1113,6 +1136,10 @@ function boot(){
 $("#enterBtn").addEventListener("click", ()=>{
   $("#title").classList.add("gone");
   $("#hud").hidden=false;
+  // on phones the panel covers the canvas — start it tucked away so the life shows
+  const touch = matchMedia("(pointer:coarse)").matches || innerWidth < 760;
+  toggleUI(touch);
+  if(touch) toast("tap ☰ for controls");
   setTimeout(()=>$("#title").remove(), 900);
 });
 boot();
