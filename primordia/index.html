@@ -108,11 +108,14 @@
     <div class="group">
       <div class="glabel">World</div>
       <div class="seg" id="presetSeg"></div>
+      <div class="glabel" style="margin:10px 0 6px">Discovered <span style="opacity:.5">— evolved worlds</span></div>
+      <div class="seg" id="bestiarySeg"></div>
       <div class="btns" style="margin-top:8px">
         <button id="bReseed">⟳ Reseed</button>
         <button id="bRandom">⚄ New rules</button>
         <button id="bMutate">✦ Mutate</button>
         <button id="bPause">❚❚ Pause</button>
+        <button id="bGenesis" class="wide">✶ Genesis — autopilot: off</button>
       </div>
     </div>
 
@@ -142,11 +145,13 @@
     </div>
 
     <div class="group">
-      <div class="glabel">Senses</div>
+      <div class="glabel">Senses &amp; capture</div>
       <div class="btns">
         <button id="bSound">♪ Sound: off</button>
+        <button id="bPalette">◑ Palette</button>
         <button id="bSnap">⤓ Snapshot</button>
-        <button id="bShare" class="wide">⧉ Copy world DNA</button>
+        <button id="bRecord">● Record</button>
+        <button id="bShare" class="wide">⧉ Copy share link</button>
         <button id="bLoad" class="wide">⎘ Paste world DNA</button>
       </div>
     </div>
@@ -157,13 +162,13 @@
     <div class="s"><span>particles</span><b id="oN">—</b></div>
     <div class="s"><span>species</span><b id="oK">—</b></div>
     <div class="s"><span>avg speed</span><b id="oV">—</b></div>
-    <div class="s"><span>order</span><b id="oOrder">—</b></div>
+    <div class="s"><span>structure</span><b id="oOrder">—</b></div>
     <div id="fpsbar"><i></i></div>
   </div>
 
   <div id="hint">
-    <b>drag</b> attract · <b>shift+drag</b> repel · <b>space</b> pause<br>
-    <b>R</b> reseed · <b>N</b> new rules · <b>M</b> mutate · <b>H</b> hide UI · <b>F</b> fullscreen
+    <b>drag</b> attract · <b>shift+drag</b> repel · <b>space</b> pause · <b>G</b> genesis<br>
+    <b>R</b> reseed · <b>N</b> rules · <b>M</b> mutate · <b>P</b> palette · <b>H</b> hide · <b>F</b> fullscreen
   </div>
 </div>
 
@@ -442,9 +447,21 @@ const Usim=uniforms(Psim), Udraw=uniforms(Pdraw),
 /* ====================================================== state / params === */
 const COUNTS = [2048, 4096, 8192, 12288, 16384];
 const PALETTES = {
-  aurora:  [[0.42,0.97,1.0],[0.70,0.55,1.0],[1.0,0.48,0.85],[0.55,1.0,0.72],
-            [1.0,0.82,0.42],[0.40,0.70,1.0],[1.0,0.40,0.45],[0.80,1.0,0.40]],
+  aurora: [[0.42,0.97,1.0],[0.70,0.55,1.0],[1.0,0.48,0.85],[0.55,1.0,0.72],
+           [1.0,0.82,0.42],[0.40,0.70,1.0],[1.0,0.40,0.45],[0.80,1.0,0.40]],
+  ember:  [[1.0,0.78,0.30],[1.0,0.45,0.18],[1.0,0.25,0.30],[0.85,0.12,0.45],
+           [1.0,0.60,0.10],[0.95,0.90,0.55],[0.70,0.10,0.25],[1.0,0.35,0.05]],
+  ice:    [[0.55,0.92,1.0],[0.35,0.65,1.0],[0.75,0.80,1.0],[0.40,1.0,0.95],
+           [0.20,0.50,0.95],[0.85,0.95,1.0],[0.50,0.70,0.90],[0.30,0.85,1.0]],
+  candy:  [[1.0,0.55,0.85],[0.60,0.85,1.0],[1.0,0.85,0.55],[0.70,1.0,0.70],
+           [0.85,0.60,1.0],[1.0,0.70,0.75],[0.55,1.0,0.95],[1.0,0.95,0.65]],
+  toxic:  [[0.65,1.0,0.15],[0.20,1.0,0.55],[0.85,1.0,0.0],[0.0,0.90,0.60],
+           [0.45,0.95,0.10],[0.75,1.0,0.40],[0.10,0.80,0.30],[0.95,1.0,0.25]],
+  mono:   [[0.95,0.97,1.0],[0.75,0.82,0.95],[0.60,0.70,0.88],[0.85,0.90,1.0],
+           [0.50,0.62,0.82],[1.0,1.0,1.0],[0.68,0.78,0.92],[0.55,0.66,0.85]],
 };
+const PALETTE_NAMES = Object.keys(PALETTES);
+let paletteIdx = 0;
 let P = {
   k: 5, nIdx: 1, reach: 0.10, force: 1.0, friction: 0.70, beta: 0.3,
   dt: 0.02, size: 4.0, bloom: 1.15, trail: 0.86, threshold: 0.55, sub: 2,
@@ -454,7 +471,28 @@ let matrix = new Float32Array(64);
 let species, posTex=[], velTex=[], simFbo=[], specTex, ping=0;
 let sceneTex, sceneFbo, hdrW, hdrH, bloomA, bloomB, bloomFboA, bloomFboB, bloomW, bloomH;
 let paused=false, mouse={x:0.5,y:0.5,f:0,down:false,shift:false};
-const palette = PALETTES.aurora;
+let palette = PALETTES[PALETTE_NAMES[paletteIdx]];
+
+/* ---------- discovered worlds (auto-evolved by tools/evolve.mjs) ---------- */
+const BESTIARY = [
+  { name:"Halo",    k:3, phys:{reach:0.127,force:1.41,friction:0.688,beta:0.237,dt:0.0232},
+    m:[-0.858,0.751,0.576,-0.145,0.427,0.642,0.12,0.507,0.28] },
+  { name:"Reef",    k:5, phys:{reach:0.107,force:1.55,friction:0.791,beta:0.35,dt:0.0186},
+    m:[0.269,0.009,0.333,0.568,-0.69,0.611,-0.987,-0.07,-0.971,0.578,0.803,-0.85,0.078,0.075,-0.083,0.675,0.757,0.998,0.905,-0.207,-0.558,0.463,0.079,-0.125,0.356] },
+  { name:"Plasm",   k:4, phys:{reach:0.112,force:1.54,friction:0.705,beta:0.326,dt:0.019},
+    m:[0.541,-0.079,-0.273,0.627,0.889,-0.721,-0.202,0.902,-0.593,0.414,-0.355,-0.676,0.591,-0.28,-0.07,-0.593] },
+  { name:"Pollen",  k:3, phys:{reach:0.102,force:1.65,friction:0.773,beta:0.353,dt:0.0239},
+    m:[0.737,0.093,-0.337,0.719,0.193,0.916,-0.843,-0.982,-0.816] },
+  { name:"Drift",   k:3, phys:{reach:0.097,force:1.32,friction:0.782,beta:0.298,dt:0.0171},
+    m:[0.115,0.273,-0.254,0.623,-0.496,0.782,-0.997,-0.336,0.39] },
+  { name:"Mycelia", k:5, phys:{reach:0.118,force:1.32,friction:0.708,beta:0.239,dt:0.0171},
+    m:[-0.559,0.447,0.67,0.905,0.325,0.584,-0.157,-0.867,-0.132,0.183,-0.25,-0.875,0.161,-0.381,0.239,0.971,0.549,0.247,-0.941,0.647,-0.097,-0.355,-0.84,0.688,-0.118] },
+];
+function loadBestiary(b){
+  P.k=b.k; Object.assign(P, b.phys);
+  matrix=new Float32Array(64); b.m.forEach((x,i)=>matrix[i]=x);
+  reassignSpecies(); reflectUI(); buildMatrixUI(); toast(b.name+" — a discovered world");
+}
 
 /* ---------- world generation ---------- */
 function rngMatrix(){
@@ -629,37 +667,68 @@ function loop(now){
 }
 
 /* ============================================================ STATS ====== */
-let velReadBuf=null;
-function readVel(){
-  if(!velReadBuf || velReadBuf.length!==N*4) velReadBuf=new Float32Array(N*4);
+let velReadBuf=null, posReadBuf=null;
+function readBuf(attachment, ref){
+  if(!ref.buf || ref.buf.length!==N*4) ref.buf=new Float32Array(N*4);
   gl.bindFramebuffer(gl.FRAMEBUFFER, simFbo[ping]);
-  gl.readBuffer(gl.COLOR_ATTACHMENT1);
-  gl.readPixels(0,0,texW,texH,gl.RGBA,gl.FLOAT,velReadBuf);
+  gl.readBuffer(attachment);
+  gl.readPixels(0,0,texW,texH,gl.RGBA,gl.FLOAT,ref.buf);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  return velReadBuf;
+  return ref.buf;
 }
-let stat = {avgV:0, order:0, perSpec:new Float32Array(8)};
+const _vr={buf:null}, _pr={buf:null};
+let stat = {avgV:0, structure:0, perSpec:new Float32Array(8)};
+const GRID=20, gcount=new Float32Array(GRID*GRID);
 function updateStats(){
-  const v = readVel();
-  let sx=0, sy=0, sp=0; const cnt=new Float32Array(8), spd=new Float32Array(8);
-  // sample a subset for speed
-  const stride = N>6000 ? 3 : 1;
-  let m=0;
+  const v = readBuf(gl.COLOR_ATTACHMENT1, _vr);
+  const p = readBuf(gl.COLOR_ATTACHMENT0, _pr);
+  let sp=0; const cnt=new Float32Array(8), spd=new Float32Array(8);
+  const stride = N>6000 ? 3 : 1; let m=0;
+  gcount.fill(0);
   for(let i=0;i<N;i+=stride){
-    const vx=v[i*4], vy=v[i*4+1]; const s=Math.hypot(vx,vy);
-    sx+=vx; sy+=vy; sp+=s; m++;
+    const s=Math.hypot(v[i*4], v[i*4+1]); sp+=s; m++;
     const si=species[i]; cnt[si]++; spd[si]+=s;
   }
-  stat.avgV = sp/m;
-  stat.order = stat.avgV>1e-6 ? Math.hypot(sx/m, sy/m)/stat.avgV : 0;
+  // dispersion across all particles (structure signal)
+  for(let i=0;i<N;i++){ let gx=(p[i*4]*GRID)|0, gy=(p[i*4+1]*GRID)|0;
+    if(gx>=GRID)gx=GRID-1; if(gx<0)gx=0; if(gy>=GRID)gy=GRID-1; if(gy<0)gy=0;
+    gcount[gy*GRID+gx]++; }
+  const mean=N/(GRID*GRID); let varr=0;
+  for(let i=0;i<gcount.length;i++){ const d=gcount[i]-mean; varr+=d*d; }
+  const disp=(varr/gcount.length)/Math.max(mean,1e-6);
+  stat.avgV = sp/m; stat.structure = disp;
   for(let k=0;k<8;k++) stat.perSpec[k] = cnt[k]>0 ? spd[k]/cnt[k] : 0;
   $("#oFps").textContent = fpsSmooth.toFixed(0);
   $("#oN").textContent   = N.toLocaleString();
   $("#oK").textContent   = P.k;
   $("#oV").textContent   = (stat.avgV*1000).toFixed(1);
-  $("#oOrder").textContent = (stat.order*100).toFixed(0)+"%";
+  $("#oOrder").textContent = disp.toFixed(1);
   $("#fpsbar i").style.width = Math.min(100, fpsSmooth/60*100)+"%";
   if(audio.on) updateAudio();
+  if(genesis.on) genesisTick();
+}
+
+/* ============================================================ GENESIS ===== */
+/* Autopilot: keep the world alive and interesting. If it goes static/gaseous,
+   reroll its rules (rebirth); otherwise let it gently drift (mutate). Uses the
+   same dispersion + speed signals validated in tools/evolve.mjs. */
+const genesis = { on:false, t:0, period:520 /*frames ~ 9s*/ };
+function genesisTick(){
+  genesis.t++;
+  if(genesis.t < genesis.period) return;
+  genesis.t = 0;
+  const dead = stat.avgV < 0.0006;        // everything froze
+  const gas  = stat.structure < 1.6;      // no structure / blew apart
+  if(dead || gas){
+    rngMatrix(); reseedPositions(); reassignSpecies(); buildMatrixUI();
+    flash("✶ rebirth");
+  } else {
+    mutateMatrix(0.16); buildMatrixUI();   // evolve gently
+    flash("✶ drift");
+  }
+}
+function flash(msg){ const t=$("#bGenesis"); toast(msg); t.classList.add("on");
+  setTimeout(()=>{ if(genesis.on) t.classList.remove("on"); else t.classList.remove("on"); }, 400);
 }
 
 /* ============================================================ AUDIO ====== */
@@ -786,6 +855,9 @@ function wireControls(){
   $("#bSnap").onclick=snapshot;
   $("#bShare").onclick=copyDNA;
   $("#bLoad").onclick=pasteDNA;
+  $("#bPalette").onclick=cyclePalette;
+  $("#bRecord").onclick=toggleRecord;
+  $("#bGenesis").onclick=toggleGenesis;
 
   // preset segment
   const seg=$("#presetSeg"); seg.innerHTML="";
@@ -793,7 +865,18 @@ function wireControls(){
     const b=document.createElement("button"); b.textContent=name;
     b.onclick=()=>applyPreset(name); seg.appendChild(b);
   });
+  // discovered-worlds segment
+  const bseg=$("#bestiarySeg"); bseg.innerHTML="";
+  BESTIARY.forEach(b=>{ const btn=document.createElement("button"); btn.textContent=b.name;
+    btn.onclick=()=>loadBestiary(b); bseg.appendChild(btn); });
 }
+function toggleGenesis(){ genesis.on=!genesis.on; genesis.t=0;
+  $("#bGenesis").classList.toggle("on", genesis.on);
+  $("#bGenesis").textContent = "✶ Genesis — autopilot: "+(genesis.on?"on":"off");
+  toast(genesis.on? "Genesis on — the world now lives on its own":"Genesis off"); }
+function cyclePalette(){ paletteIdx=(paletteIdx+1)%PALETTE_NAMES.length;
+  palette=PALETTES[PALETTE_NAMES[paletteIdx]]; buildPaletteFlat(); buildMatrixUI();
+  toast("palette · "+PALETTE_NAMES[paletteIdx]); }
 
 /* ---------- matrix editor ---------- */
 function cellColor(v){
@@ -849,20 +932,56 @@ function dnaObject(){ return { v:1, k:P.k, n:P.nIdx,
   phys:{reach:P.reach,force:P.force,friction:P.friction,beta:P.beta,dt:P.dt,
         size:P.size,bloom:P.bloom,trail:P.trail},
   m:Array.from(matrix.slice(0,P.k*P.k)).map(x=>+x.toFixed(3)) }; }
+function dnaCode(){ return btoa(JSON.stringify(dnaObject())); }
+function shareURL(){ return location.origin+location.pathname+"#w="+dnaCode(); }
 function copyDNA(){
-  const code = btoa(JSON.stringify(dnaObject()));
-  navigator.clipboard?.writeText(code).then(()=>toast("world DNA copied"),
-    ()=>{ prompt("World DNA:", code); });
+  const url = shareURL();
+  try{ history.replaceState(null,"","#w="+dnaCode()); }catch(e){}
+  navigator.clipboard?.writeText(url).then(()=>toast("share link copied to clipboard"),
+    ()=>{ prompt("Share link:", url); });
+}
+function applyDNAObj(o){
+  P.k=o.k; P.nIdx=o.n!=null?o.n:P.nIdx; Object.assign(P,o.phys||{});
+  matrix=new Float32Array(64); o.m.forEach((x,i)=>matrix[i]=x);
+  allocParticles(); reflectUI(); buildMatrixUI();
+}
+function decodeDNA(txt){
+  txt=txt.trim(); const h=txt.indexOf("#w="); if(h>=0) txt=txt.slice(h+3);
+  return JSON.parse(atob(txt));
 }
 function pasteDNA(){
-  const apply=txt=>{ try{ const o=JSON.parse(atob(txt.trim()));
-      P.k=o.k; P.nIdx=o.n!=null?o.n:P.nIdx; Object.assign(P,o.phys||{});
-      matrix=new Float32Array(64); o.m.forEach((x,i)=>matrix[i]=x);
-      allocParticles(); reflectUI(); buildMatrixUI(); toast("world DNA loaded");
-    }catch(e){ toast("invalid DNA"); } };
+  const apply=txt=>{ try{ applyDNAObj(decodeDNA(txt)); toast("world DNA loaded"); }
+    catch(e){ toast("invalid DNA"); } };
   if(navigator.clipboard?.readText) navigator.clipboard.readText().then(apply,
-    ()=>{ const t=prompt("Paste world DNA:"); if(t)apply(t); });
-  else { const t=prompt("Paste world DNA:"); if(t)apply(t); }
+    ()=>{ const t=prompt("Paste world DNA or link:"); if(t)apply(t); });
+  else { const t=prompt("Paste world DNA or link:"); if(t)apply(t); }
+}
+function loadFromHash(){
+  if(location.hash.startsWith("#w=")){
+    try{ applyDNAObj(decodeDNA(location.hash)); return true; }catch(e){}
+  }
+  return false;
+}
+
+/* ---------- WebM recording ---------- */
+const rec = { mr:null, chunks:[], on:false };
+function toggleRecord(){
+  if(rec.on){ rec.mr && rec.mr.stop(); return; }
+  if(!canvas.captureStream){ toast("recording unsupported here"); return; }
+  const stream = canvas.captureStream(60);
+  let mime = "video/webm;codecs=vp9";
+  if(!window.MediaRecorder || !MediaRecorder.isTypeSupported(mime)) mime="video/webm";
+  try{ rec.mr = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:12e6}); }
+  catch(e){ toast("recording unsupported"); return; }
+  rec.chunks=[]; rec.on=true;
+  rec.mr.ondataavailable=e=>{ if(e.data.size) rec.chunks.push(e.data); };
+  rec.mr.onstop=()=>{ rec.on=false; $("#bRecord").classList.remove("on");
+    $("#bRecord").textContent="● Record";
+    const blob=new Blob(rec.chunks,{type:"video/webm"}); const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="primordia-"+Date.now()+".webm"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000); toast("clip saved (.webm)"); };
+  rec.mr.start();
+  $("#bRecord").classList.add("on"); $("#bRecord").textContent="■ Stop"; toast("recording…");
 }
 
 /* ---------- input ---------- */
@@ -886,6 +1005,8 @@ window.addEventListener("keydown", e=>{
     case "f": if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
       else document.exitFullscreen?.(); break;
     case "s": snapshot(); break;
+    case "p": cyclePalette(); break;
+    case "g": toggleGenesis(); break;
   }
 });
 
@@ -897,7 +1018,7 @@ function boot(){
   wireControls();
   reflectUI();
   buildMatrixUI();
-  applyPreset("Cells");
+  if(!loadFromHash()) applyPreset("Cells");
   requestAnimationFrame(loop);
 }
 $("#enterBtn").addEventListener("click", ()=>{

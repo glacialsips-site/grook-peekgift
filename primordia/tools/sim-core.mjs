@@ -67,6 +67,58 @@ export function makeWorld({ preset="Cells", seed=0xC0FFEE, N=4096 }){
   return { preset, K, N, P, M, px, py, vx, vy, sp };
 }
 
+/* a fully random world in the stable regime — the raw material of evolution */
+export function makeRandomWorld({ seed=Date.now(), N=2048 }){
+  const r = mulberry(seed);
+  const K = 3 + ((r()*4)|0); // 3..6
+  const P = {
+    reach:    0.085 + r()*0.045,
+    force:    0.9  + r()*0.9,
+    friction: 0.68 + r()*0.16,
+    beta:     0.22 + r()*0.14,
+    dt:       0.017 + r()*0.008,
+  };
+  const M = MATRIX.random(K, r);
+  const px=new Float32Array(N), py=new Float32Array(N);
+  const vx=new Float32Array(N), vy=new Float32Array(N), sp=new Uint8Array(N);
+  for(let i=0;i<N;i++){ px[i]=r(); py[i]=r(); sp[i]=(r()*K)|0; }
+  return { preset:"Random", seed, K, N, P, M, px, py, vx, vy, sp };
+}
+
+/* coarse per-cell occupancy grid (toroidal) */
+export function gridCounts(W, G=20){
+  const { N, px, py } = W; const c = new Float32Array(G*G);
+  for(let i=0;i<N;i++){ let gx=(px[i]*G)|0, gy=(py[i]*G)|0;
+    if(gx>=G)gx=G-1; if(gy>=G)gy=G-1; c[gy*G+gx]++; }
+  return c;
+}
+/* index of dispersion: ~1 for uniform/random or exploded; >>1 for real structure */
+export function dispersion(counts, N){
+  const G2=counts.length; const mean=N/G2; let v=0;
+  for(let i=0;i<G2;i++){ const d=counts[i]-mean; v+=d*d; }
+  return (v/G2)/Math.max(mean,1e-6);
+}
+export function meanSpeed(W){ const { N,vx,vy }=W; let s=0;
+  for(let i=0;i<N;i++) s+=Math.hypot(vx[i],vy[i]); return s/N; }
+
+/* Score a world by how *alive and structured* it is. Researched in tools/evolve.mjs:
+   - dispersion separates real structure from gas/explosion (both score ~1)
+   - temporal change rewards ongoing motion (penalizes frozen AND chaotic)        */
+export function evaluate(W, { settle=460, gap=60, G=20 } = {}){
+  for(let i=0;i<settle;i++) step(W);
+  const A = gridCounts(W, G);
+  for(let i=0;i<gap;i++) step(W);
+  const B = gridCounts(W, G);
+  let tc=0; for(let i=0;i<B.length;i++) tc+=Math.abs(B[i]-A[i]);
+  tc /= W.N;                                  // 0=frozen, large=churning
+  const D = dispersion(B, W.N);
+  const spd = meanSpeed(W);
+  const exploded = spd > 0.02;                // ran away
+  const aliveBell = Math.exp(-Math.pow((tc-0.22)/0.30, 2));   // peak at gentle churn
+  const score = exploded ? 0 : Math.log(1+D) * (0.35 + 0.65*aliveBell);
+  return { score, dispersion:D, temporal:tc, speed:spd };
+}
+
 export function falloff(r,a,beta){
   if(r<beta) return r/beta-1;
   if(r<1)    return a*(1-Math.abs(2*r-1-beta)/(1-beta));

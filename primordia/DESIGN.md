@@ -60,14 +60,22 @@ real bloom pass on top.
 ## Roadmap (living)
 
 - [x] Project + manifesto
-- [ ] WebGL2 boot + float-texture state
-- [ ] Sim shader (N² particle life)
-- [ ] Glow rendering
-- [ ] Bloom post
-- [ ] Control panel + presets
-- [ ] God-mode mouse
-- [ ] Evolution / mutation
-- [ ] Sonification
-- [ ] Title screen + polish
+- [x] WebGL2 boot + float-texture state (MRT ping-pong)
+- [x] Sim shader (N² particle life), tuned in the small-step stable regime
+- [x] Glow rendering + feedback trails
+- [x] Bloom post (bright → separable blur → ACES)
+- [x] Control panel + six presets
+- [x] God-mode mouse (gravity well)
+- [x] Live attraction-matrix editor
+- [x] Sonification (per-species voices + drone)
+- [x] Title screen
+- [x] CPU reference twin (caught the exploding-dt bug; mints proven defaults)
+- [x] Interestingness metric + parallel evolutionary search → hall of fame
+- [x] Genesis autopilot (self-evolving, self-reviving worlds)
+- [x] Discovered-worlds Bestiary (curated from the search)
+- [x] Palettes, WebM recording, snapshot
+- [x] Shareable worlds via URL-hash DNA
+- [ ] GPU spatial binning to push toward 65k+ particles (someday)
+- [ ] Two-world breeding (crossover of DNA)
 
 Built for the fun of it.

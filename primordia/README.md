@@ -60,10 +60,27 @@ particle interaction onto the GPU's thousands of cores in parallel, so it holds
 ## Controls
 
 - **drag** — attract particles · **shift + drag** — repel
-- **space** pause · **R** reseed · **N** new rules · **M** mutate · **H** hide UI · **F** fullscreen · **S** snapshot
+- **space** pause · **R** reseed · **N** new rules · **M** mutate · **P** palette · **G** genesis · **H** hide UI · **F** fullscreen · **S** snapshot
 - Tune the **attraction matrix** live by dragging its cells (cyan = attract, magenta = repel)
-- Six presets: **Cells · Chase · Swarm · Crystal · Veins · Chaos**
-- **Sound** sonifies the ecosystem; **Copy/Paste World DNA** shares a universe as a string
+- Six hand-built presets — **Cells · Chase · Swarm · Crystal · Veins · Chaos** — plus six **Discovered** worlds the evolutionary search dug up
+- **Genesis autopilot** lets the universe run itself: it watches the world's structure and motion, gently mutates a living world, and triggers a *rebirth* when one goes static or blows apart. An endless self-curating screensaver.
+- **Six palettes** (aurora, ember, ice, candy, toxic, mono)
+- **Record** a `.webm` clip, grab a PNG **snapshot**, or **copy a share link** — the entire world (rules + physics) round-trips through the URL hash, so a link *is* the universe.
+
+## Genesis & the Bestiary
+
+The stable parameter space is mostly noise — most random rule-sets are boring. So
+there's an **interestingness metric** (`evaluate` in the CPU core): it separates
+real structure from gas/explosion using the *index of dispersion* of particle
+density, and rewards *ongoing motion* (penalizing both frozen and chaotic worlds).
+`tools/evolve.mjs` runs that metric across dozens of random universes in parallel
+and renders a **hall of fame** of the winners — whose DNA is curated into the app's
+Discovered worlds, and whose metric powers the live Genesis autopilot.
+
+![hall of fame](stills/hall_of_fame.png)
+
+*Nine universes, none designed — each one discovered by scoring random rule-sets for
+"alive and structured."*
 
 ## The CPU twin (`tools/`)
 
@@ -76,7 +93,8 @@ bug, then minted the proven-good defaults the GPU now ships with.
 ```
 node tools/render.mjs          # one world: primordial soup → self-organized cells
 node tools/preset.mjs Veins    # render a single preset to stills/
-node tools/montage.mjs         # stitch the labeled gallery above
+node tools/montage.mjs         # stitch the labeled preset gallery
+node tools/evolve.mjs 64       # search 64 random worlds → stills/hall_of_fame.png
 ```
 
 The CPU and GPU share one source of truth for the math, so the stills are an honest
