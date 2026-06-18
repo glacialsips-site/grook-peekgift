@@ -75,7 +75,9 @@ real bloom pass on top.
 - [x] Discovered-worlds Bestiary (curated from the search)
 - [x] Palettes, WebM recording, snapshot
 - [x] Shareable worlds via URL-hash DNA
+- [x] Two-world breeding (crossover of DNA)
+- [x] In-app "how it works" panel + adaptive performance guard
+- [x] Invariant test suite (20 assertions) + WebGL correctness review
 - [ ] GPU spatial binning to push toward 65k+ particles (someday)
-- [ ] Two-world breeding (crossover of DNA)
 
 Built for the fun of it.

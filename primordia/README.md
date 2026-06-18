@@ -66,7 +66,8 @@ particle interaction onto the GPU's thousands of cores in parallel, so it holds
 ## Controls
 
 - **drag** — attract particles · **shift + drag** — repel
-- **space** pause · **R** reseed · **N** new rules · **M** mutate · **P** palette · **G** genesis · **H** hide UI · **F** fullscreen · **S** snapshot
+- **space** pause · **R** reseed · **N** new rules · **M** mutate · **P** palette · **G** genesis · **H** hide UI · **F** fullscreen · **S** snapshot · **?** help
+- **Breed** crosses the current rules with a random mate to make a hybrid world
 - Tune the **attraction matrix** live by dragging its cells (cyan = attract, magenta = repel)
 - Six hand-built presets — **Cells · Chase · Swarm · Crystal · Veins · Chaos** — plus six **Discovered** worlds the evolutionary search dug up
 - **Genesis autopilot** lets the universe run itself: it watches the world's structure and motion, gently mutates a living world, and triggers a *rebirth* when one goes static or blows apart. An endless self-curating screensaver.

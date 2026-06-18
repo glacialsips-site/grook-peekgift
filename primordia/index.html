@@ -94,6 +94,18 @@
     text-transform:uppercase;animation:pulse 2.4s ease-in-out infinite}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(122,247,255,.0)}50%{box-shadow:0 0 30px 2px rgba(122,247,255,.25)}}
   #title small{color:var(--dim);margin-top:30px;font-size:9.5px;letter-spacing:.16em;opacity:.7;max-width:440px;text-align:center;line-height:1.9}
+  #about{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+    background:rgba(4,5,9,.72);backdrop-filter:blur(8px);padding:24px}
+  #about.show{display:flex}
+  #about .card{max-width:560px;max-height:86vh;overflow-y:auto;background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;padding:26px 30px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  #about h2{margin:0 0 4px;font-size:16px;letter-spacing:.28em;
+    background:linear-gradient(90deg,#7af7ff,#b388ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #about .sub{color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px}
+  #about p{font-size:12.5px;line-height:1.75;color:var(--txt);margin:11px 0}
+  #about code{background:rgba(122,247,255,.1);color:var(--accent);padding:2px 7px;border-radius:6px;font-size:12px}
+  #about .k{color:var(--accent)}
+  #about .close{margin-top:18px;width:100%;padding:11px;border-radius:10px}
   .err{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
     padding:40px;text-align:center;color:#ff8ba0;font-size:13px;line-height:1.8;z-index:99}
 </style>
@@ -114,7 +126,8 @@
         <button id="bReseed">⟳ Reseed</button>
         <button id="bRandom">⚄ New rules</button>
         <button id="bMutate">✦ Mutate</button>
-        <button id="bPause">❚❚ Pause</button>
+        <button id="bBreed">⚥ Breed</button>
+        <button id="bPause" class="wide">❚❚ Pause</button>
         <button id="bGenesis" class="wide">✶ Genesis — autopilot: off</button>
       </div>
     </div>
@@ -155,6 +168,10 @@
         <button id="bLoad" class="wide">⎘ Paste world DNA</button>
       </div>
     </div>
+
+    <div class="group">
+      <button id="bAbout" class="wide">? How this works</button>
+    </div>
   </div>
 
   <div id="stats" class="panel">
@@ -169,6 +186,36 @@
   <div id="hint">
     <b>drag</b> attract · <b>shift+drag</b> repel · <b>space</b> pause · <b>G</b> genesis<br>
     <b>R</b> reseed · <b>N</b> rules · <b>M</b> mutate · <b>P</b> palette · <b>H</b> hide · <b>F</b> fullscreen
+  </div>
+</div>
+
+<div id="about">
+  <div class="card">
+    <h2>PRIMORDIA</h2>
+    <div class="sub">how this works</div>
+    <p>Every particle belongs to a <b>species</b> (a color). Between any two species
+    there is a single signed number — an <b>attraction</b>. That number, times a
+    distance falloff, is the entire physics:</p>
+    <p style="text-align:center"><code>force(a,b) = matrix[a][b] · falloff(distance)</code></p>
+    <p>Run that rule across thousands of particles on the GPU every frame and
+    <b>life emerges</b>: membranes, chases, pulsing cells, crystals, worms. Nothing
+    is scripted — you only ever tune the rules, never the behavior. Edit the
+    <b>attraction matrix</b> by dragging its cells (cyan attracts, magenta repels).</p>
+    <p><b>Genesis</b> lets the universe run itself: it watches the world's structure
+    and motion, gently mutates a thriving world, and triggers a rebirth when one
+    goes static or blows apart — an endless self-curating screensaver. The
+    <b>Discovered</b> worlds were found by an evolutionary search scoring random
+    rule-sets for "alive and structured."</p>
+    <p style="color:var(--dim);font-size:11px">
+    <span class="k">drag</span> attract · <span class="k">shift+drag</span> repel ·
+    <span class="k">G</span> genesis · <span class="k">N</span> new rules ·
+    <span class="k">M</span> mutate · <span class="k">P</span> palette ·
+    <span class="k">R</span> reseed · <span class="k">space</span> pause ·
+    <span class="k">H</span> hide UI · <span class="k">F</span> fullscreen ·
+    <span class="k">S</span> snapshot · <span class="k">?</span> this panel</p>
+    <p style="color:var(--dim);font-size:10.5px;letter-spacing:.04em">One HTML file ·
+    pure WebGL2 · zero dependencies · runs offline. Built for the fun of it.</p>
+    <button class="close" id="bAboutClose">Close</button>
   </div>
 </div>
 
@@ -509,6 +556,16 @@ function mutateMatrix(amt=0.28){
     matrix[i*P.k+j] = +Math.max(-1,Math.min(1,v)).toFixed(3);
   }
 }
+// crossover the current rules with a fresh random mate (+ light mutation)
+function breedMatrix(){
+  const child=new Float32Array(64);
+  for(let i=0;i<P.k;i++) for(let j=0;j<P.k;j++){
+    const idx=i*P.k+j;
+    let g = (Math.random()<0.5 ? matrix[idx] : (Math.random()*2-1)) + (Math.random()*2-1)*0.08;
+    child[idx]=+Math.max(-1,Math.min(1,g)).toFixed(3);
+  }
+  matrix=child;
+}
 function allocParticles(){
   N = COUNTS[P.nIdx];
   texW = 64; texH = Math.ceil(N/texW); N = texW*texH;
@@ -657,7 +714,7 @@ function buildPaletteFlat(){
 buildPaletteFlat();
 
 /* ============================================================ LOOP ======= */
-let last=performance.now(), fpsSmooth=60, frame=0;
+let last=performance.now(), fpsSmooth=60, frame=0, lowFrames=0, perfAdjusted=false;
 function loop(now){
   const dt = now-last; last=now;
   fpsSmooth = fpsSmooth*0.92 + (1000/Math.max(1,dt))*0.08;
@@ -665,6 +722,12 @@ function loop(now){
   render();
   frame++;
   if(frame%12===0) updateStats();
+  // gentle one-time perf guard: ease sim substeps if fps stays low
+  if(!perfAdjusted){
+    if(fpsSmooth<38) lowFrames++; else lowFrames=Math.max(0,lowFrames-1);
+    if(lowFrames>90 && P.sub>1){ P.sub=1; $("#sSub").value=1; $("#vSub").textContent="×1";
+      perfAdjusted=true; toast("auto: eased sim speed for smoother fps"); }
+  }
   requestAnimationFrame(loop);
 }
 
@@ -852,6 +915,10 @@ function wireControls(){
   $("#bReseed").onclick=()=>{ reseedPositions(); toast("reseeded"); };
   $("#bRandom").onclick=()=>{ rngMatrix(); reassignSpecies(); buildMatrixUI(); toast("new rules"); };
   $("#bMutate").onclick=()=>{ mutateMatrix(); buildMatrixUI(); toast("mutated"); };
+  $("#bBreed").onclick=()=>{ breedMatrix(); buildMatrixUI(); toast("bred a hybrid"); };
+  $("#bAbout").onclick=()=>showAbout(true);
+  $("#bAboutClose").onclick=()=>showAbout(false);
+  $("#about").addEventListener("click", e=>{ if(e.target.id==="about") showAbout(false); });
   $("#bPause").onclick=()=>{ paused=!paused; $("#bPause").classList.toggle("on",paused);
     $("#bPause").textContent = paused? "▶ Resume":"❚❚ Pause"; };
   $("#bSound").onclick=toggleSound;
@@ -880,6 +947,7 @@ function toggleGenesis(){ genesis.on=!genesis.on; genesis.t=0;
 function cyclePalette(){ paletteIdx=(paletteIdx+1)%PALETTE_NAMES.length;
   palette=PALETTES[PALETTE_NAMES[paletteIdx]]; buildPaletteFlat(); buildMatrixUI();
   toast("palette · "+PALETTE_NAMES[paletteIdx]); }
+function showAbout(s){ $("#about").classList.toggle("show", s); }
 
 /* ---------- matrix editor ---------- */
 function cellColor(v){
@@ -1010,6 +1078,8 @@ window.addEventListener("keydown", e=>{
     case "s": snapshot(); break;
     case "p": cyclePalette(); break;
     case "g": toggleGenesis(); break;
+    case "?": showAbout(!$("#about").classList.contains("show")); break;
+    case "escape": showAbout(false); break;
   }
 });
 
