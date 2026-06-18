@@ -102,6 +102,9 @@ node tools/render.mjs          # one world: primordial soup → self-organized c
 node tools/preset.mjs Veins    # render a single preset to stills/
 node tools/montage.mjs         # stitch the labeled preset gallery
 node tools/evolve.mjs 64       # search 64 random worlds → stills/hall_of_fame.png
+node tools/anim.mjs Veins      # render the looping APNG hero
+node tools/bestiary.mjs        # re-render the curated showcase from index.html's DNA
+node tools/test.mjs            # 20 invariant tests for the core + codecs
 ```
 
 The CPU and GPU share one source of truth for the math, so the stills are an honest
