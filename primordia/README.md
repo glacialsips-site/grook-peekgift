@@ -8,6 +8,12 @@ Thousands of glowing particles. A handful of rules. **Nothing is scripted** —
 the life self-organizes. GPU-accelerated artificial life in pure WebGL2, with
 zero dependencies, zero build step, and zero network calls.
 
+![living simulation](stills/anim.png)
+
+*The "Veins" world, actually running. Segmented worms grow, wander, and feed —
+all from one signed attraction matrix. (Animated PNG; if your viewer shows a
+still, it's one frame of a continuous loop.)*
+
 ![gallery](stills/gallery.png)
 
 *Six worlds, one engine. Each grown from the same one-line force law — only the

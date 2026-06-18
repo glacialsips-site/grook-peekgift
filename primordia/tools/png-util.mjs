@@ -1,5 +1,39 @@
-/* Shared: minimal PNG decoder (our own 8-bit RGB, filter-0 files) + 5x7 font. */
+/* Shared: minimal PNG decoder (our own 8-bit RGB, filter-0 files) + 5x7 font
+   + a hand-rolled APNG (animated PNG) encoder. */
 import zlib from "node:zlib";
+
+const CRC_T = (() => { const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xedb88320^(c>>>1):c>>>1; t[n]=c>>>0; }
+  return t; })();
+function crc32(b){ let c=0xffffffff; for(let i=0;i<b.length;i++) c=CRC_T[(c^b[i])&0xff]^(c>>>8); return (c^0xffffffff)>>>0; }
+function mkChunk(type, data){ const len=Buffer.alloc(4); len.writeUInt32BE(data.length,0);
+  const t=Buffer.from(type,"ascii"); const crc=Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(Buffer.concat([t,data])),0); return Buffer.concat([len,t,data,crc]); }
+function filtered(w,h,rgb){ const raw=Buffer.alloc(h*(w*3+1));
+  for(let y=0;y<h;y++){ raw[y*(w*3+1)]=0; rgb.copy(raw,y*(w*3+1)+1,y*w*3,(y+1)*w*3); } return raw; }
+
+/* frames: array of RGB Buffers (w*h*3). Infinite loop, fps frame rate. */
+export function encodeAPNG(w, h, frames, fps=20){
+  const sig=Buffer.from([137,80,78,71,13,10,26,10]);
+  const ihdr=Buffer.alloc(13); ihdr.writeUInt32BE(w,0); ihdr.writeUInt32BE(h,4); ihdr[8]=8; ihdr[9]=2;
+  const actl=Buffer.alloc(8); actl.writeUInt32BE(frames.length,0); actl.writeUInt32BE(0,4); // 0 = loop forever
+  const out=[sig, mkChunk("IHDR",ihdr), mkChunk("acTL",actl)];
+  let seq=0;
+  const fcTL=(idx)=>{ const b=Buffer.alloc(26);
+    b.writeUInt32BE(seq++,0); b.writeUInt32BE(w,4); b.writeUInt32BE(h,8);
+    b.writeUInt32BE(0,12); b.writeUInt32BE(0,16);
+    b.writeUInt16BE(1,20); b.writeUInt16BE(fps,22);   // delay = 1/fps seconds
+    b[24]=0; b[25]=0; return mkChunk("fcTL",b); };
+  frames.forEach((rgb, idx)=>{
+    out.push(fcTL(idx));
+    const comp=zlib.deflateSync(filtered(w,h,rgb),{level:9});
+    if(idx===0){ out.push(mkChunk("IDAT",comp)); }
+    else { const sn=Buffer.alloc(4); sn.writeUInt32BE(seq++,0);
+      out.push(mkChunk("fdAT", Buffer.concat([sn,comp]))); }
+  });
+  out.push(mkChunk("IEND",Buffer.alloc(0)));
+  return Buffer.concat(out);
+}
 
 export function decodePNG(buf){
   let p = 8, w=0, h=0; const idats=[];
