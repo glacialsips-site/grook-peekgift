@@ -1,0 +1,41 @@
+name: Primordia → GitHub Pages
+
+# Publishes the self-contained Primordia app (primordia/index.html) to GitHub
+# Pages. Runs on GitHub's infrastructure, so it does not depend on any
+# sandbox network egress. Lives only on the creative-exploration branch.
+on:
+  push:
+    branches: [ "claude/creative-exploration-r78w0t" ]
+    paths: [ "primordia/**", ".github/workflows/primordia-pages.yml" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage the site
+        run: |
+          mkdir -p _site
+          cp primordia/index.html _site/index.html
+          cp -r primordia/stills _site/stills
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
