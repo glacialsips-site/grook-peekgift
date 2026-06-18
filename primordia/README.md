@@ -49,6 +49,10 @@ behavior *emerges*: membranes, predator/prey chases, pulsing cells, crystalline
 lattices, migrating flocks, segmented worms. None of it is programmed. It's all
 the matrix.
 
+This isn't a new idea — it's the **Particle Life** lineage (Ventrella's *Clusters*
+→ Tom Mohr) with a dash of **Lenia** in the evolutionary search. See
+[BACKGROUND.md](BACKGROUND.md) for the science and full credit.
+
 ## How it works
 
 The whole simulation lives in floating-point **textures** and runs as a fragment
