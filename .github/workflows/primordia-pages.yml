@@ -1,0 +1,40 @@
+name: Primordia → GitHub Pages
+
+# Manual-only. GitHub Pages must be enabled ONCE (repo Settings → Pages →
+# Source: "GitHub Actions") — the Actions token cannot self-enable it
+# ("Resource not accessible by integration"). After enabling, run this from the
+# Actions tab to publish to https://glacialsips-site.github.io/grook-peekgift/ .
+# Until then the app is already live via the githack CDN link (see PR / README).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage the site
+        run: |
+          mkdir -p _site
+          cp primordia/index.html _site/index.html
+          cp -r primordia/stills _site/stills
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

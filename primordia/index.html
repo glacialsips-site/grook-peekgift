@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PRIMORDIA — a universe in a file</title>
+<style>
+  :root{
+    --bg:#05060a; --panel:rgba(14,16,24,.72); --line:rgba(255,255,255,.10);
+    --txt:#e8ecf5; --dim:#8a93a8; --accent:#7af7ff;
+    --font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+    font-family:var(--font);overflow:hidden;-webkit-user-select:none;user-select:none}
+  #stage{position:fixed;inset:0;display:block;width:100vw;height:100vh;cursor:crosshair}
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .panel{position:absolute;background:var(--panel);backdrop-filter:blur(14px) saturate(1.3);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);border:1px solid var(--line);
+    border-radius:14px;pointer-events:auto;box-shadow:0 18px 60px rgba(0,0,0,.55)}
+  #controls{top:16px;left:16px;width:288px;padding:14px 14px 16px;
+    max-height:calc(100vh - 32px);overflow-y:auto;scrollbar-width:thin}
+  #controls::-webkit-scrollbar{width:7px}
+  #controls::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:9px}
+  .brand{display:flex;align-items:baseline;gap:8px;margin:2px 2px 12px}
+  .brand h1{font-size:17px;letter-spacing:.34em;margin:0;font-weight:700;
+    background:linear-gradient(90deg,#7af7ff,#b388ff 55%,#ff7ad9);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand .v{font-size:9px;color:var(--dim);letter-spacing:.18em}
+  .group{border-top:1px solid var(--line);padding:11px 2px 3px;margin-top:5px}
+  .group:first-of-type{border-top:0}
+  .glabel{font-size:9.5px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;margin-bottom:9px}
+  .row{display:flex;align-items:center;gap:9px;margin:9px 0}
+  .row label{flex:0 0 86px;font-size:10.5px;color:var(--dim);letter-spacing:.04em}
+  .row input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:3px;
+    background:rgba(255,255,255,.16);border-radius:3px;outline:none}
+  .row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
+    border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 10px var(--accent)}
+  .row input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;
+    background:var(--accent);cursor:pointer;box-shadow:0 0 10px var(--accent)}
+  .row .val{flex:0 0 40px;text-align:right;font-size:10.5px;color:var(--txt);font-variant-numeric:tabular-nums}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px}
+  button{font-family:var(--font);font-size:10.5px;letter-spacing:.05em;color:var(--txt);
+    background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;
+    padding:8px 6px;cursor:pointer;transition:.13s;white-space:nowrap}
+  button:hover{background:rgba(122,247,255,.14);border-color:rgba(122,247,255,.5);
+    color:#fff;box-shadow:0 0 14px rgba(122,247,255,.18)}
+  button:active{transform:translateY(1px)}
+  button.wide{grid-column:1 / -1}
+  button.on{background:rgba(122,247,255,.2);border-color:var(--accent);color:#fff}
+  .seg{display:flex;gap:5px}
+  .seg button{flex:1;padding:7px 4px}
+  /* matrix editor */
+  #matrixWrap{margin-top:2px}
+  #matrix{display:grid;gap:3px;margin:4px auto 2px}
+  .cell{aspect-ratio:1;border-radius:4px;cursor:ns-resize;border:1px solid rgba(255,255,255,.08);
+    position:relative;transition:transform .08s}
+  .cell:hover{transform:scale(1.12);z-index:2;border-color:rgba(255,255,255,.4)}
+  .axis{display:grid;gap:3px}
+  .axdot{aspect-ratio:1;border-radius:50%}
+  .mtip{font-size:9px;color:var(--dim);margin-top:7px;line-height:1.5}
+
+  /* ---------- stats / readout ---------- */
+  #stats{top:16px;right:16px;padding:11px 13px;min-width:142px;font-size:10.5px}
+  #stats .s{display:flex;justify-content:space-between;margin:4px 0;color:var(--dim)}
+  #stats .s b{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
+  #fpsbar{height:3px;background:rgba(255,255,255,.12);border-radius:3px;margin-top:8px;overflow:hidden}
+  #fpsbar i{display:block;height:100%;width:50%;background:linear-gradient(90deg,#7af7ff,#b388ff);transition:width .2s}
+
+  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 18px;
+    font-size:11px;letter-spacing:.05em;color:var(--txt);z-index:8;opacity:0;pointer-events:none;
+    transition:.32s cubic-bezier(.2,.9,.3,1);backdrop-filter:blur(12px)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  #hint{position:fixed;bottom:16px;right:18px;font-size:9.5px;color:var(--dim);
+    letter-spacing:.08em;z-index:6;text-align:right;line-height:1.7;pointer-events:none}
+  #hint b{color:var(--accent)}
+
+  /* show/hide controls — essential on touch where there's no keyboard */
+  #uiToggle{position:fixed;top:16px;right:170px;z-index:21;width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);color:var(--accent);pointer-events:auto;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.5);cursor:pointer}
+  #uiToggle:active{transform:scale(.92)}
+  #controls,#stats,#hint{transition:opacity .3s ease, transform .3s ease}
+  body.ui-hidden #controls{opacity:0;pointer-events:none;transform:translateX(-16px)}
+  body.ui-hidden #stats,body.ui-hidden #hint{opacity:0;pointer-events:none}
+
+  /* phones: panel is full-width, keyboard hints are useless, toggle moves clear of stats */
+  @media (pointer:coarse){ #hint{display:none} }
+  @media (max-width:760px){
+    #controls{width:min(92vw,340px)}
+    #uiToggle{top:auto;bottom:18px;right:16px;width:54px;height:54px;font-size:22px}
+    #stats{top:12px;right:12px;padding:8px 10px;min-width:0;font-size:9.5px}
+  }
+
+  /* ---------- title screen ---------- */
+  #title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,
+    rgba(20,16,40,.5),rgba(5,6,10,.92) 70%);transition:opacity .8s,visibility .8s}
+  #title.gone{opacity:0;visibility:hidden}
+  #title h1{font-size:clamp(34px,9vw,86px);letter-spacing:.36em;margin:0 0 4px;font-weight:800;
+    background:linear-gradient(90deg,#7af7ff,#b388ff 50%,#ff7ad9);-webkit-background-clip:text;
+    background-clip:text;color:transparent;text-indent:.36em;
+    filter:drop-shadow(0 0 40px rgba(122,247,255,.25))}
+  #title p{color:var(--dim);font-size:12px;letter-spacing:.28em;margin:0 0 40px;text-transform:uppercase}
+  #title .enter{pointer-events:auto;font-size:12px;letter-spacing:.3em;padding:14px 38px;border-radius:40px;
+    border:1px solid rgba(122,247,255,.4);color:#fff;background:rgba(122,247,255,.08);
+    text-transform:uppercase;animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(122,247,255,.0)}50%{box-shadow:0 0 30px 2px rgba(122,247,255,.25)}}
+  #title small{color:var(--dim);margin-top:30px;font-size:9.5px;letter-spacing:.16em;opacity:.7;max-width:440px;text-align:center;line-height:1.9}
+  #about{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+    background:rgba(4,5,9,.72);backdrop-filter:blur(8px);padding:24px}
+  #about.show{display:flex}
+  #about .card{max-width:560px;max-height:86vh;overflow-y:auto;background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;padding:26px 30px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  #about h2{margin:0 0 4px;font-size:16px;letter-spacing:.28em;
+    background:linear-gradient(90deg,#7af7ff,#b388ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #about .sub{color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px}
+  #about p{font-size:12.5px;line-height:1.75;color:var(--txt);margin:11px 0}
+  #about code{background:rgba(122,247,255,.1);color:var(--accent);padding:2px 7px;border-radius:6px;font-size:12px}
+  #about .k{color:var(--accent)}
+  #about .close{margin-top:18px;width:100%;padding:11px;border-radius:10px}
+  .err{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:40px;text-align:center;color:#ff8ba0;font-size:13px;line-height:1.8;z-index:99}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div id="hud" hidden>
+  <div id="controls" class="panel">
+    <div class="brand"><h1>PRIMORDIA</h1><span class="v">v0.1</span></div>
+
+    <div class="group">
+      <div class="glabel">World</div>
+      <div class="seg" id="presetSeg"></div>
+      <div class="glabel" style="margin:10px 0 6px">Discovered <span style="opacity:.5">— evolved worlds</span></div>
+      <div class="seg" id="bestiarySeg"></div>
+      <div class="btns" style="margin-top:8px">
+        <button id="bReseed">⟳ Reseed</button>
+        <button id="bRandom">⚄ New rules</button>
+        <button id="bMutate">✦ Mutate</button>
+        <button id="bBreed">⚥ Breed</button>
+        <button id="bPause" class="wide">❚❚ Pause</button>
+        <button id="bGenesis" class="wide">✶ Genesis — autopilot: off</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Physics</div>
+      <div class="row"><label>Reach</label><input id="sReach" type="range" min="0.02" max="0.22" step="0.005"><span class="val" id="vReach"></span></div>
+      <div class="row"><label>Force</label><input id="sForce" type="range" min="0.1" max="6" step="0.1"><span class="val" id="vForce"></span></div>
+      <div class="row"><label>Friction</label><input id="sFric" type="range" min="0.5" max="0.99" step="0.005"><span class="val" id="vFric"></span></div>
+      <div class="row"><label>Repulsion</label><input id="sBeta" type="range" min="0.05" max="0.6" step="0.01"><span class="val" id="vBeta"></span></div>
+      <div class="row"><label>Step</label><input id="sDt" type="range" min="0.005" max="0.05" step="0.001"><span class="val" id="vDt"></span></div>
+      <div class="row"><label>Speed</label><input id="sSub" type="range" min="1" max="4" step="1"><span class="val" id="vSub"></span></div>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Look</div>
+      <div class="row"><label>Glow size</label><input id="sSize" type="range" min="1" max="9" step="0.25"><span class="val" id="vSize"></span></div>
+      <div class="row"><label>Bloom</label><input id="sBloom" type="range" min="0" max="2.5" step="0.05"><span class="val" id="vBloom"></span></div>
+      <div class="row"><label>Trails</label><input id="sTrail" type="range" min="0" max="0.96" step="0.02"><span class="val" id="vTrail"></span></div>
+      <div class="row"><label>Species</label><input id="sK" type="range" min="2" max="8" step="1"><span class="val" id="vK"></span></div>
+      <div class="row"><label>Count</label><input id="sN" type="range" min="0" max="4" step="1"><span class="val" id="vN"></span></div>
+    </div>
+
+    <div class="group" id="matrixWrap">
+      <div class="glabel">Attraction matrix</div>
+      <div id="matrix"></div>
+      <div class="mtip">Row chases/flees column. <b style="color:var(--accent)">drag a cell ↕</b> to tune. Cyan = attract, magenta = repel.</div>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Senses &amp; capture</div>
+      <div class="btns">
+        <button id="bSound">♪ Sound: off</button>
+        <button id="bPalette">◑ Palette</button>
+        <button id="bSnap">⤓ Snapshot</button>
+        <button id="bRecord">● Record</button>
+        <button id="bShare" class="wide">⧉ Copy share link</button>
+        <button id="bLoad" class="wide">⎘ Paste world DNA</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <button id="bAbout" class="wide">? How this works</button>
+    </div>
+  </div>
+
+  <div id="stats" class="panel">
+    <div class="s"><span>fps</span><b id="oFps">—</b></div>
+    <div class="s"><span>particles</span><b id="oN">—</b></div>
+    <div class="s"><span>species</span><b id="oK">—</b></div>
+    <div class="s"><span>avg speed</span><b id="oV">—</b></div>
+    <div class="s"><span>structure</span><b id="oOrder">—</b></div>
+    <div id="fpsbar"><i></i></div>
+  </div>
+
+  <div id="hint">
+    <b>drag</b> attract · <b>shift+drag</b> repel · <b>space</b> pause · <b>G</b> genesis<br>
+    <b>R</b> reseed · <b>N</b> rules · <b>M</b> mutate · <b>P</b> palette · <b>H</b> hide · <b>F</b> fullscreen
+  </div>
+
+  <button id="uiToggle" title="Show / hide controls">☰</button>
+</div>
+
+<div id="about">
+  <div class="card">
+    <h2>PRIMORDIA</h2>
+    <div class="sub">how this works</div>
+    <p>Every particle belongs to a <b>species</b> (a color). Between any two species
+    there is a single signed number — an <b>attraction</b>. That number, times a
+    distance falloff, is the entire physics:</p>
+    <p style="text-align:center"><code>force(a,b) = matrix[a][b] · falloff(distance)</code></p>
+    <p>Run that rule across thousands of particles on the GPU every frame and
+    <b>life emerges</b>: membranes, chases, pulsing cells, crystals, worms. Nothing
+    is scripted — you only ever tune the rules, never the behavior. Edit the
+    <b>attraction matrix</b> by dragging its cells (cyan attracts, magenta repels).</p>
+    <p><b>Genesis</b> lets the universe run itself: it watches the world's structure
+    and motion, gently mutates a thriving world, and triggers a rebirth when one
+    goes static or blows apart — an endless self-curating screensaver. The
+    <b>Discovered</b> worlds were found by an evolutionary search scoring random
+    rule-sets for "alive and structured."</p>
+    <p style="color:var(--dim);font-size:11px">
+    <span class="k">drag</span> attract · <span class="k">shift+drag</span> repel ·
+    <span class="k">G</span> genesis · <span class="k">N</span> new rules ·
+    <span class="k">M</span> mutate · <span class="k">P</span> palette ·
+    <span class="k">R</span> reseed · <span class="k">space</span> pause ·
+    <span class="k">H</span> hide UI · <span class="k">F</span> fullscreen ·
+    <span class="k">S</span> snapshot · <span class="k">?</span> this panel</p>
+    <p style="color:var(--dim);font-size:10.5px;letter-spacing:.04em">One HTML file ·
+    pure WebGL2 · zero dependencies · runs offline. Built for the fun of it.</p>
+    <button class="close" id="bAboutClose">Close</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div id="title">
+  <h1>PRIMORDIA</h1>
+  <p>a universe in a file</p>
+  <button class="enter" id="enterBtn">Begin</button>
+  <small>Thousands of particles. A handful of rules. Nothing here is scripted —
+  the life you are about to see organizes itself. Move your mouse to play god.</small>
+</div>
+
+<script id="sim-vert" type="x-shader">#version 300 es
+in vec2 aPos; void main(){ gl_Position = vec4(aPos,0.,1.); }
+</script>
+
+<script id="sim-frag" type="x-shader">#version 300 es
+precision highp float;
+layout(location=0) out vec4 outPos;   // xy=pos, zw unused
+layout(location=1) out vec4 outVel;   // xy=vel, zw unused
+
+uniform sampler2D uPos;   // current positions (xy in [0,1])
+uniform sampler2D uVel;   // current velocities
+uniform sampler2D uSpec;  // species index in .x
+uniform int   uTexW;
+uniform int   uCount;
+uniform int   uK;
+uniform float uMatrix[64]; // K*K, row=self species, col=other species
+uniform float uRMax;
+uniform float uBeta;
+uniform float uForce;
+uniform float uFriction;
+uniform float uDt;
+uniform vec2  uMouse;     // [0,1]
+uniform float uMouseF;    // signed strength, 0 if inactive
+uniform float uAspect;    // w/h, to keep interaction circular on screen
+
+float falloff(float r, float a){
+  if(r < uBeta) return r/uBeta - 1.0;
+  if(r < 1.0)   return a * (1.0 - abs(2.0*r - 1.0 - uBeta)/(1.0 - uBeta));
+  return 0.0;
+}
+
+void main(){
+  ivec2 t = ivec2(gl_FragCoord.xy);
+  int self = t.y*uTexW + t.x;
+  if(self >= uCount){ outPos=vec4(0); outVel=vec4(0); return; }
+
+  vec2 p  = texelFetch(uPos, t, 0).xy;
+  vec2 v  = texelFetch(uVel, t, 0).xy;
+  int  si = int(texelFetch(uSpec, t, 0).x + 0.5);
+
+  vec2 force = vec2(0.0);
+  for(int j=0;j<uCount;j++){
+    ivec2 jt = ivec2(j % uTexW, j / uTexW);
+    vec2 q  = texelFetch(uPos, jt, 0).xy;
+    vec2 d  = q - p;
+    // toroidal nearest image
+    d -= step(0.5, d) - step(d, vec2(-0.5));
+    // correct for aspect so the influence radius is round on screen
+    vec2 ds = vec2(d.x*uAspect, d.y);
+    float r = length(ds);
+    if(r > 1e-5 && r < uRMax){
+      int sj = int(texelFetch(uSpec, jt, 0).x + 0.5);
+      float a = uMatrix[si*uK + sj];
+      float f = falloff(r/uRMax, a);
+      force += (ds/r) * f;
+    }
+  }
+  force *= uRMax * uForce;
+
+  // god-mode mouse well
+  if(abs(uMouseF) > 0.0001){
+    vec2 dm = uMouse - p;
+    dm -= step(0.5, dm) - step(dm, vec2(-0.5));
+    vec2 dms = vec2(dm.x*uAspect, dm.y);
+    float rm = length(dms);
+    if(rm > 1e-4 && rm < 0.34){
+      force += normalize(dms) * uMouseF * (1.0 - rm/0.34) * 1.6;
+    }
+  }
+
+  v = v*uFriction + force*uDt;
+  vec2 np = fract(p + v*uDt);
+  outPos = vec4(np, 0.0, 1.0);
+  outVel = vec4(v, 0.0, 1.0);
+}
+</script>
+
+<script id="draw-vert" type="x-shader">#version 300 es
+precision highp float;
+uniform sampler2D uPos;
+uniform sampler2D uVel;
+uniform sampler2D uSpec;
+uniform int   uTexW;
+uniform float uPointSize;
+uniform vec3  uPalette[8];
+out vec3  vColor;
+out float vSpeed;
+void main(){
+  int id = gl_VertexID;
+  ivec2 t = ivec2(id % uTexW, id / uTexW);
+  vec2 p  = texelFetch(uPos, t, 0).xy;
+  vec2 v  = texelFetch(uVel, t, 0).xy;
+  int  si = int(texelFetch(uSpec, t, 0).x + 0.5);
+  vColor  = uPalette[si];
+  vSpeed  = clamp(length(v)*26.0, 0.0, 1.0);
+  gl_Position = vec4(p*2.0-1.0, 0.0, 1.0);
+  gl_PointSize = uPointSize;
+}
+</script>
+
+<script id="draw-frag" type="x-shader">#version 300 es
+precision highp float;
+in vec3 vColor;
+in float vSpeed;
+out vec4 frag;
+void main(){
+  vec2 c = gl_PointCoord - 0.5;
+  float d = length(c);
+  if(d > 0.5) discard;
+  float core = smoothstep(0.5, 0.0, d);
+  float glow = pow(core, 2.2);
+  // faster particles flare brighter / whiter
+  vec3 col = mix(vColor, vec3(1.0), vSpeed*0.5);
+  frag = vec4(col * (glow*1.15 + vSpeed*0.4), glow);
+}
+</script>
+
+<!-- fullscreen passes -->
+<script id="quad-vert" type="x-shader">#version 300 es
+in vec2 aPos; out vec2 vUv;
+void main(){ vUv = aPos*0.5+0.5; gl_Position = vec4(aPos,0.,1.); }
+</script>
+
+<script id="bright-frag" type="x-shader">#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uTex; uniform float uThresh;
+void main(){
+  vec3 c = texture(uTex, vUv).rgb;
+  float l = dot(c, vec3(.299,.587,.114));
+  float k = max(0.0, l - uThresh)/max(l, 1e-4);
+  frag = vec4(c*k, 1.0);
+}
+</script>
+
+<script id="blur-frag" type="x-shader">#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uTex; uniform vec2 uDir;
+void main(){
+  vec2 px = uDir;
+  vec3 s = texture(uTex, vUv).rgb * 0.227027;
+  s += texture(uTex, vUv + px*1.3846).rgb * 0.316216;
+  s += texture(uTex, vUv - px*1.3846).rgb * 0.316216;
+  s += texture(uTex, vUv + px*3.2308).rgb * 0.070270;
+  s += texture(uTex, vUv - px*3.2308).rgb * 0.070270;
+  frag = vec4(s, 1.0);
+}
+</script>
+
+<script id="comp-frag" type="x-shader">#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform sampler2D uScene; uniform sampler2D uBloom; uniform float uBloomStr;
+vec3 aces(vec3 x){
+  return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14), 0.0, 1.0);
+}
+void main(){
+  vec3 c = texture(uScene, vUv).rgb + texture(uBloom, vUv).rgb * uBloomStr;
+  // subtle vignette
+  vec2 q = vUv - 0.5;
+  float vig = smoothstep(0.95, 0.35, length(q));
+  c *= mix(0.78, 1.0, vig);
+  frag = vec4(aces(c*1.05), 1.0);
+}
+</script>
+
+<script>
+"use strict";
+/* ============================================================ PRIMORDIA ===
+   A single-file GPU artificial-life sandbox. WebGL2, no dependencies.
+   ========================================================================= */
+const $ = s => document.querySelector(s);
+const canvas = $("#stage");
+const gl = canvas.getContext("webgl2", {antialias:false, alpha:false,
+  premultipliedAlpha:false, preserveDrawingBuffer:true});
+
+function fatal(msg){
+  document.body.innerHTML =
+    '<div class="err">PRIMORDIA needs WebGL2 with float render targets.<br><br>'+
+    msg+'<br><br>Try a recent Chrome, Edge, Firefox or Safari.</div>';
+  throw new Error(msg);
+}
+if(!gl) fatal("WebGL2 context could not be created.");
+const extCBF = gl.getExtension("EXT_color_buffer_float");
+if(!extCBF) fatal("EXT_color_buffer_float is unavailable.");
+gl.getExtension("OES_texture_float_linear");
+
+/* ---------- GL helpers ---------- */
+function sh(type, src){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src.trim()); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    fatal("shader: "+gl.getShaderInfoLog(s));
+  return s;
+}
+function prog(vsrc, fsrc){
+  const p = gl.createProgram();
+  gl.attachShader(p, sh(gl.VERTEX_SHADER, vsrc));
+  gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fsrc));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p, gl.LINK_STATUS))
+    fatal("link: "+gl.getProgramInfoLog(p));
+  return p;
+}
+const src = id => document.getElementById(id).textContent;
+function uniforms(p){
+  const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for(let i=0;i<n;i++){ const info = gl.getActiveUniform(p,i);
+    u[info.name.replace(/\[0\]$/,"")] = gl.getUniformLocation(p, info.name); }
+  return u;
+}
+function tex(w,h,data){
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA32F,w,h,0,gl.RGBA,gl.FLOAT,data||null);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  return t;
+}
+function texHDR(w,h,filter){
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA16F,w,h,0,gl.RGBA,gl.HALF_FLOAT,null);
+  const f = filter||gl.LINEAR;
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,f);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,f);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  return t;
+}
+function fbo(attachments){
+  const f = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  attachments.forEach((t,i)=>gl.framebufferTexture2D(gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0+i, gl.TEXTURE_2D, t, 0));
+  return f;
+}
+
+/* fullscreen triangle */
+const quadVbo = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadVbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+function bindQuad(p){
+  const loc = gl.getAttribLocation(p, "aPos");
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadVbo);
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+}
+
+/* ---------- programs ---------- */
+const Psim   = prog(src("sim-vert"),  src("sim-frag"));
+const Pdraw  = prog(src("draw-vert"), src("draw-frag"));
+const Pbright= prog(src("quad-vert"), src("bright-frag"));
+const Pblur  = prog(src("quad-vert"), src("blur-frag"));
+const Pcomp  = prog(src("quad-vert"), src("comp-frag"));
+const Usim=uniforms(Psim), Udraw=uniforms(Pdraw),
+      Ubright=uniforms(Pbright), Ublur=uniforms(Pblur), Ucomp=uniforms(Pcomp);
+
+/* ====================================================== state / params === */
+const COUNTS = [2048, 4096, 8192, 12288, 16384];
+const PALETTES = {
+  aurora: [[0.42,0.97,1.0],[0.70,0.55,1.0],[1.0,0.48,0.85],[0.55,1.0,0.72],
+           [1.0,0.82,0.42],[0.40,0.70,1.0],[1.0,0.40,0.45],[0.80,1.0,0.40]],
+  ember:  [[1.0,0.78,0.30],[1.0,0.45,0.18],[1.0,0.25,0.30],[0.85,0.12,0.45],
+           [1.0,0.60,0.10],[0.95,0.90,0.55],[0.70,0.10,0.25],[1.0,0.35,0.05]],
+  ice:    [[0.55,0.92,1.0],[0.35,0.65,1.0],[0.75,0.80,1.0],[0.40,1.0,0.95],
+           [0.20,0.50,0.95],[0.85,0.95,1.0],[0.50,0.70,0.90],[0.30,0.85,1.0]],
+  candy:  [[1.0,0.55,0.85],[0.60,0.85,1.0],[1.0,0.85,0.55],[0.70,1.0,0.70],
+           [0.85,0.60,1.0],[1.0,0.70,0.75],[0.55,1.0,0.95],[1.0,0.95,0.65]],
+  toxic:  [[0.65,1.0,0.15],[0.20,1.0,0.55],[0.85,1.0,0.0],[0.0,0.90,0.60],
+           [0.45,0.95,0.10],[0.75,1.0,0.40],[0.10,0.80,0.30],[0.95,1.0,0.25]],
+  mono:   [[0.95,0.97,1.0],[0.75,0.82,0.95],[0.60,0.70,0.88],[0.85,0.90,1.0],
+           [0.50,0.62,0.82],[1.0,1.0,1.0],[0.68,0.78,0.92],[0.55,0.66,0.85]],
+};
+const PALETTE_NAMES = Object.keys(PALETTES);
+let paletteIdx = 0;
+let P = {
+  k: 5, nIdx: 1, reach: 0.10, force: 1.0, friction: 0.70, beta: 0.3,
+  dt: 0.02, size: 4.0, bloom: 1.15, trail: 0.86, threshold: 0.55, sub: 2,
+};
+let texW=64, texH=64, N=4096;
+let matrix = new Float32Array(64);
+let species, posTex=[], velTex=[], simFbo=[], specTex, ping=0;
+let sceneTex, sceneFbo, hdrW, hdrH, bloomA, bloomB, bloomFboA, bloomFboB, bloomW, bloomH;
+let paused=false, mouse={x:0.5,y:0.5,f:0,down:false,shift:false};
+let palette = PALETTES[PALETTE_NAMES[paletteIdx]];
+
+/* ---------- discovered worlds (auto-evolved by tools/evolve.mjs) ---------- */
+const BESTIARY = [
+  { name:"Halo", k:3, phys:{reach:0.127,force:1.41,friction:0.688,beta:0.237,dt:0.0232},
+    m:[-0.858,0.751,0.576,-0.145,0.427,0.642,0.12,0.507,0.28] },
+  { name:"Lanterns", k:3, phys:{reach:0.123,force:1.13,friction:0.763,beta:0.326,dt:0.0229},
+    m:[0.666,0.938,0.738,0.746,0.934,-0.907,0.407,-0.739,-0.398] },
+  { name:"Orbits", k:4, phys:{reach:0.123,force:0.99,friction:0.82,beta:0.325,dt:0.0244},
+    m:[0.33,-0.665,0.427,0.343,-0.853,-0.131,0.822,-0.075,-0.879,0.101,-0.168,0.247,0.577,-0.405,-0.18,-0.28] },
+  { name:"Serpents", k:5, phys:{reach:0.118,force:1.32,friction:0.708,beta:0.239,dt:0.0171},
+    m:[-0.559,0.447,0.67,0.905,0.325,0.584,-0.157,-0.867,-0.132,0.183,-0.25,-0.875,0.161,-0.381,0.239,0.971,0.549,0.247,-0.941,0.647,-0.097,-0.355,-0.84,0.688,-0.118] },
+  { name:"Meadow", k:5, phys:{reach:0.087,force:1.44,friction:0.7,beta:0.349,dt:0.0219},
+    m:[0.262,-0.597,0.798,0.24,0.64,0.227,0.415,0.848,0.759,0.557,-0.347,0.817,0.811,0.299,0.115,0.108,0.312,0.823,-0.323,-0.295,-0.2,-0.594,0.837,-0.233,-0.333] },
+  { name:"Confetti", k:6, phys:{reach:0.092,force:1.06,friction:0.795,beta:0.238,dt:0.019},
+    m:[0.626,0.13,-0.543,-0.476,0.468,0.777,0.217,0.256,0.816,0.073,-0.129,-0.078,-0.761,-0.302,0.509,-0.866,-0.994,-0.494,0.367,0.977,-0.369,0.968,0.539,0.046,0.787,-0.472,-0.895,0.992,0.339,0.701,0.421,-0.813,0.055,0.356,0.645,0.616] },
+  { name:"Coral", k:5, phys:{reach:0.103,force:1.03,friction:0.69,beta:0.266,dt:0.0174},
+    m:[0.278,0.14,0.838,-0.67,0.687,0.785,0.701,-0.694,-0.419,-0.49,0.901,0.883,0.653,-0.14,0.592,-0.088,-0.988,0.411,-0.591,0.161,0.066,0.561,0.959,0.563,-0.74] },
+  { name:"Reef", k:5, phys:{reach:0.107,force:1.55,friction:0.791,beta:0.35,dt:0.0186},
+    m:[0.269,0.009,0.333,0.568,-0.69,0.611,-0.987,-0.07,-0.971,0.578,0.803,-0.85,0.078,0.075,-0.083,0.675,0.757,0.998,0.905,-0.207,-0.558,0.463,0.079,-0.125,0.356] },
+];
+function loadBestiary(b){
+  P.k=b.k; Object.assign(P, b.phys);
+  matrix=new Float32Array(64); b.m.forEach((x,i)=>matrix[i]=x);
+  reassignSpecies(); reflectUI(); buildMatrixUI(); toast(b.name+" — a discovered world");
+}
+
+/* ---------- world generation ---------- */
+function rngMatrix(){
+  matrix = new Float32Array(64);
+  for(let i=0;i<P.k;i++) for(let j=0;j<P.k;j++)
+    matrix[i*P.k+j] = +(Math.random()*2-1).toFixed(3);
+}
+function mutateMatrix(amt=0.28){
+  for(let i=0;i<P.k;i++) for(let j=0;j<P.k;j++){
+    let v = matrix[i*P.k+j] + (Math.random()*2-1)*amt;
+    matrix[i*P.k+j] = +Math.max(-1,Math.min(1,v)).toFixed(3);
+  }
+}
+// crossover the current rules with a fresh random mate (+ light mutation)
+function breedMatrix(){
+  const child=new Float32Array(64);
+  for(let i=0;i<P.k;i++) for(let j=0;j<P.k;j++){
+    const idx=i*P.k+j;
+    let g = (Math.random()<0.5 ? matrix[idx] : (Math.random()*2-1)) + (Math.random()*2-1)*0.08;
+    child[idx]=+Math.max(-1,Math.min(1,g)).toFixed(3);
+  }
+  matrix=child;
+}
+function allocParticles(){
+  N = COUNTS[P.nIdx];
+  texW = 64; texH = Math.ceil(N/texW); N = texW*texH;
+  const pos = new Float32Array(N*4), vel = new Float32Array(N*4), spc = new Float32Array(N*4);
+  species = new Uint8Array(N);
+  for(let i=0;i<N;i++){
+    pos[i*4]=Math.random(); pos[i*4+1]=Math.random(); pos[i*4+3]=1;
+    const s = Math.floor(Math.random()*P.k); species[i]=s; spc[i*4]=s; spc[i*4+3]=1;
+  }
+  posTex.forEach(t=>gl.deleteTexture(t)); velTex.forEach(t=>gl.deleteTexture(t));
+  if(specTex) gl.deleteTexture(specTex);
+  simFbo.forEach(f=>gl.deleteFramebuffer(f));
+  posTex=[tex(texW,texH,pos), tex(texW,texH,pos)];
+  velTex=[tex(texW,texH,vel), tex(texW,texH,vel)];
+  specTex=tex(texW,texH,spc);
+  simFbo=[fbo([posTex[0],velTex[0]]), fbo([posTex[1],velTex[1]])];
+  ping=0;
+}
+function reseedPositions(){ allocParticles(); }
+function reassignSpecies(){
+  // keep positions, re-roll species count K
+  const spc = new Float32Array(N*4);
+  species = new Uint8Array(N);
+  for(let i=0;i<N;i++){ const s=Math.floor(Math.random()*P.k); species[i]=s; spc[i*4]=s; spc[i*4+3]=1; }
+  gl.bindTexture(gl.TEXTURE_2D, specTex);
+  gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,texW,texH,gl.RGBA,gl.FLOAT,spc);
+}
+
+/* ---------- offscreen targets (resize-aware) ---------- */
+function allocTargets(){
+  hdrW = canvas.width; hdrH = canvas.height;
+  if(sceneTex) gl.deleteTexture(sceneTex);
+  if(sceneFbo) gl.deleteFramebuffer(sceneFbo);
+  sceneTex = texHDR(hdrW,hdrH); sceneFbo = fbo([sceneTex]);
+  bloomW = Math.max(2, hdrW>>1); bloomH = Math.max(2, hdrH>>1);
+  [bloomA,bloomB].forEach(t=>t&&gl.deleteTexture(t));
+  [bloomFboA,bloomFboB].forEach(f=>f&&gl.deleteFramebuffer(f));
+  bloomA = texHDR(bloomW,bloomH); bloomB = texHDR(bloomW,bloomH);
+  bloomFboA = fbo([bloomA]); bloomFboB = fbo([bloomB]);
+}
+function resize(){
+  const dpr = Math.min(window.devicePixelRatio||1, 1.75);
+  const w = Math.floor(innerWidth*dpr), h = Math.floor(innerHeight*dpr);
+  if(canvas.width===w && canvas.height===h) return;
+  canvas.width=w; canvas.height=h;
+  canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px";
+  allocTargets();
+}
+window.addEventListener("resize", resize);
+
+/* ============================================================ SIM step === */
+function step(){
+  gl.bindFramebuffer(gl.FRAMEBUFFER, simFbo[ping^1]);
+  gl.viewport(0,0,texW,texH);
+  gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+  gl.disable(gl.BLEND);
+  gl.useProgram(Psim);
+  bindQuad(Psim);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, posTex[ping]); gl.uniform1i(Usim.uPos,0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, velTex[ping]); gl.uniform1i(Usim.uVel,1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, specTex);      gl.uniform1i(Usim.uSpec,2);
+  gl.uniform1i(Usim.uTexW, texW);
+  gl.uniform1i(Usim.uCount, N);
+  gl.uniform1i(Usim.uK, P.k);
+  gl.uniform1fv(Usim.uMatrix, matrix);
+  gl.uniform1f(Usim.uRMax, P.reach);
+  gl.uniform1f(Usim.uBeta, P.beta);
+  gl.uniform1f(Usim.uForce, P.force);
+  gl.uniform1f(Usim.uFriction, P.friction);
+  gl.uniform1f(Usim.uDt, P.dt);
+  gl.uniform2f(Usim.uMouse, mouse.x, mouse.y);
+  gl.uniform1f(Usim.uMouseF, mouse.f);
+  gl.uniform1f(Usim.uAspect, canvas.width/canvas.height);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
+  ping ^= 1;
+}
+
+/* ============================================================ RENDER ===== */
+function render(){
+  // 1) particles -> HDR scene, with feedback trails
+  gl.bindFramebuffer(gl.FRAMEBUFFER, sceneFbo);
+  gl.viewport(0,0,hdrW,hdrH);
+  // fade previous frame instead of clearing => trails
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+  gl.blendColor(P.trail,P.trail,P.trail,P.trail);
+  drawFade();
+  // additive particles
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.useProgram(Pdraw);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, posTex[ping]); gl.uniform1i(Udraw.uPos,0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, velTex[ping]); gl.uniform1i(Udraw.uVel,1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, specTex);      gl.uniform1i(Udraw.uSpec,2);
+  gl.uniform1i(Udraw.uTexW, texW);
+  gl.uniform1f(Udraw.uPointSize, P.size * (canvas.width/1600));
+  gl.uniform3fv(Udraw.uPalette, paletteFlat);
+  gl.drawArrays(gl.POINTS, 0, N);
+  gl.disable(gl.BLEND);
+
+  // 2) bright pass -> bloomA (half res)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, bloomFboA);
+  gl.viewport(0,0,bloomW,bloomH);
+  gl.useProgram(Pbright); bindQuad(Pbright);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, sceneTex); gl.uniform1i(Ubright.uTex,0);
+  gl.uniform1f(Ubright.uThresh, P.threshold);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+
+  // 3) separable blur, a few iterations, ping-pong A<->B
+  gl.useProgram(Pblur); bindQuad(Pblur);
+  for(let i=0;i<3;i++){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomFboB);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bloomA); gl.uniform1i(Ublur.uTex,0);
+    gl.uniform2f(Ublur.uDir, 1.2/bloomW, 0);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomFboA);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bloomB); gl.uniform1i(Ublur.uTex,0);
+    gl.uniform2f(Ublur.uDir, 0, 1.2/bloomH);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+
+  // 4) composite to screen
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.useProgram(Pcomp); bindQuad(Pcomp);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, sceneTex); gl.uniform1i(Ucomp.uScene,0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bloomA);   gl.uniform1i(Ucomp.uBloom,1);
+  gl.uniform1f(Ucomp.uBloomStr, P.bloom);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+}
+// tiny fullscreen fade rectangle (reuses quad geometry, no program color needed -> use comp? simpler: dedicated)
+let fadeProg, fadeLoc;
+(function(){
+  fadeProg = prog("#version 300 es\nin vec2 aPos;void main(){gl_Position=vec4(aPos,0.,1.);}",
+                  "#version 300 es\nprecision highp float;out vec4 f;void main(){f=vec4(0.);}");
+})();
+function drawFade(){
+  gl.useProgram(fadeProg); bindQuad(fadeProg);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+}
+
+let paletteFlat = new Float32Array(24);
+function buildPaletteFlat(){
+  for(let i=0;i<8;i++){ const c=palette[i]; paletteFlat[i*3]=c[0]; paletteFlat[i*3+1]=c[1]; paletteFlat[i*3+2]=c[2]; }
+}
+buildPaletteFlat();
+
+/* ============================================================ LOOP ======= */
+let last=performance.now(), fpsSmooth=60, frame=0, lowFrames=0, perfAdjusted=false;
+function loop(now){
+  const dt = now-last; last=now;
+  fpsSmooth = fpsSmooth*0.92 + (1000/Math.max(1,dt))*0.08;
+  if(!paused){ for(let s=0;s<P.sub;s++) step(); }
+  render();
+  frame++;
+  if(frame%12===0) updateStats();
+  // gentle one-time perf guard: ease sim substeps if fps stays low
+  if(!perfAdjusted){
+    if(fpsSmooth<38) lowFrames++; else lowFrames=Math.max(0,lowFrames-1);
+    if(lowFrames>90 && P.sub>1){ P.sub=1; $("#sSub").value=1; $("#vSub").textContent="×1";
+      perfAdjusted=true; toast("auto: eased sim speed for smoother fps"); }
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================ STATS ====== */
+function readBuf(attachment, ref){
+  if(!ref.buf || ref.buf.length!==N*4) ref.buf=new Float32Array(N*4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, simFbo[ping]);
+  gl.readBuffer(attachment);
+  gl.readPixels(0,0,texW,texH,gl.RGBA,gl.FLOAT,ref.buf);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  return ref.buf;
+}
+const _vr={buf:null}, _pr={buf:null};
+let stat = {avgV:0, structure:0, perSpec:new Float32Array(8)};
+const GRID=20, gcount=new Float32Array(GRID*GRID);
+function updateStats(){
+  const v = readBuf(gl.COLOR_ATTACHMENT1, _vr);
+  const p = readBuf(gl.COLOR_ATTACHMENT0, _pr);
+  let sp=0; const cnt=new Float32Array(8), spd=new Float32Array(8);
+  const stride = N>6000 ? 3 : 1; let m=0;
+  gcount.fill(0);
+  for(let i=0;i<N;i+=stride){
+    const s=Math.hypot(v[i*4], v[i*4+1]); sp+=s; m++;
+    const si=species[i]; cnt[si]++; spd[si]+=s;
+  }
+  // dispersion across all particles (structure signal)
+  for(let i=0;i<N;i++){ let gx=(p[i*4]*GRID)|0, gy=(p[i*4+1]*GRID)|0;
+    if(gx>=GRID)gx=GRID-1; if(gx<0)gx=0; if(gy>=GRID)gy=GRID-1; if(gy<0)gy=0;
+    gcount[gy*GRID+gx]++; }
+  const mean=N/(GRID*GRID); let varr=0;
+  for(let i=0;i<gcount.length;i++){ const d=gcount[i]-mean; varr+=d*d; }
+  const disp=(varr/gcount.length)/Math.max(mean,1e-6);
+  stat.avgV = sp/m; stat.structure = disp;
+  for(let k=0;k<8;k++) stat.perSpec[k] = cnt[k]>0 ? spd[k]/cnt[k] : 0;
+  $("#oFps").textContent = fpsSmooth.toFixed(0);
+  $("#oN").textContent   = N.toLocaleString();
+  $("#oK").textContent   = P.k;
+  $("#oV").textContent   = (stat.avgV*1000).toFixed(1);
+  $("#oOrder").textContent = disp.toFixed(1);
+  $("#fpsbar i").style.width = Math.min(100, fpsSmooth/60*100)+"%";
+  if(audio.on) updateAudio();
+  if(genesis.on) genesisTick();
+}
+
+/* ============================================================ GENESIS ===== */
+/* Autopilot: keep the world alive and interesting. If it goes static/gaseous,
+   reroll its rules (rebirth); otherwise let it gently drift (mutate). Uses the
+   same dispersion + speed signals validated in tools/evolve.mjs. */
+const genesis = { on:false, t:0, period:520 /*frames ~ 9s*/ };
+function genesisTick(){
+  genesis.t++;
+  if(genesis.t < genesis.period) return;
+  genesis.t = 0;
+  const dead = stat.avgV < 0.0006;        // everything froze
+  const gas  = stat.structure < 1.6;      // no structure / blew apart
+  if(dead || gas){
+    rngMatrix(); reseedPositions(); reassignSpecies(); buildMatrixUI();
+    flash("✶ rebirth");
+  } else {
+    mutateMatrix(0.16); buildMatrixUI();   // evolve gently
+    flash("✶ drift");
+  }
+}
+function flash(msg){ const t=$("#bGenesis"); toast(msg); t.classList.add("on");
+  setTimeout(()=>{ if(genesis.on) t.classList.remove("on"); else t.classList.remove("on"); }, 400);
+}
+
+/* ============================================================ AUDIO ====== */
+const audio = {on:false, ctx:null, voices:[], master:null, drone:null};
+const SCALE = [0,2,4,7,9,12,14,16]; // pentatonic-ish, semitone offsets
+function initAudio(){
+  if(audio.ctx) return;
+  const Ctx = window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
+  const ctx = new Ctx(); audio.ctx=ctx;
+  const master = ctx.createGain(); master.gain.value=0.0; master.connect(ctx.destination);
+  audio.master=master;
+  const comp = ctx.createDynamicsCompressor(); comp.connect(master);
+  for(let i=0;i<8;i++){
+    const o=ctx.createOscillator(); o.type = i%2? "triangle":"sine";
+    const f = 110*Math.pow(2, SCALE[i]/12);
+    o.frequency.value=f;
+    const g=ctx.createGain(); g.gain.value=0;
+    const pan=ctx.createStereoPanner? ctx.createStereoPanner():null;
+    if(pan){ pan.pan.value=(i/7)*2-1; o.connect(g); g.connect(pan); pan.connect(comp); }
+    else { o.connect(g); g.connect(comp); }
+    o.start(); audio.voices.push({o,g,f});
+  }
+  // sub drone
+  const d=ctx.createOscillator(); d.type="sine"; d.frequency.value=55;
+  const dg=ctx.createGain(); dg.gain.value=0; d.connect(dg); dg.connect(comp); d.start();
+  audio.drone={o:d,g:dg};
+}
+function updateAudio(){
+  if(!audio.ctx) return; const t=audio.ctx.currentTime;
+  for(let i=0;i<P.k;i++){
+    const v=audio.voices[i]; if(!v) continue;
+    const target = Math.min(0.16, stat.perSpec[i]*9);
+    v.g.gain.setTargetAtTime(target, t, 0.25);
+  }
+  for(let i=P.k;i<8;i++) audio.voices[i].g.gain.setTargetAtTime(0,t,0.4);
+  const tone = Math.min(stat.structure/25, 1);   // bounded; structure can be large
+  audio.drone.g.gain.setTargetAtTime(0.04 + tone*0.06, t, 0.5);
+}
+function toggleSound(){
+  audio.on=!audio.on;
+  if(audio.on){ initAudio(); audio.ctx&&audio.ctx.resume();
+    audio.master.gain.setTargetAtTime(0.5, audio.ctx.currentTime, 0.5); }
+  else if(audio.ctx){ audio.master.gain.setTargetAtTime(0.0, audio.ctx.currentTime, 0.3); }
+  $("#bSound").textContent = "♪ Sound: "+(audio.on?"on":"off");
+  $("#bSound").classList.toggle("on", audio.on);
+}
+
+/* ============================================================ PRESETS ==== */
+// NOTE: dt lives in the small-step regime (~0.02). Verified stable via the CPU
+// reference sim in tools/render.mjs — anything near dt=1 explodes into noise.
+const PRESETS = {
+  Cells(){ P.k=5; P.reach=0.10; P.force=1.0; P.friction=0.70; P.beta=0.30; P.dt=0.020;
+    sym(0.9,-0.35,0.25); },
+  Chase(){ P.k=4; P.reach=0.12; P.force=1.2; P.friction=0.78; P.beta=0.22; P.dt=0.022;
+    antisym(0.7); },
+  Swarm(){ P.k=3; P.reach=0.14; P.force=1.0; P.friction=0.86; P.beta=0.18; P.dt=0.026;
+    allPositive(0.5,0.9); },
+  Crystal(){ P.k=6; P.reach=0.072; P.force=1.7; P.friction=0.66; P.beta=0.34; P.dt=0.016;
+    alternating(0.85); },
+  Veins(){ P.k=4; P.reach=0.10; P.force=1.3; P.friction=0.78; P.beta=0.28; P.dt=0.020;
+    chain(); },
+  Chaos(){ P.k=Math.floor(3+Math.random()*5); P.reach=0.07+Math.random()*0.08;
+    P.force=0.8+Math.random()*1.6; P.friction=0.66+Math.random()*0.22;
+    P.beta=0.18+Math.random()*0.22; P.dt=0.014+Math.random()*0.016; rngMatrix(); },
+};
+function sym(self,cross,jitter){ matrix=new Float32Array(64);
+  for(let i=0;i<P.k;i++)for(let j=0;j<P.k;j++){
+    matrix[i*P.k+j]= i===j? self : cross + (Math.random()*2-1)*jitter; clampCell(i,j);} }
+function antisym(scale){ matrix=new Float32Array(64);
+  for(let i=0;i<P.k;i++)for(let j=0;j<P.k;j++){
+    if(i===j) matrix[i*P.k+j]=0.1;
+    else if(j>i){ const v=(Math.random()*2-1)*scale; matrix[i*P.k+j]=v; matrix[j*P.k+i]=-v; } } }
+function allPositive(lo,hi){ matrix=new Float32Array(64);
+  for(let i=0;i<P.k;i++)for(let j=0;j<P.k;j++) matrix[i*P.k+j]=lo+Math.random()*(hi-lo); }
+function alternating(s){ matrix=new Float32Array(64);
+  for(let i=0;i<P.k;i++)for(let j=0;j<P.k;j++) matrix[i*P.k+j]=((i+j)%2?-1:1)*s*(0.6+Math.random()*0.4); }
+function chain(){ matrix=new Float32Array(64);
+  for(let i=0;i<P.k;i++)for(let j=0;j<P.k;j++){
+    if(j===(i+1)%P.k) matrix[i*P.k+j]=0.9; else if(i===j) matrix[i*P.k+j]=-0.2;
+    else matrix[i*P.k+j]=-0.1+(Math.random()*2-1)*0.2; clampCell(i,j);} }
+function clampCell(i,j){ matrix[i*P.k+j]=Math.max(-1,Math.min(1,+matrix[i*P.k+j].toFixed(3))); }
+function applyPreset(name){
+  PRESETS[name]();
+  reassignSpecies(); reflectUI(); buildMatrixUI();
+  toast(name+" world");
+}
+
+/* ============================================================ UI WIRING == */
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1500); }
+
+const SL = [
+  ["sReach","vReach","reach", v=>v.toFixed(3)],
+  ["sForce","vForce","force", v=>v.toFixed(1)],
+  ["sFric","vFric","friction", v=>v.toFixed(2)],
+  ["sBeta","vBeta","beta", v=>v.toFixed(2)],
+  ["sDt","vDt","dt", v=>v.toFixed(3)],
+  ["sSize","vSize","size", v=>v.toFixed(2)],
+  ["sBloom","vBloom","bloom", v=>v.toFixed(2)],
+  ["sTrail","vTrail","trail", v=>v.toFixed(2)],
+];
+function reflectUI(){
+  for(const [s,vlab,key,fmt] of SL){ $("#"+s).value=P[key]; $("#"+vlab).textContent=fmt(P[key]); }
+  $("#sK").value=P.k; $("#vK").textContent=P.k;
+  $("#sN").value=P.nIdx; $("#vN").textContent=(COUNTS[P.nIdx]).toLocaleString();
+  $("#sSub").value=P.sub; $("#vSub").textContent="×"+P.sub;
+}
+function wireControls(){
+  for(const [s,vlab,key,fmt] of SL){
+    $("#"+s).addEventListener("input", e=>{ P[key]=parseFloat(e.target.value);
+      $("#"+vlab).textContent=fmt(P[key]); });
+  }
+  $("#sK").addEventListener("input", e=>{ P.k=parseInt(e.target.value); $("#vK").textContent=P.k;
+    rngMatrix(); reassignSpecies(); buildMatrixUI(); });
+  $("#sN").addEventListener("input", e=>{ P.nIdx=parseInt(e.target.value);
+    $("#vN").textContent=COUNTS[P.nIdx].toLocaleString(); allocParticles(); });
+  $("#sSub").addEventListener("input", e=>{ P.sub=parseInt(e.target.value); $("#vSub").textContent="×"+P.sub; });
+
+  $("#bReseed").onclick=()=>{ reseedPositions(); toast("reseeded"); };
+  $("#bRandom").onclick=()=>{ rngMatrix(); reassignSpecies(); buildMatrixUI(); toast("new rules"); };
+  $("#bMutate").onclick=()=>{ mutateMatrix(); buildMatrixUI(); toast("mutated"); };
+  $("#bBreed").onclick=()=>{ breedMatrix(); buildMatrixUI(); toast("bred a hybrid"); };
+  $("#bAbout").onclick=()=>showAbout(true);
+  $("#bAboutClose").onclick=()=>showAbout(false);
+  $("#about").addEventListener("click", e=>{ if(e.target.id==="about") showAbout(false); });
+  $("#bPause").onclick=()=>{ paused=!paused; $("#bPause").classList.toggle("on",paused);
+    $("#bPause").textContent = paused? "▶ Resume":"❚❚ Pause"; };
+  $("#bSound").onclick=toggleSound;
+  $("#bSnap").onclick=snapshot;
+  $("#bShare").onclick=copyDNA;
+  $("#bLoad").onclick=pasteDNA;
+  $("#bPalette").onclick=cyclePalette;
+  $("#bRecord").onclick=toggleRecord;
+  $("#bGenesis").onclick=toggleGenesis;
+  $("#uiToggle").onclick=()=>toggleUI();
+
+  // preset segment
+  const seg=$("#presetSeg"); seg.innerHTML="";
+  Object.keys(PRESETS).forEach(name=>{
+    const b=document.createElement("button"); b.textContent=name;
+    b.onclick=()=>applyPreset(name); seg.appendChild(b);
+  });
+  // discovered-worlds segment
+  const bseg=$("#bestiarySeg"); bseg.innerHTML="";
+  BESTIARY.forEach(b=>{ const btn=document.createElement("button"); btn.textContent=b.name;
+    btn.onclick=()=>loadBestiary(b); bseg.appendChild(btn); });
+}
+function toggleGenesis(){ genesis.on=!genesis.on; genesis.t=0;
+  $("#bGenesis").classList.toggle("on", genesis.on);
+  $("#bGenesis").textContent = "✶ Genesis — autopilot: "+(genesis.on?"on":"off");
+  toast(genesis.on? "Genesis on — the world now lives on its own":"Genesis off"); }
+function cyclePalette(){ paletteIdx=(paletteIdx+1)%PALETTE_NAMES.length;
+  palette=PALETTES[PALETTE_NAMES[paletteIdx]]; buildPaletteFlat(); buildMatrixUI();
+  toast("palette · "+PALETTE_NAMES[paletteIdx]); }
+function showAbout(s){ $("#about").classList.toggle("show", s); }
+function toggleUI(force){
+  const hide = force!==undefined ? force : !document.body.classList.contains("ui-hidden");
+  document.body.classList.toggle("ui-hidden", hide);
+  const b=$("#uiToggle"); if(b) b.textContent = hide ? "☰" : "✕";
+}
+
+/* ---------- matrix editor ---------- */
+function cellColor(v){
+  // v in [-1,1]: cyan positive, magenta negative
+  const a=Math.abs(v);
+  const pos=[122,247,255], neg=[255,114,217];
+  const c = v>=0? pos:neg;
+  const r=Math.round(c[0]*a+18*(1-a)), g=Math.round(c[1]*a+20*(1-a)), b=Math.round(c[2]*a+30*(1-a));
+  return `rgb(${r},${g},${b})`;
+}
+// single shared drag state + window listeners registered ONCE (not per cell —
+// otherwise rebuilding the grid, e.g. every Genesis tick, leaks listeners).
+let mtxDrag = null;
+function mtxMove(e){
+  if(!mtxDrag) return;
+  const y = e.touches ? e.touches[0].clientY : e.clientY;
+  const nv = +Math.max(-1, Math.min(1, mtxDrag.sv - (y - mtxDrag.sy)/90)).toFixed(3);
+  matrix[mtxDrag.idx] = nv;
+  mtxDrag.cell.style.background = cellColor(nv);
+  mtxDrag.cell.title = `${mtxDrag.i}→${mtxDrag.j}: ${nv.toFixed(2)}`;
+  if(e.cancelable) e.preventDefault();
+}
+function mtxUp(){ mtxDrag = null; }
+window.addEventListener("mousemove", mtxMove);
+window.addEventListener("mouseup", mtxUp);
+window.addEventListener("touchmove", mtxMove, {passive:false});
+window.addEventListener("touchend", mtxUp);
+function buildMatrixUI(){
+  const wrap=$("#matrix"); wrap.style.gridTemplateColumns=`16px repeat(${P.k},1fr)`;
+  wrap.innerHTML="";
+  // top-left corner blank
+  wrap.appendChild(document.createElement("div"));
+  // column axis dots
+  for(let j=0;j<P.k;j++){ const d=document.createElement("div"); d.className="axdot";
+    const c=palette[j]; d.style.background=`rgb(${c[0]*255},${c[1]*255},${c[2]*255})`;
+    d.style.boxShadow=`0 0 8px rgb(${c[0]*255},${c[1]*255},${c[2]*255})`; wrap.appendChild(d); }
+  for(let i=0;i<P.k;i++){
+    const rd=document.createElement("div"); rd.className="axdot"; const c=palette[i];
+    rd.style.background=`rgb(${c[0]*255},${c[1]*255},${c[2]*255})`;
+    rd.style.boxShadow=`0 0 8px rgb(${c[0]*255},${c[1]*255},${c[2]*255})`; wrap.appendChild(rd);
+    for(let j=0;j<P.k;j++){
+      const cell=document.createElement("div"); cell.className="cell";
+      const idx=i*P.k+j, ii=i, jj=j; cell.style.background=cellColor(matrix[idx]);
+      cell.title=`${i}→${j}: ${matrix[idx].toFixed(2)}`;
+      const down=e=>{ mtxDrag={ idx, cell, i:ii, j:jj,
+        sy:(e.touches?e.touches[0].clientY:e.clientY), sv:matrix[idx] };
+        if(e.cancelable) e.preventDefault(); };
+      cell.addEventListener("mousedown",down);
+      cell.addEventListener("touchstart",down,{passive:false});
+      cell.addEventListener("dblclick",()=>{ matrix[idx]=0; cell.style.background=cellColor(0); });
+      wrap.appendChild(cell);
+    }
+  }
+}
+
+/* ---------- snapshot / DNA ---------- */
+function snapshot(){
+  render(); // ensure fresh frame in buffer
+  canvas.toBlob(b=>{ const a=document.createElement("a");
+    a.href=URL.createObjectURL(b); a.download="primordia-"+Date.now()+".png"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast("snapshot saved"); });
+}
+function dnaObject(){ return { v:1, k:P.k, n:P.nIdx,
+  phys:{reach:P.reach,force:P.force,friction:P.friction,beta:P.beta,dt:P.dt,
+        size:P.size,bloom:P.bloom,trail:P.trail},
+  m:Array.from(matrix.slice(0,P.k*P.k)).map(x=>+x.toFixed(3)) }; }
+function dnaCode(){ return btoa(JSON.stringify(dnaObject())); }
+function shareURL(){ return location.origin+location.pathname+"#w="+dnaCode(); }
+function copyDNA(){
+  const url = shareURL();
+  try{ history.replaceState(null,"","#w="+dnaCode()); }catch(e){}
+  navigator.clipboard?.writeText(url).then(()=>toast("share link copied to clipboard"),
+    ()=>{ prompt("Share link:", url); });
+}
+function applyDNAObj(o){
+  // validate fully BEFORE mutating any state
+  if(!o || !Array.isArray(o.m)) throw new Error("bad dna");
+  const k = Math.max(2, Math.min(8, (o.k|0) || 5));
+  if(o.m.length < k*k) throw new Error("dna matrix too small");
+  P.k = k;
+  if(o.n!=null) P.nIdx = Math.max(0, Math.min(COUNTS.length-1, o.n|0));
+  if(o.phys) Object.assign(P, o.phys);
+  matrix=new Float32Array(64); for(let i=0;i<k*k;i++) matrix[i]=+o.m[i]||0;
+  allocParticles(); reflectUI(); buildMatrixUI();
+}
+function decodeDNA(txt){
+  txt=txt.trim(); const h=txt.indexOf("#w="); if(h>=0) txt=txt.slice(h+3);
+  return JSON.parse(atob(txt));
+}
+function pasteDNA(){
+  const apply=txt=>{ try{ applyDNAObj(decodeDNA(txt)); toast("world DNA loaded"); }
+    catch(e){ toast("invalid DNA"); } };
+  if(navigator.clipboard?.readText) navigator.clipboard.readText().then(apply,
+    ()=>{ const t=prompt("Paste world DNA or link:"); if(t)apply(t); });
+  else { const t=prompt("Paste world DNA or link:"); if(t)apply(t); }
+}
+function loadFromHash(){
+  if(location.hash.startsWith("#w=")){
+    try{ applyDNAObj(decodeDNA(location.hash)); return true; }catch(e){}
+  }
+  return false;
+}
+
+/* ---------- WebM recording ---------- */
+const rec = { mr:null, chunks:[], on:false };
+function toggleRecord(){
+  if(rec.on){ rec.mr && rec.mr.stop(); return; }
+  if(!canvas.captureStream){ toast("recording unsupported here"); return; }
+  const stream = canvas.captureStream(60);
+  let mime = "video/webm;codecs=vp9";
+  if(!window.MediaRecorder || !MediaRecorder.isTypeSupported(mime)) mime="video/webm";
+  try{ rec.mr = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:12e6}); }
+  catch(e){ toast("recording unsupported"); return; }
+  rec.chunks=[]; rec.on=true;
+  rec.mr.ondataavailable=e=>{ if(e.data.size) rec.chunks.push(e.data); };
+  rec.mr.onstop=()=>{ rec.on=false; $("#bRecord").classList.remove("on");
+    $("#bRecord").textContent="● Record";
+    const blob=new Blob(rec.chunks,{type:"video/webm"}); const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="primordia-"+Date.now()+".webm"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000); toast("clip saved (.webm)"); };
+  rec.mr.start();
+  $("#bRecord").classList.add("on"); $("#bRecord").textContent="■ Stop"; toast("recording…");
+}
+
+/* ---------- input ---------- */
+canvas.addEventListener("pointermove", e=>{
+  mouse.x = e.clientX/innerWidth; mouse.y = 1 - e.clientY/innerHeight;
+});
+canvas.addEventListener("pointerdown", e=>{ mouse.down=true; mouse.shift=e.shiftKey;
+  mouse.f = e.shiftKey? -2.6 : 2.6; });
+window.addEventListener("pointerup", ()=>{ mouse.down=false; mouse.f=0; });
+window.addEventListener("keydown", e=>{
+  if(e.target.tagName==="INPUT") return;
+  switch(e.key.toLowerCase()){
+    case " ": e.preventDefault(); $("#bPause").click(); break;
+    case "r": reseedPositions(); toast("reseeded"); break;
+    case "n": rngMatrix(); reassignSpecies(); buildMatrixUI(); toast("new rules"); break;
+    case "m": mutateMatrix(); buildMatrixUI(); toast("mutated"); break;
+    case "h": toggleUI(); break;
+    case "f": if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.(); break;
+    case "s": snapshot(); break;
+    case "p": cyclePalette(); break;
+    case "g": toggleGenesis(); break;
+    case "?": showAbout(!$("#about").classList.contains("show")); break;
+    case "escape": showAbout(false); break;
+  }
+});
+
+/* ============================================================ BOOT ======= */
+function boot(){
+  rngMatrix();
+  allocParticles();
+  resize();
+  wireControls();
+  reflectUI();
+  buildMatrixUI();
+  if(!loadFromHash()) applyPreset("Cells");
+  requestAnimationFrame(loop);
+}
+$("#enterBtn").addEventListener("click", ()=>{
+  $("#title").classList.add("gone");
+  $("#hud").hidden=false;
+  // on phones the panel covers the canvas — start it tucked away so the life shows
+  const touch = matchMedia("(pointer:coarse)").matches || innerWidth < 760;
+  toggleUI(touch);
+  if(touch) toast("tap ☰ for controls");
+  setTimeout(()=>$("#title").remove(), 900);
+});
+boot();
+window.__PRIMORDIA__ = { P, get matrix(){return matrix;}, allocParticles, rngMatrix, PRESETS };
+</script>
+</body>
+</html>
