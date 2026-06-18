@@ -64,9 +64,10 @@ let all = [];
 for (const f of fs.readdirSync(evoDir)) if (f.startsWith("scores_"))
   all = all.concat(JSON.parse(fs.readFileSync(path.join(evoDir, f))));
 all.sort((a, b) => b.score - a.score);
-const top = all.slice(0, 9);
+const SHOW = +(process.env.SHOW || 12);
+const top = all.slice(0, SHOW);
 
-console.log(`\nScored ${all.length} worlds in ${((Date.now()-t0)/1000).toFixed(1)}s. Top 9:`);
+console.log(`\nScored ${all.length} worlds in ${((Date.now()-t0)/1000).toFixed(1)}s. Top ${SHOW}:`);
 for (const t of top) console.log(`  seed ${t.seed}  K${t.K}  score ${t.score.toFixed(2)}  disp ${t.D.toFixed(1)}  churn ${t.tc.toFixed(3)}`);
 
 /* render hall-of-fame grid (re-render winners bigger) */
@@ -75,7 +76,7 @@ for (const t of top) {
   const W = makeRandomWorld({ seed: t.seed, N: N }); evaluate(W);
   tiles.push({ t, img: { w: S_BIG, h: S_BIG, rgb: renderFrame(W, S_BIG, 1.25) } });
 }
-const cols = 3, rows = Math.ceil(tiles.length / cols), gut = 14, lab = 26;
+const cols = 4, rows = Math.ceil(tiles.length / cols), gut = 14, lab = 26;
 const GW = cols*S_BIG + (cols+1)*gut, GH = rows*(S_BIG+lab) + (rows+1)*gut + 34;
 const buf = Buffer.alloc(GW*GH*3);
 for (let i=0;i<GW*GH;i++){ buf[i*3]=6; buf[i*3+1]=7; buf[i*3+2]=12; }

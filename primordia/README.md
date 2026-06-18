@@ -83,10 +83,11 @@ density, and rewards *ongoing motion* (penalizing both frozen and chaotic worlds
 and renders a **hall of fame** of the winners — whose DNA is curated into the app's
 Discovered worlds, and whose metric powers the live Genesis autopilot.
 
-![hall of fame](stills/hall_of_fame.png)
+![bestiary](stills/bestiary.png)
 
-*Nine universes, none designed — each one discovered by scoring random rule-sets for
-"alive and structured."*
+*The eight Discovered worlds that ship in the app — none designed, each one found by
+scoring random rule-sets for "alive and structured," then named. This image is
+rendered straight from the DNA in `index.html`, so it always matches what ships.*
 
 ## The CPU twin (`tools/`)
 

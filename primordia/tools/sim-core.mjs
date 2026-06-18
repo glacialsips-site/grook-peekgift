@@ -119,6 +119,16 @@ export function evaluate(W, { settle=460, gap=60, G=20 } = {}){
   return { score, dispersion:D, temporal:tc, speed:spd };
 }
 
+/* build a world from explicit DNA (k, physics, matrix) — used by the bestiary tool */
+export function makeWorldFromDNA({ k, phys, m, seed=1, N=3000 }){
+  const r = mulberry(seed); const K = k; const P = { ...phys };
+  const M = new Float32Array(K*K); for (let i=0;i<m.length;i++) M[i]=m[i];
+  const px=new Float32Array(N), py=new Float32Array(N);
+  const vx=new Float32Array(N), vy=new Float32Array(N), sp=new Uint8Array(N);
+  for (let i=0;i<N;i++){ px[i]=r(); py[i]=r(); sp[i]=(r()*K)|0; }
+  return { preset:"DNA", K, N, P, M, px, py, vx, vy, sp };
+}
+
 export function falloff(r,a,beta){
   if(r<beta) return r/beta-1;
   if(r<1)    return a*(1-Math.abs(2*r-1-beta)/(1-beta));
