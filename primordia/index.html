@@ -266,7 +266,6 @@ uniform sampler2D uVel;
 uniform sampler2D uSpec;
 uniform int   uTexW;
 uniform float uPointSize;
-uniform float uAspect;
 uniform vec3  uPalette[8];
 out vec3  vColor;
 out float vSpeed;
@@ -606,7 +605,6 @@ function render(){
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, specTex);      gl.uniform1i(Udraw.uSpec,2);
   gl.uniform1i(Udraw.uTexW, texW);
   gl.uniform1f(Udraw.uPointSize, P.size * (canvas.width/1600));
-  gl.uniform1f(Udraw.uAspect, canvas.width/canvas.height);
   gl.uniform3fv(Udraw.uPalette, paletteFlat);
   gl.drawArrays(gl.POINTS, 0, N);
   gl.disable(gl.BLEND);
@@ -768,7 +766,8 @@ function updateAudio(){
     v.g.gain.setTargetAtTime(target, t, 0.25);
   }
   for(let i=P.k;i<8;i++) audio.voices[i].g.gain.setTargetAtTime(0,t,0.4);
-  audio.drone.g.gain.setTargetAtTime(0.05 + stat.order*0.07, t, 0.5);
+  const tone = Math.min(stat.structure/25, 1);   // bounded; structure can be large
+  audio.drone.g.gain.setTargetAtTime(0.04 + tone*0.06, t, 0.5);
 }
 function toggleSound(){
   audio.on=!audio.on;
