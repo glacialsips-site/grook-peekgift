@@ -732,7 +732,6 @@ function loop(now){
 }
 
 /* ============================================================ STATS ====== */
-let velReadBuf=null, posReadBuf=null;
 function readBuf(attachment, ref){
   if(!ref.buf || ref.buf.length!==N*4) ref.buf=new Float32Array(N*4);
   gl.bindFramebuffer(gl.FRAMEBUFFER, simFbo[ping]);
@@ -958,6 +957,23 @@ function cellColor(v){
   const r=Math.round(c[0]*a+18*(1-a)), g=Math.round(c[1]*a+20*(1-a)), b=Math.round(c[2]*a+30*(1-a));
   return `rgb(${r},${g},${b})`;
 }
+// single shared drag state + window listeners registered ONCE (not per cell —
+// otherwise rebuilding the grid, e.g. every Genesis tick, leaks listeners).
+let mtxDrag = null;
+function mtxMove(e){
+  if(!mtxDrag) return;
+  const y = e.touches ? e.touches[0].clientY : e.clientY;
+  const nv = +Math.max(-1, Math.min(1, mtxDrag.sv - (y - mtxDrag.sy)/90)).toFixed(3);
+  matrix[mtxDrag.idx] = nv;
+  mtxDrag.cell.style.background = cellColor(nv);
+  mtxDrag.cell.title = `${mtxDrag.i}→${mtxDrag.j}: ${nv.toFixed(2)}`;
+  if(e.cancelable) e.preventDefault();
+}
+function mtxUp(){ mtxDrag = null; }
+window.addEventListener("mousemove", mtxMove);
+window.addEventListener("mouseup", mtxUp);
+window.addEventListener("touchmove", mtxMove, {passive:false});
+window.addEventListener("touchend", mtxUp);
 function buildMatrixUI(){
   const wrap=$("#matrix"); wrap.style.gridTemplateColumns=`16px repeat(${P.k},1fr)`;
   wrap.innerHTML="";
@@ -973,19 +989,13 @@ function buildMatrixUI(){
     rd.style.boxShadow=`0 0 8px rgb(${c[0]*255},${c[1]*255},${c[2]*255})`; wrap.appendChild(rd);
     for(let j=0;j<P.k;j++){
       const cell=document.createElement("div"); cell.className="cell";
-      const idx=i*P.k+j; cell.style.background=cellColor(matrix[idx]);
+      const idx=i*P.k+j, ii=i, jj=j; cell.style.background=cellColor(matrix[idx]);
       cell.title=`${i}→${j}: ${matrix[idx].toFixed(2)}`;
-      let dragging=false, sy=0, sv=0;
-      const down=e=>{ dragging=true; sy=(e.touches?e.touches[0].clientY:e.clientY); sv=matrix[idx];
-        e.preventDefault(); };
-      const move=e=>{ if(!dragging)return; const y=(e.touches?e.touches[0].clientY:e.clientY);
-        let nv=Math.max(-1,Math.min(1, sv - (y-sy)/90)); matrix[idx]=+nv.toFixed(3);
-        cell.style.background=cellColor(nv); cell.title=`${i}→${j}: ${nv.toFixed(2)}`; };
-      const up=()=>{ dragging=false; };
-      cell.addEventListener("mousedown",down); window.addEventListener("mousemove",move);
-      window.addEventListener("mouseup",up);
+      const down=e=>{ mtxDrag={ idx, cell, i:ii, j:jj,
+        sy:(e.touches?e.touches[0].clientY:e.clientY), sv:matrix[idx] };
+        if(e.cancelable) e.preventDefault(); };
+      cell.addEventListener("mousedown",down);
       cell.addEventListener("touchstart",down,{passive:false});
-      cell.addEventListener("touchmove",move,{passive:false}); cell.addEventListener("touchend",up);
       cell.addEventListener("dblclick",()=>{ matrix[idx]=0; cell.style.background=cellColor(0); });
       wrap.appendChild(cell);
     }
@@ -1012,8 +1022,14 @@ function copyDNA(){
     ()=>{ prompt("Share link:", url); });
 }
 function applyDNAObj(o){
-  P.k=o.k; P.nIdx=o.n!=null?o.n:P.nIdx; Object.assign(P,o.phys||{});
-  matrix=new Float32Array(64); o.m.forEach((x,i)=>matrix[i]=x);
+  // validate fully BEFORE mutating any state
+  if(!o || !Array.isArray(o.m)) throw new Error("bad dna");
+  const k = Math.max(2, Math.min(8, (o.k|0) || 5));
+  if(o.m.length < k*k) throw new Error("dna matrix too small");
+  P.k = k;
+  if(o.n!=null) P.nIdx = Math.max(0, Math.min(COUNTS.length-1, o.n|0));
+  if(o.phys) Object.assign(P, o.phys);
+  matrix=new Float32Array(64); for(let i=0;i<k*k;i++) matrix[i]=+o.m[i]||0;
   allocParticles(); reflectUI(); buildMatrixUI();
 }
 function decodeDNA(txt){
