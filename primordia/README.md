@@ -8,6 +8,11 @@ Thousands of glowing particles. A handful of rules. **Nothing is scripted** —
 the life self-organizes. GPU-accelerated artificial life in pure WebGL2, with
 zero dependencies, zero build step, and zero network calls.
 
+### ▶ [Play it in your browser](https://htmlpreview.github.io/?https://github.com/glacialsips-site/grook-peekgift/blob/claude/creative-exploration-r78w0t/primordia/index.html)
+
+*(works on phones too — it's one self-contained file served straight off this
+public repo. Needs WebGL2.)*
+
 ![living simulation](stills/anim.png)
 
 *The "Veins" world, actually running. Segmented worms grow, wander, and feed —
