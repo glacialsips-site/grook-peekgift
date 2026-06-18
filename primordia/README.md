@@ -113,6 +113,16 @@ preview of the live app — not a mockup.
 
 ---
 
+## The space of possible life
+
+![poster](stills/poster.png)
+
+*Thirty-six universes, the top of ninety-six random rule-sets the search rated
+"alive and structured." Every tile is the same engine — only the numbers in one
+small matrix differ. `node tools/poster.mjs` builds it from a finished search.*
+
+---
+
 <div align="center">
 <sub>Built for the fun of it.</sub>
 </div>
