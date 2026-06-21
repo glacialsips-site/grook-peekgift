@@ -104,7 +104,8 @@
   - 🖍️ FLAG: Frank (seller) pays **both** sides — listing per agreement **plus** the buyer's agent 2.5%. Confirm against listing agreement; this is a real seller cost on a lowball price.
 
 ### § 32 Real Estate Licensee Disclosure (p.32)
-- Marked **[X] Applicable**, type **[X] salesperson**, name **Frank DeAndino** (SELLER). → **Frank is himself a licensed RE salesperson.** Properly disclosed. (Explains his contract fluency.) _[pass B confirming]_
+- Marked **[X] Applicable**, type **[X] salesperson**, name **Frank "DiAndino"** (SELLER). → **Frank is himself a licensed RE salesperson.** Properly disclosed. (Explains his contract fluency.)
+- 🖍️ **MARKUP (name inconsistency) — VERIFIED by zoom adjudicator:** §1/p.21 spells it **"DeAndino"** (correct, both Frank & Dorothy, 2nd letter clearly "e"); §32/p.32 spells it **"DiAndino"** (2nd letter clearly dotted "i"). Internal inconsistency. Correct §32 to **DeAndino** so the name is identical everywhere (deed/title consistency).
 
 ### § 42 Addenda (p.33)
 - **ALL boxes UNCHECKED** — no addenda/riders incorporated. (Notably NO "Lead Based Paint Disclosure (Pre-1978)" addendum checked, NO "Underground Fuel Tank(s)" addendum, NO "Private Sewage Disposal" addendum — even though §43 raises oil-tank/septic. Inconsistency to flag.)
@@ -125,8 +126,15 @@
 ### Signatures (p.33)
 - **Buyers signed** (Keith 6:25 PM, Danielle 6:22 PM, 06/19/26, dotloop). **All SELLER lines BLANK.** → buyers' offer awaiting seller. (Danielle signed first — leverage read.)
 
-## 🚩 PROOF-OF-FUNDS RECONCILIATION (flag for Frank)
-- Documented POF in this packet: **$135,671.44 (Capital One/Puopolo) + $488,176.21 = $623,847.65 total.**
-- That is **~$126k SHORT of the $750,000 offer** — and the $488k account name is redacted (possibly the father's, not necessarily the buyers' to spend).
-- ⚠️ This partially **contradicts the "they obviously have well over the price in cash" read.** Either (a) more accounts/pages exist that aren't in this packet (the Capital One statement is "Page 1 of 3"), or (b) the documented liquidity is genuinely short. **Reinforces MARKUP 3b: demand POF covering the FULL $750k in the buyers' own names before removing contingencies.**
+## 🚩 PROOF-OF-FUNDS RECONCILIATION (flag for Frank — VERIFIED figures)
+- **POF #1 (p.2):** Capital One 360 Performance Savings, acct …6202 — **$135,671.44** (Apr 2026, "Page 1 of 3"); name **"Puopolo"** (first name redacted).
+- **POF #2 (p.19):** Synchrony Bank High Yield Savings, acct …1021 — **$488,178.21** (verified, stmt ending 06/07/2026, "Page 1 of 4"); name redacted "…UOPOLO".
+- **Documented total = $623,849.65** → **~$126,150 SHORT of the $750,000 offer.**
+- ⚠️ Both accounts are **"Puopolo," NOT "Cardona"** — Danielle's name is Danielle *Puopolo* Cardona, so one could be hers; the fully-redacted-first-name $488k Synchrony acct may be the **father's** (not necessarily the buyers' to spend).
+- ⚠️ This partially **contradicts the "they obviously have well over the price in cash" read.** Either (a) more accounts/pages exist not in this packet (statements are "page 1 of 3" / "1 of 4"), or (b) documented liquidity is genuinely short. **Reinforces MARKUP 3b: demand POF covering the FULL $750k in the BUYERS' OWN names before contingencies come off.**
+- _Frank to reconcile against what he recalls seeing (~$850k)._
+
+## ✅ §16 INSPECTION — Responsibility to Cure (p.27, lines ~400–406) — verified
+- Standard form: after the 7-business-day inspection window, if Buyer doesn't void, Buyer waives and **"Seller shall be under NO obligation to correct or cure any of the defects."** Seller-favorable boilerplate. All six day-count blanks empty → defaults (14/14/7/14/14/14 days) apply.
+- NOTE: This standard §16 mechanism is **separately overridden by §43 item 2's cancel-rights** (oil tank/soil/septic). The §43 carve-outs are the real exposure, not §16.
 
