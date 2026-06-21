@@ -1,15 +1,15 @@
-# Cube clips — video-generator prompts
+# Drum clips — video-generator prompts
 
-Six short clips, one per face of the spinning studio cube. Generate each, then save as
-`assets/cube/clips/01.mp4` … `06.mp4` and add `src="assets/cube/clips/0X.mp4"` to the
-matching `<video>` in `index.html`. The face already shows `0X.jpg` as a poster, so the
-cube looks finished until the clips land.
+Six short clips, one per face of the rotating studio drum (a hexagonal prism of vertical
+panels). Generate each, then save as `assets/cube/clips/01.mp4` … `06.mp4` and add
+`src="assets/cube/clips/0X.mp4"` to the matching `<video>` in `index.html`. The face already
+shows `0X.jpg` as a poster, so the drum looks finished until the clips land.
 
 **Specs to keep them cohesive (paste into every prompt):**
-> Square 1:1 aspect ratio, ~8 seconds, seamless loop. Warm natural window light, soft
-> shadows, shallow depth of field, cozy small-batch Indian pottery studio. Earthy palette —
-> terracotta, oat, marigold, Jaipur blue, Longpi black. Calm, slow, tactile. No text, no
-> logos, no people's faces, hands only. Film-like, gentle grain.
+> 9:16 vertical / portrait, ~8 seconds, seamless loop, main subject centered in frame. Warm
+> natural window light, soft shadows, shallow depth of field, cozy small-batch Indian pottery
+> studio. Earthy palette — terracotta, oat, marigold, Jaipur blue, Longpi black. Calm, slow,
+> tactile. No text, no logos, no people's faces, hands only. Film-like, gentle grain.
 
 ---
 
