@@ -35,5 +35,8 @@
 - **Sellers:** Frank DeAndino; Dorothy DeAndino — addr = the property (115 Browns Dock Rd).
 - **Property:** 115 Browns Dock Rd; tax map **Middletown Twp**, **Monmouth County**; **Block 840, Lot 97**; Qualifier blank (not a condo). ✓ all correct vs survey + tax ID.
   - Note: mailing town "Atlantic Highlands" but taxing municipality is **Middletown** — normal for this area, not an error.
-- _[awaiting Frank's markups on §1]_
+- **🖍️ MARKUP (§1, seller-directed) — Dorothy as a party:** Frank is sole titleholder (bought pre-marriage; only his name on the deed). Dorothy is his wife; 115 Browns Dock is their **principal matrimonial residence**, so under **N.J.S.A. 3B:28-3** she holds a statutory **right of joint possession** that must be released/subordinated for clear title — title co. will require her signature regardless. BUT naming her flatly as "Seller" makes her a full contracting party assuming all seller reps/warranties/obligations despite owning nothing = needless exposure to the marital estate.
+  - **DECISION = Option A:** Strike Dorothy as a named "Seller." Add provision (in §43): *"Dorothy DeAndino, spouse of Frank DeAndino, joins in the deed at closing solely to release and subordinate her right of joint possession in the marital residence pursuant to N.J.S.A. 3B:28-3, and assumes no obligations and makes no representations or warranties under this Contract."*
+  - Net effect: she still signs at closing (title requirement satisfied) but is NOT on the hook for the contract's seller obligations.
+- _[no other §1 markups from Frank]_
 
