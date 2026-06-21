@@ -604,7 +604,7 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $8
 191   43.  [ ]   [X]   [ ]  Is either the private water or sewage system shared? If "yes," explain: ____________________
 192                         ____________________
 193   44.        Water Heater: [ ]Electric  [ ]Fuel Oil  [X]Gas
-194   45.            [X]    Age of Water Heater ____ Unknown
+194                  [X]    Age of Water Heater ____ Unknown
 195   44a. [ ]   [X]        Are you aware of any problems with the water heater?
 196   45.        Explain any "yes" answers that you give in this section:
 197                         Whole-home water filtration system; septic located in front of house.
@@ -734,8 +734,8 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 294   [ ] Yes  [X] No  [ ] Unknown     84.   Is the Property in a designated Airport Safety Zone?
 295
 296
-297                  DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS
-                     AND CO-OPS
+296                  DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS
+297                  AND CO-OPS
 298        Yes      No      Unknown
 299   [ ] Yes  [X] No                  85.   Are you aware if the Property is subject to any deed restrictions or other limitations on how it
 300                                           may be used due to its being situated within a designated historic district, or a protected area like
@@ -760,7 +760,7 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 319                                           ___________________________________________________________________________________________
 320
 
-                     MISCELLANEOUS
+321                  MISCELLANEOUS
 322        Yes      No      Unknown
 323   [ ] Yes  [X] No                  92.   Are you aware of any existing or threatened legal action affecting the Property or any condominium
 324                                           or homeowners association to which you, as an owner, belong?
@@ -1055,19 +1055,19 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 554    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
        SIGNED                              DATE        SIGNED                              DATE
 555
-556    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
-557    The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
-558    to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
-559    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
-560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, at Prospective
-561    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is intended to
-562    provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale. This form
-563    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
-564    etc. Prospective Buyer acknowledges that they may independently investigate such local conditions before entering into a binding contract
-565    to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the Seller's
-566    real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed home
-567    inspector.
-568
+556
+557    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
+558    The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
+559    to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
+560    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
+561    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, at Prospective
+562    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is intended to
+563    provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale. This form
+564    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
+565    etc. Prospective Buyer acknowledges that they may independently investigate such local conditions before entering into a binding contract
+566    to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the Seller's
+567    real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed home
+568    inspector.
 569    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
 570    │                                             │                                             │
 571    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
@@ -1548,27 +1548,27 @@ CONTRACT.  SEE SECTION ON ATTORNEY REVIEW FOR DETAILS.
 TABLE OF CONTENTS
 
 [Column 1]
-1.  PARTIES AND PROPERTY
+1     1.  PARTIES AND PROPERTY
         DESCRIPTION
-2.  PURCHASE PRICE
-3.  MANNER OF PAYMENT
-4.  SUFFICIENT ASSETS
-5.  ACCURATE DISCLOSURE OF SELLING
+2     2.  PURCHASE PRICE
+3     3.  MANNER OF PAYMENT
+4     4.  SUFFICIENT ASSETS
+5     5.  ACCURATE DISCLOSURE OF SELLING
         PRICE
-6.  ITEMS INCLUDED IN SALE
-7.  ITEMS EXCLUDED FROM SALE
-8.  DATES AND TIMES FOR
+6     6.  ITEMS INCLUDED IN SALE
+7     7.  ITEMS EXCLUDED FROM SALE
+8     8.  DATES AND TIMES FOR
         PERFORMANCE
-9.  CERTIFICATE OF OCCUPANCY AND
+9     9.  CERTIFICATE OF OCCUPANCY AND
         ZONING COMPLIANCE
-10. MUNICIPAL ASSESSMENTS
-11. QUALITY AND INSURABILITY OF
+10    10. MUNICIPAL ASSESSMENTS
+11    11. QUALITY AND INSURABILITY OF
         TITLE
-12. POSSESSION, OCCUPANCY AND
+12    12. POSSESSION, OCCUPANCY AND
         TENANCIES
-13. LEAD-BASED PAINT AND/OR LEAD-
+13    13. LEAD-BASED PAINT AND/OR LEAD-
         BASED PAINT HAZARD
-14. POINT OF ENTRY TREATMENT SYSTEMS
+14    14. POINT OF ENTRY TREATMENT SYSTEMS
 
 [Column 2]
 15. CESSPOOL REQUIREMENTS
@@ -1616,43 +1616,46 @@ TABLE OF CONTENTS
 43. ADDITIONAL CONTRACTUAL
         PROVISIONS
 
-1.  PARTIES AND PROPERTY DESCRIPTION:
-
-Keith Cardona                                          ("Buyer"),   Danielle Puopolo Cardona                                  ("Buyer"),
-
-                                                       ("Buyer"),                                                              ("Buyer"),
-
-whose address is/are 280 River Rd, Red Bank NJ 07701
-
-AGREES TO PURCHASE FROM
-
-Frank DeAndino                                         ("Seller"),  Dorothy DeAndino                                          ("Seller"),
-
-                                                       ("Seller"),                                                            ("Seller"),
-
-whose address is/are 115 Browns Dock Rd Atlantic Highlands NJ  07716
-
-THROUGH THE BROKER(S) NAMED IN THIS CONTRACT AT THE PRICE AND TERMS STATED BELOW, THE
-FOLLOWING PROPERTY:
-Property Address: 115 Browns Dock Rd, Atlantic Highlands, NJ 07716
-
-shown on the municipal tax map of Middletown                                                  County Monmouth
-
-as Block 840              Lot 97              (the "Property") Qualifier                          (if the Property is a condominium),
-
-THE WORDS "BUYER" AND "SELLER" INCLUDE ALL BUYERS AND SELLERS LISTED ABOVE.
-
-2. PURCHASE PRICE:
-TOTAL PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $        750000.000
-INITIAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              35000
-ADDITIONAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
-MORTGAGE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
-BALANCE OF PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              715,000.00
+15
+16    1.  PARTIES AND PROPERTY DESCRIPTION:
+17
+18    Keith Cardona                                          ("Buyer"),   Danielle Puopolo Cardona                                  ("Buyer"),
+19
+20                                                           ("Buyer"),                                                              ("Buyer"),
+21
+22    whose address is/are 280 River Rd, Red Bank NJ 07701
+23
+24
+25    AGREES TO PURCHASE FROM
+26
+27    Frank DeAndino                                         ("Seller"),  Dorothy DeAndino                                          ("Seller"),
+28
+29                                                           ("Seller"),                                                            ("Seller"),
+30
+31    whose address is/are 115 Browns Dock Rd Atlantic Highlands NJ  07716
+32
+33
+34    THROUGH THE BROKER(S) NAMED IN THIS CONTRACT AT THE PRICE AND TERMS STATED BELOW, THE
+35    FOLLOWING PROPERTY:
+36    Property Address: 115 Browns Dock Rd, Atlantic Highlands, NJ 07716
+37
+38    shown on the municipal tax map of Middletown                                                  County Monmouth
+39
+40    as Block 840              Lot 97              (the "Property") Qualifier                          (if the Property is a condominium),
+41    THE WORDS "BUYER" AND "SELLER" INCLUDE ALL BUYERS AND SELLERS LISTED ABOVE.
+42
+43    2. PURCHASE PRICE:
+44    TOTAL PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $        750000.000
+45    INITIAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              35000
+46    ADDITIONAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
+47    MORTGAGE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
+48    BALANCE OF PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              715,000.00
+49
+50
 
 New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 2 of 14
 Buyer's Initials: [KC] [DC]    Seller's Initials: [____] [____]
 [dotloop initials stamps under KC/DC dated 06/19/26]
-
 =================== PAGE 22 ===================
 [Top-left header]: dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
 51    3.  MANNER OF PAYMENT:
