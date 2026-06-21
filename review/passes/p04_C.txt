@@ -1,0 +1,104 @@
+PAGE 4 — MLS DATA SHEET (Residential)
+
+=== TOP HEADER ===
+22617358   Residential        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        LP: $894,900   Private Copy
+
+[photo of one-story green house at left]
+
+=== STATUS / SUMMARY (two-column) ===
+LEFT COLUMN:
+Status:                    Active 06/09/2026
+Property Sub-Type:         Single Family Residence
+Sub-Type:                  Detached
+Minimum Age:
+County:                    Monmouth
+Municipality:              Middletown (MID)
+Area/Section:              None
+Complex/Subdivision:       None
+Tax ID#:                   32-00840-0000-00097
+Apx Lot Dimensions:        90 x 125
+Acreage:                   1.08
+Elementary School:         Navesink Elementary
+Middle School:             Bayshore
+High School:               Ranney School
+Other Elementary:
+Other High:
+Style:                     Ranch
+Model:
+Zoning:                    Residential
+
+RIGHT COLUMN:
+List Price:                $894,900
+Original List Price:       $894,900
+Apx Year Built:            1959
+Apx SqFt:                  1,820
+Basement:                  Yes
+Rooms:                     7
+Bedrooms:                  3
+Baths:                     1 / 0
+FP / #:                    Yes / 1
+Garage / #:                No / 0
+Waterfront:                No
+Waterview:                 No
+Handicap Access:           No
+Linked Listing:
+Directions:                Monmouth Ave to Browns Dock Road
+
+=== REMARKS / PUBLIC ===
+Acre-plus estate parcel in the Browns Dock/Navesink section of Atlantic Highlands--minutes to the Seastreak ferry, harbor, downtown and Sandy Hook, yet set
+in a private, mature landscape that feels worlds away. The existing 1950s residence is occupied and serviceable, but the real value is the canvas: scale,
+privacy, location and the ability to create a substantial custom home in a corridor where land like this is seldom available. Renovate, expand or build new,
+subject to approvals. Improvements conveyed as-is
+
+=== TAX / ASSESSMENT ===
+Tax Year:              2025          Asmnt - Land:           403,800     New Construction:  No      Deed Restricted: No
+Taxes:                 9,452         Asmnt - Improvements:   181,800     Farm:              No      Farm Assessed:   No
+Special Assessment:    No            Asmnt - Total:          585,600     Assessment Status: Assessed
+
+Assn Fee:                            Mgmt Type:                          Fee Includes:                  App Escrow Required:
+Assn Fee Paid:                       Common Elements:                    Mgmt Name:                     Mgmt Phone:
+Capital Contribution:
+
+=== ROOMS ===
+Room Name     Level   Dimensions   Remarks    |  Room Name   Level   Dimensions   Remarks
+Dining Room   First   16 x 12                  |  Bedroom     First   14 x 11
+Foyer         First   3 x 3                    |  Bedroom     First   11 x 10
+Kitchen       First   14 x 12                  |  Primary     First   14 x 14
+Living Room   First   27 x 16                  |  Bedroom
+
+# Level 1 - Baths:   1
+# Level 2 - Baths:   1
+
+=== FEATURES GRID ===
+Allowable:                                     Financing:
+Ownership Type:                                Heating:           Forced Air; Natural Gas
+Primary Bath:       Floor - Ceramic; Tub       Interior:          Attic
+Basement:           Full                       Kitchen:           Eat-In; Floor - Ceramic
+Dining Room:        Floor - Wood               Lot Description:
+Energy Features:                               Living Room:       Floor - Wood
+Exterior:           Deck                       Primary Bedroom:   Floor - Wood
+Floors:             Ceramic Tile; Wood         Out Buildings:
+Foyer:                                         Parking:           Driveway
+Great/Family Room:
+Cooling:            Central Air                Pool:              In Ground; Vinyl
+Excluded: Personal Property                    Roof:              Shingle
+                                               Siding:
+                                               Special Needs:
+                                               Style:             Ranch
+                                               Water Heater:      Natural Gas
+                                               Water/Sewer:       Public Water; Septic Tank
+
+=== LISTING / OFFICE ===
+Days on Market: 3                              Office: 732-970-8733     Owner Name: Withheld          LD-EX: 06/09/2026
+Listing Office: 3716 Red Door Realty Group    Cell: 732-616-8020       Seller Discl: Document Link
+Listing Member: 43150 Glenn Aaronson                                   Owner: Individual(s); NJ LIC RE
+                                                                       Possession: At Closing
+
+Typ: Exclusive Right To Sell  LBox: Yes
+Showing: Call Listing Office; Lockbox - Monmouth; Sign; Vacant
+Agent Notes: Home being sold strictly "as is", buyer responsible for Certificate of Occupancy. Dogs reside in the home so please knock first, confirmed
+appointments only.
+
+=== FOOTER ===
+Information is deemed to be reliable, but is not guaranteed. © 2026 MLS and FBS. Prepared by Colleen Antoon on Friday, June 12, 2026 4:31 PM. The information on
+this sheet has been made available by the MLS and may not be the listing of the provider.
