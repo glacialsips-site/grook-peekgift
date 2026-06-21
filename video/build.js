@@ -48,10 +48,13 @@ function synthVO() {
   // low-end body, mild de-ess, and a single loudnorm pass. No stacked dynamics (which
   // is what made the earlier take sound "compressed").
   const sultry = [
-    'asetrate=22050*0.97', 'aresample=22050', 'atempo=1.03093',
-    'highpass=f=65',
-    'equalizer=f=200:t=q:w=1.2:g=2.5',
-    'equalizer=f=6500:t=q:w=2:g=-2',
+    'asetrate=22050*0.96', 'aresample=44100', 'atempo=1.041667',  // ~4% down for a warmer, lower register
+    'highpass=f=58',
+    'bass=g=3.5:f=150',                       // low-mid body — kills the "tinny" thinness
+    'equalizer=f=2900:t=q:w=1.5:g=-2.5',      // tame the harsh/robotic presence
+    'equalizer=f=7200:t=q:w=2:g=-3',          // de-ess
+    'treble=g=-2.5:f=9000',                   // gentle roll-off of the fizzy top
+    'aecho=0.86:0.9:33|47:0.06|0.04',         // a hint of room so it reads less dry/synthetic
     'loudnorm=I=-15:TP=-1.5:LRA=11',
     'aresample=44100'
   ].join(',');
@@ -59,7 +62,7 @@ function synthVO() {
     const raw = path.join(WORK, `raw_${i}.wav`);
     const out = path.join(WORK, `vo_${i}.wav`);
     execSync(`echo ${JSON.stringify(sc.vo)} | piper -m ${JSON.stringify(VOICE)} --speaker ${SPEAKER} ` +
-      `--length-scale 1.13 --noise-scale 0.6 --noise-w-scale 0.8 --sentence-silence 0.30 -f ${JSON.stringify(raw)}`,
+      `--length-scale 1.1 --noise-scale 0.7 --noise-w-scale 0.9 --sentence-silence 0.28 -f ${JSON.stringify(raw)}`,
       { stdio: ['pipe', 'ignore', 'ignore'] });
     sh(FFMPEG, ['-y', '-i', raw, '-af', sultry, out]);
     sc._voDur = wavDuration(out);

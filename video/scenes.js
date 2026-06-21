@@ -30,8 +30,8 @@ function chrome(cartCount, activeNav, opacity = 1) {
     // user chip (Clerk)
     rrect(W - 470, 70, 150, 44, 22, C.card, `stroke="${C.line}"`) +
     `<circle cx="${W - 446}" cy="92" r="15" fill="url(#avg)"/>` +
-    txt(W - 446, 99, 'AK', { size: 15, weight: 700, fill: '#fff', anchor: 'middle' }) +
-    txt(W - 420, 99, 'Ananya', { size: 18, weight: 600 }) +
+    txt(W - 446, 99, 'AM', { size: 15, weight: 700, fill: '#fff', anchor: 'middle' }) +
+    txt(W - 420, 99, 'Arjun', { size: 18, weight: 600 }) +
     `<circle cx="${W - 338}" cy="92" r="5" fill="${C.neem}"/>` +
     // cart button
     rrect(W - 300, 68, 180, 48, 24, C.ink) +
@@ -283,9 +283,9 @@ const SCENES = [
       // clerk banner
       s += rrect(lx, ly + 24, 980, 86, 16, C.paper2, `stroke="${C.line}"`);
       s += `<circle cx="${lx + 44}" cy="${ly + 67}" r="22" fill="url(#avg2)"/>`;
-      s += txt(lx + 44, ly + 75, 'AK', { size: 17, weight: 700, fill: '#fff', anchor: 'middle' });
-      s += txt(lx + 82, ly + 60, 'Ananya Kapoor', { size: 21, weight: 600 });
-      s += txt(lx + 82, ly + 88, 'ananya@example.com', { size: 17, fill: C.inkSoft });
+      s += txt(lx + 44, ly + 75, 'AM', { size: 17, weight: 700, fill: '#fff', anchor: 'middle' });
+      s += txt(lx + 82, ly + 60, 'Arjun Mehta', { size: 21, weight: 600 });
+      s += txt(lx + 82, ly + 88, 'arjun@example.com', { size: 17, fill: C.inkSoft });
       s += `<circle cx="${lx + 820}" cy="${ly + 67}" r="6" fill="${C.neem}"/>`;
       s += txt(lx + 838, ly + 73, 'Signed in · Clerk', { size: 16, weight: 600, fill: C.neem });
       s += `<defs><linearGradient id="avg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bf6238"/><stop offset="1" stop-color="#8a3f22"/></linearGradient></defs>`;
@@ -294,7 +294,7 @@ const SCENES = [
       const field = (x, y, w, label, val) => rrect(x, y, w, 58, 11, C.card, `stroke="${C.line}"`) +
         txt(x + 16, y - 8, label, { size: 14, weight: 600, fill: C.inkSoft, spacing: 0.5 }) +
         txt(x + 16, y + 37, val, { size: 19 });
-      s += field(lx, ly + 210, 980, 'FULL NAME', 'Ananya Kapoor');
+      s += field(lx, ly + 210, 980, 'FULL NAME', 'Arjun Mehta');
       s += field(lx, ly + 300, 980, 'ADDRESS', '48 Raritan Avenue, Highland Park, NJ 08904');
       // payment / stripe element
       s += txt(lx, ly + 430, '2  Payment', { family: SERIF, size: 26, weight: 600 });
@@ -407,7 +407,7 @@ const SCENES = [
       const mailA = seg(t, 0.62, 0.82);
       s += `<g opacity="${mailA}">` +
         mail(cx - 322, 1004, 1, C.inkSoft) +
-        txt(cx + 16, 1010, 'A receipt is on its way to ananya@example.com  ·  via Resend', { size: 18, fill: C.inkSoft, anchor: 'middle' }) +
+        txt(cx + 16, 1010, 'A receipt is on its way to arjun@example.com  ·  via Resend', { size: 18, fill: C.inkSoft, anchor: 'middle' }) +
         `</g>`;
       return s;
     }
@@ -415,8 +415,8 @@ const SCENES = [
 
   /* 8 — CLOSE / KICKER ----------------------------------------------- */
   {
-    name: 'close', min: 10, voLead: 0.3,
-    vo: 'Mitti. Handmade, from the earth up. And every piece of this shop — the pots, the page, even this voice — was made by Claude. Told you so.',
+    name: 'close', min: 8, voLead: 0.3,
+    vo: 'Mitti. Wheel-thrown, glazed by hand, fired slow. Earth in — heirloom out.',
     render(t) {
       let s = '';
       // a quiet shelf of vessels
@@ -430,12 +430,11 @@ const SCENES = [
       s += rrect(W / 2 - 760, 560, 1520, 2, 0, C.line, `opacity="${seg(t, 0.2, 0.5)}"`);
       s += `<g opacity="${seg(t, 0.32, 0.58)}">` + wordmark(W / 2, 700, 1.2, 1) + `</g>`;
       s += txt(W / 2, 770, 'Handmade stoneware, from the earth up.', { family: SERIF, italic: true, size: 32, anchor: 'middle', fill: C.inkSoft, opacity: seg(t, 0.42, 0.66) });
-      // kicker line
-      const ka = seg(t, 0.62, 0.82);
-      s += txt(W / 2, 880, 'Brand, storefront, ceramics & voiceover — built by Claude.', { size: 24, anchor: 'middle', fill: C.clayDeep, weight: 600, opacity: ka });
-      const ta = seg(t, 0.78, 0.94, easeOutBack);
-      if (ta > 0.01) s += `<g opacity="${clamp(ta)}" transform="translate(${W / 2},950) scale(${lerp(0.85, 1, clamp(ta))})">` +
-        txt(0, 0, 'Told you so.', { family: SERIF, italic: true, size: 46, weight: 600, anchor: 'middle', fill: C.ink }) + `</g>`;
+      const ka = seg(t, 0.6, 0.84);
+      s += txt(W / 2, 872, 'WHEEL-THROWN  ·  GLAZED BY HAND  ·  MADE TO ORDER IN NEW JERSEY', { size: 21, anchor: 'middle', fill: C.clayDeep, weight: 600, spacing: 3, opacity: ka });
+      const ta = seg(t, 0.74, 0.92, easeOutBack);
+      if (ta > 0.01) s += `<g opacity="${clamp(ta)}">` +
+        txt(W / 2, 944, 'mitti.studio', { family: SERIF, size: 30, weight: 600, anchor: 'middle', fill: C.ink, spacing: 1 }) + `</g>`;
       return s;
     }
   }

@@ -141,6 +141,7 @@
         '<div class="details"><h4>The details</h4><ul>' +
           p.details.map(function (d) { return '<li>' + d + '</li>'; }).join('') +
         '</ul></div>' +
+        reviewsBlock() +
       '</div>';
     byId('pdBody').innerHTML = html;
 
@@ -164,6 +165,27 @@
     byId('addBtn').addEventListener('click', function () {
       addToCart(p, state.glaze, state.qty);
     });
+  }
+
+  /* ---------------- reviews (with a wink for Arjun) ---------------- */
+  function review(name, badge, stars, body) {
+    var av = name.split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    return '<div class="rev">' +
+      '<div class="rev-av">' + av + '</div>' +
+      '<div><div class="rev-top"><b>' + name + '</b><span class="rev-badge">✓ ' + badge + '</span></div>' +
+      '<div class="rev-stars">' + '★★★★★'.slice(0, stars) + '</div>' +
+      '<p>' + body + '</p></div></div>';
+  }
+  function reviewsBlock() {
+    return '<div class="reviews"><h4>What buyers say · 4.9 ★</h4>' +
+      review('Arjun M.', 'Verified buyer', 5,
+        'A friend bet me you couldn’t build a whole working shop like this. I was very confident. ' +
+        'I am no longer very confident. The pieces are lovely too — ordered a second set.') +
+      review('Priya S.', 'Verified buyer', 5,
+        'The glaze is even better in person, and somehow my morning chai tastes like it has opinions now.') +
+      review('Devin R.', 'Verified buyer', 5,
+        'Arrived wrapped in actual newsprint. Felt like opening a letter from a kinder century.') +
+      '</div>';
   }
 
   /* ---------------- cart ---------------- */
@@ -264,12 +286,12 @@
         '<a class="back" href="#" id="coBack">← Back</a>' +
         '<div class="co-steps"><b>Cart</b><span>›</span><b>Information</b><span>›</span><span style="color:var(--ink-faint)">Done</span></div>' +
         '<div class="clerk-banner">' +
-          '<span class="avatar">AK</span>' +
-          '<div class="t"><b>Ananya Kapoor</b><div>ananya@example.com</div></div>' +
+          '<span class="avatar">AM</span>' +
+          '<div class="t"><b>Arjun Mehta</b><div>arjun@example.com</div></div>' +
           '<div class="clerk-tag"><span class="d"></span> Signed in · Clerk</div>' +
         '</div>' +
         '<div class="co-block"><h3><span class="num">1</span> Shipping address</h3>' +
-          '<div class="field"><label>Full name</label><input value="Ananya Kapoor"/></div>' +
+          '<div class="field"><label>Full name</label><input value="Arjun Mehta"/></div>' +
           '<div class="field"><label>Address</label><input value="48 Raritan Avenue"/></div>' +
           '<div class="field-row three"><div class="field"><label>City</label><input value="Highland Park"/></div>' +
             '<div class="field"><label>State</label><input value="NJ"/></div>' +
@@ -335,7 +357,7 @@
         lines +
         '<div class="sum-tot" style="margin-top:8px"><div class="r big" style="margin-top:0"><span>Total</span><span>' + money(total) + '</span></div></div>' +
       '</div>' +
-      '<div class="email-note">✉️ A receipt is on its way to ananya@example.com via Resend</div>' +
+      '<div class="email-note">✉️ A receipt is on its way to arjun@example.com via Resend</div>' +
       '<div style="margin-top:26px"><button class="btn btn-primary" id="doneShop">Continue shopping</button></div>';
     state.cart = [];
     renderCart();
