@@ -8,7 +8,7 @@ County:                 Monmouth                         Basement:             Y
 Municipality:           Middletown (MID)                 Rooms:                7
 Area/Section:           None                             Bedrooms:             3
 Complex/Subdivision:    None                             Baths:                1 / 0
-Tax ID#:                32-00840-0000-00097              FF / #:               Yes / 1
+Tax ID#:                32-00840-0000-00097              FP / #:               Yes / 1
 Apx Lot Dimensions:     90 x 125                         Garage / #:           No / 0
 Acreage:                1.08                             Waterfront:           No
 Elementary School:      Navesink Elementary              Waterview:            No

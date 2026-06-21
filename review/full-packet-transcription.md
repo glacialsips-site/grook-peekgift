@@ -1,10 +1,8 @@
 # 115 Browns Dock Rd — Full Packet Transcription (VERIFIED / LOCKED)
 
-> Built from 32 per-page `_FINAL` transcriptions, each produced by a 4-stage pipeline:
-> two independent vision passes (A,B) → reconciliation (A-vs-B diff, shared-error re-check,
-> zoom-resolution) → independent falsification audit (Wave 5) → convergence re-verify on all
-> corrected pages. Every material token (numbers, $, names, dates, checkboxes, fill-ins) was
-> zoom-verified against the source image. Page 3 is blank. Page 20 hand-reconciled (content-filter).
+> Built from 32 per-page _FINAL transcriptions. Pipeline: blind passes A,B,C → reconciliation →
+> independent falsification audits → cross-pass diff (C vs FINAL) with zoom adjudication. Iterated to
+> convergence. Page 3 blank; page 20 hand-reconciled (content-filter).
 
 
 =================== PAGE 1 ===================
@@ -212,7 +210,7 @@ County:                 Monmouth                         Basement:             Y
 Municipality:           Middletown (MID)                 Rooms:                7
 Area/Section:           None                             Bedrooms:             3
 Complex/Subdivision:    None                             Baths:                1 / 0
-Tax ID#:                32-00840-0000-00097              FF / #:               Yes / 1
+Tax ID#:                32-00840-0000-00097              FP / #:               Yes / 1
 Apx Lot Dimensions:     90 x 125                         Garage / #:           No / 0
 Acreage:                1.08                             Waterfront:           No
 Elementary School:      Navesink Elementary              Waterview:            No
@@ -878,7 +876,7 @@ NEW JERSEY REALTORS®
 SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
 ADDENDUM REGARDING FLOOD RISK
 
-© 2024 New Jersey REALTORS®
+© 2018 New Jersey REALTORS®
 
 471   Pursuant to N.J.S.A. 56:8-19.2, all Sellers of real property (including both residential and non-residential property) must complete
 472   questions 109-117 below.
@@ -950,7 +948,7 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 530
 531    ACKNOWLEDGMENT OF SELLER
 532    The undersigned Seller affirms that the information set forth in the above Flood Risk Addendum to the Disclosure Statement is accurate
-533    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. The Seller hereby authorizes the real
+533    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real
 534    estate brokerage firm representing or assisting the Seller to provide this completed Flood Risk Addendum to the Disclosure Statement
 535    to all prospective buyers of the Property, and to other real estate agents. Seller alone is the source of all information contained in this
 536    statement. *If the Seller relied upon any credible representation of another, the Seller should state the name(s) of the person(s) who made
@@ -978,9 +976,9 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 555
 556    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
 557    The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
-558    to signing a Contract of Sale pertaining to the Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
+558    to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
 559    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
-560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, as Prospective
+560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, at Prospective
 561    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is intended to
 562    provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale. This form
 563    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
@@ -1019,11 +1017,11 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716          
 
 --- BODY (with margin line numbers) ---
 586    ACKNOWLEDGMENT OF REAL ESTATE BROKER/BROKER-SALESPERSON/SALESPERSON
-587    The undersigned Seller's real estate broker/broker-salesperson/salesperson acknowledges receipt of this completed Flood Risk
+587    The undersigned Seller's real estate broker/broker/broker-salesperson/salesperson acknowledges receipt of this completed Flood Risk
 588    Addendum to the Disclosure Statement and that the information contained in this form was provided by the Seller.
 589
 590    The Seller's real estate broker/broker-salesperson/salesperson also confirms that he or she visually inspected the Property with reasonable
-591    diligence to ascertain the accuracy of the information disclosed by the Seller prior to providing a copy of the property disclosure statement
+591    diligence to ascertain the accuracy of the information disclosed by the Seller, prior to providing a copy of the property disclosure statement
 592    to the buyer.
 593
 594    The Prospective Buyer's real estate broker/broker/broker-salesperson also acknowledges receipt of this completed Flood Disclosure
@@ -1105,7 +1103,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 652       Yes      No
 653       [ ]      [X]      Is the Property serviced by a Solar Panel System?
 654
-655   If you responded "yes," answer the following questions:
+655   If you responded "yes," answer the following questions.
 656
 657       Yes      No
 658       [ ]      [ ]      118.   When was the Solar Panel System Installed? ____________________
@@ -1114,7 +1112,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 661       [ ]      [ ]      118b.  Do you have documents and/or contracts relating to the Solar Panel System? If "yes," please
 662                                attach copies to this form.
 663       [ ]      [ ]      119.   Are SRECs available from the Solar Panel System?
-664       [ ]      [ ]      119a.  If SRECs are available, what is the SRECs expire? ____________________
+664       [ ]      [ ]      119a.  If SRECs are available, when will the SRECs expire? ____________________
 665       [ ]      [ ]      120.   Is there any storage capacity on the Property for the Solar Panel System?
 666       [ ]      [ ]      121.   Are you aware of any defects in or damage to any component of the Solar Panel System? If yes,
 667                                explain: ____________________________________________________________________
@@ -1123,7 +1121,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 670       Choose one of the following three options:
 671       [ ]      122a.  The Solar Panel System is financed under a power purchase agreement or other type of financing
 672                       arrangement which requires me/us to make periodic payments to a Solar Panel System provider
-673                       in order to acquire ownership of the Solar Panel System ("PPA"). If yes, proceed to Section A
+673                       in order to acquire ownership of the Solar Panel System ("PPA")? If yes, proceed to Section A
 674                       below.
 675       [ ]      122b.  The Solar Panel System is the subject of a lease agreement. If yes, proceed to Section B below.
 676       [ ]      122c.  I/we own the Solar Panel System outright. If yes, you do not have to answer any further questions.
@@ -1133,7 +1131,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 680       [ ]      [ ]      124.   What is the frequency of the periodic payments (check one)?  [ ] Monthly  [ ] Quarterly
 681       [ ]      [ ]      125.   What is the expiration date of the PPA, which is when you will become the owner of the Solar
 682                                Panel System? ____________________ ("PPA Expiration Date")
-683       [ ]      [ ]      126.   Is there a balloon payment that will become due on or before this PPA Expiration Date?
+683       [ ]      [ ]      126.   Is there a balloon payment that will become due on or before the PPA Expiration Date?
 684       [ ]      [ ]      127.   If there is a balloon payment, what is the amount? $____________________
 685       Choose one of the following three options:
 686       [ ]      128a.  Buyer will assume my/our obligations under the PPA at Closing.
@@ -1143,7 +1141,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 690                       cancellation of the PPA as of the Closing.
 691
 692       SECTION B - THE SOLAR PANEL SYSTEM IS SUBJECT TO A LEASE
-693       [ ]      [ ]      129.   What is the current lease payment amount? $____________________
+693       [ ]      [ ]      129.   What is the current periodic lease payment amount? $____________________
 694       [ ]      [ ]      130.   What is the frequency of the periodic lease payments (check one)?  [ ] Monthly  [ ] Quarterly
 695       [ ]      [ ]      131.   What is the expiration date of the lease? ____________________
 696       Choose one of the following two options:
@@ -1165,7 +1163,7 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 702  [ ]  [ ]  [ ]      133.  Are Solar Transition Renewable Energy Certificates ("TRECs") available from the Solar Panel
 703                            System?
 704            [ ]      133a. If TRECs are available, when will the TRECs expire? ____________
-705  [ ]  [ ]  [ ]      134.  Are Solar Renewable Energy Certificates ("SREC IIs") available from the Solar Panel System?
+705  [ ]  [ ]  [ ]      134.  Are Solar Renewable Energy Certificates IIs ("SREC IIs") available from the Solar Panel System?
 706            [ ]      134a. If SREC IIs are available, when will the SREC IIs expire? ____________
 707
 708  WATER INTRUSION Pursuant to N.J.S.A. 56:8-19.1
@@ -1186,7 +1184,7 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 723  [ ]  [X]  [ ]      136.  Is there a secondary power source at the Property (i.e. permanently installed combustion
 724                            generators, solar panels, battery storage systems, or any other supplemental source of electrical
 725                            energy)?
-726  [ ]  [ ]          136a. If "yes," is a label installed within 18 inches of the main [N/A] electrical panel and electrical meter
+726  [ ]  [ ]          136a. If "yes," is a label installed within 18 inches of the m[N/A]electrical panel and electrical meter
 727                            warning of the dangers associated with the secondary power sources?
 728
 729
@@ -1250,7 +1248,7 @@ NJ REALTORS® | Form 140 | 05/2025.2   Page 13 of 14
      PROSPECTIVE BUYER                          PROSPECTIVE BUYER
 779
 780  ACKNOWLEDGMENT OF REAL ESTATE BROKER/BROKER-SALESPERSON/SALESPERSON
-781  The undersigned Seller's real estate broker/broker-salesperson/salesperson acknowledges receipt of this Statutory Disclosures &
+781  The undersigned Seller's real estate broker/broker/broker-salesperson/salesperson acknowledges receipt of this Statutory Disclosures &
 782  Other Items Addendum to the Disclosure Statement and that the information contained in this form was provided by the Seller.
 783
 784  The Seller's real estate broker/broker-salesperson/salesperson also confirms that he or she visually inspected the Property with reasonable
@@ -1745,7 +1743,7 @@ New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 4 of 14    Buyer's In
 217   existing Municipal, County, State or Federal rules, regulations or laws.  Seller agrees to transfer all security deposits to Buyer at the Closing
 218   and to provide to Brokers and Buyer a copy of all leases concerning the tenancies, if any, along with this Contract when it is signed by
 219   Seller.  Seller represents that such leases can be assigned and that Seller will assign said leases, and Buyer agrees to accept title subject to
-220   the tenancies.
+220   these leases.
 221
 222   TENANT'S NAME          LOCATION          RENT          SECURITY DEPOSIT          TERM
 223
@@ -2013,7 +2011,7 @@ Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]  
 462  Seller nor any real estate broker or salesperson make any representation as to the accuracy of the registry.
 463
 464  19. NOTIFICATION REGARDING OFF-SITE CONDITIONS: (Applicable to all resale transactions.)
-465  Pursuant to the New Jersey Residential Construction Off-Site Conditions Disclosure Act, N.J.S.A. 46:3C-1, et seq., the clerks of municipalities in
+465  Pursuant to the New Residential Construction Off-Site Conditions Disclosure Act, N.J.S.A. 46:3C-1, et seq., the clerks of municipalities in
 466  New Jersey maintain lists of off-site conditions which may affect the value of residential properties in the vicinity of the off-site condition.
 467  Buyers may examine the lists and are encouraged to independently investigate the area surrounding this property in order to become
 468  familiar with any off-site conditions which may affect the value of the property. In cases where a property is located near the border of a
@@ -2060,7 +2058,7 @@ Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]  
 502   Lakewood Tp.            Lakewood                            Robbinsville            Trenton-Robbinsville
 503   Lincoln Park Bor.       Lincoln Park                        West Milford Tp.        Greenwood Lake
 504   Lower Tp.               Cape May County                     Winslow Tp.             Camden County
-505   Lumberton Tp.           Flying W & South Jersey Regional    Woodbine Tp.            Woodbine Municipal
+505   Lumberton Tp.           Flying W & South Jersey Regional    Woodbine Bor.            Woodbine Municipal
 
 506   The following airports are not subject to the Airport Safety and Zoning Act because they are subject to federal regulation or within the
 507   jurisdiction of the Port of Authority of New York and New Jersey and therefore are not regulated by New Jersey: Essex County Airport,
@@ -2071,7 +2069,7 @@ Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]  
 511   21. BULK SALES:
 512   The New Jersey Bulk Sales Law, N.J.S.A. 54:50-38, (the "Law") applies to the sale of certain residential property. Under the Law,
 513   Buyer may be liable for taxes owed by Seller if the Law applies and Buyer does not deliver to the Director of the New Jersey Division
-514   of Taxation (the "Division") a copy of this Contract and a notice on a form required by the Division (the "Tax Form"), at least ten
+514   of Taxation (the "Division") a copy of this Contract and a notice on a form required by the Division (the "Tax Form") at least ten
 515   (10) business days prior to the Closing. If Buyer decides to deliver the Tax Form to the Division, Seller shall cooperate with Buyer by
 516   promptly providing Buyer with any information that Buyer needs to complete and deliver the Tax Form in a timely manner. Buyer
 517   promptly shall deliver to Seller a copy of any notice that Buyer receives from the Division in response to the Tax Form.
@@ -2151,7 +2149,7 @@ Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]  
 585    and deliver to Buyer at the Closing any and all forms, affidavits or certifications required under state and federal law to be filed in
 586    connection with the amount(s) withheld.
 587
-588    There shall be no adjustment on any Homestead Rebate due to or become due.
+588    There shall be no adjustment on any Homestead Rebate due or to become due.
 589
 590
 

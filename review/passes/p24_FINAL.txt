@@ -47,7 +47,7 @@
 217   existing Municipal, County, State or Federal rules, regulations or laws.  Seller agrees to transfer all security deposits to Buyer at the Closing
 218   and to provide to Brokers and Buyer a copy of all leases concerning the tenancies, if any, along with this Contract when it is signed by
 219   Seller.  Seller represents that such leases can be assigned and that Seller will assign said leases, and Buyer agrees to accept title subject to
-220   the tenancies.
+220   these leases.
 221
 222   TENANT'S NAME          LOCATION          RENT          SECURITY DEPOSIT          TERM
 223

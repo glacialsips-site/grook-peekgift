@@ -33,7 +33,7 @@
 502   Lakewood Tp.            Lakewood                            Robbinsville            Trenton-Robbinsville
 503   Lincoln Park Bor.       Lincoln Park                        West Milford Tp.        Greenwood Lake
 504   Lower Tp.               Cape May County                     Winslow Tp.             Camden County
-505   Lumberton Tp.           Flying W & South Jersey Regional    Woodbine Tp.            Woodbine Municipal
+505   Lumberton Tp.           Flying W & South Jersey Regional    Woodbine Bor.            Woodbine Municipal
 
 506   The following airports are not subject to the Airport Safety and Zoning Act because they are subject to federal regulation or within the
 507   jurisdiction of the Port of Authority of New York and New Jersey and therefore are not regulated by New Jersey: Essex County Airport,
@@ -44,7 +44,7 @@
 511   21. BULK SALES:
 512   The New Jersey Bulk Sales Law, N.J.S.A. 54:50-38, (the "Law") applies to the sale of certain residential property. Under the Law,
 513   Buyer may be liable for taxes owed by Seller if the Law applies and Buyer does not deliver to the Director of the New Jersey Division
-514   of Taxation (the "Division") a copy of this Contract and a notice on a form required by the Division (the "Tax Form"), at least ten
+514   of Taxation (the "Division") a copy of this Contract and a notice on a form required by the Division (the "Tax Form") at least ten
 515   (10) business days prior to the Closing. If Buyer decides to deliver the Tax Form to the Division, Seller shall cooperate with Buyer by
 516   promptly providing Buyer with any information that Buyer needs to complete and deliver the Tax Form in a timely manner. Buyer
 517   promptly shall deliver to Seller a copy of any notice that Buyer receives from the Division in response to the Tax Form.

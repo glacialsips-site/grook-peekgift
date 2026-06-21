@@ -7,7 +7,7 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 530
 531    ACKNOWLEDGMENT OF SELLER
 532    The undersigned Seller affirms that the information set forth in the above Flood Risk Addendum to the Disclosure Statement is accurate
-533    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. The Seller hereby authorizes the real
+533    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real
 534    estate brokerage firm representing or assisting the Seller to provide this completed Flood Risk Addendum to the Disclosure Statement
 535    to all prospective buyers of the Property, and to other real estate agents. Seller alone is the source of all information contained in this
 536    statement. *If the Seller relied upon any credible representation of another, the Seller should state the name(s) of the person(s) who made
@@ -35,9 +35,9 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 555
 556    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
 557    The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
-558    to signing a Contract of Sale pertaining to the Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
+558    to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
 559    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
-560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, as Prospective
+560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, at Prospective
 561    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is intended to
 562    provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale. This form
 563    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
