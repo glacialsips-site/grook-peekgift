@@ -40,6 +40,11 @@ NJ Form 140 disclosure, and the Form 118 Statewide Contract of Sale).
    Markup: correct §32 to DeAndino. Don't re-litigate.
 
 ## STATUS — WHERE WE ARE
+> ✅ UPDATE 2026-06-21: **TRANSCRIPTION LOCKED & VERIFIED.** Waves 4 (reconcile A-vs-B) + 5 (independent
+> falsification audit) + convergence re-verify COMPLETE across all 32 pages. Authoritative source =
+> the 32 `review/passes/pNN_FINAL.txt` + rebuilt `review/full-packet-transcription.md`. The old A/B
+> pass files remain for provenance. **NEXT PHASE:** finish line-by-line legal markup (pp.23-33 detail
+> still thin in `contract-line-by-line.md`; pp.20-22 + key findings done).
 - **Re-rip COMPLETE.** Every page (1–33; p3 blank) has TWO independent transcription passes
   `_A` + `_B` in `review/passes/`. Page 20 done by hand (filter issue above).
 - **Pending = RECONCILIATION (the step that actually catches errors).** For each page: diff

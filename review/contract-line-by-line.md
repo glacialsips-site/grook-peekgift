@@ -92,7 +92,7 @@
 | 3 | blank |
 | 4 | MLS data sheet (Tax ID 32-00840-0000-00097; 90×125 apx lot dims — misleading vs 1.08ac irregular lot) |
 | 5–18 | **Seller's Property Condition Disclosure Statement (NJ REALTORS Form 140, 14 pp).** Seller "Frank Evan DeAndino." Built ~1959, bought ~2012, public water, sump pump+attic fan, **in-ground pool (liner due for replacement)**, solar=No, water intrusion=No, flood addendum all No. ⚠️ **ALL signature/date blocks BLANK — disclosure unsigned.** |
-| 19 | **Proof of funds #2** — **Ending Balance $488,176.21**, name redacted (…"polo"/Puopolo thread) — likely the father's account Frank recalled |
+| 19 | **Proof of funds #2** — **Ending Balance $488,178.21**, name redacted (…"polo"/Puopolo thread) — likely the father's account Frank recalled |
 | 20–33 | The sales contract (Form 118-Statewide, 14 pp) |
 
 ## 🔑 KEY CONTRACT FINDINGS (pp. 30–33)

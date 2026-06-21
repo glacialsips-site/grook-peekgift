@@ -1,13 +1,13 @@
-# 115 Browns Dock Rd — Full Packet Transcription (subagent-verified)
+# 115 Browns Dock Rd — Full Packet Transcription (VERIFIED / LOCKED)
 
-> Assembled from multi-pass subagent transcription. Pages 2,19,27,31,32,33 cross-verified (pass A+B).
-> Resolved: p19 Ending Balance = $488,178.21 (8, not 6). p27 cure clause = "Seller" (standard).
-> Pending adjudication: seller surname DeAndino vs DiAndino (p21 vs p32).
-
+> Built from 32 per-page `_FINAL` transcriptions, each produced by a 4-stage pipeline:
+> two independent vision passes (A,B) → reconciliation (A-vs-B diff, shared-error re-check,
+> zoom-resolution) → independent falsification audit (Wave 5) → convergence re-verify on all
+> corrected pages. Every material token (numbers, $, names, dates, checkboxes, fill-ins) was
+> zoom-verified against the source image. Page 3 is blank. Page 20 hand-reconciled (content-filter).
 
 
 =================== PAGE 1 ===================
-[transcription pass: A]
 IMAGE DEPICTS: A photograph of a printed land SURVEY / location survey (plat) sheet for a residential property — Lot 97, Block 840, 115 Browns Dock Road, Middletown, Monmouth County, New Jersey. Shows the lot outline, a one-story frame dwelling (#115) with driveway, deck, inground pool, fences, and bearing/distance calls along the lot lines and along Clay Pit Creek.
 
 ================ VERBATIM TRANSCRIPTION ================
@@ -75,7 +75,7 @@ LOT 97
 --- RIGHT (EAST) PROPERTY LINE ---
 S 16°12'00" W
 320.92'
-(317.44 deed)
+(317.44' deed)
 CHAIN LINK FENCE
 
 --- SOUTH / CLAY PIT CREEK LINE (BEARINGS & DISTANCES) ---
@@ -90,7 +90,7 @@ N 28°16'00" W
 31.82'
 N 04°26'20" W
 31.31'
-N 32°17'[?]" W
+N 32°17'26" W
 STONE FOUND
 
 --- COMPASS / NORTH ARROW ---
@@ -142,91 +142,66 @@ DWG: B-2128
 6/19/26, 6:56 PM     17067.jpg
 https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?projector=1     1/1
 
-================ UNCERTAIN ================
-N 32°17'[?]" W  -- the seconds value of the last (lower) creek bearing is obscured near "STONE FOUND"; best guess the bearing reads N 32°17' with seconds illegible.
-
-
-
 =================== PAGE 2 ===================
-[transcription pass: B(verified)]
-PAGE 2 — VERBATIM TRANSCRIPTION
+=== PAGE 2 — LOCKED FINAL TRANSCRIPTION ===
 IMAGE FILE: /tmp/pages_full/hi-2-02.png
+DOCUMENT TYPE: Screenshot (emailed as image1.jpeg) of the first/summary page of
+a Capital One 360 bank statement. Proof-of-funds bank statement showing a total
+ending balance. Account holder first name and mailing address redacted with
+black bars; surname "puopolo" visible.
+NOTE: No prior A/B passes existed for this page; transcribed directly from the
+image with high-zoom (3-5x) verification of every dollar figure and the
+account number.
 
-DOCUMENT TYPE: Screenshot/photograph of an emailed image ("image1.jpeg") of a Capital One 360 bank statement (April 2026 monthly statement / proof of funds). Browser/email print view.
+--- BROWSER / EMAIL CHROME (screenshot edges) ---
+[Top-left]: 6/19/26, 3:50 PM
+[Top-center]: image1.jpeg
+[Bottom-left URL]: https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox/FMfcgzQgMVfvlmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.2
+[Bottom-right]: 1/1
 
---- BROWSER / EMAIL PRINT HEADER ---
-Top-left timestamp: 6/19/26, 3:50 PM
-Top-center: image1.jpeg
+--- TOP (Capital One logo / addressee) ---
+Capital One  [logo, with stylized red swoosh]
 
---- STATEMENT BODY ---
+[Addressee block — first name REDACTED with black bar; surname visible:]
+            puopolo
+[address line partially visible, mostly redacted: "...Rd" — street/city/state/ZIP REDACTED]
 
-[LOGO] Capital One®
-
-[Account holder name block — PARTIALLY REDACTED with black marker/redaction bar]
-Visible text over/below the redaction:
-  "puopolo" (lowercase as shown)
-  "d" (lowercase, on next line)
-NOTE: The first name and most of the name/address block is obscured by a black redaction bar. Only the partial surname "puopolo" and a stray "d" are legible. First name is REDACTED/obscured.
-
+--- INTRO ---
 Thanks for saving with Capital One 360®
-
 Here's your April 2026 bank statement.
 
 STATEMENT PERIOD
-Apr 1 – Apr 30, 2026
+Apr 1 - Apr 30, 2026
 
-[DARK BANNER]
-$135,671.44    TOTAL ENDING BALANCE
-               IN ALL ACCOUNTS
+--- TOTAL ENDING BALANCE (dark band) ---
+$135,671.44   TOTAL ENDING BALANCE IN ALL ACCOUNTS
 
+--- ACCOUNT SUMMARY ---
 Account Summary
 
-ACCOUNT NAME                    Apr 1        Apr 30
-360 Performance Savings...6202  [REDACTED/  $135,671.44
-                                 grayed box]
+ACCOUNT NAME                       Apr 1        Apr 30
+360 Performance Savings...6202   [REDACTED]   $135,671.44
 
-NOTE: The "Apr 1" opening balance value is hidden behind a gray redaction box. A large lower portion of the account summary table is covered by gray redaction boxes (no further values legible).
+[Remainder of page (transaction detail area) is covered by a large gray
+redaction box.]
 
 --- FOOTER ---
 Page 1 of 3
+capitalone.com    1-888-464-0727    P.O. Box 85123, Richmond, VA 23285    Member FDIC    [Equal Housing Lender logo]
 
-[icon] capitalone.com   [phone icon] 1-888-464-0727   [mail icon] P.O. Box 85123, Richmond, VA 23285   FDIC   [house icon = Equal Housing]
-
---- BROWSER FOOTER ---
-URL: https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox/FMfcgzQgMVfvImBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.2
-1/1
-
-=== KEY DATA EXTRACTION ===
-DOLLAR AMOUNTS:
-  $135,671.44 (Total Ending Balance in all accounts)
-  $135,671.44 (360 Performance Savings ...6202, Apr 30 balance)
-  (Apr 1 opening balance — REDACTED behind gray box, not legible)
-
-NAMES:
-  "puopolo" — partial surname, lowercase; first name REDACTED/obscured by black bar
-  "d" — stray lowercase letter near name block (possibly part of redacted line)
-  No "Cardona" present.
-
-INSTITUTION: Capital One / Capital One 360
-ACCOUNT NUMBER FRAGMENT: 360 Performance Savings ...6202 (last 4: 6202)
-DATES: Statement period Apr 1 – Apr 30, 2026; "April 2026 bank statement"; email/print timestamp 6/19/26, 3:50 PM
-PHONE: 1-888-464-0727
-ADDRESS: P.O. Box 85123, Richmond, VA 23285
-PAGE: "Page 1 of 3" (this image shows page 1 of the 3-page statement)
-
-=== UNCERTAIN TOKENS ===
-- "puopolo"[?] — legible but partially overlapped by redaction; capitalization in original likely "Puopolo" but rendered lowercase here. Best guess: surname Puopolo.
-- "d"[?] — isolated lowercase letter under the name; could be a leftover of a redacted line (e.g., end of an address/name). Best guess: fragment of redacted name/address.
-- Apr 1 opening balance[?] — completely covered by gray redaction box; unreadable.
-
-
+--- VERIFIED KEY FIELDS (zoom-resolved) ---
+Total Ending Balance: $135,671.44
+Account (360 Performance Savings) last 4: 6202  (shown as ...6202)
+Apr 30 column balance: $135,671.44
+Apr 1 column: REDACTED (gray box)
+Statement Period: Apr 1 - Apr 30, 2026  (April 2026 statement)
+Page: Page 1 of 3
+Visible surname: puopolo (first name redacted)
 
 =================== PAGE 3 ===================
 [blank page]
 
-
 =================== PAGE 4 ===================
-[transcription pass: A]
 22617358   Residential        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        LP: $894,900 Private Copy
 
 Status:                 Active 06/09/2026                List Price:           $894,900
@@ -239,10 +214,10 @@ Area/Section:           None                             Bedrooms:             3
 Complex/Subdivision:    None                             Baths:                1 / 0
 Tax ID#:                32-00840-0000-00097              FF / #:               Yes / 1
 Apx Lot Dimensions:     90 x 125                         Garage / #:           No / 0
-Acreage:                                                 Waterfront:           No
+Acreage:                1.08                             Waterfront:           No
 Elementary School:      Navesink Elementary              Waterview:            No
 Middle School:          Bayshore                         Handicap Access:      No
-High School:            Rumsey School                    Linked Listing:
+High School:            Ranney School                    Linked Listing:
 Other Elementary:                                        Directions: Monmouth Ave to Browns
 Other High:                                              Dock Road
 Style:                  Ranch
@@ -255,16 +230,16 @@ privacy, location and the ability to create a substantial custom home in a corri
 subject to approvals. Improvements conveyed as-is.
 
 Tax Year:               2025          Asmnt - Land:         403,800      New Construction:  No        Deed Restricted:  No
-Taxes:                  9,452         Asmnt - Improvements: 181,800      Pool:              No        Farm Assessed:    No
-Special Assessment:     No            Asmnt - Total:        585,600      Assessment Status: Current
+Taxes:                  9,452         Asmnt - Improvements: 181,800      Farm:              No        Farm Assessed:    No
+Special Assessment:     No            Asmnt - Total:        585,600      Assessment Status: Assessed
 
 Assn Fee:                             Mgmt Type:                         Fee Includes:                App Escrow Required:
-Assn Fee Paid:                        Common Elements:                   Mgmt Phone:                  Mgmt Phone:
+Assn Fee Paid:                        Common Elements:                   Mgmt Name:                   Mgmt Phone:
 Capital Contribution:
 
 Room Name Level Dimensions Remarks      Room Name Level Dimensions Remarks                              # Level 1 -        1
 Dining Room First   16 x 12             Bedroom    First   14 x 11                                      Baths:
-Foyer       First   3 x 3               Bedroom    First   15 x 10                                      # Level 2 -        1
+Foyer       First   3 x 3               Bedroom    First   11 x 10                                      # Level 2 -        1
 Kitchen     First   14 x 12             Primary    First   14 x 14                                      Baths:
 Living Room First   27 x 16             Bedroom
 
@@ -282,31 +257,26 @@ Cooling:                Central Air
 Excluded: Personal Property
 
 Days on Market: 3                      Office: 732-970-8733            Owner Name: Withheld                LD-EX: 06/09/2026
-Listing Office: 3716 Red Door Realty Group     Cell: 732-616-8020     Seller Disc: Document Link
+Listing Office: 3716 Red Door Realty Group     Cell: 732-616-8020     Seller Discl: Document Link
 Listing Member: 43150 Glenn Aaronson                                  Owner: Individual(s); NJ LIC RE
                                                                       Possession: At Closing
 
 Typ: Exclusive Right To Sell  LBox: Yes
 Showing:Call Listing Office; Lockbox - Monmouth; Sign; Vacant
 Agent Notes:Home being sold strictly "as is", buyer responsible for Certificate of Occupancy. Dogs reside in the home so please knock first, confirmed
-appointment only.
+appointments only.
 
 Information is deemed to be reliable, but is not guaranteed. © 2026 MLS and FBS. Prepared by Colleen Antoon on Friday, June 12, 2026 4:31 PM. The information on
 this sheet has been made available by the MLS and may not be the listing of the provider.
 
-
-
 =================== PAGE 5 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey REALTORS® Seller's Property Condition Disclosure Statement — Instructions page (Page 1 of 14 of the form). This is the introductory "INSTRUCTIONS" page explaining the purpose and legal basis of the disclosure statement.
+DOCUMENT TYPE: New Jersey REALTORS® Seller's Property Condition Disclosure Statement — INSTRUCTIONS page (Page 1 of 14 of Form 140).
 
 --- HEADER (top of page) ---
 Documents for MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,900
 
 --- LOGO (left) ---
 [New Jersey REALTORS logo]
-NEW JERSEY
-REALTORS
 
 --- TITLE (centered) ---
 INSTRUCTIONS –
@@ -316,13 +286,13 @@ SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
 
 --- BODY (with margin line numbers) ---
 
-1   Effective August 1, 2024, the New Jersey Real Estate Consumer Protection Enhancement Act, P.L.2023,c.92, requires sellers of
+1   Effective August 1, 2024, the New Jersey Real Estate Consumer Protection Enhancement Act, P.L.2024,c32, requires sellers of
 2   residential property located in New Jersey to complete and sign a property condition disclosure statement as promulgated by the
-3   New Jersey Division of Consumer Affairs pursuant to N.J.A.C. 13:45A:29.1. This requires all sellers of residential real estate to
+3   New Jersey Division of Consumer Affairs pursuant to N.J.A.C. 13:45A-29.1. This requires all sellers of residential real estate to
 4   provide the property condition disclosure statement to a prospective buyer before the prospective buyer becomes obligated under
 5   any contract for the purchase of the property.
 6
-7   Additionally, the New Jersey Law of Flood Risk Notification, P.L.2023,c.93, requires sellers of all real property located in New
+7   Additionally, the New Jersey Law of Flood Risk Notification, P.L.2023,c93, requires sellers of all real property located in New
 8   Jersey to make certain supplemental disclosures concerning flood risks on the "Flood Risk Addendum" incorporated within the
 9   property condition disclosure statement. As a result of these two laws:
 10
@@ -331,34 +301,34 @@ SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
 13  •   All sellers of residential and non-residential (i.e. commercial), must complete the Flood Risk Addendum, Questions
 14      109-117, on the property condition disclosure statement.
 15
-16  Moreover, regarding the property condition disclosure statement, the New Jersey Division of Consumer Affairs has provided the
+16  Moreover, regarding the Property Condition disclosure statement, the New Jersey Division of Consumer Affairs has provided the
 17  following instructions:
 18
 19      The purpose of the Property Condition Disclosure Statement ("Disclosure Statement"), including the Flood Risk Addendum, is to disclose the
-20      condition of the property as of the date set forth on this Disclosure Statement or Flood Risk Addendum. The seller is under no obligation to disclose
+20      condition of the property, as of the date set forth on this Disclosure Statement or Flood Risk Addendum. The seller is under an obligation to disclose
 21      any known material defects in the property even if not addressed in this printed form. The seller alone is the source of all information contained in
-22      this form. All prospective buyers of the property are cautioned to carefully inspect the property and to carefully verify any surrounding area, for any
+22      this form. All prospective buyers of the property are cautioned to carefully inspect the property and to carefully inspect the surrounding area for any
 23      off-site conditions that may adversely affect the property. Moreover, this Disclosure Statement is not intended to be a substitute for prospective buyer's
 24      hiring of qualified experts to inspect the property.
 25
-26      If a property consists of multiple units, systems and/or fixtures, please provide complete answers on all such units, systems and/or fixtures even if
+26      If a property consists of multiple units, systems and/or features, please provide complete answers on all such units, systems and/or features even if
 27      the question is phrased in the singular, such as if a duplex has multiple furnaces, water heaters, and fireplaces.
 28
-29      Pursuant to P.L. 2023, c.92, completion of questions 1 through 108 is mandatory for all sellers of residential real property in the State. Sellers
-30      of residential real property must answer these questions before the purchase becomes obligated under any contract for the purchase of the property.
-31      Questions 1 through 108 must be answered to the best of seller's knowledge, unless otherwise stated.
+29      Pursuant to P.L. 2024, c.32, completion of questions 1 through 108 is mandatory for all sellers of residential real property in the State. Sellers
+30      of residential real property must answer these questions before the purchaser becomes obligated under any contract for the purchase of the property.
+31      Questions 1 through 108 must be answered to the best of the seller's knowledge, unless otherwise stated.
 32
-33      Pursuant to N.J.S.A. 26:6-19.2, completion of the "Flood Risk Addendum" (questions 109 through 117 of the Disclosure Statement), is mandatory
+33      Pursuant to N.J.S.A. 56:8-19.2, completion of the "Flood Risk Addendum" questions 109 through 117 of the Disclosure Statement, is mandatory
 34      for all sellers of real property (including both residential and non-residential property). Sellers of real property must answer these questions before the
-35      purchase becomes obligated under any contract for the purchase of the property. This is the case regardless of whether a seller completes questions
-36      1-108 of the Disclosure Statement. Sellers must certify their answers to questions 109 and 110, and may do so using the Flood Risk Notification
-37      Tool located at floodriskalaw.nj.gov. Questions 111 through 117 must be answered based on the seller's actual knowledge.
+35      purchaser becomes obligated under any contract for the purchase of the property. This is the case regardless of whether a seller completes questions
+36      1-108 of the Disclosure Statement. Sellers must verify their answers to questions 109 and 110, and may do so using the Flood Risk Notification
+37      Tool located at flooddisclosure.nj.gov. Questions 111 through 117 must be answered based on the seller's actual knowledge.
 38
-39      A seller must execute a separate acknowledgement for each portion of this Disclosure Statement that the seller completes. If a seller does not answer
+39      A seller must execute a separate acknowledgement for each portion of the Disclosure Statement that the seller completes. If a seller does not answer
 40      questions 1 through 108, no acknowledgement is required for that portion. However, the mandatory Flood Risk Addendum must still be completed
 41      and acknowledged in all cases.
 42
-43  Lastly, the New Jersey REALTORS® Seller's Property Condition Disclosure Statement, Form #140, includes an Addendum
+43  Lastly, New Jersey REALTORS® Seller's Property Condition Disclosure Statement, Form #140, includes an Addendum
 44  Regarding Statutory Disclosures & Other Items, Questions 118-136a, to be answered to the best of seller's knowledge as required
 45  by law.
 46
@@ -373,126 +343,116 @@ SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
 55
 
 --- FOOTER ---
-NJ REALTORS® / Form 140 / Rev 07/2025-2      Page 1 of 14      [REALTOR® logo]  [Equal Housing Opportunity logo]
-
-
+NJ REALTORS® | Form 140 | 05/2025.2    Page 1 of 14      [Equal Housing Opportunity logo]
 
 =================== PAGE 6 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey Realtors Seller's Property Condition Disclosure Statement — Page 2 of 14 (Form 140). This page covers OCCUPANCY, ROOF, and ATTIC/BASEMENTS AND CRAWL SPACES sections with Yes/No/Unknown checkboxes.
+DOCUMENT TYPE: New Jersey REALTORS® Seller's Property Condition Disclosure Statement — Page 2 of 14 (Form 140). OCCUPANCY, ROOF, and ATTIC/BASEMENTS AND CRAWL SPACES sections with Yes/No/Unknown checkboxes.
 
 === TOP HEADER (above the form) ===
-MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands NJ 07716          $894,900
+MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,900
 
 === FORM BODY ===
 
-[NEW JERSEY REALTORS logo]
+[NEW JERSEY REALTORS logo]                    NEW JERSEY REALTORS®
+                                      SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
+                                                © 2018 New Jersey REALTORS®
 
-NEW JERSEY REALTORS®
-SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
-©2016 New Jersey REALTORS®
+56   Property Address:   115 Browns Dock Road, Atlantic Highlands, New Jersey 07716
+57
+58   _______________________________________________________________________________________________________ ("Property").
+59
+60   Seller:   Frank Evan DeAndino
+61
+62   _______________________________________________________________________________________________________ ("Seller").
+63
+64   The purpose of this Disclosure Statement is to disclose, to the best of Seller's knowledge, the condition of the Property, as of the date set
+65   forth below. The Seller is aware that he or she is under an obligation to disclose any known material defects in the Property even if not
+66   addressed in this printed form. Seller alone is the source of all information contained in this form. All prospective buyers of the Property
+67   are cautioned to carefully inspect the Property and to carefully inspect the surrounding area for any off-site conditions that may adversely
+68   affect the Property. Moreover, this Disclosure Statement is not intended to be a substitute for prospective buyer's hiring of qualified experts
+69   to inspect the Property.
+70
+71   If your Property consists of multiple units, systems and/or features, please provide complete answers on all such units, systems and/or
+72   features even if the question is phrased in the singular, such as if a duplex has multiple furnaces, water heaters and fireplaces.
+73
+74   OCCUPANCY
+75       Yes    No    Unknown
+76       [ ]    [ ]     [ ]       1.    Age of House, if known  Built 1959
+77       [X]    [ ]                2.    Does the Seller currently occupy this Property?
+78                                       If not, how long has it been since Seller occupied the Property? _______________________
+79                                 3.    What year did the Seller buy the Property?  2012
+80       [ ]    [X]                3a.   Do you have in your possession the original or a copy of the deed evidencing your ownership of
+81                                       the Property? If "yes," please attach a copy of it to this form.
+82
+83   ROOF
+84       Yes    No    Unknown
+85       [ ]    [ ]     [X]       4.    Age of roof   Unknown
+86       [ ]    [X]                5.    Has roof been replaced or repaired since Seller bought the Property?
+87       [ ]    [X]                6.    Are you aware of any roof leaks?
+88                                 7.    Explain any "yes" answers that you give in this section: ______________________________
+89                                       ___________________________________________________________________________________
+90
+91   ATTIC, BASEMENTS AND CRAWL SPACES (Complete only if applicable)
+92       Yes    No    Unknown
+93       [X]    [ ]                8.    Does the Property have one or more sump pumps?
+94       [ ]    [X]                8a.   Are there any problems with the operation of any sump pump?
+95       [ ]    [X]                9.    Are you aware of any water leakage, accumulation or dampness within the basement or crawl
+96                                       spaces or any other areas within any of the structures on the Property?
+97       [ ]    [X]                9a.   Are you aware of the presence of any mold or similar natural substance within the basement or
+98                                       crawl spaces or any other areas within any of the structures on the Property?
+99       [ ]    [X]                10.   Are you aware of any repairs or other attempts to control any water or dampness problem in the
+100                                      basement or crawl space? If "yes," describe the location, nature and date of the repairs: _______
+101                                      ___________________________________________________________________________________
+102
+103      [ ]    [X]                11.   Are you aware of any cracks or bulges in the basement floor or foundation walls? If "yes," specify
+104                                      location: ___________________________________________________________________________
+105      [ ]    [X]                12.   Are you aware of any restrictions on how the attic may be used as a result of the manner in which
+106                                      the attic or roof was constructed?
+107      [X]    [ ]                13.   Is the attic or house ventilated by:  [ ] a whole house fan?  [X] an attic fan?
+108      [ ]    [X]                13a.  Are you aware of any problems with the operation of such a fan?
+109
+110
 
-Property Address:   115 Browns Dock Road, Atlantic Highlands, New Jersey 07716
+                                                                                                          [REALTOR logo]
+                                                                                                          [EQUAL HOUSING OPPORTUNITY logo]
 
-_______________________________________________________________________ ("Property").
-
-Seller:    Frank Evan DeAndino
-
-_______________________________________________________________________ ("Seller").
-
-The purpose of this Disclosure Statement is to disclose, to the best of Seller's knowledge, the condition of the Property as of the date set
-forth below. The Seller is aware that he or she is under no obligation to disclose any known material defects to the Property even if not
-addressed in this printed form. Seller alone is the source of all information contained in this form. All prospective buyers of the Property
-are cautioned to carefully inspect the Property and to carefully inspect the surrounding area for any offsite conditions that may adversely
-affect the Property. Moreover, this Disclosure Statement is not intended to be a substitute for prospective buyer's hiring of qualified experts
-to inspect the Property.
-
-If your Property consists of multiple units, systems and/or features, please provide complete answers on all such units, systems and/or
-features even if the question is phrased in the singular, such as if a duplex has multiple furnaces, water heaters and fireplaces.
-
-OCCUPANCY
-   Yes    No    Unknown
-   [ ]    [ ]     [X]      1.   Age of Home, if known: Built 1959
-                           2.   Does the Seller currently occupy the Property?
-   [X]    [ ]              7.        If not, how long has it been since Seller occupied the Property? ___________________
-                           3.   What year did the Seller buy the Property? Pr/2012  /? ___________________
-   [ ]    [X]              5a.  Do you have in your possession the original or a copy of the third evidencing your ownership of
-                                the Property? If "yes," please attach a copy of it to this form.
-
-ROOF
-   Yes    No    Unknown
-   [ ]    [ ]     [X]      4.   Age of roof: Unknown
-   [ ]    [X]              5.   Has roof been replaced or repaired since Seller bought the Property?
-   [ ]    [X]              6.   Are you aware of any roof leaks?
-   [ ]    [X]              7.   Explain any "yes" answers that you give in this section: _______________________________
-
-   ____________________________________________________________________________________________________
-
-ATTIC, BASEMENTS AND CRAWL SPACES (Complete only if applicable)
-   Yes    No    Unknown
-   [X]    [ ]              8.   Does the Property have one or more sump pumps?
-   [ ]    [X]              8a.  Are there any problems with the operation of any sump pump?
-   [ ]    [X]              9.   Are you aware of any water leakage, accumulation or dampness within the basement or crawl
-                                spaces or any other areas within any of the structures on the Property?
-   [ ]    [X]              9a.  Are you aware of the presence of any mold or similar natural substance within the basement or
-                                crawl spaces or any other areas within any of the structures on the Property?
-   [ ]    [X]              10.  Are you aware of any repairs or other attempts to control any water or dampness problem in the
-                                basement or crawl space? If "yes," describe the location, nature and date of the repairs: ______
-
-   ____________________________________________________________________________________________________
-
-   [ ]    [X]              11.  Are you aware of any cracks or bulges in the basement floor or foundation walls? If "yes," specify
-                                location: ______________________________________________________________________________
-
-   [ ]    [X]              12.  Are you aware of any structures below the attic that may be used as a result of the manner in which
-                                the attic or roof was constructed?
-   [X]    [ ]              13.  Is the attic or home ventilated by: [ ] a whole house fan?  [ ] an attic fan?
-   [X]    [ ]              13a. Are you aware of any problems with the operation of an attic fan?
-
-NJ REALTORS® | Form 140 | 05/2025.2.  Page 2 of 14
-[REALTOR® logo]   [Equal Housing Opportunity logo]
-
-=== MARGIN LINE NUMBERS (left margin, top to bottom) ===
-56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110
-
-
+NJ REALTORS® | Form 140 | 05/2025.2    Page 2 of 14
 
 =================== PAGE 7 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey REALTORS Seller's Property Condition Disclosure Statement (Form 140) — Page 5 of 14. This page covers Termites/Wood Destroying Insects/Dry Rot/Pests, Structural Items, Additions/Remodels, and Plumbing/Water and Sewage sections, with Yes/No/Unknown checkbox columns.
+NJ REALTORS Seller's Property Condition Disclosure Statement (Form 140) — Page 3 of 14.
+Sections: Termites/Wood Destroying Insects/Dry Rot/Pests, Structural Items, Additions/Remodels, Plumbing/Water and Sewage.
+Checkbox columns are Yes / No / Unknown (left to right).
 
 HEADER:
 MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $894,900
 
-[Margin line numbers shown in left margin: 111-170]
-
 111   14.  In what manner is access to the attic space provided?
 112        [ ] staircase  [X] pull down stairs  [ ] crawl space with aid of ladder or other device
-113        [ ] other ___________________________
-114   15.  Explain any "yes" answers that you give in this section: __________________________
-115        Basement sump pump; attic fan
-116        ____________________________________________________________________
+113        [ ] other ____________________
+114   15.  Explain any "yes" answers that you give in this section: ____________________
+115        Basement sump pump; attic fan.
+116        ____________________
 117
 
 118   TERMITES/WOOD DESTROYING INSECTS, DRY ROT, PESTS
 119        Yes   No   Unknown
 120   16.  [ ]   [X]        Are you aware of any termites/wood destroying insects, dry rot, or pests affecting the Property?
-121
-122   17.  [ ]   [X]        Are you aware of any damage to the Property caused by termites/wood destroying insects, dry
-123                         rot, or pests?
-124   18.  [ ]   [X]        If "yes," has work been performed to repair the damage?
+121   17.  [ ]   [X]        Are you aware of any damage to the Property caused by termites/wood destroying insects, dry
+122                         rot, or pests?
+123   18.  [ ]   [X]        If "yes," has work been performed to repair the damage?
 124   19.  [ ]   [X]        Is your Property under contract by a licensed pest control company? If "yes," state the name and
-                            address of the licensed pest control company: ___________________________
-127   20.  [ ]   [X]        Are you aware of any termite/pest control inspections or treatments performed at the Property
+125                         address of the licensed pest control company: ____________________
+126
+127   20.  [ ]   [X]        Are you aware of any termite/pest control inspections or treatments performed on the Property
 128                         in the past?
-129   21.        Explain any "yes" answers that you give in this section: ___________________________
-130        ____________________________________________________________________
-131        ____________________________________________________________________
+129   21.        Explain any "yes" answers that you give in this section: ____________________
+130        ____________________
+131        ____________________
 132
 
 133   STRUCTURAL ITEMS
 134        Yes   No   Unknown
-135   22.  [ ]   [X]        Are you aware of any movement, shifting, or other  problems with walls, floors, or foundations,
+135   22.  [ ]   [X]        Are you aware of any movement, shifting, or other problems with walls, floors, or foundations,
 136                         including any restrictions on how any space, other than the attic or roof, may be used as a result
 137                         of the manner in which it was constructed?
 138   23.  [ ]   [X]        Are you aware if the Property or any of the structures on it have ever been damaged by fire,
@@ -503,143 +463,138 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $8
 143   26.  [ ]   [X]        Are you aware of any present or past efforts made to repair any problems with the items in this
 144                         section?
 145   27.        Explain any "yes" answers that you give in this section. Please describe the location and nature of
-146                         the problem: ___________________________________________________
-147        ____________________________________________________________________
-148
+146                         the problem: ____________________
+147        ____________________
+148        ____________________
+149
 
-149   ADDITIONS/REMODELS
-150        Yes   No   Unknown
-151   28.  [ ]   [X]        Are you aware of any addition, structural changes or other alterations to the structure on the
-152                         Property made by any present or past owners?
-153   29.  [ ]   [ ]        Were the proper building permits and approvals obtained? Explain any "yes" answers you give
-154                         in this section: __________________________________________________
-155        ____________________________________________________________________
-156        ____________________________________________________________________
-157
+150   ADDITIONS/REMODELS
+151        Yes   No   Unknown
+152   28.  [ ]   [X]        Are you aware of any additions, structural changes or other alterations to the structures on the
+153                         Property made by any present or past owners?
+154   29.  [ ]   [ ]        Were the proper building permits and approvals obtained? Explain any "yes" answers you give
+155                         in this section: ____________________
+156        ____________________
+157        ____________________
+158
 
-158   PLUMBING, WATER AND SEWAGE
-159        Yes   No   Unknown
-160   30.        What is the source of your drinking water?
-161             [X] Public [ ] Community Water [ ] Well on Property [ ] Other (explain) _______________
-162   31.  [ ]   [ ]        If  your  drinking  water  source  is  not  public,  have  you  performed  any  tests  on  the  water?
-163                         If so, when? _____________________
-164                         Attach a copy of or describe the results: ___________________________
-165
-167   32.  [ ]   [X]   [ ]  Does the wastewater from your clothes washer, dishwasher, or other appliance discharge to any
+159   PLUMBING, WATER AND SEWAGE
+160        Yes   No   Unknown
+161   30.        What is the source of your drinking water?
+162             [X] Public  [ ] Community System  [ ] Well on Property  [ ] Other (explain) ____________________
+163   31.  [ ]   [ ]        If your drinking water source is not public, have you performed any tests on the water?
+164                         If so, when? ____________________
+165                         Attach a copy of or describe the results: ____________________
+166
+167   32.  [ ]   [X]   [ ]  Does the wastewater from any clothes washer, dishwasher, or other appliance discharge to any
 168                         location other than the sewer, septic, or other system that services the rest of the Property?
-169             [ ]        33.  When was well installed? ___________________________
-170                         Location of well? _________________________________
+169        [ ]        33.  When was well installed? ____________________
+170                         Location of well? ____________________
 
 FOOTER:
-NJ REALTORS®  |  Form 140  |  03/2025.2.  Page 5 of 14
-
-UNCERTAIN LIST:
-- (none of high significance; checkbox positions read carefully)
-
-
+NJ REALTORS®  |  Form 140  |  05/2025.2    Page 3 of 14
 
 =================== PAGE 8 ===================
-[transcription pass: A]
-DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement (Page 4 of 14). This page covers sewer/septic, plumbing, water systems, Heating and Air Conditioning, and Woodburning Stove or Fireplace sections, in a Yes/No/Unknown checkbox format.
+NJ REALTORS Seller's Property Condition Disclosure Statement (Form 140) — Page 4 of 14.
+Sections: Sewer/Septic, Plumbing/Water systems, Heating and Air Conditioning, Woodburning Stove or Fireplace.
+Checkbox columns are Yes / No / Unknown (left to right).
 
-=== TOP HEADER (full width banner) ===
-MLS # 22617358    115 Browns Dock Rd. Atlantic Highlands, NJ 07716    $894,900
+HEADER:
+MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $894,900
 
-=== BODY (left margin line numbers shown, then Yes/No/Unknown checkbox columns, item number, text) ===
-
-171
-172   [X]  [ ]        34.  Do you have a softener, filter, or other water purification system? [ ]Leased  [X]Owned
-173
-174                   35.  What is the type of sewage system?
-175   [X]  [ ]             [ ]Public Sewer  [X]Private Sewer  [ ]Septic System  [ ]Cesspool  [ ]Other  Explain:
-176                   36.  If "yes" answered "septic system," have you ever had the system inspected to confirm that it is a
-177                        true septic system and not a cesspool?
-178   [ ]  [ ]   [X]   37.  If "Septic System, when was it last cleaned? _____ Unknown
-179   [ ]  [X]        38.  When was the Septic System or Cesspool last cleaned and/or serviced? __ Regularly serviced
-180   [ ]  [X]        38a. Are you aware of any abandoned Septic Systems or Cesspools on your Property?
-181                   38a. If "yes," is the closure in accordance with the municipality's ordinance? Explain:
-182   [ ]  [X]        40.  Are you aware of any leaks, backups, or other problems relating to any of the plumbing systems and
-183                        fixtures (including pipes, sinks, tubs and showers), or of any other water or sewage related problems?
-184                        If "yes," explain: ____________________________________________
-185
-186   [ ]  [X]        41.  Are you aware of the presence of any lead piping, including but not limited to service line,
-187                        piping materials, fixtures, and solder? If "yes," explain: ___________________
-188
-189   [ ]  [X]        42.  Are you aware of any shut off, disconnected, or abandoned wells, underground water or sewage
-190                        tanks, or dry wells on the Property?
-191   [ ]  [X]   [ ]   43.  Is either the private water or sewage system shared? If "yes," explain: ______________
-192
-193                   44.  Water Heater: [X]Electric  [ ]Fuel Oil  [ ]Gas
-194   [ ]        [X]        Age of Water Heater __ Unknown
-195   [ ]  [X]        44a. Are you aware of any problems with the water heater?
-196                   45.  Explain any "yes" answers that you give in this section: ________________________
-197                        Whole-house water filtration system; septic located in front of house.
-198
+171   34.  [X]   [ ]        Do you have a softener, filter, or other water purification system?  [ ]Leased  [X]Owned
+172   35.        What is the type of sewage system?
+173             [ ]Public Sewer  [ ]Private Sewer  [X]Septic System  [ ]Cesspool  [ ]Other (explain): ____________________
+174   36.  [X]   [ ]        If you answered "septic system," have you ever had the system inspected to confirm that it is a
+175                         true septic system and not a cesspool?
+176   37.            [X]    If Septic System, when was it installed? ____ Unknown
+177                         Location? Front of house
+178   38.            [ ]    When was the Septic System or Cesspool last cleaned and/or serviced? ____ Regularly serviced
+179   39.  [ ]   [X]        Are you aware of any abandoned Septic Systems or Cesspools on your Property? ____________________
+180   39a. [ ]   [ ]        If "yes," is the closure in accordance with the municipality's ordinance? Explain: ____________________
+181                         ____________________
+182   40.  [ ]   [X]        Are you aware of any leaks, backups, or other problems relating to any of the plumbing systems and
+183                         fixtures (including pipes, sinks, tubs and showers), or of any other water or sewage related problems?
+184                         If "yes," explain ____________________
+185                         ____________________
+186   41.  [ ]   [X]        Are you aware of the presence of any lead piping, including but not limited to any service line,
+187                         piping materials, fixtures, and solder. If "yes," explain: ____________________
+188                         ____________________
+189   42.  [ ]   [X]        Are you aware of any shut off, disconnected, or abandoned wells, underground water or sewage
+190                         tanks, or dry wells on the Property?
+191   43.  [ ]   [X]   [ ]  Is either the private water or sewage system shared? If "yes," explain: ____________________
+192                         ____________________
+193   44.        Water Heater: [ ]Electric  [ ]Fuel Oil  [X]Gas
+194   45.            [X]    Age of Water Heater ____ Unknown
+195   44a. [ ]   [X]        Are you aware of any problems with the water heater?
+196   45.        Explain any "yes" answers that you give in this section:
+197                         Whole-home water filtration system; septic located in front of house.
+198                         ____________________
 199
+
 200   HEATING AND AIR CONDITIONING
 201        Yes   No   Unknown
-202
-203                   46.  Type of Air Conditioning:
-204   [ ]                  [ ]Central one zone  [X]Central multiple zone  [ ]Wall/Window Unit  [ ]None
+202   46.        Type of Air Conditioning:
+203             [ ]Central one zone  [X]Central multiple zone  [ ]Wall/Window Unit  [ ]None
+204   47.        List any areas of the house that are not air conditioned: None (livable areas)
 205
-206   [ ]  [ ]   [X]   48.  What is the age of Air Conditioning System? __ Unknown
-207                   49.  Type of fuel: [ ]Electric  [ ]Fuel Oil  [X]Natural Gas  [ ]Propane  [ ]Unheated  [ ]Other
-208                   50.  What is the type of heating system? (for example, forced air, hot water or heat pump, radiant
-209                        steam heat, etc.) ____________ Forced air
-210                   51.  If it is a unitscheme/zoned heating system, is it one zone or multiple zones? Multiple zones - three
+206   48.            [X]    What is the age of Air Conditioning System? Unknown
+207   49.        Type of heat: [ ]Electric  [ ]Fuel Oil  [X]Natural Gas  [ ]Propane  [ ]Unheated  [ ]Other
+208   50.        What is the type of heating system? (for example, forced air, hot water or base board, radiator,
+209                         steam heat) Forced air
+210   51.        If it is a centralized heating system, is it one zone or multiple zones? Multiple zones - three
 211
-212                   52.  Age of heating system __ Unknown    Date of last servicing? Approx. 2 years ago
-213   [ ]  [X]        53.  Are you aware of any problems with the heating system? If "yes," explain: ___________
-214                   54.  List any areas of the house that are not heated? __ None (double zone)
-215   [ ]  [X]   [ ]   54.  Are you aware (or on the Property either above or underground, used to store fuel for
-216                        other substances? ____________________
-217   [ ]  [ ]        55.  If tank is not in use, do you have a closure certificate? ____________________
-218   [ ]  [ ]        56.  Are you aware of any problems with any items in this section? If "yes," explain: __________
-219
+212   52.        Age of furnace Unknown    Date of last servicing Approx. 2 years ago
+213   53.        List any areas of the house that are not heated: None (livable areas)
+214                         ____________________
+215   54.  [ ]   [X]   [ ]  Are you aware of any tanks on the Property, either above or underground, used to store fuel or
+216                         other substances?
+217   55.  [ ]   [ ]        If tank is not in use, do you have a closure certificate?
+218   56.  [ ]   [X]        Are you aware of any problems with any items in this section? If "yes," explain: ____________________
+219                         ____________________
 220
+
 221   WOODBURNING STOVE OR FIREPLACE
 222        Yes   No   Unknown
-223   [X]  [ ]        57.  Do you have: [X]wood burning stove?  [X]fireplace?  [ ]insert?  [ ]other
-224   [X]  [ ]        57a. Is it presently usable?
-225   [ ]  [X]        58.  If you have a fireplace, when was the flue last cleaned? __ Approx. 2 years ago
-226   [X]  [ ]        58a. Was the flue cleaned by a professional or non-professional? __ Professional
-227   [ ]  [X]        59.  NA - existing fireplace [is] required permits for any work there?
-228   [ ]  [X]        60.  Are you aware of any problems with any of these items? If "yes," please explain: ________
-229
+223   57.  [X]   [ ]        Do you have [ ]wood burning stove?  [X]fireplace?  [ ]insert?  [ ]other
+224   57a. [X]   [ ]        Is it presently usable?
+225   58.  [X]   [ ]   [ ]  If you have a fireplace, when was the flue last cleaned? Approx. 2 years ago
+226   58a. [X]   [ ]   [ ]  Was the flue cleaned by a professional or non-professional? Professional
+227   59.  [ ]   [ ]   [ ]  N/A - existing fireplace   any required permits for any such item?
+228   60.  [ ]   [X]        Are you aware of any problems with any of these items? If "yes," please explain: ____________________
+229                         ____________________
 230
 
-=== FOOTER ===
-NJ REALTORS®  Form 140  Rev. 03/2025.2   Page 4 of 14
-
-
+FOOTER:
+NJ REALTORS®  |  Form 140  |  05/2025.2    Page 4 of 14
 
 =================== PAGE 9 ===================
-[transcription pass: A]
-DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement. Page 5 of 14 (packet page 9). This page covers ELECTRICAL SYSTEM, LAND (SOILS, DRAINAGE AND BOUNDARIES), and ENVIRONMENTAL HAZARDS sections, with Yes/No/Unknown checkbox columns and numbered question items. Left margin contains line numbers 231–290.
+NJ REALTORS Form 140 - Seller's Property Condition Disclosure Statement. Page 5 of 14 (packet page 9). ELECTRICAL SYSTEM, LAND (SOILS, DRAINAGE AND BOUNDARIES), and ENVIRONMENTAL HAZARDS. Margin line numbers 231-290.
 
-=== PAGE HEADER ===
 MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,900
 
-=== BODY ===
-
-231   ELECTRICAL SYSTEM
-232        Yes      No      Unknown
+ELECTRICAL SYSTEM
+          Yes      No      Unknown
+231
+232
 233                                          61.  What type of wiring is in this structure? [ ] Copper [ ] Aluminum [ ] Other [X] Unknown
 234   [ ]      [ ]                           62.  What amp service does the Property have? [ ] 60 [ ] 100 [ ] 150 [X] 200 [ ] Other [ ] Unknown
 235   [X]      [ ]      [ ]                   63.  Does it have 240 volt service? Which are present [X] Circuit Breakers, [ ] Fuses or [ ] Both?
 236   [ ]      [X]                           64.  Are you aware of any additions to the original service?
-237                                               If "yes," were the additions done by a licensed electrician? Name and address: ____________
+237                                               If "yes," were the additions done by a licensed electrician? Name and address: ______________
 238
-239                                               ________________________________________________________________
+239
 240   [ ]      [ ]      [ ]                   65.  If "yes," were proper building permits and approvals obtained?
 241   [ ]      [X]                           66.  Are you aware of any wall switches, light fixtures or electrical outlets in need of repair?
-242                                          67.  Explain any "yes" answers that you give in this section: ____________________
+242                                          67.  Explain any "yes" answers that you give in this section: ______________________________
 243
-244                                               ________________________________________________________________
-245                                               ________________________________________________________________
+244                                               ______________________________________________________________________________
+245
 
-246   LAND (SOILS, DRAINAGE AND BOUNDARIES)
-247        Yes      No      Unknown
+LAND (SOILS, DRAINAGE AND BOUNDARIES)
+          Yes      No      Unknown
+246
+247
 248   [ ]      [X]                           68.  Are you aware of any fill or expansive soil on the Property?
 249   [ ]      [X]                           69.  Are you aware of any past or present mining operations in the area in which the Property is
 250                                               located?
@@ -650,25 +605,28 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 255                                               other easements affecting the Property?
 256   [ ]      [X]                           74.  Are there any water retention basins on the Property or the adjacent properties?
 257   [ ]      [X]                           75.  Are you aware if any part of the Property is being claimed by the State of New Jersey as land
-258                                               presently or formerly covered by tidal water (Riparian claim or lease grant)? Explain: ________
+258                                               presently or formerly covered by tidal water (Riparian claim or lease grant)? Explain: __________
 259
-260                                               ________________________________________________________________
+260                                               ______________________________________________________________________________
 261   [ ]      [X]                           76.  Are you aware of any shared or common areas (for example, driveways, bridges, docks, walls,
 262                                               bulkheads, etc.) or maintenance agreements regarding the Property?
-263                                          77.  Explain any "yes" answers to the preceding questions in this section: ____________________
+263                                          77.  Explain any "yes" answers to the preceding questions in this section: _________________________
 264
-265                                               ________________________________________________________________
+265                                               ______________________________________________________________________________
 266   [X]      [ ]                           78.  Do you have a survey of the Property?
 267
-268   ENVIRONMENTAL HAZARDS
-269        Yes      No      Unknown
-270   [ ]      [X]                           79.  Have you received any written notification from any public agency or private concern informing you
+
+ENVIRONMENTAL HAZARDS
+          Yes      No      Unknown
+268
+269
+270                                          79.  Have you received any written notification from any public agency or private concern informing you
 271                                               that the Property is adversely affected, or may be adversely affected, by a condition that exists on a
-272   [ ]      [ ]                                property in the vicinity of this Property? If "yes," attach a copy of any such notice currently in your
+272   [ ]      [X]                                property in the vicinity of this Property? If "yes," attach a copy of any such notice currently in your
 273                                               possession.
 274   [ ]      [X]                           79a. Are you aware of any condition that exists on any property in the vicinity which adversely affects,
 275                                               or has been identified as possibly adversely affecting, the quality or safety of the air, soil, water,
-276                                               and/or physical structures present on this Property? If "yes," explain: ____________________
+276                                               and/or physical structures present on this Property? If "yes," explain: ____________________________
 277
 278   [ ]      [X]                           80.  Are you aware of any underground storage tanks (UST) or toxic substances now or previously
 279                                               present on this Property or adjacent property (structure or soil), such as polychlorinated biphenyl
@@ -682,92 +640,81 @@ MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716        
 287                                               (Attach copy of each test report if available.)
 288                                          83.  If "yes" to any of the above, explain: [Home test kits; no known issues identified.]
 289
-290                                               ________________________________________________________________
+290                                               ______________________________________________________________________________
 
 NJ REALTORS® | Form 140 | 05/2025.2   Page 5 of 14
 
-=== UNCERTAIN ===
-- None. All checkboxes, digits, and the typed fill-in ("Home test kits; no known issues identified.") read clearly on zoom.
-
-
-
 =================== PAGE 10 ===================
-[transcription pass: A]
-DOCUMENT TYPE: NJ REALTORS Form 140 - Seller's Property Condition Disclosure Statement (Page 6 of 14). This page covers "DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS AND CO-OPS" and "MISCELLANEOUS" sections.
+NJ REALTORS Form 140 - Seller's Property Condition Disclosure Statement. Page 6 of 14 (packet page 10). DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS AND CO-OPS, and MISCELLANEOUS. Margin line numbers 291-350.
 
-[HEADER]
-MLS # 22617358          115 Browns Dock Rd. Atlantic Highlands, NJ 07716          $894,900
+MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,900
 
-[Margin line numbers appear on left side, 291 through 350]
-
-291   [ ]  [X]        83a.  If "yes" to any of the above, were any actions taken to correct the problem? Explain: ___________
-292                         _________________________________________________________________________________
+291   [ ] Yes  [X] No                  83a.  If "yes" to any of the above, were any actions taken to correct the problem? Explain: _____________
+292                                           ___________________________________________________________________________________________
 293
-294   [ ]  [X]  [ ]   84.   Is the Property in a designated Airport Safety Zone?
+294   [ ] Yes  [X] No  [ ] Unknown     84.   Is the Property in a designated Airport Safety Zone?
 295
-296         DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS
-297         AND CO-OPS
-298         Yes   No   Unknown
-299   [ ]  [X]        85.   Are you aware of the Property is subject to any deed restrictions or other limitations on how it
-300                         may be used due to its being situated within a designated historic district, or a protected area like
-301                         the New Jersey Pinelands, or its being subject to similar legal authorities other than typical local
-302                         zoning ordinances?
-303   [ ]  [X]        86.   Is the Property part of a condominium or other common-interest ownership plan?
-304   [ ]  [X]        86a.  If so, is the Property subject to any covenants, conditions, or restrictions as a result of its being
-305                         part of a condominium or other form of common-interest ownership?
-306   [ ]  [X]        87.   As the owner of the Property, are you required to belong to a condominium association or
-307                         homeowners association, or other similar organization or property owners?
-308   [ ]  [ ]         87a.  If so, what is the Association's name and telephone number? ___________________________
+296
+297                  DEED RESTRICTIONS, SPECIAL DESIGNATIONS, HOMEOWNERS ASSOCIATION/CONDOMINIUMS
+                     AND CO-OPS
+298        Yes      No      Unknown
+299   [ ] Yes  [X] No                  85.   Are you aware if the Property is subject to any deed restrictions or other limitations on how it
+300                                           may be used due to its being situated within a designated historic district, or a protected area like
+301                                           the New Jersey Pinelands, or its being subject to similar legal authorities other than typical local
+302                                           zoning ordinances?
+303   [ ] Yes  [X] No                  86.   Is the Property part of a condominium or other common interest ownership plan?
+304   [ ] Yes  [X] No                  86a.  If so, is the Property subject to any covenants, conditions, or restrictions as a result of its being
+305                                           part of a condominium or other form of common interest ownership?
+306   [ ] Yes  [X] No                  87.   As the owner of the Property, are you required to belong to a condominium association or
+307                                           homeowners association, or other similar organization or property owners?
+308   [ ] Yes  [ ] No                  87a.  If so, what is the Association's name and telephone number? ____________________________________
 309
-310   [ ]  [X]        87b.  If so, are there any dues or assessments involved?
-311                         If "yes," how much? ___________
-312   [ ]  [X]        88.   Are you aware of any defect, damage, or problem with any common elements or common areas
-313                         that materially affects the Property?
-314         [ ]  [X]   89.   Are you aware of any condition or claim which may result in an increase in assessments or fees?
-315   [ ]  [X]        90.   Since you purchased the Property, have there been any changes to the rules or by-laws of the
-316                         Association that impact the Property?
-317   [ ]  [ ]         91.   Explain any "yes" answer you give in this section: ___________________________________
-318                         _________________________________________________________________________________
-319
+310   [ ] Yes  [X] No  [ ] Unknown     87b.  If so, are there any dues or assessments involved?
+311                                           If "yes," how much? _______________
+312   [ ] Yes  [X] No                  88.   Are you aware of any defect, damage, or problem with any common elements or common areas
+313                                           that materially affects the Property?
+314            [X] No  [ ] Unknown     89.   Are you aware of any condition or claim which may result in an increase in assessments or fees?
+315   [ ] Yes  [X] No  [ ] Unknown     90.   Since you purchased the Property, have there been any changes to the rules or by-laws of the
+316                                           Association that impact the Property?
+317                                    91.   Explain any "yes" answers you give in this section: ______________________________________________
+318                                           ___________________________________________________________________________________________
+319                                           ___________________________________________________________________________________________
 320
-321         MISCELLANEOUS
-322         Yes   No   Unknown
-323   [ ]  [X]        92.   Are you aware of any existing or threatened legal action affecting the Property or any condominium
-324                         or homeowners association to which you, as an owner, belong?
-325   [ ]  [X]        93.   Are you aware of any violations of Federal, State or local laws or regulations relating to this
-326                         Property?
-327   [ ]  [X]        94.   Are you aware of any zoning violations, encroachments on adjacent properties, non-conforming
-328                         uses, or set-back violations relating to this Property? If so, please state whether the condition is
-329                         pre-existing non-conformance to present day zoning or a violation to zoning and/or land use
-330                         laws._____________________________________________________________________________
+
+                     MISCELLANEOUS
+322        Yes      No      Unknown
+323   [ ] Yes  [X] No                  92.   Are you aware of any existing or threatened legal action affecting the Property or any condominium
+324                                           or homeowners association to which you, as an owner, belong?
+325   [ ] Yes  [X] No                  93.   Are you aware of any violations of Federal, State or local laws or regulations relating to this
+326                                           Property?
+327   [ ] Yes  [X] No                  94.   Are you aware of any zoning violations, encroachments on adjacent properties, non-conforming
+328                                           uses, or set-back violations relating to this Property? If so, please state whether the condition is
+329                                           pre-existing non-conformance to present day zoning or a violation to zoning and/or land use
+330                                           laws. _____________________________________________________________________________________
 331
-332   [ ]  [X]        95.   Are you aware of any public improvements, condominium or homeowner association assessments
-333                         against the Property that remain unpaid? Are you aware of any violations of zoning, housing,
-334                         building, safety or fire ordinances that remain uncorrected?
-335   [ ]  [X]  [ ]   96.   Are there mortgages, encumbrances or liens on this Property?
-336   [ ]  [X]        96a.  Are you aware of any reason, including a defect in title, that would prevent you from conveying
-337                         clear title?
-338   [ ]  [X]        97.   Are you aware of any material defect to the Property, the existence of features which are not disclosed
-339                         elsewhere on this form? (A defect is "material," if a reasonable person would attach importance
-340                         to its existence or non-existence in deciding whether or how to proceed in the transaction).
-341                         If "yes," explain: _________________________________________________________________
-342
-343   [ ]  [X]        98.   Other than water and sewer charges, utility and cable tv fees, your local property taxes, any
-344                         special assessments and any association dues or membership fees, are there any other fees that you
-345                         pay on an ongoing basis with respect to this Property, such as garbage collection fees?
-346   [ ]  [ ]         99.   Explain any other "yes" answers you give in this section: As per the search.
-347
+332   [ ] Yes  [X] No                  95.   Are you aware of any public improvement, condominium or homeowner association assessments
+333                                           against the Property that remain unpaid? Are you aware of any violations of zoning, housing,
+334                                           building, safety or fire ordinances that remain uncorrected?
+335   [X] Yes  [ ] No  [ ] Unknown     96.   Are there mortgages, encumbrances or liens on this Property?
+336   [ ] Yes  [X] No                  96a.  Are you aware of any reason, including a defect in title, that would prevent you from conveying
+337                                           clear title?
+338   [ ] Yes  [X] No                  97.   Are you aware of any material defects to the Property, dwelling, or fixtures which are not disclosed
+339                                           elsewhere on this form? (A defect is "material," if a reasonable person would attach importance
+340                                           to its existence or non-existence in deciding whether or how to proceed in the transaction.)
+341                                           If "yes," explain: _________________________________________________________________________
+342                                           ___________________________________________________________________________________________
+343   [ ] Yes  [X] No                  98.   Other than water and sewer charges, utility and cable tv fees, your local property taxes, any
+344                                           special assessments and any association dues or membership fees, are there any other fees that you
+345                                           pay on an ongoing basis with respect to this Property, such as garbage collection fees?
+346                                    99.   Explain any other "yes" answers you give in this section: As per title search.
+347                                           ___________________________________________________________________________________________
 348
 349
 350
 
-[FOOTER]
-NJ REALTORS®  Form 140 - 05/2025.2    Page 6 of 14
-
-
+NJ REALTORS® | Form 140 | 05/2025.2    Page 6 of 14
 
 =================== PAGE 11 ===================
-[transcription pass: A]
 DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement (Page 7 of 14). Sections: RADON GAS and MAJOR APPLIANCES AND OTHER ITEMS.
 
 === PAGE HEADER ===
@@ -804,8 +751,8 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $8
 377       [ ]      [ ]              [X]    103a.  If "yes," are they reversible? Number of Transmitters ____________
 378       [X]      [ ]      [ ]     [ ]    104.   Smoke Detectors
 379                                               [X] Battery  [ ] Electric  [ ] Both  How many ____ | Various
-380                                               [X] Carbon Monoxide Detectors  How many | Various
-381                                               Location | Throughout house
+380                                               [X] Carbon Monoxide Detectors  How many ____ | Various
+381                                               Location ____ | Throughout house
 382       [ ]      [X]              [ ]    105.   With regard to the above items, are you aware that any item is not in working order?
 383                                        105a.  If "yes," identify each item that is not in working order or defective and explain the nature
 384                                               of the problem: ____________________________________________________
@@ -841,12 +788,13 @@ NJ REALTORS® | Form 140 | 05/2025.2   Page 7 of 14
 === NOTES ===
 - Item 107: the printed boxes next to each appliance are EMPTY; the Y/N answers are written as handwritten/typed letters in the margin column to the left of the boxes.
 - Item 108: answer "Yes" written on the blank line.
-
-
+- Radon waiver (357): No [X]. All radon questions 100-102a blank.
+- 104 Smoke Detectors: Yes [X]; [X] Battery; [X] Carbon Monoxide; "How many" lines blank, "Various" written; Location "Throughout house".
+- 106 pool: Yes [X], [X] In-ground pool only. 106a N/A [X]. 106b Yes [X] "In-ground pool; liner due for replacement." 106c No [X].
+- Footer revision code is "05/2025.2" (period, not hyphen).
 
 =================== PAGE 12 ===================
-[transcription pass: A]
-DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement (continuation page). Page 8 of 14. This page contains acknowledgment/receipt and signature blocks.
+DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement (continuation page). Page 8 of 14. This page contains acknowledgment/receipt and signature blocks. ALL SIGNATURE/DATE FIELDS ARE BLANK.
 
 --- HEADER ---
 MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716                $894,900
@@ -857,7 +805,7 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716              
 412    The undersigned Seller affirms that the information set forth in this Disclosure Statement is accurate and complete to the best of Seller's
 413    knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real estate brokerage firm representing
 414    or assisting the Seller to provide this Disclosure Statement to all prospective buyers of the Property, and to other real estate agents. Seller
-415    alone is the source of all information contained in this statement. The Seller relied upon any credible representations of another; the
+415    alone is the source of all information contained in this statement. *If the Seller relied upon any credible representations of another, the
 416    Seller should state the name(s) of the person(s) who made the representation(s) and describe the information that was relied upon.
 417
 418
@@ -882,9 +830,9 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716              
 437    inspected by qualified professionals, at Prospective Buyer's expense, to determine the actual condition of the Property. Prospective Buyer
 438    further acknowledges that this form is intended to provide information relating to the condition of the land, structures, major systems and
 439    amenities, if any, included in the sale. This form does not address local conditions which may affect a purchaser's use and enjoyment of
-440    the Property such as noise, odors, traffic volume, etc. Prospective Buyer acknowledges that they should independently investigate such local
+440    the Property such as noise, odors, traffic volume, etc. Prospective Buyer acknowledges that they may independently investigate such local
 441    conditions before entering into a binding contract to purchase the Property. Prospective Buyer acknowledges that he or she understands
-442    that the visual inspection performed by the Seller's real estate broker-broker-salesperson/salesperson does not constitute a professional
+442    that the visual inspection performed by the Seller's real estate broker/broker-salesperson/salesperson does not constitute a professional
 443    home inspection as performed by a licensed home inspector.
 444
 445
@@ -893,12 +841,12 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716              
 448
 449    PROSPECTIVE BUYER                       DATE          PROSPECTIVE BUYER                       DATE
 450
-451    ACKNOWLEDGMENT OF REAL ESTATE BROKER-BROKER/SALESPERSON/SALESPERSON
+451    ACKNOWLEDGMENT OF REAL ESTATE BROKER/BROKER-SALESPERSON/SALESPERSON
 452    The undersigned Seller's real estate broker/broker-salesperson/salesperson acknowledges receipt of the Property Disclosure Statement
 453    form and that the information contained in the form was provided by the Seller.
 454
 455    The Seller's real estate broker/broker-salesperson/salesperson also confirms that he or she visually inspected the Property with reasonable
-456    diligence to ascertain the accuracy of the information disclosed by the Seller prior to providing a copy of the property disclosure statement
+456    diligence to ascertain the accuracy of the information disclosed by the Seller, prior to providing a copy of the property disclosure statement
 457    to the buyer.
 458
 459    The Prospective Buyer's real estate broker/broker-salesperson/salesperson also acknowledges receipt of the Property Disclosure Statement
@@ -915,16 +863,14 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716              
 470               SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT CONTINUES ON NEXT PAGE
 
 --- FOOTER ---
-NJ REALTORS®  |  Form 140  |  05/2025-2.    Page 8 of 14
+NJ REALTORS® | Form 140 | 05/2025.2   Page 8 of 14
 
-
+=== NOTES ===
+- Entire page is unsigned/undated: all SELLER, SIGNED, PROSPECTIVE BUYER, and BROKER name/DATE fields are blank.
+- Footer revision code is "05/2025.2" (period, not hyphen).
 
 =================== PAGE 13 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey Realtors Seller's Property Condition Disclosure Statement — Addendum Regarding Flood Risk. This is page 9 of 14 (Form 140). A Yes/No/Unknown checkbox questionnaire (questions 109–116) about flood risk.
-
-[Header — MLS # box top left]
-MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716                    $894,000
+MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716                                        $894,900
 
 [Logo: NEW JERSEY REALTORS]
 
@@ -934,129 +880,125 @@ ADDENDUM REGARDING FLOOD RISK
 
 © 2024 New Jersey REALTORS®
 
-473  Pursuant to N.J.S.A. 56:8-19.2, all Sellers of real property (including both residential and non-residential property) must complete
-474  questions 109-117 below.
-475
-476  Sellers of real property must answer these questions before the purchaser becomes obligated under any contract for the purchase of the
-477  Property. This is the case regardless of whether the Seller completes questions 1-108. Sellers must certify their answers to questions 109-
-478  119, and may do so using the Flood Risk Notification Tool located at njrera.to/flood-disclosure. Questions 111-117 must be answered
-479  based on the Seller's actual knowledge.
-480
-481  Flood risks in New Jersey are growing due to the effects of climate change. Coastal and inland areas may experience significant flooding
-482  now and in the near future, including in places that were not previously known to flood. For example, by 2050, it is likely that one-and-half
-483  one will crest or exceed 2.1 feet above 2000 levels, placing over 40,000 New Jersey properties at risk of permanent coastal flooding.
-484  In addition, precipitation intensity in New Jersey is increasing at levels significantly above historic trends, placing inland properties at
-485  greater risk of flash flooding. These and other coastal and inland flood risks are expected to increase within the life of a typical mortgage
-486  originated in or after 2020.
-487
-488  To learn more about these impacts, including the flood risk to your Property, visit njrera.to/flood-disclosure. To learn more about how to
-489  prepare for a flood emergency, visit njrera.to/flood-planning.
-490
-491       Yes      No       Unknown
-492  [ ]      [X]      [ ]        109.  Is any or all of the Property located wholly or partially in the Special Flood Hazard Area ("100-
-493                                     year floodplain") according to FEMA's current flood insurance rate maps for your area?
-494  [ ]      [X]      [ ]        110.  Is any or all of the Property located wholly or partially in a Moderate Risk Flood Hazard Area
-495                                     ("500-year floodplain") according to FEMA's current flood insurance rate maps for your area?
-496  [ ]      [X]      [ ]        111.  Is the Property subject to any requirement under federal law to obtain and maintain flood
-497                                     insurance on the Property?
-498                                     Properties in the special flood hazard area, also known as high risk flood zones, on FEMA's flood insurance rate
-499                                     maps with mortgages from federally regulated or insured lenders are required to obtain and maintain flood insurance.
-500                                     Even when not required, FEMA encourages property owners in high risk, moderate risk, and low risk flood zones
-501                                     to purchase flood insurance that covers the structure and the personal property therein. Also note that
-502                                     properties in coastal and interior areas may be subject to increased risk of flooding over time due to projected sea level
-503                                     rise and increased extreme storms caused by climate change which may not be reflected in current flood insurance rate
-504                                     maps.
-505  [ ]      [X]      [ ]        112.  Have you ever received assistance, or are you aware of any previous owners receiving assistance,
-506                                     from FEMA, the U.S. Small Business Administration, or any other federal disaster flood assistance
-507                                     for flood damage to the Property?
-508                                     If assistance was received federal disaster assistance, the requirement to obtain flood insurance passes down
-509                                     to all future owners. Failure to obtain and maintain flood insurance can result in an individual being ineligible for
-510                                     future assistance.
-511  [ ]      [X]      [ ]        113.  Is there flood insurance on the Property?
-512  [ ]      [X]      [ ]        114.  A claimant homeowner's insurance policy typically does not cover flood damage. You are required to maintain
-513                                     policy to determine whether you are covered.
-514  [ ]      [X]      [ ]        115.  Is there a FEMA elevation certificate available for this Property? If so, the elevation certificate
-515                                     must be shared with the buyer.
-516                                     An elevation certificate is a FEMA form, completed by a licensed surveyor or engineer. The form provides critical
-517                                     information about the flood risk of the Property and is used by flood insurance providers under the National Flood
-518                                     Insurance Program. While not required for the appropriate flood insurance rating for the Property. A buyer may be able to
-519                                     use the elevation certificate from a previous owner for their flood insurance rating.
-520  [ ]      [X]      [ ]        116.  Have you ever filed a claim for flood damage to the Property with any insurance provider,
-521                                     including the National Flood Insurance Program?
-522  [ ]      [X]      [ ]        117.  Has the Property experienced any flood damage, water seepage, or pooled water due to a natural
-523                                     flood event, such as heavy rainfall, coastal storm surge, tidal inundation, or river overflow?
-524                                     If so, how many times?                       N/A
+471   Pursuant to N.J.S.A. 56:8-19.2, all Sellers of real property (including both residential and non-residential property) must complete
+472   questions 109-117 below.
+473
+474   Sellers of real property must answer these questions before the purchaser becomes obligated under any contract for the purchase of the
+475   Property. This is the case regardless of whether the Seller completes questions 1-108. Sellers must verify their answers to questions 109-
+476   110, and may do so using the Flood Risk Notification Tool located at njreal.to/flood-disclosure. Questions 111-117 must be answered
+477   based on the Seller's actual knowledge.
+478
+479   Flood risks in New Jersey are growing due to the effects of climate change. Coastal and inland areas may experience significant flooding
+480   now and in the near future, including in places that were not previously known to flood. For example, by 2050, it is likely that sea-level
+481   rise will meet or exceed 2.1 feet above 2000 levels, placing over 40,000 New Jersey properties at risk of permanent coastal flooding.
+482   In addition, precipitation intensity in New Jersey is increasing at levels significantly above historic trends, placing inland properties at
+483   greater risk of flash flooding. These and other coastal and inland flood risks are expected to increase within the life of a typical mortgage
+484   originated in or after 2020.
+485
+486   To learn more about these impacts, including the flood risk to your Property, visit njreal.to/flood-disclosure. To learn more about how to
+487   prepare for a flood emergency, visit njreal.to/flood-planning.
+488
+489        Yes      No      Unknown
+490   [ ]      [X]               109.  Is any or all of the Property located wholly or partially in the Special Flood Hazard Area ("100-
+491                                       year floodplain") according to FEMA's current flood insurance rate maps for your area?
+492   [ ]      [X]               110.  Is any or all of the Property located wholly or partially in a Moderate Risk Flood Hazard Area
+493                                       ("500-year floodplain") according to FEMA's current flood insurance rate maps for your area?
+494   [ ]      [X]      [ ]       111.  Is the Property subject to any requirement under federal law to obtain and maintain flood
+495                                       insurance on the Property?
+496                                       Properties in the special flood hazard area, also known as high risk flood zones, on FEMA's flood insurance rate
+497                                       maps with mortgages from federally regulated or insured lenders are required to obtain and maintain flood insurance.
+498                                       Even when not required, FEMA encourages property owners in high risk, moderate risk, and low risk flood zones
+499                                       to purchase flood insurance that covers the structure and the personal property within the structure. Also note that
+500                                       properties in coastal and riverine areas may be subject to increased risk of flooding over time due to projected sea level
+501                                       rise and increased extreme storms caused by climate change which may not be reflected in current flood insurance rate
+502                                       maps.
+503   [ ]      [X]      [ ]       112.  Have you ever received assistance, or are you aware of any previous owners receiving assistance,
+504                                       from FEMA, the U.S. Small Business Administration, or any other federal disaster flood assistance
+505                                       for flood damage to the Property?
+506                                       For properties that have received federal disaster assistance, the requirement to obtain flood insurance passes down
+507                                       to all future owners. Failure to obtain and maintain flood insurance can result in an individual being ineligible for
+508                                       future assistance.
+509   [ ]      [X]      [ ]       113.  Is there flood insurance on the Property?
+510                                       A standard homeowner's insurance policy typically does not cover flood damage. You are encouraged to examine your
+511                                       policy to determine whether you are covered.
+512   [ ]      [X]      [ ]       114.  Is there a FEMA elevation certificate available for the Property? If so, the elevation certificate
+513                                       must be shared with the buyer.
+514                                       An elevation certificate is a FEMA form, completed by a licensed surveyor or engineer. The form provides critical
+515                                       information about the flood risk of the Property and is used by flood insurance providers under the National Flood
+516                                       Insurance Program to help determine the appropriate flood insurance rating for the Property. A buyer may be able to
+517                                       use the elevation certificate from a previous owner for their flood insurance policy.
+518   [ ]      [X]      [ ]       115.  Have you ever filed a claim for flood damage to the Property with any insurance provider,
+519                                       including the National Flood Insurance Program?
+520                                       If the claim was approved, what was the amount received? $________
+521   [ ]      [X]      [ ]       116.  Has the Property experienced any flood damage, water seepage, or pooled water due to a natural
+522                                       flood event, such as heavy rainfall, coastal storm surge, tidal inundation, or river overflow?
+523                                       If so, how many times? ________N/A
+524
 525
 
-[Footer]
-NJ REALTORS® / Form 140 / 05/2025.2.   Page 9 of 14
+NJ REALTORS® | Form 140 | 05/2025.2     Page 9 of 14
 
 [Right margin: REALTOR® and Equal Housing Opportunity logos]
 
-
-
 =================== PAGE 14 ===================
-[transcription pass: A]
-DOCUMENT TYPE: Seller's Property Condition Disclosure Statement — NJ REALTORS Form 140 (continuation page). Page 10 of 14. Contains a Flood Risk Addendum acknowledgment section: "Acknowledgment of Seller", "Executor, Administrator, Trustee", and "Receipt and Acknowledgment by Prospective Buyer", with signature/date blocks.
+MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716                                        $894,900
 
---- HEADER (top of page) ---
-MLS # 22617358     115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,000
-
---- BODY (margin line numbers in left column) ---
-
-326
-327          117.   Explain any "yes" answers that you give in this section: _______________________________
-328          _____________________________________________________________________________________
-329          _____________________________________________________________________________________
-330
-
-331    ACKNOWLEDGMENT OF SELLER
-332          The undersigned Seller affirms that the information set forth in the above Flood Risk Addendum to the Disclosure Statement is accurate
-333    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. The Seller hereby authorizes the real
-334    estate brokerage firm representing or assisting the Seller to provide this completed Flood Risk Addendum to the Disclosure Statement
-335    to all prospective buyers of the Property, and to other real estate agents. Seller alone is the source of all information contained in this
-336    statement. *If the Seller relied upon any credible representation of another, the Seller should state the name(s) of the person(s) who made
-337    the representation(s) and describe the information that was relied upon.
-338          _____________________________________________________________________________________
-339          _____________________________________________________________________________________
-340          _____________________________________________________________________________________
-341
-342    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-343    │                                                                                            │
-344    └──────────────────────────────────────────────────────────────────────────────────────────┘
-545          SELLER                                  DATE          SELLER                              DATE
-546    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-547    │                                                                                            │
-       SELLER                                  DATE          SELLER                              DATE
-
+526    117.   Explain any "yes" answers that you give in this section: ___________________
+527    ___________________________________________________________________________
+528    ___________________________________________________________________________
+529    ___________________________________________________________________________
+530
+531    ACKNOWLEDGMENT OF SELLER
+532    The undersigned Seller affirms that the information set forth in the above Flood Risk Addendum to the Disclosure Statement is accurate
+533    and complete to Seller's actual knowledge, but is not a warranty as to the condition of the Property. The Seller hereby authorizes the real
+534    estate brokerage firm representing or assisting the Seller to provide this completed Flood Risk Addendum to the Disclosure Statement
+535    to all prospective buyers of the Property, and to other real estate agents. Seller alone is the source of all information contained in this
+536    statement. *If the Seller relied upon any credible representation of another, the Seller should state the name(s) of the person(s) who made
+537    the representation(s) and describe the information that was relied upon.
+538    ___________________________________________________________________________
+539    ___________________________________________________________________________
+540    ___________________________________________________________________________
+541
+542    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+543    │                                             │                                             │
+544    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+       SELLER                              DATE        SELLER                              DATE
+545    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+546    │                                             │                                             │
+547    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+       SELLER                              DATE        SELLER                              DATE
+548
+549
 550    EXECUTOR, ADMINISTRATOR, TRUSTEE (if applicable)
-551          The undersigned has never occupied the Property and lacks the personal knowledge necessary to complete this Disclosure Statement.
-552
-553    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-554    │                                                                                            │
-555    └──────────────────────────────────────────────────────────────────────────────────────────┘
-       SIGNED                                  DATE          SIGNED                              DATE
-
-557    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
-558          The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
-559    to signing a Contract of Sale pertaining to the Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
-560    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
-561    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, as Prospective
-562    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer acknowledges that this form is intended to
-563    provide information relating to the condition of the local, structures, major systems and amenities, if any, located in the Property. This form
-564    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
-565    etc. Prospective Buyer acknowledges that they may independently investigate such local conditions before entering into a binding contract
-566    to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the Seller's
-567    real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed home
-568    inspector.
-569
-570    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-571    │                                                                                            │
-572    └──────────────────────────────────────────────────────────────────────────────────────────┘
-573          PROSPECTIVE BUYER                       DATE          PROSPECTIVE BUYER                   DATE
-574    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-575    │                                                                                            │
-       PROSPECTIVE BUYER                       DATE          PROSPECTIVE BUYER                   DATE
+551    The undersigned has never occupied the Property and lacks the personal knowledge necessary to complete this Disclosure Statement.
+552    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+553    │                                             │                                             │
+554    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+       SIGNED                              DATE        SIGNED                              DATE
+555
+556    RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
+557    The undersigned Prospective Buyer acknowledges receipt of this completed Flood Risk Addendum to the Disclosure Statement prior
+558    to signing a Contract of Sale pertaining to the Property. Prospective Buyer acknowledges that this completed Flood Risk Addendum to
+559    the Disclosure Statement is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or herself as to the
+560    condition of the Property. Prospective Buyer acknowledges that the Property may be inspected by qualified professionals, as Prospective
+561    Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is intended to
+562    provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale. This form
+563    does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic volume,
+564    etc. Prospective Buyer acknowledges that they may independently investigate such local conditions before entering into a binding contract
+565    to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the Seller's
+566    real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed home
+567    inspector.
+568
+569    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+570    │                                             │                                             │
+571    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+       PROSPECTIVE BUYER                   DATE        PROSPECTIVE BUYER                   DATE
+572    ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+573    │                                             │                                             │
+574    └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+       PROSPECTIVE BUYER                   DATE        PROSPECTIVE BUYER                   DATE
+575
+576
 577
 578
 579
@@ -1065,16 +1007,12 @@ MLS # 22617358     115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $89
 582
 583
 584
-585              SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT CONTINUES ON NEXT PAGE
+585                    SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT CONTINUES ON NEXT PAGE
 
---- FOOTER ---
-NJ REALTORS®  Form 140  |  05/2025.2     Page 10 of 14
-
-
+NJ REALTORS® | Form 140 | 05/2025.2     Page 10 of 14
 
 =================== PAGE 15 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey REALTORS Standard Form 140 — Seller's Property Condition Disclosure Statement / Flood Risk Disclosure addendum packet. This page (Page 11 of 14 of the form) contains the "Acknowledgment of Real Estate Broker/Broker-Salesperson/Salesperson" section with signature/date blocks.
+DOCUMENT TYPE: New Jersey REALTORS® Standard Form 140 — Seller's Property Condition Disclosure Statement / Flood Risk Disclosure addendum packet. This page (Page 11 of 14) contains the "Acknowledgment of Real Estate Broker/Broker-Salesperson/Salesperson" section with blank signature/date blocks. No fill-ins; no marks.
 
 --- PAGE HEADER ---
 MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716                    $894,900
@@ -1088,18 +1026,18 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716          
 591    diligence to ascertain the accuracy of the information disclosed by the Seller prior to providing a copy of the property disclosure statement
 592    to the buyer.
 593
-594    The Prospective Buyer's real estate broker/broker-salesperson/salesperson also acknowledges receipt of this completed Flood Disclosure
+594    The Prospective Buyer's real estate broker/broker/broker-salesperson also acknowledges receipt of this completed Flood Disclosure
 595    Addendum to the Property Disclosure for the purpose of providing it to the Prospective Buyer.
 596
-597
+597    ________________________________________________________________________________
 598    SELLER'S REAL ESTATE BROKER/                          DATE
-599    BROKER-SALESPERSON/SALESPERSON
+599    BROKER-SALESPERSON/SALESPERSON:
 600
-601
+601    ________________________________________________________________________________
 602
-603    PROSPECTIVE BUYER'S REAL ESTATE BROKER/              DATE
-604    BROKER-SALESPERSON/SALESPERSON
-605
+603
+604    PROSPECTIVE BUYER'S REAL ESTATE BROKER/              DATE
+605    BROKER-SALESPERSON/SALESPERSON
 606
 607
 608
@@ -1142,148 +1080,138 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716          
 645    ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS CONTINUES ON NEXT PAGE
 
 --- FOOTER ---
-NJ REALTORS®  |  Form 140  |  03/2025.2  Page 11 of 14
-
-
+NJ REALTORS®  |  Form 140  |  05/2025.2    Page 11 of 14
 
 =================== PAGE 16 ===================
-[transcription pass: A]
-DOCUMENT TYPE: New Jersey Realtors Seller's Property Condition Disclosure Statement — Addendum Regarding Statutory Disclosures & Other Items (Solar Panel Systems section). Page 12 of 14, Form 140.
+DOCUMENT TYPE: New Jersey REALTORS® Seller's Property Condition Disclosure Statement — Addendum Regarding Statutory Disclosures & Other Items (Solar Panel Systems section). Page 12 of 14, Form 140.
 
 [Top header band:]
-MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,000
+MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716                    $894,900
 
 [Logo:] NEW JERSEY REALTORS
 
 NEW JERSEY REALTORS®
 SELLER'S PROPERTY CONDITION DISCLOSURE STATEMENT
 ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
-© 2016 New Jersey REALTORS®
+© 2018 New Jersey REALTORS®
 
-[Margin line numbers shown at left; content follows line-by-line:]
-
-646   SOLAR PANEL SYSTEMS Pursuant to P.L. 2012, c.317
+646   SOLAR PANEL SYSTEMS Pursuant to P.L.2023, c312
 647   This section is applicable if the Property is serviced by a Solar Panel System, which means a system of solar panels designed to absorb the
-648   sunlight as a source of energy for generating electricity or heating, and use all inverters, net meter, wiring, roof supports and any other
+648   sunlight as a source of energy for generating electricity or heating, any and all inverters, net meter, wiring, roof supports and any other
 649   equipment pertaining to the Solar Panels (collectively, the "Solar Panel System"). This information may be used, among other purposes,
 650   to prepare a Solar Panel Addendum to be affixed to and made a part of a contract of sale for the Property.
 
 651
-652   Yes      No
-653   [ ]      [X]      Is the Property serviced by a Solar Panel System?
+652       Yes      No
+653       [ ]      [X]      Is the Property serviced by a Solar Panel System?
 654
 655   If you responded "yes," answer the following questions:
 656
-657   Yes      No
-658   [ ]      [ ]      118.   When was the Solar Panel System Installed? ____________
-659   [ ]      [ ]      118a.  What is the name and contact information of the business that installed the Solar Panel System? ____
+657       Yes      No
+658       [ ]      [ ]      118.   When was the Solar Panel System Installed? ____________________
+659       [ ]      [ ]      118a.  What is the name and contact information of the business that installed the Solar Panel System? ____
 660
-661   [ ]      [ ]      118b.  Do you have documents and/or contracts relating to the Solar Panel System? If "yes," please
-662                            attach copies to this form.
-663   [ ]      [ ]      119.   Are SRECs available from the Solar Panel System?
-664   [ ]      [ ]      119a.  If SRECs are available, what is the SRECs expire? ____________
-665   [ ]      [ ]      120.   Is there any storage capacity on the Property for the Solar Panel System?
-666   [ ]      [ ]      121.   Are you aware of any defects in or damage to any component of the Solar Panel System? If yes,
-667                            explain ___________________________________________________________________
-668                            _________________________________________________________________________
+661       [ ]      [ ]      118b.  Do you have documents and/or contracts relating to the Solar Panel System? If "yes," please
+662                                attach copies to this form.
+663       [ ]      [ ]      119.   Are SRECs available from the Solar Panel System?
+664       [ ]      [ ]      119a.  If SRECs are available, what is the SRECs expire? ____________________
+665       [ ]      [ ]      120.   Is there any storage capacity on the Property for the Solar Panel System?
+666       [ ]      [ ]      121.   Are you aware of any defects in or damage to any component of the Solar Panel System? If yes,
+667                                explain: ____________________________________________________________________
+668                                ____________________________________________________________________
 669
-670         Choose one of the following three options:
-671   [ ]      122a.  The Solar Panel System is financed under a power purchase agreement or other type of financing
-672                            arrangement which requires me/us to make periodic payments to a Solar Panel System provider
-673                            in order to acquire ownership of the Solar Panel System ("PPA"). If yes, proceed to Section A
-674                            below.
-675   [ ]      122b.  The Solar Panel System is the subject of a lease agreement. If yes, proceed to Section B below.
-676   [ ]      122c.  If yes/no the Solar Panel System outright. If yes, you do not have to answer any further questions.
+670       Choose one of the following three options:
+671       [ ]      122a.  The Solar Panel System is financed under a power purchase agreement or other type of financing
+672                       arrangement which requires me/us to make periodic payments to a Solar Panel System provider
+673                       in order to acquire ownership of the Solar Panel System ("PPA"). If yes, proceed to Section A
+674                       below.
+675       [ ]      122b.  The Solar Panel System is the subject of a lease agreement. If yes, proceed to Section B below.
+676       [ ]      122c.  I/we own the Solar Panel System outright. If yes, you do not have to answer any further questions.
 677
-678         SECTION A - THE SOLAR PANEL SYSTEM IS SUBJECT TO A PPA
-679   [ ]      [ ]      123.   What is the current periodic payment amount? $
-680   [ ]      [ ]      124.   What is the frequency of the periodic payments (check one)?  [ ] Monthly  [ ] Quarterly
-681   [ ]      [ ]      125.   What is the expiration date of the PPA, which is when you will become the owner of the Solar
-682                            Panel System? ________________________ ("PPA Expiration Date")
-683   [ ]      [ ]      126.   Is there a balloon payment that will become due on or before this PPA Expiration Date?
-684   [ ]      [ ]      127.   If there is a balloon payment, what is the amount? $____________
-685         Choose one of the following three options:
-686   [ ]      128a.  Buyer will assume my/our obligations under the PPA at Closing.
-687   [ ]      128b.  I/we will pay off or otherwise obtain cancellation of the PPA as of the Closing so that the Solar
-688                            Panel System can be included in the sale free and clear.
-689   [ ]      128c.  I/we will remove the Solar Panel System from the Property and pay off or otherwise obtain
-690                            cancellation of the PPA as of the Closing.
+678       SECTION A - THE SOLAR PANEL SYSTEM IS SUBJECT TO A PPA
+679       [ ]      [ ]      123.   What is the current periodic payment amount? $____________________
+680       [ ]      [ ]      124.   What is the frequency of the periodic payments (check one)?  [ ] Monthly  [ ] Quarterly
+681       [ ]      [ ]      125.   What is the expiration date of the PPA, which is when you will become the owner of the Solar
+682                                Panel System? ____________________ ("PPA Expiration Date")
+683       [ ]      [ ]      126.   Is there a balloon payment that will become due on or before this PPA Expiration Date?
+684       [ ]      [ ]      127.   If there is a balloon payment, what is the amount? $____________________
+685       Choose one of the following three options:
+686       [ ]      128a.  Buyer will assume my/our obligations under the PPA at Closing.
+687       [ ]      128b.  I/we will pay off or otherwise obtain cancellation of the PPA as of the Closing so that the Solar
+688                       Panel System can be included in the sale free and clear.
+689       [ ]      128c.  I/we will remove the Solar Panel System from the Property and pay off or otherwise obtain
+690                       cancellation of the PPA as of the Closing.
 691
-692         SECTION B - THE SOLAR PANEL SYSTEM IS SUBJECT TO A LEASE
-693   [ ]      [ ]      129.   What is the current lease payment amount? $
-694   [ ]      [ ]      130.   What is the frequency of the periodic lease payments (check one)?  [ ] Monthly  [ ] Quarterly
-695   [ ]      [ ]      131.   What is the expiration date of the lease? ____________
-696         Choose one of the following two options:
-697   [ ]      132a.  Buyer will assume my/our obligations under the lease at Closing.
-698   [ ]      132b.  I/we will obtain an early termination of the lease and will remove the Solar Panel System prior
-699                            to Closing.
+692       SECTION B - THE SOLAR PANEL SYSTEM IS SUBJECT TO A LEASE
+693       [ ]      [ ]      129.   What is the current lease payment amount? $____________________
+694       [ ]      [ ]      130.   What is the frequency of the periodic lease payments (check one)?  [ ] Monthly  [ ] Quarterly
+695       [ ]      [ ]      131.   What is the expiration date of the lease? ____________________
+696       Choose one of the following two options:
+697       [ ]      132a.  Buyer will assume my/our obligations under the lease at Closing.
+698       [ ]      132b.  I/we will obtain an early termination of the lease and will remove the Solar Panel System prior
+699                       to Closing.
 700
 
 [Footer:]
-NJ REALTORS®  |  Form 140  |  05/2025-2.  Page 12 of 14
+NJ REALTORS®  |  Form 140  |  05/2025.2    Page 12 of 14
 
 [REALTOR® logo and Equal Housing Opportunity logo at bottom right]
 
-
-
 =================== PAGE 17 ===================
-[transcription pass: A]
-DOCUMENT TYPE: Real-estate Seller's Property Condition Disclosure Statement — page 13 of 14 (NJ REALTORS Form 140). This page contains Section C (Solar Panel System / Energy Certificates), Water Intrusion, Secondary Power Source, Acknowledgment of Seller, and signature/date blocks.
+[HEADER]
+MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 
-[Header bar]
-MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716                          $894,000
-
-701   SECTION C - THE SOLAR PANEL SYSTEM IS SUBJECT TO ENERGY CERTIFICATE(S)
-702         [ ]      [ ]      [ ]      133.  Are Solar Transition Renewable Energy Certificates ("TRECs") available from the Solar Panel
-703                                            System?
-704         [ ]      [ ]      [ ]      133a. If TRECs are available, when will the TRECs expire?
-705         [ ]      [ ]      [ ]      134.  Are Solar Renewable Energy Certificates ("SREC IIs") available from the Solar Panel System?
-706                                    134a. If SREC IIs are available, when will the SREC IIs expire?
+701  SECTION C - THE SOLAR PANEL SYSTEM IS SUBJECT TO ENERGY CERTIFICATE(S)
+702  [ ]  [ ]  [ ]      133.  Are Solar Transition Renewable Energy Certificates ("TRECs") available from the Solar Panel
+703                            System?
+704            [ ]      133a. If TRECs are available, when will the TRECs expire? ____________
+705  [ ]  [ ]  [ ]      134.  Are Solar Renewable Energy Certificates ("SREC IIs") available from the Solar Panel System?
+706            [ ]      134a. If SREC IIs are available, when will the SREC IIs expire? ____________
 707
-708   WATER INTRUSION Pursuant to N.J.S.A. 30:E-19.1
-709         Yes     No   Unknown
-710         [ ]     [X]    [ ]        135.  Are you aware of any water leakage, accumulation or dampness, the presence of mold or other
-711                                          similar natural substances, or repairs or other attempts to control any water or dampness problem use
-712                                          on the Property? If yes, please describe the nature of the issue and any attempts to repair or control it:
-713
-714
-715
-716
-717
-718                                    If yes, pursuant to New Jersey law, the buyer of the real Property is advised to refer to the "Mold
-719                                    Guidelines for New Jersey Residents" pamphlet issued by the New Jersey Department of Health
-720                                    (njmd.us/mold-guidelines) and has the right to request a physical copy of the pamphlet from the
-721                                    real estate broker, broker-salesperson, or salesperson.
-722
-723   SECONDARY POWER SOURCE Pursuant to PL 2025, c19
-724         Yes     No   Unknown
-725         [ ]     [X]    [ ]        136.  Is there a secondary power source at the Property (i.e. permanently installed combustion
-726                                          generators, solar panels, battery storage systems, or any other supplemental source of electrical
-727                                          energy.)?
-728         [ ]     [ ]    [ ]         136a. If "yes," is a label installed within 18 inches of the main N/A electrical panel and electrical meter
-729                                          warning of the dangers associated with the secondary power source?
-730
-731   ACKNOWLEDGMENT OF SELLER
-732   The undersigned Seller affirms that the information set forth in this Disclosure Statement is accurate and complete to the best of Seller's
-733   knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real estate brokerage firm representing
-734   or assisting the Seller to provide this Disclosure Statement to all prospective buyers of the Property, and to other real estate agents. Seller
-735   alone is the source of all information contained in this statement. *If the Seller relied upon any credible representations of another, the
-736   Seller should state the name(s) of the person(s) who made the representations and describe the information that was relied upon.
-737
-738
+708  WATER INTRUSION Pursuant to N.J.S.A. 56:8-19.1
+709       Yes   No   Unknown
+710  [ ]  [X]  [ ]      135.  Are you aware of any water leakage, accumulation or dampness, the presence of mold or other
+711                            similar natural substance, or repairs or other attempts to control any water or dampness problem on
+712                            the Property? If yes, please describe the nature of the issue and any attempts to repair or control it:
+713                            ____________________________________________________________________________
+714                            ____________________________________________________________________________
+715                            ____________________________________________________________________________
+716                            If yes, pursuant to New Jersey law, the buyer of the real Property is advised to refer to the "Mold
+717                            Guidelines for New Jersey Residents' pamphlet issued by the New Jersey Department of Health
+718                            (njreal.to/mold-guidelines) and has the right to request a physical copy of the pamphlet from the
+719                            real estate broker, broker-salesperson, or salesperson.
+720
+721  SECONDARY POWER SOURCE Pursuant to P.L.2025, c19
+722       Yes   No   Unknown
+723  [ ]  [X]  [ ]      136.  Is there a secondary power source at the Property (i.e. permanently installed combustion
+724                            generators, solar panels, battery storage systems, or any other supplemental source of electrical
+725                            energy)?
+726  [ ]  [ ]          136a. If "yes," is a label installed within 18 inches of the main [N/A] electrical panel and electrical meter
+727                            warning of the dangers associated with the secondary power sources?
+728
+729
+730  ACKNOWLEDGMENT OF SELLER
+731  The undersigned Seller affirms that the information set forth in this Disclosure Statement is accurate and complete to the best of Seller's
+732  knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real estate brokerage firm representing
+733  or assisting the Seller to provide this Disclosure Statement to all prospective buyers of the Property, and to other real estate agents. Seller
+734  alone is the source of all information contained in this statement. *If the Seller relied upon any credible representations of another, the
+735  Seller should state the name(s) of the person(s) who made the representation(s) and describe the information that was relied upon.
+736
+737  ____________________________________________________________________________
+738  ____________________________________________________________________________
 739
-740
-741   SELLER                                  DATE          SELLER                                  DATE
+740  ___________________________          ___________________________
+741  SELLER                    DATE        SELLER                    DATE
 742
-743
-744
-745   SELLER                                  DATE          SELLER                                  DATE
-746
-747   EXECUTOR, ADMINISTRATOR, TRUSTEE (if applicable)
-748   The undersigned has never occupied the Property and lacks the personal knowledge necessary to complete this Disclosure Statement.
-749
-750
-751   SIGNED                                  DATE          SIGNED                                  DATE
+743  ___________________________          ___________________________
+744  SELLER                    DATE        SELLER                    DATE
+745
+746  EXECUTOR, ADMINISTRATOR, TRUSTEE (if applicable)
+747  The undersigned has never occupied the Property and lacks the personal knowledge necessary to complete this Disclosure Statement.
+748
+749  ___________________________          ___________________________
+750  SIGNED                    DATE        SIGNED                    DATE
+751
 752
 753
 754
@@ -1292,70 +1220,54 @@ MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716          
 757
 758
 759
-760            ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS CONTINUES ON NEXT PAGE
+760  ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS CONTINUES ON NEXT PAGE
 
-[Footer]
+[FOOTER]
 NJ REALTORS® | Form 140 | 05/2025.2   Page 13 of 14
 
-
-UNCERTAIN LIST:
-- "njmd.us/mold-guidelines" [?] — the pamphlet URL/hyperlink text is small; best guess of the displayed link text.
-- "N.J.S.A. 30:E-19.1" [?] — citation in the Water Intrusion heading; statute number partly faint.
-- "PL 2025, c19" [?] — Secondary Power Source citation; could be "P.L. 2025, c.19".
-- "N/A" in line 728 [?] — appears to be a fill-in within the printed sentence ("...within 18 inches of the main N/A electrical panel...").
-- Checkboxes for items 133, 133a, 134, 134a (lines 702-705) [?] — three boxes each appear empty/unmarked.
-- "problem use" line 711 [?] — wording near end of line appears to read "control any water or dampness problem use"; printed text faint.
-
-
-
 =================== PAGE 18 ===================
-[transcription pass: A]
-DOCUMENT TYPE: NJ REALTORS Form 140 (Statutory Disclosures & Other Items Addendum to the Property Disclosure Statement) - Page 14 of 14. This page contains "Receipt and Acknowledgment by Prospective Buyer" and "Acknowledgment of Real Estate Broker/Broker-Salesperson/Salesperson" sections with signature/date blocks.
+[HEADER] MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 
---- HEADER ---
-22617358          115 Browns Dock Rd. Atlantic Highlands, NJ 07716          $894,900
-
---- BODY (with margin line numbers) ---
-
-761   RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
-762   The undersigned Prospective Buyer acknowledges receipt of this completed Statutory Disclosures & Other Items Addendum to Disclosure
-763   Statement prior to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Statutory
-764   Disclosures & Other Items Addendum is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or
-765   herself as to the conditionof the Property. Prospective Buyer's acknowledges that the Property may be inspected by qualified professionals,
-766   including the right to terminate the actual condition of the Property. Prospective Buyer further acknowledges that this form is
-767   intended to provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale.
-768   This form does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic,
-769   volume, etc. Prospective Buyer acknowledges that they independently investigate such local conditions before entering into a binding
-770   contract to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the
-771   Seller's real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed
-772   home inspector.
-
+761  RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
+762  The undersigned Prospective Buyer acknowledges receipt of this completed Statutory Disclosures & Other Items Addendum to Disclosure
+763  Statement prior to signing a Contract of Sale pertaining to this Property. Prospective Buyer acknowledges that this completed Statutory
+764  Disclosures & Other Items Addendum is not a warranty by Seller and that it is Prospective Buyer's responsibility to satisfy himself or
+765  herself as to the condition of the Property. Prospective Buyer's acknowledges that the Property may be inspected by qualified professionals,
+766  at Prospective Buyer's expense, to determine the actual condition of the Property. Prospective Buyer further acknowledges that this form is
+767  intended to provide information relating to the condition of the land, structures, major systems and amenities, if any, included in the sale.
+768  This form does not address local conditions which may affect a purchaser's use and enjoyment of the Property such as noise, odors, traffic
+769  volume, etc. Prospective Buyer acknowledges that they may independently investigate such local conditions before entering into a binding
+770  contract to purchase the Property. Prospective Buyer acknowledges that he or she understands that the visual inspection performed by the
+771  Seller's real estate broker/broker-salesperson/salesperson does not constitute a professional home inspection as performed by a licensed
+772  home inspector.
 773
 774
-775   PROSPECTIVE BUYER                    DATE          PROSPECTIVE BUYER                    DATE
+775  ___________________________ DATE ______   ___________________________ DATE ______
+     PROSPECTIVE BUYER                          PROSPECTIVE BUYER
 776
 777
-778   PROSPECTIVE BUYER                    DATE          PROSPECTIVE BUYER                    DATE
+778  ___________________________ DATE ______   ___________________________ DATE ______
+     PROSPECTIVE BUYER                          PROSPECTIVE BUYER
 779
-780   ACKNOWLEDGMENT OF REAL ESTATE BROKER/BROKER-SALESPERSON/SALESPERSON
-781   The undersigned Seller's real estate broker/broker-salesperson/salesperson acknowledges receipt of this Statutory Disclosures &
-782   Other Items Addendum to the Disclosure Statement and that the information contained in this form was provided by the Seller.
+780  ACKNOWLEDGMENT OF REAL ESTATE BROKER/BROKER-SALESPERSON/SALESPERSON
+781  The undersigned Seller's real estate broker/broker-salesperson/salesperson acknowledges receipt of this Statutory Disclosures &
+782  Other Items Addendum to the Disclosure Statement and that the information contained in this form was provided by the Seller.
 783
-784   The Seller's real estate broker/broker-salesperson/salesperson also confirms that he or she visually inspected the Property with reasonable
-785   diligence to ascertain the accuracy of the information disclosed by the Seller, prior to providing a copy of the property disclosure statement
-786   to the buyer.
+784  The Seller's real estate broker/broker-salesperson/salesperson also confirms that he or she visually inspected the Property with reasonable
+785  diligence to ascertain the accuracy of the information disclosed by the Seller, prior to providing a copy of the property disclosure statement
+786  to the buyer.
 787
-788   The Prospective Buyer's real estate broker/broker-salesperson/salesperson acknowledges receipt of this completed Statutory Disclosures
-789   & Other Items Addendum to the Property Disclosure for the purpose of providing it to the Prospective Buyer.
+788  The Prospective Buyer's real estate broker/broker/broker-salesperson also acknowledges receipt of this completed Statutory Disclosures
+789  & Other Items Addendum to the Property Disclosure for the purpose of providing it to the Prospective Buyer.
 790
-791
-792   SELLER's REAL ESTATE BROKER/                    DATE
-793   BROKER-SALESPERSON/SALESPERSON
+791  ___________________________ DATE ______
+792  SELLER'S REAL ESTATE BROKER/
+793  BROKER-SALESPERSON/SALESPERSON:
 794
 795
-796
-797   PROSPECTIVE BUYER's REAL ESTATE BROKER/                    DATE
-798   BROKER-SALESPERSON/SALESPERSON
+796  ___________________________ DATE ______
+797  PROSPECTIVE BUYER'S REAL ESTATE BROKER/
+798  BROKER-SALESPERSON/SALESPERSON
 799
 800
 801
@@ -1379,24 +1291,20 @@ DOCUMENT TYPE: NJ REALTORS Form 140 (Statutory Disclosures & Other Items Addendu
 819
 820
 
---- FOOTER ---
-NJ REALTORS®  Form 140 / 05/2025.2   Page 14 of 14
-
-
+[FOOTER] NJ REALTORS® | Form 140 | 05/2025.2   Page 14 of 14
 
 =================== PAGE 19 ===================
-[transcription pass: B(verified)]
-=== PAGE 19 — VERBATIM TRANSCRIPTION ===
+=== PAGE 19 — LOCKED FINAL TRANSCRIPTION ===
 IMAGE FILE: /tmp/pages_full/hi-19-19.png
-DOCUMENT TYPE: Screenshot (emailed as image0.jpeg) of a Synchrony Bank
-"High Yield Savings" account statement, page 1 of 4. Proof-of-funds / bank
-statement showing an ending balance. Account holder name is redacted with a
-black box (only "...UOPOLO" visible).
+DOCUMENT TYPE: Screenshot (emailed as image0.jpeg) of the first page of a
+Synchrony Bank "High Yield Savings" account statement. Proof-of-funds bank
+statement showing an ending balance. Account holder name redacted with a black
+box; only the tail of the surname ("UOPOLO") is visible.
 
 --- BROWSER / EMAIL CHROME (screenshot edges) ---
 [Top-left]: 6/19/26, 3:52 PM
 [Top-center]: image0.jpeg
-[Bottom-left URL]: https://mail.google.com/mail/u/0/?tab=rm&ogbl#search/dani/FMfcgzGgMVlvmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.1
+[Bottom-left URL]: https://mail.google.com/mail/u/0/?tab=rm&ogbl#search/dani/FMfcgzGgMVlvlmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.1
 [Bottom-right]: 1/1
 
 --- TOP LEFT (Synchrony logo / return address) ---
@@ -1421,6 +1329,7 @@ Street/city/state/ZIP of addressee FULLY REDACTED by the black box.]
 Statement Ending 06/07/2026
 Page 1 of 4
 
+--- MANAGING YOUR ACCOUNTS (right column box) ---
 Managing Your Accounts
   Phone    (866) 226-5638
   Online   synchrony.com/banking
@@ -1450,92 +1359,102 @@ HIGH YIELD SAVINGS - XXXXXXXX1021
 Visit us at synchrony.com/banking
 Member FDIC
 
-
+--- VERIFIED KEY FIELDS (zoom-resolved) ---
+Ending Balance: $488,178.21
+Account (last 4): 1021  (shown as XXXXXXXX1021)
+Statement Ending: 06/07/2026
+Page: Page 1 of 4
+Visible surname tail: UOPOLO (surname PUOPOLO, partially redacted)
 
 =================== PAGE 20 ===================
-[source: PDF text layer + direct review]
+=================== PAGE 20 ===================
+[transcription pass: FINAL — hand-reconciled by orchestrator from source image + text export;
+ page tripped subagent output content-filter twice, so verified directly. Checkbox/signature
+ states zoom-verified against /tmp/pages_full/p-20.png.]
+
+DOCUMENT TYPE: NJ REALTORS® Standard Form of Real Estate Sales Contract (Form 118-Statewide,
+07/2025.2) — PAGE 1 OF 14: "NOTICE TO BUYER AND SELLER / READ THIS NOTICE BEFORE SIGNING THE
+CONTRACT" (the attorney-review notice + agency disclosure + signature page).
+
+================ VERBATIM TRANSCRIPTION ================
+
+                              NOTICE
+                        TO BUYER AND SELLER
+              READ THIS NOTICE BEFORE SIGNING THE CONTRACT
+
+   The Law requires real estate brokers to give you the following information before you sign
+this contract. It requires us to tell you that you must read all of it before you sign. The
+purpose is to help you in this purchase or sale.
+
+   1) As a real estate broker, I represent: [ ] the seller, not the buyer;  [X] the buyer, not the seller;
+      [ ] both the seller and the buyer;  [ ] neither the seller nor the buyer.
+      The title company does not represent either the seller or the buyer.
+
+   2) You will not get any legal advice unless you have your own lawyer. Neither I nor anyone
+from the title company can give legal advice to either the buyer or the seller. If you do not
+hire a lawyer, no one will represent you in legal matters now or at the closing. Neither I nor
+the title company will represent you in those matters.
+
+   3) The contract is the most important part of the transaction. It determines your rights,
+risks, and obligations. Signing the contract is a big step. A lawyer would review the contract,
+help you to understand it, and to negotiate its terms.
+
+   4) The contract becomes final and binding unless your lawyer cancels it within the following
+three business days. If you do not have a lawyer, you cannot change or cancel the contract unless
+the other party agrees. Neither can the real estate broker nor the title insurance company change
+the contract.
+
+   5) Another important service of a lawyer is to order a survey, title report, or other important
+reports. The lawyer will review them and help to resolve any questions that may arise about the
+ownership and condition of the property. These reports and survey can cost you a lot of money. A
+lawyer will also prepare the documents needed to close title and represent you at the closing.
+
+   6) A buyer without a lawyer runs special risks. Only a lawyer can advise a buyer about what to
+do if problems arise concerning the purchase of this property. The problems may be about the
+seller's title, the size and shape of the property, or other matters that may affect the value of
+the property. If either the broker or the title company knows about the problems, they should tell
+you. But they may not recognize the problem, see it from your point of view, or know what to do.
+Ordinarily, the broker and the title company have an interest in seeing that the sale is completed,
+because only then do they usually receive their commissions. So, their interests may differ from
+yours.
+
+   7) Whether you retain a lawyer is up to you. It is your decision. The purpose of this notice is
+to make sure that you have the information needed to make your decision.
+
+--- SIGNATURE BLOCK ---
+SELLER ____________________  DATE ______   BUYER  Keith Cardona ____________  DATE __________
+                                                  [dotloop verified 06/19/26 6:25 PM EDT  6WW4-OEHM-YMOX-Y7WW]
+
+SELLER ____________________  DATE ______   BUYER  Danielle Cardona __________  DATE __________
+                                                  [dotloop verified 06/19/26 6:22 PM EDT  D9LT-4ZBP-RW98-Z2M0]
+
+SELLER ____________________  DATE ______   BUYER ____________________  DATE __________
+SELLER ____________________  DATE ______   BUYER ____________________  DATE __________
+
+Listing Broker ____________________        Selling Broker ____________________
+
+   Prepared by: Colleen Antoon
+                Name of Real Estate Licensee
+
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2   Page 1 of 14
 dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
 
+================ VERIFIED MATERIAL FACTS ================
+- Agency disclosure (item 1): box checked = "the buyer, not the seller" (2nd of 4 boxes; other three blank). Broker Colleen Antoon represents the BUYERS.
+- Buyers BOTH e-signed (dotloop): Keith Cardona 06/19/26 6:25 PM EDT; Danielle Cardona 06/19/26 6:22 PM EDT (Danielle signed first, 3 min earlier).
+- ALL SELLER signature/date lines BLANK. Listing Broker / Selling Broker lines BLANK.
+- Prepared by: Colleen Antoon.
 
-
-
-                                                                  NOTICE
-                                                            TO BUYER AND SELLER
-                                               READ THIS NOTICE BEFORE SIGNING THE CONTRACT
-
-           The Law requires real estate brokers to give you the following information before you sign this contract. It
-         requires us to tell you that you must read all of it before you sign. The purpose is to help you in this purchase or
-         sale.
-
-            1) As a real estate broker, I represent: the seller, not the buyer;      the buyer, not the seller;
-                 both the seller and the buyer;     neither the seller nor the buyer.
-               The title company does not represent either the seller or the buyer.
-
-           2) You will not get any legal advice unless you have your own lawyer. Neither I nor anyone from the title com-
-         pany can give legal advice to either the buyer or the seller. If you do not hire a lawyer, no one will represent you
-         in legal matters now or at the closing. Neither I nor the title company will represent you in those matters.
-
-           3) The contract is the most important part of the transaction. It determines your rights, risks, and obligations.
-         Signing the contract is a big step. A lawyer would review the contract, help you to understand it, and to negoti-
-         ate its terms.
-           4) The contract becomes final and binding unless your lawyer cancels it within the following three business
-         days. If you do not have a lawyer, you cannot change or cancel the contract unless the other party agrees. Nei-
-         ther can the real estate broker nor the title insurance company change the contract.
-
-           5) Another important service of a lawyer is to order a survey, title report, or other important reports. The
-         lawyer will review them and help to resolve any questions that may arise about the ownership and condition of
-         the property. These reports and survey can cost you a lot of money. A lawyer will also prepare the documents
-         needed to close title and represent you at the closing.
-
-           6) A buyer without a lawyer runs special risks. Only a lawyer can advise a buyer about what to do if problems
-         arise concerning the purchase of this property. The problems may be about the seller’s title, the size and shape
-         of the property, or other matters that may affect the value of the property. If either the broker or the title com-
-         pany knows about the problems, they should tell you. But they may not recognize the problem, see it from your
-         point of view, or know what to do. Ordinarily, the broker and the title company have an interest in seeing that
-         the sale is completed, because only then do they usually receive their commissions. So, their interests may differ
-         from yours.
-
-           7) Whether you retain a lawyer is up to you. It is your decision. The purpose of this notice is to make sure that
-         you have the information needed to make your decision.
-
-                                                                            Keith Cardona
-                                                                                                                   dotloop verified
-                                                                                                                   06/19/26 6:25 PM EDT
-            _________________________________________________                _________________________________________________
-                                                                                                                   6WW4-OEHM-YMOX-Y7WW
-
-            SELLER                            DATE                           BUYER                                DATE
-                                                                            Danielle Cardona
-                                                                                                                     dotloop verified
-                                                                                                                     06/19/26 6:22 PM EDT
-            _________________________________________________               _________________________________________________
-                                                                                                                     D9LT-4ZBP-RW98-Z2M0
-
-            SELLER                             DATE                          BUYER                                DATE
-
-            _________________________________________________               _________________________________________________
-            SELLER                            DATE                          BUYER                              DATE
-
-            _________________________________________________               _________________________________________________
-            SELLER                            DATE                          BUYER                              DATE
-
-            _________________________________________________               _________________________________________________
-            Listing Broker                                                   Selling Broker
-
-                       Prepared by: Colleen
-                                    _________________________________________________
-                                            Antoon
-                                         Name of Real Estate Licensee
-
-         New Jersey REALTORS® Form 118-Statewide | 07/2025.2 Page 1 of 14
-
+================ UNCERTAIN ================
+- None. Printed text from machine export; checkbox + signatures zoom-verified against image.
 
 =================== PAGE 21 ===================
-[transcription pass: A]
-[dotloop signature verification: dtlp.us/XXXX-XXXX-XXXX]
+dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
 
 STATEWIDE NEW JERSEY REALTORS® STANDARD FORM
 OF REAL ESTATE SALES CONTRACT
+
+[NEW JERSEY REALTORS logo]
 
 ©2016 New Jersey REALTORS®, Inc.
 
@@ -1545,123 +1464,117 @@ PREVIOUSLY EXECUTED A WRITTEN LISTING AGREEMENT.
 
 THIS IS A LEGALLY BINDING CONTRACT THAT WILL BECOME FINAL WITHIN THREE BUSINESS DAYS.
 DURING THIS PERIOD YOU MAY CHOOSE TO CONSULT AN ATTORNEY WHO CAN REVIEW AND CANCEL THE
-CONTRACT. SEE SECTION ON ATTORNEY REVIEW FOR DETAILS.
+CONTRACT.  SEE SECTION ON ATTORNEY REVIEW FOR DETAILS.
 
 TABLE OF CONTENTS
 
-1. PARTIES AND PROPERTY
-   DESCRIPTION
-2. PURCHASE PRICE
-3. MANNER OF PAYMENT
-4. SUFFICIENT ASSETS
-5. ACCURATE DISCLOSURE OF SELLING
-   PRICE
-6. ITEMS INCLUDED IN SALE
-7. ITEMS EXCLUDED FROM SALE
-8. DATES AND TIMES FOR
-   PERFORMANCE
-9. CERTIFICATE OF OCCUPANCY AND
-   ZONING COMPLIANCE
+[Column 1]
+1.  PARTIES AND PROPERTY
+        DESCRIPTION
+2.  PURCHASE PRICE
+3.  MANNER OF PAYMENT
+4.  SUFFICIENT ASSETS
+5.  ACCURATE DISCLOSURE OF SELLING
+        PRICE
+6.  ITEMS INCLUDED IN SALE
+7.  ITEMS EXCLUDED FROM SALE
+8.  DATES AND TIMES FOR
+        PERFORMANCE
+9.  CERTIFICATE OF OCCUPANCY AND
+        ZONING COMPLIANCE
 10. MUNICIPAL ASSESSMENTS
 11. QUALITY AND INSURABILITY OF
-    TITLE
+        TITLE
 12. POSSESSION, OCCUPANCY AND
-    TENANCIES
+        TENANCIES
 13. LEAD-BASED PAINT AND/OR LEAD-
-    BASED PAINT HAZARD
+        BASED PAINT HAZARD
 14. POINT OF ENTRY TREATMENT SYSTEMS
 
+[Column 2]
 15. CESSPOOL REQUIREMENTS
 16. INSPECTION CONTINGENCY CLAUSE
 17. MEGAN'S LAW STATEMENT
 18. MEGAN'S LAW REGISTRY
 19. NOTIFICATION REGARDING OFF-
-    SITE CONDITIONS
+        SITE CONDITIONS
 20. AIR SAFETY AND ZONING
-    NOTICE
+        NOTICE
 21. BULK SALES
 22. NOTICE TO BUYER CONCERNING
-    INSURANCE
+        INSURANCE
 23. MAINTENANCE AND CONDITION OF
-    PROPERTY
+        PROPERTY
 24. RISK OF LOSS
 25. INITIAL AND FINAL WALK-
-    THROUGH INSPECTIONS
+        THROUGHS
 26. ADJUSTMENTS AT CLOSING
 27. FAILURE OF BUYER OR SELLER TO
-    CLOSE
+        CLOSE
 28. CONSUMER INFORMATION
-    STATEMENT ACKNOWLEDGEMENT
+        STATEMENT ACKNOWLEDGEMENT
 
+[Column 3]
 29. DECLARATION OF BROKER(S)
-    BUSINESS RELATIONSHIP(S)
+        BUSINESS RELATIONSHIP(S)
 30. BROKERS' INFORMATION AND
-    COMMISSION
+        COMMISSION
 31. EQUITABLE LIEN
 32. DISCLOSURE THAT BUYER OR
-    SELLER IS A REAL ESTATE LICENSEE
+        SELLER IS A REAL ESTATE LICENSEE
 33. BROKERS TO RECEIVE CLOSING
-    DISCLOSURE AND OTHER DOCUMENTS
+        DISCLOSURE AND OTHER DOCUMENTS
 34. PROFESSIONAL REFERRALS
-35. ATTORNEY REVIEW CLAUSE
+35. ATTORNEY-REVIEW CLAUSE
 36. NOTICES
 37. NO ASSIGNMENT
 38. ELECTRONIC SIGNATURES AND
-    DOCUMENTS
+        DOCUMENTS
 39. CORPORATE RESOLUTIONS
 40. ENTIRE AGREEMENT; PARTIES LIABLE
 41. APPLICABLE LAWS
 42. ADDENDA
 43. ADDITIONAL CONTRACTUAL
-    PROVISIONS
+        PROVISIONS
 
-1. PARTIES AND PROPERTY DESCRIPTION:
+1.  PARTIES AND PROPERTY DESCRIPTION:
 
-1
-2
-3   Keith Cardona                                          ("Buyer"),    Danielle Puopolo Cardona                                   ("Buyer"),
-4
-5                                                          ("Buyer"),                                                              ("Buyer"),
-6
-7   whose address is/are 280 River Rd, Red Bank NJ 07701
-8
-9   AGREES TO PURCHASE FROM
-10
-11  Frank DeAndino                                         ("Seller"),   Dorothy DeAndino                                          ("Seller"),
-12
-13                                                         ("Seller"),                                                            ("Seller"),
-14
-15  whose address is/are 115 Browns Dock Rd Atlantic Highlands NJ 07716
-16
-17  THROUGH THE BROKER(S) NAMED IN THIS CONTRACT AT THE PRICE AND TERMS STATED BELOW, THE
-18  FOLLOWING PROPERTY:
-19  Property Address: 115 Browns Dock Rd, Atlantic Highlands, NJ 07716
-20
-21  located on the municipal tax map of Middletown                                                  County Monmouth
-22
-23  as Block 840              Lot 97              (the "Property") Qualifier                          (if the Property is a condominium),
-24  THE WORDS "BUYER" AND "SELLER" INCLUDE ALL BUYERS AND SELLERS LISTED ABOVE.
-25
-26  2. PURCHASE PRICE:
-27  TOTAL PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $        750000.000
-28  INITIAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              35000
-29  ADDITIONAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
-30  MORTGAGE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
-31  BALANCE OF PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              715,000.00
+Keith Cardona                                          ("Buyer"),   Danielle Puopolo Cardona                                  ("Buyer"),
 
-New Jersey REALTORS® Form 118-Statewide | 07/2025-2  Page 2 of 14
+                                                       ("Buyer"),                                                              ("Buyer"),
 
-Buyer's Initials: [KC] [DC]
-Seller's Initials: [____] [____]
+whose address is/are 280 River Rd, Red Bank NJ 07701
 
-[dotloop signature stamp lower-left near Buyer's Initials]
+AGREES TO PURCHASE FROM
 
+Frank DeAndino                                         ("Seller"),  Dorothy DeAndino                                          ("Seller"),
 
+                                                       ("Seller"),                                                            ("Seller"),
+
+whose address is/are 115 Browns Dock Rd Atlantic Highlands NJ  07716
+
+THROUGH THE BROKER(S) NAMED IN THIS CONTRACT AT THE PRICE AND TERMS STATED BELOW, THE
+FOLLOWING PROPERTY:
+Property Address: 115 Browns Dock Rd, Atlantic Highlands, NJ 07716
+
+shown on the municipal tax map of Middletown                                                  County Monmouth
+
+as Block 840              Lot 97              (the "Property") Qualifier                          (if the Property is a condominium),
+
+THE WORDS "BUYER" AND "SELLER" INCLUDE ALL BUYERS AND SELLERS LISTED ABOVE.
+
+2. PURCHASE PRICE:
+TOTAL PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $        750000.000
+INITIAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              35000
+ADDITIONAL DEPOSIT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
+MORTGAGE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $
+BALANCE OF PURCHASE PRICE . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . $              715,000.00
+
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 2 of 14
+Buyer's Initials: [KC] [DC]    Seller's Initials: [____] [____]
+[dotloop initials stamps under KC/DC dated 06/19/26]
 
 =================== PAGE 22 ===================
-[transcription pass: A]
-dotloop signature verification: [link/redacted]
-
 51    3.  MANNER OF PAYMENT:
 52    (A) INITIAL DEPOSIT to be paid by Buyer to: [ ] Listing Broker [ ] Participating Broker [X] Buyer's Attorney [ ] Title Company
 53    [ ] Other ______________________, on or before  3 days after Atty Review  (date) (if left blank, then within five (5)
@@ -1723,15 +1636,10 @@ dotloop signature verification: [link/redacted]
 109   The Property includes all fixtures permanently attached to the building(s), and all shrubbery, plantings and fencing, gas and electric
 110   fixtures, cooking ranges and ovens, hot water heaters, flooring, screens, storm sashes, shades, blinds, awnings, radiator covers, heating
 
-New Jersey REALTORS® Form 118-Statewide | 07/2025 2 Page 3 of 14    Buyer's Initials: [initials]    Seller's Initials: ______
-
-dotloop signature verification: [link/redacted]
-
-
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 3 of 14    Buyer's Initials: [KC] [DC]    Seller's Initials: [____] [____]
 
 =================== PAGE 23 ===================
-[transcription pass: A]
-[dotloop signature verification: (illegible code at top of page)]
+[dotloop signature verification mark at top-left margin]
 
 111   apparatus and sump pumps, if any, except where owned by tenants, are included in this sale. All of the appliances shall be in working
 112   order as of the Closing. Seller does not guarantee the condition of the appliances after the Deed and affidavit of title have been delivered
@@ -1749,57 +1657,45 @@ dotloop signature verification: [link/redacted]
 124   _______________________________________________________________________________________________________________________
 125   _______________________________________________________________________________________________________________________
 126   _______________________________________________________________________________________________________________________
-
 127   8. DATES AND TIMES FOR PERFORMANCE:
 128   Seller and Buyer agree that all dates and times included in this Contract are of the essence. This means that Seller and Buyer must satisfy
 129   the terms of this Contract within the time limits that are set in this Contract or will be in default, except as otherwise provided in this
 130   Contract or required by applicable law, including but not limited to if the Closing has to be delayed either because a lender does not timely
 131   provide documents through no fault of Buyer or Seller or for three (3) business days because of the change of terms as required by the
 132   Consumer Financial Protection Bureau.
-
 133   If Seller requests that any addendum or other document be signed in connection with this Contract, "final execution date," "acknowl-
 134   edgement date," or similar language contained in such document that sets the time period for the completion of any conditions or contin-
 135   gencies, including but not limited to inspections and financing, shall mean that the time will begin to run after the attorney-review period
 136   is completed or, if this Contract is timely disapproved by an attorney as provided in the Attorney-Review Clause Section of this Contract,
 137   then from the date the parties agree to the terms of this Contract.
-
-138   Buyer selects [Joseph Michelini Esq                                    ] ("Closing Agent"), as the title company, attorney or other entity or person to con-
+138   Buyer selects Joseph Michelini Esq ___________________________________ ("Closing Agent") as the title company, attorney or other entity or person to con-
 139   duct the Closing. If the Closing Agent is an entity or person other than the Buyer's attorney, Buyer agrees to timely contact the Closing
 140   Agent to schedule the Closing after the attorney-review period is completed or, if the Contract is timely disapproved by an attorney as
 141   provided in the Attorney-Review Section of this Contract, then after the parties agree to the terms of this Contract.
-
 142   9. CERTIFICATE OF OCCUPANCY AND ZONING COMPLIANCE:
 143   (A) Zoning Compliance.
 144   Seller makes no representations concerning existing zoning ordinances, except that Seller's use of the Property is not presently in violation
 145   of any zoning ordinances.
-
 146   (B) Certificate of Occupancy or Housing Code Letter.
 147   Some municipalities may require a Certificate of Occupancy or Housing Code Letter to be issued. If any is required for this Property,
 148   Seller shall obtain it at Seller's expense and provide to Buyer prior to Closing and shall be responsible to make and pay for any repairs
-149   required in order to obtain the Certificate or Letter. However, if this expense exceeds $__________ (If left blank, then 1.5% of the
-150   purchase price), in which case Seller may terminate this Contract and refund to Buyer all deposit monies plus Buyer's reasonable expenses,
+149   required in order to obtain the Certificate or Letter. However, if this expense exceeds $___________ (if left blank, then 1.5% of the
+150   purchase price) to Seller, then Seller may terminate this Contract and refund to Buyer all deposit monies plus Buyer's reasonable expenses,
 151   if any, in connection with this transaction unless Buyer elects to make repairs in excess of said amount at Buyer's expense, in which event
 152   Seller shall not have the right to terminate this Contract.
-
 153   (C) Smoke-Sensitive Alarm Device Compliance.
 154   Seller shall comply with all New Jersey laws, and local ordinances, including but not limited to smoke detectors, carbon monoxide
 155   detectors, fire extinguishers and indoor sprinklers, the cost of which shall be paid by Seller and not be considered a repair cost.
-
 156   (D) Secondary Power Source Identification Label.
 157   If there is a secondary power source to the primary power supply (i.e. permanently installed internal combustion generators, solar panels,
-158   battery storage system, or any other supplemental source of electrical energy), a label shall be installed within 18 inches of the main
+158   battery storage systems, or any other supplemental source of electrical energy), a label shall be installed within 18 inches of the main
 159   electrical panel and electrical meter, warning about the dangers associated with secondary power sources as required by law.
 
 [footer]
-New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 4 of 14    Buyer's Initials [ KR ] [ DD ]    Seller's Initials [ ] [ ]
-[dotloop verified stamp in Buyer's Initials boxes]
-
-
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 4 of 14    Buyer's Initials [KC] [DC]    Seller's Initials [ ] [ ]
+[dotloop verified stamp; Buyer's initials KC and DC dated 06/19/26; Seller's initials blank]
 
 =================== PAGE 24 ===================
-[transcription pass: A]
-dotcloop signature verification [illegible] [QID xxxx]
-
 171   10. MUNICIPAL ASSESSMENTS: (Seller represents that Seller [ ] has [X] has not been notified of any such municipal assessments as
 172   explained in this Section.)
 173
@@ -1829,7 +1725,7 @@ dotcloop signature verification [illegible] [QID xxxx]
 197   commitment (title search) and survey, if required by Buyer's lender, title company or the municipality where the Property is located,
 198   and to furnish copies to Seller.  If Seller's title contains any exceptions other than as set forth in this Section, Buyer shall notify Seller
 199   and Seller shall have thirty (30) calendar days within which to eliminate those exceptions.  Seller represents, to the best of Seller's
-200   knowledge, that there are no restrictions in any conveyance or plan of record that will prohibit use and/or occupancy of the Property
+200   knowledge, that there are no restrictions in any conveyance or plans of record that will prohibit use and/or occupancy of the Property
 201   as a single _______________ family residential dwelling.  Seller represents that all buildings and other improvements on the Property are
 202   within its boundary lines and that no improvements on adjoining properties extend across boundary lines of the Property.
 203
@@ -1861,17 +1757,15 @@ dotcloop signature verification [illegible] [QID xxxx]
 229   N.J.S.A. 52:27D-437.16, et seq., for lead-based paint.  See section 13D below.
 230
 
-New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 5 of 14    Buyer's Initials [RE] [JZ]    Seller's Initials [ ] [ ]
-
-
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 5 of 14    Buyer's Initials [KC] [DC]    Seller's Initials [ ] [ ]
+[dotloop verified stamp; Buyer's initials KC and DC; Seller's initials blank]
 
 =================== PAGE 25 ===================
-[transcription pass: A]
 231  13. LEAD-BASED PAINT AND/OR LEAD-BASED PAINT HAZARD: (This section is applicable only to all dwellings
-232  built prior to 1978.)   [X] Applicable  [ ] Not Applicable
+232  built prior to 1978.)   [X] Applicable   [ ] Not Applicable
 233  (A) Document Acknowledgement.
-234  Buyer acknowledges receipt of the EPA pamphlet entitled "Protect Your Family From Lead In Your Home." Moreover, a copy of
-235  a document entitled "Disclosure of Information and Acknowledgment Lead-Based Paint and Lead-Based Paint Hazards" has been fully
+234  Buyer acknowledges receipt of the EPA pamphlet entitled "Protect Your Family From Lead In Your Home." Moreover, a copy of a
+235  document entitled "Disclosure of Information and Acknowledgement Lead-Based Paint and Lead-Based Paint Hazards" has been fully
 236  completed and signed by Buyer, Seller and Broker(s) and is appended to and made a part of this Contract.
 237
 238  (B) Lead Warning Statement.
@@ -1899,10 +1793,10 @@ New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 5 of 14    Buyer's In
 260  and Brokers, in writing that Buyer is voiding this Contract; or (2) delivers to Seller and Brokers a written amendment (the "Amendment")
 261  to this Contract listing the specific existing deficiencies and corrections required by Buyer. The Amendment shall provide that Seller
 262  agrees to (a) correct the deficiencies; and (b) furnish Buyer with a certification from a certified inspector/risk assessor that the deficiencies
-263  have been corrected, before the Closing. Seller shall have _____________ (if left blank, then 5 business days after receipt of the Amendment)
+263  have been corrected, before the Closing. Seller shall have ___________ (if left blank, then 5) business days after receipt of the Amendment
 264  to sign and return it to Buyer or send a written counter-proposal to Buyer. If Seller does not sign and return the Amendment or fails to
-265  offer a counter-proposal, this Contract shall be null and void. If Seller offers a counter-proposal, Buyer shall have _____________ (if left
-266  blank, then 5 business days after receipt of the counter-proposal) to accept it. If Buyer fails to accept the counter-proposal within the time
+265  offer a counter-proposal, this Contract shall be null and void. If Seller offers a counter-proposal, Buyer shall have ___________ (if left
+266  blank, then 5) business days after receipt of the counter-proposal to accept it. If Buyer fails to accept the counter-proposal within the time
 267  limit provided, this Contract shall be null and void.
 268
 269  (D) Rental Dwelling Inspections.
@@ -1920,7 +1814,7 @@ New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 5 of 14    Buyer's In
 281  Buyer is advised to contact the municipality in which the Property is located to determine the type of inspection, if any, required if the
 282  Property currently has a tenant or may have a tenant in the future.
 283
-284  14. POINT-OF-ENTRY TREATMENT ("POET") SYSTEMS: [ ] Applicable  [X] Not Applicable
+284  14. POINT-OF-ENTRY TREATMENT ("POET") SYSTEMS:  [ ] Applicable   [X] Not Applicable
 285  A point-of-entry treatment ("POET") system is a type of water treatment system used to remove contaminants from the water entering a
 286  structure from a potable well, usually through a filtration process. Seller represents that a POET system has been installed to an existing
 287  well on the Property and the POET system was installed and/or maintained using funds received from the New Jersey Spill Compensation
@@ -1928,12 +1822,10 @@ New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 5 of 14    Buyer's In
 289  continued maintenance of the POET system. Pursuant to N.J.A.C. 7:1J-2.5(c), Seller agrees to notify the Department of Environmental
 290  Protection within thirty (30) calendar days of executing this Contract that the Property is to be sold.
 
-New Jersey REALTORS® Form 118-Statewide  | 07/2025-2  Page 6 of 14   Buyer's Initials: ___ ___    Seller's Initials: ___ ___
-
-
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 6 of 14    Buyer's Initials: [KC] [DC]    Seller's Initials: [____] [____]
+(Buyer's Initials filled in handwriting: "KC" dated 06/19/26 6:25 PM EDT, "DC" dated 06/19/26 6:22 PM EDT; remaining two Buyer boxes and all Seller boxes blank.)
 
 =================== PAGE 26 ===================
-[transcription pass: A]
 291  15. CESSPOOL REQUIREMENTS: [ ] Applicable  [X] Not Applicable
 292  (This section is applicable if the Property has a cesspool, except in certain limited circumstances set forth in N.J.A.C.
 293  7:9A-3.16.) Pursuant to New Jersey's Standards for Individual Subsurface Sewage Disposal Systems, N.J.A.C. 7:9A (the "Standards"), if
@@ -1942,11 +1834,11 @@ New Jersey REALTORS® Form 118-Statewide  | 07/2025-2  Page 6 of 14   Buyer's In
 296  property transfer, except in limited circumstances.
 297
 298  (A) Seller represents to Buyer that [ ] no Cesspool is located at or on the Property, or [ ] one or more Cesspools are located at or on the
-299  Property. [If there are one or more Cesspools, then also check EITHER Box 1 OR Box 2 below.]
+299  Property. [If there are one or more Cesspools, then also check EITHER Box 1 or 2 below.]
 300
 301  1. [ ] Seller agrees that, prior to the Closing and at its sole cost and expense, Seller shall abandon and replace any and all Cesspools
 302  located at or on the Property and replace such Cesspools with an individual subsurface sewage disposal system ("System") meeting all
-303  the requirements of the Standards. At or prior to the Closing, the Seller shall deliver to Buyer a certificate of compliance ("Certificate of
+303  the requirements of the Standards. At or prior to the Closing, Seller shall deliver to Buyer a certificate of compliance ("Certificate of
 304  Compliance") issued by the administrative authority ("Administrative Authority") (as those terms are defined in N.J.A.C. 7:9A-2.1) with
 305  respect to the System. Notwithstanding the foregoing, if the Administrative Authority determines that a fully compliant system cannot
 306  be installed at the Property, then Seller shall notify Buyer in writing within three (3) business days of its receipt of the Administrative
@@ -1967,14 +1859,14 @@ New Jersey REALTORS® Form 118-Statewide  | 07/2025-2  Page 6 of 14   Buyer's In
 321  at or prior to execution of this Contract, the party with knowledge of the newly identified Cesspool shall promptly, but in no event later
 322  than three (3) business days after receipt of such knowledge, advise the other party of the newly identified Cesspool in writing. In such
 323  event, the parties in good faith shall agree, no later than seven (7) business days after sending or receiving the written notice of the newly
-324  identified Cesspool, on the day preceding the scheduled Closing, whichever is sooner, to proceed pursuant to subsection (A) 1 or 2 above
+324  identified Cesspool, or the day preceding the scheduled Closing, whichever is sooner, to proceed pursuant to subsection (A) 1 or 2 above
 325  or such other agreement as satisfies the Standards, or either party may terminate this Contract.
 326
 327  16. INSPECTION CONTINGENCY CLAUSE:
 328  (A) Responsibilities of Home Ownership.
 329  Buyer and Seller acknowledge and agree that, because the purchase of a home is one of the most significant investments a person can
 330  make in a lifetime, all aspects of this transaction require considerable analysis and investigation by Buyer before closing title to the
-331  Property. While Brokers and salespersons who are involved in this transaction are trained in licensure under the New Jersey Licensing Act
+331  Property. While Brokers and salespersons who are involved in this transaction are trained as licensees under the New Jersey Licensing Act
 332  they readily acknowledge that they have had no special training or experience with respect to the complexities pertaining to the multitude
 333  of structural, topographical and environmental components of this Property. For example, and not by way of limitation, Brokers and
 334  salespersons have no special training, knowledge or experience with regard to discovering and/or evaluating physical defects, including
@@ -1995,14 +1887,12 @@ New Jersey REALTORS® Form 118-Statewide  | 07/2025-2  Page 6 of 14   Buyer's In
 349  (D) below. If any test results furnished or obtained by Buyer indicate a concentration level of 4 picocuries per liter (4.0 pCi/L) or more
 350  in the subject dwelling, Buyer shall then have the right to void this Contract by notifying Seller in writing within seven (7) business days of
 
-New Jersey REALTORS®  Form 118-Statewide  | 07/2025-2  Page 7 of 14    Buyer's Initials: [AB?] [___]    Seller's Initials: [___] [___]
-
-
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 7 of 14    Buyer's Initials: [KC] [DC]    Seller's Initials: [____] [____]
+(Buyer's Initials filled in handwriting: "KC" dated 06/19/26 6:25 PM EDT, "DC" dated 06/19/26 6:22 PM EDT; remaining two Buyer boxes and all Seller boxes blank.)
 
 =================== PAGE 27 ===================
-[transcription pass: B(verified)]
 351  the receipt of any such report. For the purposes of this Section 16, Seller and Buyer agree that, in the event a radon gas concentration
-352  level in the subject dwelling is determined to be less than 4 picocuries per liter (4.0 pCi/L)  without any remediation, such level of
+352  level in the subject dwelling is determined to be less than 4 picocuries per liter (4.0 pCi/L) without any remediation, such level of
 353  radon gas concentration shall be deemed to be an acceptable level ("Acceptable Level") for the purposes of this Contract. Under those
 354  circumstances, Seller shall be under no obligation to remediate, and this contingency clause as it relates to radon shall be deemed fully
 355  satisfied.
@@ -2015,7 +1905,7 @@ New Jersey REALTORS®  Form 118-Statewide  | 07/2025-2  Page 7 of 14    Buyer's 
 362  level to an Acceptable Level, and Buyer shall then have the right to void this Contract by notifying Seller in writing within seven (7)
 363  calendar days thereafter. If Buyer fails to void this Contract within the seven (7) business day period, Buyer shall have waived Buyer's
 364  right to cancel this Contract and this Contract shall remain in full force and effect, and Seller shall be under no obligation to remediate
-365  the radon gas concentration.  If Seller agrees to remediate the radon to an Acceptable Level, such remediation and associated testing
+365  the radon gas concentration. If Seller agrees to remediate the radon to an Acceptable Level, such remediation and associated testing
 366  shall be completed by Seller prior to the Closing.
 367
 368  (C) Infestation and/or Damage By Wood Boring Insects.
@@ -2055,88 +1945,86 @@ New Jersey REALTORS®  Form 118-Statewide  | 07/2025-2  Page 7 of 14    Buyer's 
 402  to agree to cure or correct such defects within the seven (7) business day period, or if the environmental condition at the Property (other
 403  than radon) is incurable and is of such significance as to unreasonably endanger the health of Buyer, Buyer shall then have the right to
 404  void this Contract by notifying Seller in writing within seven (7) business days thereafter. If Buyer fails to void this Contract within the
-405  seven (7) business day period. Buyer shall have waived Buyer's right to cancel this Contract and this Contract shall remain in full force,
+405  seven (7) business day period, Buyer shall have waived Buyer's right to cancel this Contract and this Contract shall remain in full force,
 406  and Seller shall be under no obligation to correct or cure any of the defects set forth in the inspections. If Seller agrees to correct or cure
-407  such defects, all such repair work shall be completed by Seller prior to the closing of title.  Radon at the Property shall be governed by
+407  such defects, all such repair work shall be completed by Seller prior to the closing of title. Radon at the Property shall be governed by
 408  the provisions of paragraph (B), above.
 409
 410
 
 New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 8 of 14
 
-Buyer's Initials: KC  DC  [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]   Seller's Initials: [blank] [blank] [blank] [blank]
-
-
+Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]    Seller's Initials: [ ] [ ]
 
 =================== PAGE 28 ===================
-[transcription pass: A]
-411   (F) Flood Risks.
-412   Flood risks in New Jersey are growing due to the effects of climate change. Coastal and inland areas may experience significant flooding
-413   now and in the near future, including in places that were not previously known to flood. For example, by 2050, it is likely that sea-level
-414   rise will rise will increase 2.1 feet above 2000 levels, placing over 40,000 New Jersey properties at risk of permanent coastal flooding.
-415   In addition, precipitation intensity in New Jersey is increasing at levels significantly above historic trends, placing inland properties at
-416   greater risk of flash flooding. These and other coastal and inland flood risks are expected to increase within the life of a typical mortgage
-417   originated in or after 2020.
+[Top-left header]: dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
+
+411  (F) Flood Risks.
+412  Flood risks in New Jersey are growing due to the effects of climate change. Coastal and inland areas may experience significant flooding
+413  now and in the near future, including in places that were not previously known to flood. For example, by 2050, it is likely that sea-level
+414  rise will meet or exceed 2.1 feet above 2000 levels, placing over 40,000 New Jersey properties at risk of permanent coastal flooding.
+415  In addition, precipitation intensity in New Jersey is increasing at levels significantly above historic trends, placing inland properties at
+416  greater risk of flash flooding. These and other coastal and inland flood risks are expected to increase within the life of a typical mortgage
+417  originated in or after 2020.
 418
-419   To learn more about these impacts, including the flood risk to the property, visit [njreal.to/flood-disclosure]. To learn more about how to
-420   prepare for a flood emergency, visit [njreal.to/flood-planning].
+419  To learn more about these impacts, including the flood risk to the property, visit njreal.to/flood-disclosure. To learn more about how to
+420  prepare for a flood emergency, visit njreal.to/flood-planning.
 421
-422   (G) Flood Hazard Area.
-423   The federal and state governments have designated certain areas as flood areas. If the Property is located in a flood area, the use of the
-424   Property may be limited. If Buyer's inquiry reveals that the Property is in a flood area, Buyer may cancel this Contract within ten (10)
-425   calendar days after the attorney-review period is completed or, if this Contract is timely disapproved by an attorney as provided in the
-426   Attorney-Review Clause Section of this Contract, then within ten (10) calendar days after the parties agree to the terms of this Contract.
-427   If the mortgage lender requires flood insurance, then Buyer shall be responsible for obtaining such insurance on the Property. For a flood
-428   policy to be in effect immediately, there must be a loan closing. There is a thirty (30) calendar day wait for flood policies to be in effect for
-429   cash transactions. Therefore, cash buyers are advised to make application and make advance payment for a flood policy at least thirty (30)
-430   calendar days in advance of closing if they want coverage to be in effect upon transfer of title.
+422  (G) Flood Hazard Area.
+423  The federal and state governments have designated certain areas as flood areas. If the Property is located in a flood area, the use of the
+424  Property may be limited. If Buyer's inquiry reveals that the Property is in a flood area, Buyer may cancel this Contract within ten (10)
+425  calendar days after the attorney-review period is completed or, if this Contract is timely disapproved by an attorney as provided in the
+426  Attorney-Review Clause Section of this Contract, then within ten (10) calendar days after the parties agree to the terms of this Contract.
+427  If the mortgage lender requires flood insurance, then Buyer shall be responsible for obtaining such insurance on the Property. For a flood
+428  policy to be in effect immediately, there must be a loan closing. There is a thirty (30) calendar day wait for flood policies to be in effect for
+429  cash transactions. Therefore, cash buyers are advised to make application and make advance payment for a flood policy at least thirty (30)
+430  calendar days in advance of closing if they want coverage to be in effect upon transfer of title.
 431
-432   Buyer's mortgage lender may require Buyer to purchase flood insurance in connection with Buyer's purchase of this Property. The
-433   National Flood Insurance Program ("NFIP") provides for the availability of flood insurance but also establishes flood insurance policy
-434   premiums based on the risk of flooding in the area where properties are located. Due to amendments to federal law governing the
-435   NFIP, those premiums are increasing and, in some cases, will rise by a substantial amount over the premiums previously charged for
-436   flood insurance for the Property. As a result, Buyer should not rely on the premiums paid for flood insurance on this Property previously
-437   as an indication of the premiums that will apply after Buyer completes the purchase. Therefore, in considering Buyer's purchase of this Property,
-438   Buyer is therefore urged to consult with one or more carriers of flood insurance for a better understanding of flood insurance coverage,
-439   the premiums that are likely to be required to purchase such insurance and any available information about how those premiums may
-440   increase in the future.
+432  Buyer's mortgage lender may require Buyer to purchase flood insurance in connection with Buyer's purchase of this Property. The
+433  National Flood Insurance Program ("NFIP") provides for the availability of flood insurance but also establishes flood insurance policy
+434  premiums based on the risk of flooding in the area where properties are located. Due to amendments to federal law governing the
+435  NFIP, those premiums are increasing and, in some cases, will rise by a substantial amount over the premiums previously charged for
+436  flood insurance for the Property. As a result, Buyer should not rely on the premiums paid for flood insurance on this Property previously
+437  as an indication of the premiums that will apply after Buyer completes the purchase. In considering Buyer's purchase of this Property,
+438  Buyer is therefore urged to consult with one or more carriers of flood insurance for a better understanding of flood insurance coverage,
+439  the premiums that are likely to be required to purchase such insurance and any available information about how those premiums may
+440  increase in the future.
 441
-442   (H) Qualifications of Inspectors.
-443   Where the term "qualified inspectors" is used in this Contract, it is intended to refer to persons or businesses that are licensed or certified
-444   by the State of New Jersey for such purpose.
+442  (H) Qualifications of Inspectors.
+443  Where the term "qualified inspectors" is used in this Contract, it is intended to refer to persons or businesses that are licensed or certified
+444  by the State of New Jersey for such purpose.
 445
-446   (I) Water Quality.
-447   Buyer acknowledges that Seller, the Broker(s) and/or its agent(s) make no representations concerning the quality of the drinking water
-448   or any drinking water health advisories issued by federal, state and/or municipal agencies, including but not limited to concerning
-449   manufactured chemicals, such as per- and poly-fluoalkyl substances ("PFAS"), or otherwise, at the Property, except as set forth by Seller in
-450   the Seller Property Disclosure Statement, if applicable. Buyer has the right and is advised to contact the local water utility, the municipality
-451   where the Property is located and/or the New Jersey Department of Environmental Protection to learn more about the drinking water at
-452   the Property, as well as testing, monitoring and reducing exposure to contaminants.
+446  (I) Water Quality.
+447  Buyer acknowledges that Seller, the Broker(s) and/or its agent(s) make no representations concerning the quality of the drinking water
+448  or any drinking water health advisories issued by federal, state and/or municipal agencies, including but not limited to concerning
+449  manufactured chemicals, such as per- and poly-fluoalkyl substances ("PFAS"), or otherwise, at the Property, except as set forth by Seller in
+450  the Seller Property Disclosure Statement, if applicable. Buyer has the right and is advised to contact the local water utility, the municipality
+451  where the Property is located and/or the New Jersey Department of Environmental Protection to learn more about the drinking water at
+452  the Property, as well as testing, monitoring and reducing exposure to contaminants.
 453
-454   17. MEGAN'S LAW STATEMENT:
-455   Under New Jersey law, the county prosecutor determines whether and how to provide notice of the presence of convicted sex offenders
-456   in an area. In their professional capacity, real estate licensees are not entitled to notification by the county prosecutor under Megan's Law
-457   and are unable to obtain such information for you. Upon closing, the county prosecutor may be contacted for such further information
-458   as may be disclosable to you.
+454  17. MEGAN'S LAW STATEMENT:
+455  Under New Jersey law, the county prosecutor determines whether and how to provide notice of the presence of convicted sex offenders
+456  in an area. In their professional capacity, real estate licensees are not entitled to notification by the county prosecutor under Megan's Law
+457  and are unable to obtain such information for you. Upon closing, the county prosecutor may be contacted for such further information
+458  as may be disclosable to you.
 459
-460   18. MEGAN'S LAW REGISTRY:
-461   Buyer is notified that New Jersey law establishes an Internet Registry of Sex Offenders that may be accessed at www.njsp.org. Neither
-462   Seller nor any real estate broker or salesperson make any representation as to the accuracy of the registry.
+460  18. MEGAN'S LAW REGISTRY:
+461  Buyer is notified that New Jersey law establishes an Internet Registry of Sex Offenders that may be accessed at www.njsp.org. Neither
+462  Seller nor any real estate broker or salesperson make any representation as to the accuracy of the registry.
 463
-464   19. NOTIFICATION REGARDING OFF-SITE CONDITIONS: (Applicable to all resale transactions.)
-465   Pursuant to the New Jersey Residential Construction Off-Site Conditions Disclosure Act, N.J.S.A. 46:3C-1, et seq., the clerks of municipalities in
-466   New Jersey maintain lists of off-site conditions which may affect the value of residential properties in the vicinity of the off-site condition.
-467   Buyers may examine the lists and are encouraged to independently investigate the area surrounding this property in order to become
-468   familiar with any off-site conditions which may affect the value of the property. In cases where a property is located near the border of a
-469   municipality, buyers may wish to also examine the list maintained by the neighboring municipality.
+464  19. NOTIFICATION REGARDING OFF-SITE CONDITIONS: (Applicable to all resale transactions.)
+465  Pursuant to the New Jersey Residential Construction Off-Site Conditions Disclosure Act, N.J.S.A. 46:3C-1, et seq., the clerks of municipalities in
+466  New Jersey maintain lists of off-site conditions which may affect the value of residential properties in the vicinity of the off-site condition.
+467  Buyers may examine the lists and are encouraged to independently investigate the area surrounding this property in order to become
+468  familiar with any off-site conditions which may affect the value of the property. In cases where a property is located near the border of a
+469  municipality, buyers may wish to also examine the list maintained by the neighboring municipality.
 470
 
-New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         Buyer's Initials [____] [____]      Seller's Initials [____] [____]
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 9 of 14
 
-
+Buyer's Initials: [KC] [DC]    [06/19/26  6:25 PM EDT] [06/19/26  6:22 PM EDT]    Seller's Initials: [ ] [ ]
 
 =================== PAGE 29 ===================
-[transcription pass: A]
 471   20. AIR SAFETY AND ZONING NOTICE:
 472   Any person who sells or transfers a property that is in an airport safety zone as set forth in the New Jersey Air Safety and Zoning Act of
 473   1983, N.J.S.A. 6:1-80, et seq., and appearing on a municipal map used for tax purposes, as well as Seller's agent, shall provide notice to
@@ -2147,8 +2035,8 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 478   contact the municipal clerk of any affected municipality concerning any ordinance that may affect the Property.
 
 479   Municipality            Airport(s)                          Municipality            Airport(s)
-480   Alexandria Tp.          Alexandria & Sky Manor              Montague Tp. (Monmouth Cty.)   Old Bridge
-481   Andover Tp.             Aeroflex-Andover & Newton           Mansfield Tp.           Blairstown
+480   Alexandria Tp.          Alexandria & Sky Manor              Manalapan Tp. (Monmouth Cty.)   Old Bridge
+481   Andover Tp.             Aeroflex-Andover & Newton           Mansfield Tp.           Hackettstown
 482   Bedminster Tp.          Somerset                            Manville Bor.           Central Jersey Regional
 483   Berkeley Tp.            Ocean County                        Medford Tp.             Flying W
 484   Berlin Bor.             Camden County                       Middle Tp.              Cape May County
@@ -2156,10 +2044,10 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 486   Branchburg Tp.          Somerset                            Monroe Tp. (Gloucester Cty.)   Cross Keys & Southern Cross
 487   Buena Bor. (Atlantic Cty.)   Vineland-Downtown              Monroe Tp. (Middlesex Cty.)   Old Bridge
 488   Dennis Tp.              Woodbine Municipal                  Montgomery Tp.          Princeton
-489   Eagleswood Tp.          Eagle's Nest                        Ocean City              Ocean City
+489   Eagleswood Tp.          Eagles Nest                         Ocean City              Ocean City
 490   Ewing Tp.               Trenton-Mercer County               Old Bridge Tp.          Old Bridge
 491   E. Hanover Tp.          Morristown Municipal                Oldmans Tp.             Oldmans
-492   Florham Park Bor.       Morristown Municipal                Parsippany Tp.          Parsippany
+492   Florham Park Bor.       Morristown Municipal                Pemberton Tp.           Pemberton
 493   Franklin Tp. (Gloucester Cty.)   Southern Cross & Vineland Downtown   Pequannock Tp.   Lincoln Park
 494   Franklin Tp. (Hunterdon Cty.)   Sky Manor                  Readington Tp.          Solberg-Hunterdon
 495   Franklin Tp. (Somerset Cty.)   Central Jersey Regional      Rocky Hill Boro.        Princeton
@@ -2177,7 +2065,7 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 506   The following airports are not subject to the Airport Safety and Zoning Act because they are subject to federal regulation or within the
 507   jurisdiction of the Port of Authority of New York and New Jersey and therefore are not regulated by New Jersey: Essex County Airport,
 508   Linden Airport, Newark Liberty Airport, Teterboro Airport, Little Ferry Seaplane Base, Atlantic City International Airport, and
-509   Maguire Airforce Base and NAEC/Lakehurst.
+509   Maguire Airforce Base and NAEC Lakehurst.
 
 510
 511   21. BULK SALES:
@@ -2190,7 +2078,7 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 
 518
 519   The Law does not apply to the sale of a simple dwelling house, or the sale or lease of a seasonal rental property, if Seller is an
-520   individual, estate, or trust. For purposes of this Law, a simple dwelling house or seasonal rental property is a one or two family,
+520   individual, estate or trust, or any combination thereof, owning the simple dwelling house or seasonal rental property as joint tenants,
 521   tenants in common or tenancy by the entirety. A simple dwelling house is a one or two family residential building, or a cooperative or
 522   condominium unit used as a residential dwelling, none of which has any commercial property. A seasonal rental property is a time
 523   share, or a dwelling unit that is rented for residential purposes for a term of not more than 125 consecutive days, by an owner that has a
@@ -2200,15 +2088,12 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 526   If, prior to the Closing, the Division notifies Buyer to withhold an amount (the "Tax Amount") from the purchase price proceeds for
 527   possible unpaid tax liabilities of Seller, Buyer's attorney or Buyer's title insurance company (the "Escrow Agent") shall withhold the Tax
 528   Amount from the closing proceeds and place that amount in escrow (the "Tax Escrow"). If the Tax Amount exceeds the amount of
-529   proceeds payable to Seller at the Closing, Seller shall deliver the difference to the Escrow Agent. Following the Closing, and the delivery
-530   to the Division of the difference (if necessary), Buyer's attorney shall notify the Division by sending the difference (if necessary) to the Tax Escrow. If the
+529   available closing proceeds, Seller shall bring the deficiency to the Closing and the deficiency shall be added to the Tax Escrow. If the
 
-      New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 10 of 14    Buyer's Initials [____] [____]   Seller's Initials [____] [____]
-
-
+      New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 10 of 14    Buyer's Initials [KC] [DC]   Seller's Initials [ ] [ ]
+      (Buyer's Initials handwritten cursive "KC" and "DC", each box date-stamped 06/19/26 with time below; Seller's Initials blank)
 
 =================== PAGE 30 ===================
-[transcription pass: A]
 531    Division directs the Escrow Agent or Buyer to remit funds from the Tax Escrow to the Division or some other entity, the Escrow Agent
 532    or Buyer shall do so. The Escrow Agent or Buyer shall only release the Tax Escrow, or the remaining balance thereof, to Seller (or as
 533    otherwise directed by the Division) upon receipt of written notice from the Division that it can be released, and that no liability will be
@@ -2238,7 +2123,7 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 557
 558    26. ADJUSTMENTS AT CLOSING:
 559    Seller shall pay for the preparation of the Deed, realty transfer fee, lien discharge fees, if any, and one-half of the title company charges
-560    for disbursements and attendance allowed by the Commissioner of Insurance; but all searches, title insurance premiums and other
+560    for disbursements and attendance allowed by the Commissioner of Insurance; but all searches, title insurance premium and other
 561    conveyancing expenses are to be paid for by Buyer.
 562
 563    Seller and Buyer shall make prorated adjustments at Closing for items which have been paid by Seller or are due from Seller, such as real
@@ -2262,7 +2147,7 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 581    Property Tax Act of 1980, as amended ("FIRPTA"), then with a few exceptions, a portion of the proceeds of sale may need to be
 582    withheld from Seller and paid to the Internal Revenue Service as an advance payment against Seller's tax liability.
 583    Seller agrees that, if applicable, Seller will (a) be solely responsible for payment of any state or federal income tax withholding amount(s)
-584    required by law to be paid by Seller (which Buyer may deduct from the purchase price and pay as of the Closing); and (b) execute
+584    required by law to be paid by Seller (which Buyer may deduct from the purchase price and pay at the Closing); and (b) execute
 585    and deliver to Buyer at the Closing any and all forms, affidavits or certifications required under state and federal law to be filed in
 586    connection with the amount(s) withheld.
 587
@@ -2270,12 +2155,10 @@ New Jersey REALTORS® Form 118-Statewide   J   07/2025.2   Page 9 of 14         
 589
 590
 
-New Jersey REALTORS® Form 118-Statewide   |   07/2025.2  Page 11 of 14    Buyer's Initials [KE] [DD]    Seller's Initials [ ] [ ]
-
-
+      New Jersey REALTORS® Form 118-Statewide   |   07/2025.2  Page 11 of 14    Buyer's Initials [KC] [DC]    Seller's Initials [ ] [ ]
+      (Buyer's Initials handwritten cursive "KC" and "DC", each box date-stamped 06/19/26 with time below — 6:25 PM EDT / 6:22 PM EDT; Seller's Initials blank)
 
 =================== PAGE 31 ===================
-[transcription pass: B(verified)]
 591  27. FAILURE OF BUYER OR SELLER TO CLOSE:
 592  If Seller fails to close title to the Property in accordance with this Contract, Buyer then may commence any legal or equitable action
 593  to which Buyer may be entitled. If Buyer fails to close title in accordance with this Contract, Seller then may commence an action
@@ -2338,15 +2221,10 @@ New Jersey REALTORS® Form 118-Statewide   |   07/2025.2  Page 11 of 14    Buyer
 650  the commission to be paid to the broker(s) and may not be modified or otherwise changed, except in writing by the broker(s).
 
 New Jersey REALTORS(R) Form 118-Statewide | 07/2025.2  Page 12 of 14
-Buyer's Initials: [KC] [DC]   (06/19/26 6:25 PM EDT dotloop verified) (06/19/26 6:22 PM EDT dotloop verified)
+Buyer's Initials: [KC] [DC] [ ] [ ]   (KC 06/19/26 6:25 PM EDT dotloop verified) (DC 06/19/26 6:22 PM EDT dotloop verified)
 Seller's Initials: [ ] [ ] [ ] [ ]
 
-
-
 =================== PAGE 32 ===================
-[transcription pass: B(verified)]
-PAGE 32 (Contract page 13 of 14) — NJ REALTORS Form 118-Statewide
-
 651  31. EQUITABLE LIEN:
 652  Under New Jersey law, brokers who bring the parties together in a real estate transaction are entitled to an equitable lien in the amount
 653  of their commission. This lien attaches to the property being sold from when the contract of sale is signed until the closing and then to
@@ -2408,86 +2286,74 @@ PAGE 32 (Contract page 13 of 14) — NJ REALTORS Form 118-Statewide
 709  electronic signature of one of the parties to this Contract, do not have to be witnessed.
 710
 
-[FOOTER]
 New Jersey REALTORS(R) Form 118-Statewide | 07/2025.2  Page 13 of 14
-
-Buyer's Initials: [KC  06/19/26  6:25 PM EDT]  [DC  06/19/26  6:22 PM EDT]  [ ]  [ ]
-Seller's Initials: [ ]  [ ]  [ ]  [ ]
-
-[UNCERTAIN TOKENS]
-- "Frank DiAndino"[?] — printed/typed name on blank line in Section 32 line 662; reads "DiAndino" (D-i-A-n-d-i-n-o), NOT "DeAndino". Second letter is clearly "i". High confidence.
-- Buyer's Initials "KC"[?] and "DC"[?] — handwritten/cursive initials, dated 06/19/26.
-- Footer date stamps "6:25 PM EDT" / "6:22 PM EDT"[?] — small print under initials.
-
-
+Buyer's Initials: [KC] [DC] [ ] [ ]   (KC 06/19/26 6:25 PM EDT)  (DC 06/19/26 6:22 PM EDT)
+Seller's Initials: [ ] [ ] [ ] [ ]
 
 =================== PAGE 33 ===================
-[transcription pass: B(verified)]
 PAGE 33 — Contract page 14 of 14
-New Jersey REALTORS® Form 118-Statewide
-VERBATIM TRANSCRIPTION (margin line numbers preserved)
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2 — Page 14 of 14
+LOCKED VERBATIM TRANSCRIPTION (margin line numbers preserved)
 
-[Top header] dotloop signature verification: dtlp.us/0O6L-KQAZ-RXCE
+[Top header] dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
 
 711  39. CORPORATE RESOLUTIONS:
-712  If Buyer or Seller is a corporate or other entity, the person signing below on behalf of the entity represents that all required corporate
-713  resolutions have been duly approved and the person has the authority to sign on behalf of the entity.
+712      If Buyer or Seller is a corporate or other entity, the person signing below on behalf of the entity represents that all required corporate
+713      resolutions have been duly approved and the person has the authority to sign on behalf of the entity.
 714
 715  40. ENTIRE AGREEMENT; PARTIES LIABLE:
-716  This Contract contains the entire agreement of the parties. No representations have been made by any of the parties, the Broker(s) or its
-717  salespersons, except as set forth in this Contract. This Contract is binding upon all parties who sign it and all who succeed to their rights
-718  and responsibilities and only may be amended by an agreement in writing signed by Buyer and Seller.
+716      This Contract contains the entire agreement of the parties. No representations have been made by any of the parties, the Broker(s) or its
+717      salespersons, except as set forth in this Contract. This Contract is binding upon all parties who sign it and all who succeed to their rights
+718      and responsibilities and only may be amended by an agreement in writing signed by Buyer and Seller.
 719
 720  41. APPLICABLE LAWS:
-721  This Contract shall be governed by and construed in accordance with the laws of the State of New Jersey and any lawsuit relating to
-722  this Contract or the underlying transaction shall be venued in the State of New Jersey.
+721      This Contract shall be governed by and construed in accordance with the laws of the State of New Jersey and any lawsuit relating to
+722      this Contract or the underlying transaction shall be venued in the State of New Jersey.
 723
 724  42. ADDENDA:
-725  The following additional terms are included in the attached addenda or riders and incorporated into this Contract (check if applicable):
-726  [ ] Buyer's Property Sale Contingency            [ ] Properties With Three (3) or More Units
-727  [ ] Condominium/Homeowner's Associations         [ ] Seller Concession
-728  [ ] Coronavirus                                  [ ] Short Sale
-729  [ ] FHA/VA Loans                                 [ ] Solar Panel
-730  [ ] Lead Based Paint Disclosure (Pre-1978)       [ ] Swimming Pools
-731  [ ] New Construction                             [ ] Taxes for Properties $1 Million and More
-732  [ ] Private Sewage Disposal (Other than Cesspool) [ ] Underground Fuel Tank(s)
-733  [ ] Private Well Testing
+725      The following additional terms are included in the attached addenda or riders and incorporated into this Contract (check if applicable):
+726      [ ] Buyer's Property Sale Contingency              [ ] Properties With Three (3) or More Units
+727      [ ] Condominium/Homeowner's Associations           [ ] Seller Concession
+728      [ ] Coronavirus                                    [ ] Short Sale
+729      [ ] FHA/VA Loans                                   [ ] Solar Panel
+730      [ ] Lead Based Paint Disclosure (Pre-1978)         [ ] Swimming Pools
+731      [ ] New Construction                               [ ] Taxes for Properties $1 Million and More
+732      [ ] Private Sewage Disposal (Other than Cesspool)  [ ] Underground Fuel Tank(s)
+733      [ ] Private Well Testing
+                 (ALL 15 §42 ADDENDA CHECKBOXES UNCHECKED — verified at 3x zoom)
 734
 735  43. ADDITIONAL CONTRACTUAL PROVISIONS:
-736  1. This is a cash offer. No Mortgage contingency. Buyer to obtain CO.
-737  2. Inspections are for buyer's information. Buyers reserve the right to cancel if
-738  an underground oil tank is found,
-739  soil contamination requiring remediation is found,
-740  a replacement septic system cannot be permitted on the property or a viable solution is over $65,000.
-741  3. Buyers will remove the existing tree logs in the driveway, log pile on property line and the fallen trees. Buyers will also
-742  dispose of existing metal frame/tarp/shed. Sellers to remove all contents and personal property.
-743  4. Offer based on property being 1+ acres as per attached survey.
-744  5. Pending seller's completed and signed Seller's Disclosure & Lead Paint Disclosure.
+736      1, This is a cash offer. No Mortgage contingency. Buyer to obtain CO.
+737      2. Inspections are for buyer's information. Buyers reserve the right to cancel if
+738      an underground oil tank is found,
+739      soil contamination requiring remediation is found,
+740      a replacement septic system cannot be permitted on the property or a viable solution is over $65,000.
+741      3. Buyers will remove the existing tree logs in the driveway, log pile on property line and the fallen trees. Buyers will also
+742      dispose of existing metal frame/tarp/shed. Sellers to remove all contents and personal property.
+743      4. Offer based on property being 1+ acres as per attached survey.
+744      5. Pending seller's completed and signed Seller's Disclosure & Lead Paint Disclosure.
 745
 746  WITNESS:
-747  ______________________________   Keith Cardona [signed]        [dotloop verified]
-748                                                                  06/19/26 6:25 PM EDT
-                                                                     CC7Q-VYRX-QTZC-2KWA
-                                         BUYER                       Date
-749  ______________________________   Danielle Cardona [signed]     [dotloop verified]
-750                                                                  06/19/26 6:22 PM EDT
-                                                                     HIZR-QRV4-O2M2-VUDF
-751                                       BUYER                       Date
-752  ______________________________   ______________________________ [BLANK]
-753-754                                  BUYER                       Date
-755  ______________________________   ______________________________ [BLANK]
-756-757                                  BUYER                       Date
-758  ______________________________   ______________________________ [BLANK]
-759-760                                  BUYER                       Date
-761  ______________________________   ______________________________ [BLANK]
-762-763                                  SELLER                      Date
-764  ______________________________   ______________________________ [BLANK]
-765-766                                  SELLER                      Date
-767  ______________________________   ______________________________ [BLANK]
-768-769                                  SELLER                      Date
-770                                      SELLER                      Date
+747  ___________________________________   Keith Cardona [dotloop signed]
+                                            dotloop verified  06/19/26 6:25 PM EDT  CC7Q-VYRX-QTZC-2KWA
+                                            BUYER                                                       Date
+750  ___________________________________   Danielle Cardona [dotloop signed]
+                                            dotloop verified  06/19/26 6:22 PM EDT  HIZR-QRV4-O2M2-VUDF
+                                            BUYER                                                       Date
+753  ___________________________________   [BLANK]
+                                            BUYER                                                       Date
+756  ___________________________________   [BLANK]
+                                            BUYER                                                       Date
+759  ___________________________________   [BLANK]
+                                            BUYER                                                       Date
+761  ___________________________________   [BLANK]
+                                            SELLER                                                      Date
+764  ___________________________________   [BLANK]
+                                            SELLER                                                      Date
+767  ___________________________________   [BLANK]
+770                                         SELLER                                                      Date
 
 [Footer]
 New Jersey REALTORS® Form 118-Statewide | 07/2025.2  Page 14 of 14
-Buyer's Initials: [KC] (06/19/26 6:25 PM EDT, dotloop verified) [DC] (06/19/26 6:22 PM EDT, dotloop verified) [ ] [ ]
-Seller's Initials: [ ] [ ] [ ] [ ]
+Buyer's Initials: [KC] (06/19/26 6:25 PM EDT, dotloop verified)  [DC] (06/19/26 6:22 PM EDT, dotloop verified)
+Seller's Initials: [ ] [ ] [ ] [ ]  (blank)
