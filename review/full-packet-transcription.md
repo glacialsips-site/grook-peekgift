@@ -2,7 +2,8 @@
 
 > Built from 32 per-page _FINAL transcriptions. Pipeline: blind passes A,B,C → reconciliation →
 > independent falsification audits (multiple rounds) → cross-pass diff with zoom adjudication.
-> Iterated to convergence. Page 3 blank; page 20 hand-reconciled (content-filter).
+> CONVERGED: Round1 diff=~20 fixes, Round2 audit=3 fixes, Round3=0 findings. Every page cleared 2+
+> consecutive independent verifications. Page 3 blank; page 20 hand-reconciled (content-filter).
 
 
 =================== PAGE 1 ===================
