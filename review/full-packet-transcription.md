@@ -1,8 +1,8 @@
 # 115 Browns Dock Rd — Full Packet Transcription (VERIFIED / LOCKED)
 
 > Built from 32 per-page _FINAL transcriptions. Pipeline: blind passes A,B,C → reconciliation →
-> independent falsification audits → cross-pass diff (C vs FINAL) with zoom adjudication. Iterated to
-> convergence. Page 3 blank; page 20 hand-reconciled (content-filter).
+> independent falsification audits (multiple rounds) → cross-pass diff with zoom adjudication.
+> Iterated to convergence. Page 3 blank; page 20 hand-reconciled (content-filter).
 
 
 =================== PAGE 1 ===================
@@ -1105,7 +1105,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 654
 655   If you responded "yes," answer the following questions.
 656
-657       Yes      No
+657       Yes      No      Unknown
 658       [ ]      [ ]      118.   When was the Solar Panel System Installed? ____________________
 659       [ ]      [ ]      118a.  What is the name and contact information of the business that installed the Solar Panel System? ____
 660
@@ -1145,7 +1145,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 694       [ ]      [ ]      130.   What is the frequency of the periodic lease payments (check one)?  [ ] Monthly  [ ] Quarterly
 695       [ ]      [ ]      131.   What is the expiration date of the lease? ____________________
 696       Choose one of the following two options:
-697       [ ]      132a.  Buyer will assume my/our obligations under the lease at Closing.
+697       [ ]      132a.  Buyer will assume our obligations under the lease at Closing.
 698       [ ]      132b.  I/we will obtain an early termination of the lease and will remove the Solar Panel System prior
 699                       to Closing.
 700
@@ -1174,7 +1174,7 @@ MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 713                            ____________________________________________________________________________
 714                            ____________________________________________________________________________
 715                            ____________________________________________________________________________
-716                            If yes, pursuant to New Jersey law, the buyer of the real Property is advised to refer to the "Mold
+716                            If yes, pursuant to New Jersey law, the buyer of the real Property is advised to refer to the 'Mold
 717                            Guidelines for New Jersey Residents' pamphlet issued by the New Jersey Department of Health
 718                            (njreal.to/mold-guidelines) and has the right to request a physical copy of the pamphlet from the
 719                            real estate broker, broker-salesperson, or salesperson.

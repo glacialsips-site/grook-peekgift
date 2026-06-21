@@ -22,7 +22,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 654
 655   If you responded "yes," answer the following questions.
 656
-657       Yes      No
+657       Yes      No      Unknown
 658       [ ]      [ ]      118.   When was the Solar Panel System Installed? ____________________
 659       [ ]      [ ]      118a.  What is the name and contact information of the business that installed the Solar Panel System? ____
 660
@@ -62,7 +62,7 @@ ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS
 694       [ ]      [ ]      130.   What is the frequency of the periodic lease payments (check one)?  [ ] Monthly  [ ] Quarterly
 695       [ ]      [ ]      131.   What is the expiration date of the lease? ____________________
 696       Choose one of the following two options:
-697       [ ]      132a.  Buyer will assume my/our obligations under the lease at Closing.
+697       [ ]      132a.  Buyer will assume our obligations under the lease at Closing.
 698       [ ]      132b.  I/we will obtain an early termination of the lease and will remove the Solar Panel System prior
 699                       to Closing.
 700
