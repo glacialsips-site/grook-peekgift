@@ -1,0 +1,47 @@
+DESCRIPTION:
+This page is a screenshot/photograph of an emailed image ("image1.jpeg") showing a Capital One 360 bank statement summary. It displays the Capital One logo, a redacted account holder name/address, a statement period, total ending balance, and an account summary table. A browser/Gmail URL appears at the bottom.
+
+VERBATIM TRANSCRIPTION:
+
+6/19/26, 3:50 PM
+
+image1.jpeg
+
+Capital One®
+
+[REDACTED — name/address blacked out, partially visible:]
+puopolo
+d
+
+Thanks for saving with Capital One 360®
+
+Here's your April 2026 bank statement.
+
+STATEMENT PERIOD
+Apr 1 – Apr 30, 2026
+
+$135,671.44
+
+TOTAL ENDING BALANCE
+IN ALL ACCOUNTS
+
+Account Summary
+
+ACCOUNT NAME          Apr 1          Apr 30
+
+360 Performance Savings...6202    [REDACTED]    $135,671.44
+
+Page 1 of 3
+
+capitalone.com          1-888-464-0727          P.O. Box 85123, Richmond, VA 23285          FDIC
+
+https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox/FMfcgzQgMVfvImBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.2
+
+1/1
+
+UNCERTAIN LIST:
+- "puopolo" [?] — partial redacted text near top; best guess "puopolo"
+- "d" [?] — single visible character below redacted block
+- Phone "1-888-464-0727" [?] — final digits could read 0727 or 0722; best guess 0727
+- Account suffix "6202" [?] — could read 6202 or 6203; best guess 6202
+- URL token "FMfcgzQgMVfvImBWzrZRKhmJdPXjcDvh" [?] — long Gmail message ID, character case/0-vs-O ambiguous; transcribed as best read

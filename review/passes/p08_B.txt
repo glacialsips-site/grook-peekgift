@@ -1,0 +1,68 @@
+MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
+
+[Yes / No / Unknown columns where applicable]
+
+171   [X]Yes [ ]No        34.   Do you have a softener, filter, or other water purification system?  [ ]Leased  [X]Owned
+172                       35.   What is the type of sewage system?
+173                             [ ]Public Sewer [ ]Private Sewer [X]Septic System [ ]Cesspool [ ]Other (explain): __________
+174   [X]Yes [ ]No        36.   If you answered "septic system," have you ever had the system inspected to confirm that it is a
+175                             true septic system and not a cesspool?
+176                  [X]  37.   If Septic System, when was it installed? ____Unknown____
+177                             Location? _Front of house_
+178                  [ ]  38.   When was the Septic System or Cesspool last cleaned and/or serviced? ___Regularly serviced___
+179   [ ]Yes [X]No        39.   Are you aware of any abandoned Septic Systems or Cesspools on your Property? __________
+180   [ ]Yes [ ]No        39a.  If "yes," is the closure in accordance with the municipality's ordinance? Explain: __________
+181                             __________
+182   [ ]Yes [X]No        40.   Are you aware of any leaks, backups, or other problems relating to any of the plumbing systems and
+183                             fixtures (including pipes, sinks, tubs and showers), or of any other water or sewage related problems?
+184                             If "yes," explain __________
+185                             __________
+186   [ ]Yes [X]No        41.   Are you aware of the presence of any lead piping, including but not limited to any service line,
+187                             piping materials, fixtures, and solder. If "yes," explain: __________
+188                             __________
+189   [ ]Yes [X]No        42.   Are you aware of any shut off, disconnected, or abandoned wells, underground water or sewage
+190                             tanks, or dry wells on the Property?
+191   [ ]Yes [X]No [ ]Unk 43.   Is either the private water or sewage system shared? If "yes," explain: __________
+192                             __________
+193                       44.   Water Heater: [ ]Electric  [ ]Fuel Oil  [X]Gas
+194                  [X]  45.   Age of Water Heater __________Unknown__________
+195   [ ]Yes [X]No        44a.  Are you aware of any problems with the water heater?
+196                       45.   Explain any "yes" answers that you give in this section:
+197                             Whole-home water filtration system; septic located in front of house.
+198                             __________
+199
+
+200   HEATING AND AIR CONDITIONING
+201        Yes    No    Unknown
+202                       46.   Type of Air Conditioning:
+203                             [ ]Central one zone [X]Central multiple zone [ ]Wall/Window Unit [ ]None
+204                       47.   List any areas of the house that are not air conditioned: ___None (livable areas)___
+205
+206                  [X]  48.   What is the age of Air Conditioning System? __________Unknown__________
+207                       49.   Type of heat: [ ]Electric [ ]Fuel Oil [X]Natural Gas [ ]Propane [ ]Unheated [ ]Other
+208                       50.   What is the type of heating system? (for example, forced air, hot water or base board, radiator,
+209                             steam heat) ______Forced air______
+210                       51.   If it is a centralized heating system, is it one zone or multiple zones? Multiple zones - three
+211
+212                       52.   Age of furnace ______Unknown______  Date of last service Approx. 2 years ago
+213                       53.   List any areas of the house that are not heated: ___None (livable areas)___
+214                             __________
+215   [ ]Yes [X]No [ ]Unk 54.   Are you aware of any tanks on the Property, either above or underground, used to store fuel or
+216                             other substances?
+217   [ ]Yes [ ]No        55.   If tank is not in use, do you have a closure certificate?
+218   [ ]Yes [X]No        56.   Are you aware of any problems with any items in this section? If "yes," explain: __________
+219                             __________
+220
+
+221   WOODBURNING STOVE OR FIREPLACE
+222        Yes    No    Unknown
+223   [X]Yes [ ]No        57.   Do you have [ ]wood burning stove? [X]fireplace? [ ]insert? [ ]other
+224   [X]Yes [ ]No        57a.  Is it presently usable?
+225   [X]Yes [ ]No [ ]Unk 58.   If you have a fireplace, when was the flue last cleaned? _Approx. 2 years ago_
+226   [X]Yes [ ]No [ ]Unk 58a.  Was the flue cleaned by a professional or non-professional? ______Professional______
+227   [ ]Yes [ ]No [ ]Unk 59.   N/A - existing fireplace [a]ny required permits for any such item?
+228   [ ]Yes [X]No        60.   Are you aware of any problems with any of these items? If "yes," please explain: __________
+229                             __________
+230
+
+NJ REALTORS® | Form 140 | 05/2025.2    Page 4 of 14

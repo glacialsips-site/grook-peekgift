@@ -1,0 +1,54 @@
+=== PAGE 2 — LOCKED FINAL TRANSCRIPTION ===
+IMAGE FILE: /tmp/pages_full/hi-2-02.png
+DOCUMENT TYPE: Screenshot (emailed as image1.jpeg) of the first/summary page of
+a Capital One 360 bank statement. Proof-of-funds bank statement showing a total
+ending balance. Account holder first name and mailing address redacted with
+black bars; surname "puopolo" visible.
+NOTE: No prior A/B passes existed for this page; transcribed directly from the
+image with high-zoom (3-5x) verification of every dollar figure and the
+account number.
+
+--- BROWSER / EMAIL CHROME (screenshot edges) ---
+[Top-left]: 6/19/26, 3:50 PM
+[Top-center]: image1.jpeg
+[Bottom-left URL]: https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox/FMfcgzQgMVfvlmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.2
+[Bottom-right]: 1/1
+
+--- TOP (Capital One logo / addressee) ---
+Capital One  [logo, with stylized red swoosh]
+
+[Addressee block — first name REDACTED with black bar; surname visible:]
+            puopolo
+[address line partially visible, mostly redacted: "...Rd" — street/city/state/ZIP REDACTED]
+
+--- INTRO ---
+Thanks for saving with Capital One 360®
+Here's your April 2026 bank statement.
+
+STATEMENT PERIOD
+Apr 1 - Apr 30, 2026
+
+--- TOTAL ENDING BALANCE (dark band) ---
+$135,671.44   TOTAL ENDING BALANCE IN ALL ACCOUNTS
+
+--- ACCOUNT SUMMARY ---
+Account Summary
+
+ACCOUNT NAME                       Apr 1        Apr 30
+360 Performance Savings...6202   [REDACTED]   $135,671.44
+
+[Remainder of page (transaction detail area) is covered by a large gray
+redaction box.]
+
+--- FOOTER ---
+Page 1 of 3
+capitalone.com    1-888-464-0727    P.O. Box 85123, Richmond, VA 23285    Member FDIC    [Equal Housing Lender logo]
+
+--- VERIFIED KEY FIELDS (zoom-resolved) ---
+Total Ending Balance: $135,671.44
+Account (360 Performance Savings) last 4: 6202  (shown as ...6202)
+Apr 30 column balance: $135,671.44
+Apr 1 column: REDACTED (gray box)
+Statement Period: Apr 1 - Apr 30, 2026  (April 2026 statement)
+Page: Page 1 of 3
+Visible surname: puopolo (first name redacted)

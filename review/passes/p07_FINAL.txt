@@ -1,0 +1,74 @@
+NJ REALTORS Seller's Property Condition Disclosure Statement (Form 140) — Page 3 of 14.
+Sections: Termites/Wood Destroying Insects/Dry Rot/Pests, Structural Items, Additions/Remodels, Plumbing/Water and Sewage.
+Checkbox columns are Yes / No / Unknown (left to right).
+
+HEADER:
+MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $894,900
+
+111   14.  In what manner is access to the attic space provided?
+112        [ ] staircase  [X] pull down stairs  [ ] crawl space with aid of ladder or other device
+113        [ ] other ____________________
+114   15.  Explain any "yes" answers that you give in this section: ____________________
+115        Basement sump pump; attic fan.
+116        ____________________
+117
+
+118   TERMITES/WOOD DESTROYING INSECTS, DRY ROT, PESTS
+119        Yes   No   Unknown
+120   16.  [ ]   [X]        Are you aware of any termites/wood destroying insects, dry rot, or pests affecting the Property?
+121   17.  [ ]   [X]        Are you aware of any damage to the Property caused by termites/wood destroying insects, dry
+122                         rot, or pests?
+123   18.  [ ]   [X]        If "yes," has work been performed to repair the damage?
+124   19.  [ ]   [X]        Is your Property under contract by a licensed pest control company? If "yes," state the name and
+125                         address of the licensed pest control company: ____________________
+126
+127   20.  [ ]   [X]        Are you aware of any termite/pest control inspections or treatments performed on the Property
+128                         in the past?
+129   21.        Explain any "yes" answers that you give in this section: ____________________
+130        ____________________
+131        ____________________
+132
+
+133   STRUCTURAL ITEMS
+134        Yes   No   Unknown
+135   22.  [ ]   [X]        Are you aware of any movement, shifting, or other problems with walls, floors, or foundations,
+136                         including any restrictions on how any space, other than the attic or roof, may be used as a result
+137                         of the manner in which it was constructed?
+138   23.  [ ]   [X]        Are you aware if the Property or any of the structures on it have ever been damaged by fire,
+139                         smoke, wind or flood?
+140   24.  [ ]   [ ]   [X]  Are you aware of any fire retardant plywood used in the construction?
+141   25.  [ ]   [X]        Are you aware of any current or past problems with driveways, walkways, patios, sinkholes, or
+142                         retaining walls on the Property?
+143   26.  [ ]   [X]        Are you aware of any present or past efforts made to repair any problems with the items in this
+144                         section?
+145   27.        Explain any "yes" answers that you give in this section. Please describe the location and nature of
+146                         the problem: ____________________
+147        ____________________
+148        ____________________
+149
+
+150   ADDITIONS/REMODELS
+151        Yes   No   Unknown
+152   28.  [ ]   [X]        Are you aware of any additions, structural changes or other alterations to the structures on the
+153                         Property made by any present or past owners?
+154   29.  [ ]   [ ]        Were the proper building permits and approvals obtained? Explain any "yes" answers you give
+155                         in this section: ____________________
+156        ____________________
+157        ____________________
+158
+
+159   PLUMBING, WATER AND SEWAGE
+160        Yes   No   Unknown
+161   30.        What is the source of your drinking water?
+162             [X] Public  [ ] Community System  [ ] Well on Property  [ ] Other (explain) ____________________
+163   31.  [ ]   [ ]        If your drinking water source is not public, have you performed any tests on the water?
+164                         If so, when? ____________________
+165                         Attach a copy of or describe the results: ____________________
+166
+167   32.  [ ]   [X]   [ ]  Does the wastewater from any clothes washer, dishwasher, or other appliance discharge to any
+168                         location other than the sewer, septic, or other system that services the rest of the Property?
+169        [ ]        33.  When was well installed? ____________________
+170                         Location of well? ____________________
+
+FOOTER:
+NJ REALTORS®  |  Form 140  |  05/2025.2    Page 3 of 14
