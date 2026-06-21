@@ -1,5 +1,5 @@
 [HEADER]
-MLS # 22617358    115 Browns Dock Rd. Atlantic Highlands, NJ 07716    $894,900
+MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 
 701  SECTION C - THE SOLAR PANEL SYSTEM IS SUBJECT TO ENERGY CERTIFICATE(S)
 702  [ ]  [ ]  [ ]      133.  Are Solar Transition Renewable Energy Certificates ("TRECs") available from the Solar Panel

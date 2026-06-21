@@ -1,4 +1,4 @@
-[HEADER] MLS # 22617358    115 Browns Dock Rd. Atlantic Highlands, NJ 07716    $894,900
+[HEADER] MLS # 22617358    115 Browns Dock Rd, Atlantic Highlands, NJ 07716    $894,900
 
 761  RECEIPT AND ACKNOWLEDGMENT BY PROSPECTIVE BUYER
 762  The undersigned Prospective Buyer acknowledges receipt of this completed Statutory Disclosures & Other Items Addendum to Disclosure
@@ -63,4 +63,4 @@
 819
 820
 
-[FOOTER] NJ REALTORS®  Form 140 | 05/2025.2   Page 14 of 14
+[FOOTER] NJ REALTORS® | Form 140 | 05/2025.2   Page 14 of 14
