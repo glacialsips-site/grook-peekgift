@@ -21,7 +21,9 @@ const OUTDIR = path.join(ROOT, 'mockup', 'demo');
 const FRAMES_OUT = path.join(OUTDIR, 'frames');
 
 const FFMPEG = execSync('python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"').toString().trim();
-const VOICE = path.join(ROOT, '.voiceover', 'voices', 'tmp_southern_english_female', 'en-gb-southern_english_female-low.onnx');
+// High-quality (22.05kHz) LibriTTS model; speaker 80 = a warm, lower-pitched female read.
+const VOICE = path.join(ROOT, '.voiceover', 'voices', 'tmp_libritts', 'en-us-libritts-high.onnx');
+const SPEAKER = 80;
 
 function sh(cmd, args) { return execFileSync(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] }); }
 function ensure(d) { fs.mkdirSync(d, { recursive: true }); }
@@ -42,20 +44,22 @@ function wavDuration(file) {
 /* ---------- 1. Voiceover ---------- */
 function synthVO() {
   ensure(WORK);
+  // Clean, gentle warmth — a slight 3% pitch-down for a sultry register, a touch of
+  // low-end body, mild de-ess, and a single loudnorm pass. No stacked dynamics (which
+  // is what made the earlier take sound "compressed").
   const sultry = [
-    'asetrate=22050*0.92', 'aresample=44100',
-    'atempo=1.0870',
-    'highpass=f=72', 'lowpass=f=8200',
-    'acompressor=threshold=-17dB:ratio=3:attack=8:release=200',
-    'aecho=0.8:0.85:28:0.12',
-    'dynaudnorm=f=180:g=9',
-    'volume=1.55'
+    'asetrate=22050*0.97', 'aresample=22050', 'atempo=1.03093',
+    'highpass=f=65',
+    'equalizer=f=200:t=q:w=1.2:g=2.5',
+    'equalizer=f=6500:t=q:w=2:g=-2',
+    'loudnorm=I=-15:TP=-1.5:LRA=11',
+    'aresample=44100'
   ].join(',');
   SCENES.forEach((sc, i) => {
     const raw = path.join(WORK, `raw_${i}.wav`);
     const out = path.join(WORK, `vo_${i}.wav`);
-    execSync(`echo ${JSON.stringify(sc.vo)} | piper -m ${JSON.stringify(VOICE)} ` +
-      `--length-scale 1.16 --noise-scale 0.667 --noise-w-scale 0.85 --sentence-silence 0.32 -f ${JSON.stringify(raw)}`,
+    execSync(`echo ${JSON.stringify(sc.vo)} | piper -m ${JSON.stringify(VOICE)} --speaker ${SPEAKER} ` +
+      `--length-scale 1.13 --noise-scale 0.6 --noise-w-scale 0.8 --sentence-silence 0.30 -f ${JSON.stringify(raw)}`,
       { stdio: ['pipe', 'ignore', 'ignore'] });
     sh(FFMPEG, ['-y', '-i', raw, '-af', sultry, out]);
     sc._voDur = wavDuration(out);
@@ -100,7 +104,7 @@ function buildAudio(total) {
     '-filter_complex',
     '[0:a]volume=0.5[a];[1:a]volume=0.32[b];[2:a]volume=0.22[c];' +
     '[a][b][c]amix=inputs=3:normalize=0,tremolo=f=0.18:d=0.5,lowpass=f=520,' +
-    `afade=t=in:st=0:d=2,afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5,volume=0.10[out]`,
+    `afade=t=in:st=0:d=2,afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5,volume=0.075[out]`,
     '-map', '[out]', pad]);
 
   const master = path.join(WORK, 'master.wav');
