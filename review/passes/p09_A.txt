@@ -1,0 +1,73 @@
+DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement. Page 5 of 14 (packet page 9). This page covers ELECTRICAL SYSTEM, LAND (SOILS, DRAINAGE AND BOUNDARIES), and ENVIRONMENTAL HAZARDS sections, with Yes/No/Unknown checkbox columns and numbered question items. Left margin contains line numbers 231–290.
+
+=== PAGE HEADER ===
+MLS # 22617358          115 Browns Dock Rd, Atlantic Highlands, NJ 07716          $894,900
+
+=== BODY ===
+
+231   ELECTRICAL SYSTEM
+232        Yes      No      Unknown
+233                                          61.  What type of wiring is in this structure? [ ] Copper [ ] Aluminum [ ] Other [X] Unknown
+234   [ ]      [ ]                           62.  What amp service does the Property have? [ ] 60 [ ] 100 [ ] 150 [X] 200 [ ] Other [ ] Unknown
+235   [X]      [ ]      [ ]                   63.  Does it have 240 volt service? Which are present [X] Circuit Breakers, [ ] Fuses or [ ] Both?
+236   [ ]      [X]                           64.  Are you aware of any additions to the original service?
+237                                               If "yes," were the additions done by a licensed electrician? Name and address: ____________
+238
+239                                               ________________________________________________________________
+240   [ ]      [ ]      [ ]                   65.  If "yes," were proper building permits and approvals obtained?
+241   [ ]      [X]                           66.  Are you aware of any wall switches, light fixtures or electrical outlets in need of repair?
+242                                          67.  Explain any "yes" answers that you give in this section: ____________________
+243
+244                                               ________________________________________________________________
+245                                               ________________________________________________________________
+
+246   LAND (SOILS, DRAINAGE AND BOUNDARIES)
+247        Yes      No      Unknown
+248   [ ]      [X]                           68.  Are you aware of any fill or expansive soil on the Property?
+249   [ ]      [X]                           69.  Are you aware of any past or present mining operations in the area in which the Property is
+250                                               located?
+251   [ ]      [X]                           70.  Is the Property located in a flood hazard zone?
+252   [ ]      [X]                           71.  Are you aware of any drainage or flood problems affecting the Property?
+253   [ ]      [X]      [ ]                   72.  Are there any areas on the Property which are designated as protected wetlands?
+254   [ ]      [X]                           73.  Are you aware of any encroachments, utility easements, boundary line disputes, or drainage or
+255                                               other easements affecting the Property?
+256   [ ]      [X]                           74.  Are there any water retention basins on the Property or the adjacent properties?
+257   [ ]      [X]                           75.  Are you aware if any part of the Property is being claimed by the State of New Jersey as land
+258                                               presently or formerly covered by tidal water (Riparian claim or lease grant)? Explain: ________
+259
+260                                               ________________________________________________________________
+261   [ ]      [X]                           76.  Are you aware of any shared or common areas (for example, driveways, bridges, docks, walls,
+262                                               bulkheads, etc.) or maintenance agreements regarding the Property?
+263                                          77.  Explain any "yes" answers to the preceding questions in this section: ____________________
+264
+265                                               ________________________________________________________________
+266   [X]      [ ]                           78.  Do you have a survey of the Property?
+267
+268   ENVIRONMENTAL HAZARDS
+269        Yes      No      Unknown
+270   [ ]      [X]                           79.  Have you received any written notification from any public agency or private concern informing you
+271                                               that the Property is adversely affected, or may be adversely affected, by a condition that exists on a
+272   [ ]      [ ]                                property in the vicinity of this Property? If "yes," attach a copy of any such notice currently in your
+273                                               possession.
+274   [ ]      [X]                           79a. Are you aware of any condition that exists on any property in the vicinity which adversely affects,
+275                                               or has been identified as possibly adversely affecting, the quality or safety of the air, soil, water,
+276                                               and/or physical structures present on this Property? If "yes," explain: ____________________
+277
+278   [ ]      [X]                           80.  Are you aware of any underground storage tanks (UST) or toxic substances now or previously
+279                                               present on this Property or adjacent property (structure or soil), such as polychlorinated biphenyl
+280                                               (PCB), solvents, hydraulic fluid, petro-chemicals, hazardous wastes, pesticides, chromium,
+281                                               thorium, lead or other hazardous substances in the soil? If "yes," explain: ____________________
+282
+283   [ ]      [X]                           81.  Are you aware if any underground storage tank has been tested?
+284                                               (Attach a copy of each test report or closure certificate if available.)
+285   [X]      [ ]      [ ]                   82.  Are you aware if the Property has been tested for the presence of any other toxic substances, such
+286                                               as lead-based paint, urea-formaldehyde foam insulation, asbestos-containing materials, or others?
+287                                               (Attach copy of each test report if available.)
+288                                          83.  If "yes" to any of the above, explain: [Home test kits; no known issues identified.]
+289
+290                                               ________________________________________________________________
+
+NJ REALTORS® | Form 140 | 05/2025.2   Page 5 of 14
+
+=== UNCERTAIN ===
+- None. All checkboxes, digits, and the typed fill-in ("Home test kits; no known issues identified.") read clearly on zoom.

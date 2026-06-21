@@ -1,0 +1,82 @@
+PAGE 19 — VERBATIM TRANSCRIPTION
+
+DESCRIPTION:
+A photograph (emailed as "image0.jpeg") of the first page of a Synchrony Bank account statement, lying on a flat surface. It is a HIGH YIELD SAVINGS account summary statement. The recipient's name and address block has been redacted with a black marker bar. Browser/email metadata appears at the top and bottom edges of the screenshot.
+
+--- VERBATIM TEXT ---
+
+[Top-left screenshot header:]
+6/19/26, 3:52 PM
+
+[Top-center screenshot header:]
+image0.jpeg
+
+[Statement header, right side:]
+Statement Ending 06/07/2026
+Page 1 of 4
+
+[Logo, top-left:]
+synchrony
+
+[Return address block, top-left:]
+P.O. Box 669802, Dallas, TX 75266-0955
+ADDRESS SERVICE REQUESTED
+
+[Recipient name/address — REDACTED with black bar]
+[POLO[?] partially visible above the redaction bar]
+
+[Vertical side text, left margin:]
+[unreadable vertical code][?]
+
+[Barcode/IMB postal barcode below redacted address — graphic, not text]
+
+[Right column box — Managing Your Accounts:]
+Managing Your Accounts
+
+Phone        (866) 226-5638
+Online       synchrony.com/banking
+Mail         Synchrony Bank
+             P.O. Box 669802
+             Dallas, TX 75266-0955
+
+[Promotional banner:]
+SPRING CLEANING (FOR STATEMENTS).
+
+Switch to eStatements and tidy up your life, this spring. It's easy:
+• In the mobile app, click Go paperless, under the More tab.
+• Sign in at synchrony.com/banking and click ePreferences under Inbox.
+
+[Summary box:]
+Summary of Accounts
+
+Spring ahead, in organizing your finances!
+
+Enjoy 24/7 access to track your savings, manage alerts and more! Plus, the freedom to bank
+wherever it's convenient for you. Download our app at synchrony.com/banking/mobile-app.
+
+Account Type                          Account Number          Ending Balance
+HIGH YIELD SAVINGS                                            $488,176.21
+
+[Account section header:]
+HIGH YIELD SAVINGS - XXXXXXXX1021
+
+[Bottom orange banner:]
+Visit us at synchrony.com/banking
+
+[Bottom-right:]
+Member
+FDIC
+
+[Bottom screenshot footer — URL:]
+https://mail.google.com/mail/u/0/?tab=rm&ogbl#search/dani/FMfcgzGgMVlvlmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.1
+
+[Bottom-right page footer:]
+1/1
+
+--- END VERBATIM TEXT ---
+
+UNCERTAIN LIST:
+- POLO[?] — partial text visible just above the redaction bar over the recipient address; possibly the tail of a name (best guess: "...POLO").
+- [vertical side text][?] — small rotated alphanumeric code in the left margin (mailing/printer code); illegible.
+- $488,176.21 — Ending Balance digits read carefully; high confidence but flagged for legal review (4-8-8 / 1-7-6 / 2-1).
+- (866) 226-5638 — phone number; "5638" read carefully, moderate-high confidence.

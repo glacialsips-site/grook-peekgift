@@ -1,0 +1,66 @@
+[Header]
+MLS # 22617358    115 Browns Dock Rd. Atlantic Highlands, NJ 07716    $894,900
+
+701  SECTION C - THE SOLAR PANEL SYSTEM IS SUBJECT TO ENERGY CERTIFICATE(s)
+702  [ ]  [ ]  [ ]      133.  Are Solar Transition Renewable Energy Certificates ("TRECs") available from the Solar Panel
+703                            System?
+704            [ ]      133a.  If TRECs are available, when will the TRECs expire? ____________
+705  [ ]  [ ]  [ ]      134.  Are Solar Renewable Energy Certificates IIs ("SREC IIs") available from the Solar Panel System?
+706            [ ]      134a.  If SREC IIs are available, when will the SREC IIs expire? ____________
+707
+708  WATER INTRUSION Pursuant to N.J.S.A. 26:0-19.1
+709       Yes   No   Unknown
+710  [ ]  [X]  [ ]      135.  Are you aware of any water leakage, accumulation or dampness, the presence of mold or other
+711                            similar natural substance, or repairs or other attempts to control any water or dampness problem on
+712                            the Property? If yes, please describe the nature of the issue and any attempts to repair or control it:
+713                            ____________________________________________________________________________
+714                            ____________________________________________________________________________
+715                            ____________________________________________________________________________
+716                            If you, pursuant to New Jersey law, the buyer of the real Property is advised to refer to the "Mold
+717                            Guidelines for New Jersey Residents' pamphlet issued by the New Jersey Department of Health
+718                            (njreal.to/mold-guidelines) and has the right to request a physical copy of the pamphlet from the
+719                            real estate broker, broker-salesperson, or salesperson.
+720
+721  SECONDARY POWER SOURCE Pursuant to PL.2025, c19
+722       Yes   No   Unknown
+723  [ ]  [X]  [ ]      136.  Is there a secondary power source at the Property (i.e. permanently installed combustion
+724                            generators, solar panels, battery storage systems, or any other supplemental source of electrical
+725                            energy)?
+726  [ ]  [ ]          136a.  If "yes," is a label installed within 18 inches of the main electrical panel and electrical meter
+727                            warning of the dangers associated with the secondary power sources?      [N/A]
+728
+729
+730  ACKNOWLEDGMENT OF SELLER
+731  The undersigned Seller affirms that the information set forth in this Disclosure Statement is accurate and complete to the best of Seller's
+732  knowledge, but is not a warranty as to the condition of the Property. Seller hereby authorizes the real estate brokerage firm representing
+733  or assisting the Seller to provide this Disclosure Statement to all prospective buyers of the Property, and to other real estate agents. Seller
+734  alone is the source of all information contained in this statement. *If the Seller relied upon any credible representations of another, the
+735  Seller should state the name(s) of the person(s) who made the representation(s) and describe the information that was relied upon.
+736
+737  ____________________________________________________________________________
+738  ____________________________________________________________________________
+739
+740  ___________________________          ___________________________
+741  SELLER                    DATE        SELLER                    DATE
+742
+743  ___________________________          ___________________________
+744  SELLER                    DATE        SELLER                    DATE
+745
+746  EXECUTOR, ADMINISTRATOR, TRUSTEE (if applicable)
+747  The undersigned has never occupied the Property and lacks the personal knowledge necessary to complete this Disclosure Statement.
+748
+749  ___________________________          ___________________________
+750  SIGNED                    DATE        SIGNED                    DATE
+751
+752
+753
+754
+755
+756
+757
+758
+759
+760  ADDENDUM REGARDING STATUTORY DISCLOSURES & OTHER ITEMS CONTINUES ON NEXT PAGE
+
+[Footer]
+NJ REALTORS® | Form 140 | 05/2025.2   Page 13 of 14

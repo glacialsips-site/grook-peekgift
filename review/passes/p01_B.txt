@@ -1,0 +1,134 @@
+VERBATIM TRANSCRIPTION — PAGE 1 (hi-1-01.png)
+Photographed land survey ("LOCATION SURVEY")
+Photo header (screen/email artifact, not part of survey): "6/19/26, 6:56 PM    17067.jpg"
+Footer artifact: "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox?projector=1    1/1"
+
+====================================================================
+ROADS / STREET NAMES
+--------------------------------------------------------------------
+Left side (vertical, running down left edge): BROWNS DOCK ROAD
+  (rendered stacked as "BROWNS" / "DOCK" / "ROAD")
+
+====================================================================
+BLOCK / LOT IDENTIFICATION
+--------------------------------------------------------------------
+BLOCK 840   (large label, upper center)
+Subject parcel:
+   LOT 97
+   47205 Sq. Feet
+   1.08 Acres
+Adjoining lots:
+   LOT 98   (north / upper, within Block 840)
+   LOT 96   (south / lower)
+   LOT 1.02 (east / right side, adjoining)
+   BLOCK (label cut off at very bottom of sheet, lower right)
+
+====================================================================
+BOUNDARY BEARINGS & DISTANCES (perimeter calls)
+--------------------------------------------------------------------
+NORTH (top) line:   S 69°42'00" E   233.81'
+EAST (right) line:  S 16°12'00" W   320.92'  (317.44' deed)
+                    [annotated along east line: CHAIN LINK FENCE]
+SOUTH / SOUTHWEST boundary along CLAY PIT CREEK (series of calls,
+  read from southeast corner running northwest/back, as labeled):
+    N 30°44'31" W   121.35'
+    N 41°45'30" W    36.03'
+    N 28°16'00" W    69.96'
+    N 04°26'20" W    31.82'
+                     31.31'   (segment to STONE FOUND, no bearing shown adjacent)
+WEST side ties / interior dimensions along Browns Dock Road frontage:
+    N 19°51'00" E   105.54'
+    N 64°40'37" W    31.94'
+    (bearing partly under fold near SW): N 07°24'56" W   25.60'
+
+Watercourse label: CLAY PIT CREEK (runs along the southerly boundary)
+
+====================================================================
+INTERIOR / TIE DIMENSIONS & SITE FEATURES
+--------------------------------------------------------------------
+47.82'   (tie from west line to dwelling)
+34.03'   (tie dimension near dwelling SW corner)
+12.32'   (offset, NE area, east line near old post & rail)
+11.16'   (offset, east line)
+3.8'W    (offset at ip fnd, west / Browns Dock side near NW corner)
+2.1'N  5.7'W  (offset notation at ip fnd, NE corner near top line)
+25.97'   (vertical dimension near NW, along block curbing / driveway)
+
+Structures / improvements labeled:
+   one story frame dwelling  #115
+   block curbing
+   Asphalt Driveway
+   wood deck
+   concrete
+   inground pool
+   chain link fence
+   old post & rail  (fence, shown top and bottom of pool area)
+   stone headwalls
+   Rip Rap
+   wood walk
+
+Monuments:
+   STONE FOUND  (NE corner, top right)
+   STONE FOUND  (SE corner, bottom right)
+   ip fnd  (iron pipe found — NW corner area, Browns Dock Rd)
+   ip fnd  (iron pipe found — NE corner area at top line; "2.1'N 5.7'W")
+
+Top-left vertical note (monument/line tie):
+   481.11' TO THE SOUTHERLY LINE OF MONMOUTH AVE.
+
+====================================================================
+SURVEY MERIDIAN / SCALE
+--------------------------------------------------------------------
+North arrow labeled: SURVEY MERIDIAN (compass rose, center-left, "N")
+SCALE: 1" = 40'
+
+====================================================================
+TITLE BLOCK (lower center)
+--------------------------------------------------------------------
+LOCATION SURVEY FOR:
+FRANK DEANDINO
+
+Lot 97 Block 840, as shown on the tax assessment map for the Township
+of Middletown, Monmouth County, New Jersey. More commonly known as
+115 Browns Dock Road, Middletown, New Jersey.
+   I hereby certify to the above mentioned purchaser, Frank DeAndino;
+Kevin E. Kennedy, Esquire; First Hope Mortgages Inc., its successors
+and/or assigns, as their interests may appear; Acres Land Title
+Agency, Inc.; Title Resources Guaranty Company.
+   This survey has been accurately prepared with the best of my
+information, knowledge and belief. No encroachments exist either way
+across property lines except as shown hereon.
+
+Surveyor signature: Richard Stockton (handwritten)
+RICHARD E. STOCKTON
+Licensed Professional Land Surveyor
+New Jersey License No. 15102
+
+Richard E. Stockton & Assoc., Inc.
+Surveying & Mapping <> Land Planning <> Survey Engineering
+PO Box 124, Atlantic Highlands, NJ 07716
+(embossed surveyor's seal over/near signature)
+
+====================================================================
+SURVEY NOTES (lower left / lower center)
+--------------------------------------------------------------------
+LEFT NOTE:
+   Any Object beneath the surface of the Ground has not been located,
+   and no Guarantee as to existence or location is expressed or implied.
+
+RIGHT NOTE:
+   THIS SURVEY HAS BEEN PREPARED WI[THOUT THE BENEFIT OF A]
+   FULL TITLE SEARCH AND IS SUBJECT [TO]
+   FACTS THAT MIGHT BE REVEALED BY [A]
+   TITLE SEARCH.
+
+====================================================================
+JOB / SHEET DATA BLOCK (bottom corners)
+--------------------------------------------------------------------
+Bottom-left:
+   JOB: 6491
+   SCALE: 1" = 40'
+   CAD: D-6491.dwg
+Bottom-right:
+   DATE: 9-19-12
+   DWG: B-2128

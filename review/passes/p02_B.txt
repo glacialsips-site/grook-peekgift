@@ -1,0 +1,69 @@
+PAGE 2 — VERBATIM TRANSCRIPTION
+IMAGE FILE: /tmp/pages_full/hi-2-02.png
+
+DOCUMENT TYPE: Screenshot/photograph of an emailed image ("image1.jpeg") of a Capital One 360 bank statement (April 2026 monthly statement / proof of funds). Browser/email print view.
+
+--- BROWSER / EMAIL PRINT HEADER ---
+Top-left timestamp: 6/19/26, 3:50 PM
+Top-center: image1.jpeg
+
+--- STATEMENT BODY ---
+
+[LOGO] Capital One®
+
+[Account holder name block — PARTIALLY REDACTED with black marker/redaction bar]
+Visible text over/below the redaction:
+  "puopolo" (lowercase as shown)
+  "d" (lowercase, on next line)
+NOTE: The first name and most of the name/address block is obscured by a black redaction bar. Only the partial surname "puopolo" and a stray "d" are legible. First name is REDACTED/obscured.
+
+Thanks for saving with Capital One 360®
+
+Here's your April 2026 bank statement.
+
+STATEMENT PERIOD
+Apr 1 – Apr 30, 2026
+
+[DARK BANNER]
+$135,671.44    TOTAL ENDING BALANCE
+               IN ALL ACCOUNTS
+
+Account Summary
+
+ACCOUNT NAME                    Apr 1        Apr 30
+360 Performance Savings...6202  [REDACTED/  $135,671.44
+                                 grayed box]
+
+NOTE: The "Apr 1" opening balance value is hidden behind a gray redaction box. A large lower portion of the account summary table is covered by gray redaction boxes (no further values legible).
+
+--- FOOTER ---
+Page 1 of 3
+
+[icon] capitalone.com   [phone icon] 1-888-464-0727   [mail icon] P.O. Box 85123, Richmond, VA 23285   FDIC   [house icon = Equal Housing]
+
+--- BROWSER FOOTER ---
+URL: https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox/FMfcgzQgMVfvImBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.2
+1/1
+
+=== KEY DATA EXTRACTION ===
+DOLLAR AMOUNTS:
+  $135,671.44 (Total Ending Balance in all accounts)
+  $135,671.44 (360 Performance Savings ...6202, Apr 30 balance)
+  (Apr 1 opening balance — REDACTED behind gray box, not legible)
+
+NAMES:
+  "puopolo" — partial surname, lowercase; first name REDACTED/obscured by black bar
+  "d" — stray lowercase letter near name block (possibly part of redacted line)
+  No "Cardona" present.
+
+INSTITUTION: Capital One / Capital One 360
+ACCOUNT NUMBER FRAGMENT: 360 Performance Savings ...6202 (last 4: 6202)
+DATES: Statement period Apr 1 – Apr 30, 2026; "April 2026 bank statement"; email/print timestamp 6/19/26, 3:50 PM
+PHONE: 1-888-464-0727
+ADDRESS: P.O. Box 85123, Richmond, VA 23285
+PAGE: "Page 1 of 3" (this image shows page 1 of the 3-page statement)
+
+=== UNCERTAIN TOKENS ===
+- "puopolo"[?] — legible but partially overlapped by redaction; capitalization in original likely "Puopolo" but rendered lowercase here. Best guess: surname Puopolo.
+- "d"[?] — isolated lowercase letter under the name; could be a leftover of a redacted line (e.g., end of an address/name). Best guess: fragment of redacted name/address.
+- Apr 1 opening balance[?] — completely covered by gray redaction box; unreadable.
