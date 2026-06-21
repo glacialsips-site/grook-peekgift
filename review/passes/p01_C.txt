@@ -1,0 +1,106 @@
+PAGE 1 — LAND SURVEY (LOCATION SURVEY)
+[Browser/email header top of scan:]
+6/19/26, 6:56 PM                                                17067.jpg
+
+=== MAP FACE (drawing) ===
+
+Street label (left margin, vertical, top to bottom):
+    BROWNS DOCK ROAD
+
+Top of drawing:
+    LOT 98
+    BLOCK
+    840
+    STONE FOUND   (with leader, upper right; note "ip fnd  2.1'N  5.7'W")
+
+Top boundary line (north line of lot):
+    S 69°42'00" E
+    233.81'
+    block curbing
+    Asphalt Driveway
+    old post & rail
+    25.97'   (short tie at left near block curbing)
+    12.32'   (short tie at right)
+
+Right side (east boundary, vertical bearing/distance):
+    S 16°12'00" W
+    320.92'
+    (317.44' deed)
+    11.16'  (short tie)
+
+Left/west boundary segments along Browns Dock Road:
+    "581.11' TO THE SOUTHERLY LINE OF MONMOUTH AVE" (note at top-left margin)
+    ip fnd   3.8'W
+    N 19°51'00" E
+    105.54'
+    47.82'   (interior tie)
+    stone headwalls / "stone headwalls" note
+    31.94'
+    N 64°40'37" W
+    07°24'56" W   25.60'  (interior tie segments)
+    34.03'  (tie)
+
+Center of lot:
+    one story frame dwelling   #115
+    block curbing
+    Asphalt Driveway
+    wood deck
+    concrete
+    inground pool
+    chainlink fence
+    old post & rail
+    LOT 97
+    47205 Sq. Feet
+    1.08 Acres
+
+Bottom (south) boundary:
+    121.35'
+    N 30°44'31" W
+    CLAY PIT CREEK
+    36... (partial, cut off)
+    N 30°4... CL... (continuation lower right, cut off)
+
+Compass rose (lower center) labeled "N" with "SURVEY MERIDIAN"
+
+=== NOTES (above title block) ===
+Left note:
+    Any Object beneath the surface of the
+    Ground has not been located, and no
+    Guarantee as to existence or location
+    Is expressed or implied.
+
+Right note:
+    THIS SURVEY HAS BEEN PREPARED WITHOUT A
+    FULL TITLE SEARCH AND IS SUBJECT TO SUCH
+    FACTS THAT MIGHT BE REVEALED BY SAID
+    TITLE SEARCH.
+
+=== TITLE BLOCK ===
+            LOCATION SURVEY FOR:
+              FRANK DEANDINO
+
+Being Lot 97 Block 840, as shown on the tax assessment map for the Township of Middletown, Monmouth Co[unty],
+New Jersey. More commonly known as 115 Browns Dock Road, Middletown, New Jersey.
+   I hereby certify to the above mentioned purchaser, Frank DeAndino; Kevin E. Kennedy, Esquire;
+First Hope Mortgages Inc., its successors and/or assigns, as their interests may appear;
+   Acres Land Title Agency, Inc.; Title Resources Guaranty Company.
+This survey has been accurately prepared with the best of my information, knowledge and belief. No apparent
+encroachments exist either way across property lines except as shown hereon.
+
+            Richard E. Stockton & Assoc.,Inc.
+        Surveying & Mapping<>Land Planning<>Survey Engineering
+          PO Box 124, Atlantic Highlands, NJ 07716
+
+            [signature: Richard Stockton]
+            RICHARD E. STOCKTON
+            Licensed Professional Land Surveyor
+            New Jersey License No. 15102
+
+Bottom-left block:
+    JOB: 6491
+    SCALE: 1" = 40'
+    CAD: D-6491.dwg
+
+Bottom-right block:
+    DATE: 9-19-12
+    DWG: B-2128
