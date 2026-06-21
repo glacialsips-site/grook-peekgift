@@ -12,6 +12,10 @@
 
 > Running notes captured live during the walkthrough. Each entry = page / contract-line refs, the issue, and the action/flag.
 
+> **GOVERNING STANDARD (Frank's direction):** Strict, bare-bones, just-the-facts markup. Nothing in the document that doesn't need to be there. Insulate Dorothy ("Dory") from all unnecessary exposure. This is our own prepass BEFORE attorney review — goal is to hand the attorney a tight first turn, not pay them to find what we already found.
+
+> **NEGOTIATING STANCE (Frank's read of leverage):** Buyers are **cash and wealthy** — POF showed ~$102k OVER the $750k offer, plus a separate ~$488k account (only first name obscured, last name matches Danielle → likely **her father's account**). The $750k is a **tactical lowball**, not a stretch; effectively ~$50k under ask once their flashed liquidity is counted. **Danielle is the decision-maker** (did the 90-min first walkthrough; signed FIRST at 6:22 PM, 3 min before husband's 6:25 PM). Posture = **negotiate from strength / tighten every screw — they want THIS house and can pay.** Not in "don't scare them off" mode.
+
 ---
 
 ## Page 20 — NOTICE TO BUYER AND SELLER (Attorney-Review notice; Form 118 p.1 of 14)
@@ -39,4 +43,41 @@
   - **DECISION = Option A:** Strike Dorothy as a named "Seller." Add provision (in §43): *"Dorothy DeAndino, spouse of Frank DeAndino, joins in the deed at closing solely to release and subordinate her right of joint possession in the marital residence pursuant to N.J.S.A. 3B:28-3, and assumes no obligations and makes no representations or warranties under this Contract."*
   - Net effect: she still signs at closing (title requirement satisfied) but is NOT on the hook for the contract's seller obligations.
 - _[no other §1 markups from Frank]_
+
+### § 2. PURCHASE PRICE (lines 43–48)
+- **TOTAL: $750,000.00** | INITIAL DEPOSIT: $35,000 | ADDITIONAL DEPOSIT: _(blank)_ | MORTGAGE: _(blank)_ | BALANCE AT CLOSING: $715,000.00. Math checks ($35k + $715k = $750k).
+- **Context flag:** Offer is **$144,900 / 16.2% UNDER** the $894,900 list. Business decision (Frank's call), but frames everything: every soft term below is a discount on top of a discount.
+- **🖍️ Seller flag — thin deposit:** $35k = **4.67%** of price (customary strong = ~10%/$75k). Low earnest money = little buyer skin-in-game, easy to walk, less to recover on default. Recommend counter: raise initial deposit and/or add an **Additional Deposit** due at end of attorney review/inspection. _(Negotiation term = Frank's business call.)_
+- **🚩 HARD FLAG — mortgage line BLANK:** As written it reads like an **all-cash deal** ($715k cash balance, no mortgage stated) — good for seller IF true. BUT blank is ambiguous; financing terms / mortgage contingency may live in **§3 (Manner of Payment)**. **MUST reconcile at §3.** If buyers claim cash, there should be NO financing contingency; if one exists, that's a contradiction to attack.
+- **Cosmetic:** TOTAL entered as "750000.000" (3 decimals) → correct to "$750,000.00."
+- _Frank: agreed with analysis; deposit/price treated as flagged recommendations (his business call)._
+
+---
+
+## Page 22 — Contract p.3 of 14 (§§ 3–6 start)
+
+### § 3. MANNER OF PAYMENT (lines 51–96)
+- **(A) Initial deposit holder = ☑ Buyer's Attorney** (confirmed via zoom). Due "**3 days after Atty Review**."
+- **(B) Additional deposit:** none (blank). Default would be 10 days after full execution, but no amount = moot.
+- **(C) Escrow:** held in **buyer's attorney's** non-interest-bearing trust account until Closing.
+- **(D) MORTGAGE CONTINGENCY: ENTIRELY BLANK** (confirmed via zoom) — Principal Amount blank; VA/FHA/203(k)/Conventional/Other all UNCHECKED; Term blank.
+- **(E) Balance:** paid in cash or certified/cashier's/trust check.
+- **Closing date: 07/30/2026** (~6 wks out) at **Buyer's closing agent's** office.
+
+- **🟢 FINDING — reads as ALL CASH, NO financing contingency.** Frank confirms cash + wealthy buyers. Good for seller.
+- **🖍️ MARKUP 3a — Make cash explicit:** Don't leave (D) blank. Mark (D) "**N/A — All Cash, No Mortgage Contingency**" + add affirmative provision: *"This sale is not contingent upon Buyer obtaining mortgage financing."* (Blank ≠ airtight; convert silence to a wall so no later "implied financing" argument.)
+- **🖍️ MARKUP 3b — Demand Proof of Funds:** §4 only has buyers *represent* they'll have funds. On a $750k cash deal, require **POF within 5 days of attorney review** showing ≥ full purchase price liquid. (We've already seen they have it — make them put it in the contract.)
+- **🖍️ MARKUP 3c — Escrow holder (FLAG, Frank undecided):** $35k sits with **buyer's own attorney**. Recommend countering escrowee to **Title Company or Listing Broker** (neutral; better dispute dynamics). _Decision pending._
+- **🖍️ MARKUP 3d — Deposit timing/size:** "3 days after Atty Review" + thin $35k = minimal early commitment. Tie to §2 counter (raise deposit; consider deposit due on signing or sooner).
+- **Cosmetic:** none beyond §2.
+
+### § 4. SUFFICIENT ASSETS (lines 98–101)
+- Buyers represent they'll have cash + mortgage proceeds to close; insufficient = breach, seller gets legal remedies.
+- **Note:** "mortgage loan proceeds" language is irrelevant (cash deal). Protection is reactive (post-breach). **Pair with MARKUP 3b (upfront POF)** for real protection.
+
+### § 5. ACCURATE DISCLOSURE OF SELLING PRICE (lines 103–106)
+- Standard IRS/gov disclosure of gross sale price. No issue.
+
+### § 6. ITEMS INCLUDED IN SALE (lines 108→, continues p.23)
+- Begins: fixtures, shrubbery/plantings/fencing, gas/electric fixtures, ranges/ovens, water heaters, flooring, screens, storm sashes, shades, blinds, awnings, radiator covers, heating… **[continues p.23 — review there]**
 
