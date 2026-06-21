@@ -81,3 +81,52 @@
 ### § 6. ITEMS INCLUDED IN SALE (lines 108→, continues p.23)
 - Begins: fixtures, shrubbery/plantings/fencing, gas/electric fixtures, ranges/ovens, water heaters, flooring, screens, storm sashes, shades, blinds, awnings, radiator covers, heating… **[continues p.23 — review there]**
 
+---
+
+# PACKET MAP (full transcription via subagent waves, pass A complete + targeted pass B verification)
+
+| Pages | Document |
+|---|---|
+| 1 | Survey — Block 840 **Lot 97**, **47,205 sq ft / 1.08 acres** (locked vs sealed survey) |
+| 2 | **Proof of funds #1** — Capital One 360 Performance Savings, acct …6202, **Total Ending Balance $135,671.44** (Apr 2026), name **"Puopolo"** (first name redacted). "Page 1 of 3." |
+| 3 | blank |
+| 4 | MLS data sheet (Tax ID 32-00840-0000-00097; 90×125 apx lot dims — misleading vs 1.08ac irregular lot) |
+| 5–18 | **Seller's Property Condition Disclosure Statement (NJ REALTORS Form 140, 14 pp).** Seller "Frank Evan DeAndino." Built ~1959, bought ~2012, public water, sump pump+attic fan, **in-ground pool (liner due for replacement)**, solar=No, water intrusion=No, flood addendum all No. ⚠️ **ALL signature/date blocks BLANK — disclosure unsigned.** |
+| 19 | **Proof of funds #2** — **Ending Balance $488,176.21**, name redacted (…"polo"/Puopolo thread) — likely the father's account Frank recalled |
+| 20–33 | The sales contract (Form 118-Statewide, 14 pp) |
+
+## 🔑 KEY CONTRACT FINDINGS (pp. 30–33)
+
+### § 29–30 Agency & Commission (p.31) — verified A+B
+- **Buyer's agent:** Resources Real Estate — **Colleen Antoon** (Lic 609019196), 112 E River Rd, Rumson; checked **[X] BUYER'S AGENT**.
+- **Seller's agent (listing):** **Red Door Realty Group** — **Glenn Aaronson** (Lic 1757716), 34 N Main St, Marlboro; checked **[X] SELLER'S AGENT**.
+- **Commission (paid by SELLER):** Listing Broker (Red Door) = "per listing agreement"; **Participating/Buyer's Broker (Resources) = 2.5% FROM SELLER.** From-Buyer fields blank.
+  - 🖍️ FLAG: Frank (seller) pays **both** sides — listing per agreement **plus** the buyer's agent 2.5%. Confirm against listing agreement; this is a real seller cost on a lowball price.
+
+### § 32 Real Estate Licensee Disclosure (p.32)
+- Marked **[X] Applicable**, type **[X] salesperson**, name **Frank DeAndino** (SELLER). → **Frank is himself a licensed RE salesperson.** Properly disclosed. (Explains his contract fluency.) _[pass B confirming]_
+
+### § 42 Addenda (p.33)
+- **ALL boxes UNCHECKED** — no addenda/riders incorporated. (Notably NO "Lead Based Paint Disclosure (Pre-1978)" addendum checked, NO "Underground Fuel Tank(s)" addendum, NO "Private Sewage Disposal" addendum — even though §43 raises oil-tank/septic. Inconsistency to flag.)
+
+### § 43 ADDITIONAL CONTRACTUAL PROVISIONS (p.33) — THE NEGOTIATION CORE (verbatim)
+1. **"This is a cash offer. No Mortgage contingency. Buyer to obtain CO."**
+   - 🟢 Confirms cash/no-financing (resolves §2/§3 blank). 🟢 **Buyer** to obtain the CO (resale cert of occupancy) — shifts that burden OFF seller (favorable). Verify vs §9 default (which normally puts CO on seller); make sure the override is clean.
+2. **"Inspections are for buyer's information. Buyers reserve the right to cancel if (a) an underground oil tank is found, (b) soil contamination requiring remediation is found, (c) a replacement septic system cannot be permitted on the property, or (d) a viable solution is over $65,000."**
+   - 🚩 **Biggest seller risk in the contract.** "For information only" sounds as-is, BUT these four carve-outs are real **buyer exit ramps** on a 1959 property: buried oil tank (era-typical), soil contamination, septic non-permittable, or septic fix > **$65,000**. 
+   - 🖍️ MARKUP options: (i) cap/define each trigger tightly; (ii) give **Seller the option to remediate or credit** instead of buyer's unilateral cancel; (iii) raise/clarify the $65k septic threshold and who estimates it; (iv) require buyer to deliver report evidence. Tighten before this becomes a free look.
+3. **"Buyers will remove the existing tree logs in the driveway, log pile on property line and the fallen trees. Buyers will also dispose of existing metal frame/tarp/shed. Sellers to remove all contents and personal property."**
+   - 🟢 Buyer takes the yard-debris/shed cleanup; seller only removes own belongings. Favorable to seller. Keep, just confirm scope wording is fine.
+4. **"Offer based on property being 1+ acres as per attached survey."**
+   - Survey = 1.08 ac → satisfied. Low risk; note it's a stated basis (don't let it morph into a survey/acreage contingency).
+5. **"Pending sellers completed and signed Seller's Disclosure & Lead Paint Disclosure."**
+   - 🚩 Ties directly to our finding that the **Form 140 disclosure (pp.5–18) is UNSIGNED.** The offer is conditioned on Frank completing + signing the Seller's Disclosure AND a Lead Paint Disclosure. **To-do for Frank**, and a condition we should acknowledge/control (esp. given Lead-Based Paint §13 marked Applicable for this pre-1978 home).
+
+### Signatures (p.33)
+- **Buyers signed** (Keith 6:25 PM, Danielle 6:22 PM, 06/19/26, dotloop). **All SELLER lines BLANK.** → buyers' offer awaiting seller. (Danielle signed first — leverage read.)
+
+## 🚩 PROOF-OF-FUNDS RECONCILIATION (flag for Frank)
+- Documented POF in this packet: **$135,671.44 (Capital One/Puopolo) + $488,176.21 = $623,847.65 total.**
+- That is **~$126k SHORT of the $750,000 offer** — and the $488k account name is redacted (possibly the father's, not necessarily the buyers' to spend).
+- ⚠️ This partially **contradicts the "they obviously have well over the price in cash" read.** Either (a) more accounts/pages exist that aren't in this packet (the Capital One statement is "Page 1 of 3"), or (b) the documented liquidity is genuinely short. **Reinforces MARKUP 3b: demand POF covering the FULL $750k in the buyers' own names before removing contingencies.**
+
