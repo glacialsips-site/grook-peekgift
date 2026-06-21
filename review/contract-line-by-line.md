@@ -2,10 +2,12 @@
 
 **Property:** 115 Browns Dock Rd, Atlantic Highlands, NJ 07716
 **MLS #:** 22617358 — List price $894,900
-**Survey:** Block 840, Lot 87 — ~47,015 sq ft (1.08 acres), fronting Browns Dock Rd
+**Survey:** Block 840, **Lot 97** — **47,205 sq ft (1.08 acres)**, fronting Browns Dock Rd (seller-confirmed against sealed survey)
 **Contract:** Statewide NJ REALTORS® Standard Form of Real Estate Sales Contract (©2016 / Form 118-Statewide 07/2025.2)
-**Buyers:** Keith Cardona & Danielle Cardona (dotloop e-signed 06/19/26)
-**Prepared by:** Colleen Antoon (broker represents the **buyer**)
+**SELLERS (our side):** Frank DeAndino & Dorothy DeAndino — addr = the property
+**Buyers:** Keith Cardona & Danielle Puopolo Cardona — addr 280 River Rd, Red Bank NJ 07701 (dotloop e-signed 06/19/26)
+**Prepared by:** Colleen Antoon (broker represents the **buyer**) → this is the **buyers' offer**, awaiting seller response
+**Review lens:** SELLER-side. Flag anything soft/vague/buyer-tilted.
 **dotloop verification:** dtlp.us/0O6L-KQAZ-RxCE
 
 > Running notes captured live during the walkthrough. Each entry = page / contract-line refs, the issue, and the action/flag.
@@ -18,4 +20,20 @@
 - **Signatures:** Both buyers e-signed — Keith Cardona 06/19/26 6:25 PM EDT, Danielle Cardona 06/19/26 6:22 PM EDT. **Seller side blank** on this notice page. Listing Broker / Selling Broker lines blank.
 - **Item 4 — Attorney review:** Standard 3-business-day attorney-review window language. FLAG to discuss: did an attorney review run? clock starts on full execution/delivery.
 - _[awaiting user markups]_
+
+---
+
+## Page 21 — Contract p.2 of 14 (Header + TOC + Section 1)
+
+### Header (lines above 1)
+- Form restricted to 1–4 family residential / vacant one-family lots, and only where seller already signed a listing agreement. ✓ fits.
+- "Becomes final within THREE BUSINESS DAYS" + attorney-review pointer (Section 35). Carry the attorney-review clock as a live flag.
+
+### § 1. PARTIES AND PROPERTY DESCRIPTION (lines 16–41)
+- **Buyers:** Keith Cardona; **Danielle Puopolo Cardona** — addr 280 River Rd, Red Bank NJ 07701.
+  - ⚠️ **Name mismatch:** contract = "Danielle **Puopolo** Cardona"; she e-signed the Notice as "Danielle Cardona." Confirm exact legal name for deed/closing consistency (minor but real).
+- **Sellers:** Frank DeAndino; Dorothy DeAndino — addr = the property (115 Browns Dock Rd).
+- **Property:** 115 Browns Dock Rd; tax map **Middletown Twp**, **Monmouth County**; **Block 840, Lot 97**; Qualifier blank (not a condo). ✓ all correct vs survey + tax ID.
+  - Note: mailing town "Atlantic Highlands" but taxing municipality is **Middletown** — normal for this area, not an error.
+- _[awaiting Frank's markups on §1]_
 
