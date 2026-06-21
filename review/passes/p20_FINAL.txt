@@ -1,0 +1,80 @@
+=================== PAGE 20 ===================
+[transcription pass: FINAL — hand-reconciled by orchestrator from source image + text export;
+ page tripped subagent output content-filter twice, so verified directly. Checkbox/signature
+ states zoom-verified against /tmp/pages_full/p-20.png.]
+
+DOCUMENT TYPE: NJ REALTORS® Standard Form of Real Estate Sales Contract (Form 118-Statewide,
+07/2025.2) — PAGE 1 OF 14: "NOTICE TO BUYER AND SELLER / READ THIS NOTICE BEFORE SIGNING THE
+CONTRACT" (the attorney-review notice + agency disclosure + signature page).
+
+================ VERBATIM TRANSCRIPTION ================
+
+                              NOTICE
+                        TO BUYER AND SELLER
+              READ THIS NOTICE BEFORE SIGNING THE CONTRACT
+
+   The Law requires real estate brokers to give you the following information before you sign
+this contract. It requires us to tell you that you must read all of it before you sign. The
+purpose is to help you in this purchase or sale.
+
+   1) As a real estate broker, I represent: [ ] the seller, not the buyer;  [X] the buyer, not the seller;
+      [ ] both the seller and the buyer;  [ ] neither the seller nor the buyer.
+      The title company does not represent either the seller or the buyer.
+
+   2) You will not get any legal advice unless you have your own lawyer. Neither I nor anyone
+from the title company can give legal advice to either the buyer or the seller. If you do not
+hire a lawyer, no one will represent you in legal matters now or at the closing. Neither I nor
+the title company will represent you in those matters.
+
+   3) The contract is the most important part of the transaction. It determines your rights,
+risks, and obligations. Signing the contract is a big step. A lawyer would review the contract,
+help you to understand it, and to negotiate its terms.
+
+   4) The contract becomes final and binding unless your lawyer cancels it within the following
+three business days. If you do not have a lawyer, you cannot change or cancel the contract unless
+the other party agrees. Neither can the real estate broker nor the title insurance company change
+the contract.
+
+   5) Another important service of a lawyer is to order a survey, title report, or other important
+reports. The lawyer will review them and help to resolve any questions that may arise about the
+ownership and condition of the property. These reports and survey can cost you a lot of money. A
+lawyer will also prepare the documents needed to close title and represent you at the closing.
+
+   6) A buyer without a lawyer runs special risks. Only a lawyer can advise a buyer about what to
+do if problems arise concerning the purchase of this property. The problems may be about the
+seller's title, the size and shape of the property, or other matters that may affect the value of
+the property. If either the broker or the title company knows about the problems, they should tell
+you. But they may not recognize the problem, see it from your point of view, or know what to do.
+Ordinarily, the broker and the title company have an interest in seeing that the sale is completed,
+because only then do they usually receive their commissions. So, their interests may differ from
+yours.
+
+   7) Whether you retain a lawyer is up to you. It is your decision. The purpose of this notice is
+to make sure that you have the information needed to make your decision.
+
+--- SIGNATURE BLOCK ---
+SELLER ____________________  DATE ______   BUYER  Keith Cardona ____________  DATE __________
+                                                  [dotloop verified 06/19/26 6:25 PM EDT  6WW4-OEHM-YMOX-Y7WW]
+
+SELLER ____________________  DATE ______   BUYER  Danielle Cardona __________  DATE __________
+                                                  [dotloop verified 06/19/26 6:22 PM EDT  D9LT-4ZBP-RW98-Z2M0]
+
+SELLER ____________________  DATE ______   BUYER ____________________  DATE __________
+SELLER ____________________  DATE ______   BUYER ____________________  DATE __________
+
+Listing Broker ____________________        Selling Broker ____________________
+
+   Prepared by: Colleen Antoon
+                Name of Real Estate Licensee
+
+New Jersey REALTORS® Form 118-Statewide | 07/2025.2   Page 1 of 14
+dotloop signature verification: dtlp.us/0O6L-KQAZ-RxCE
+
+================ VERIFIED MATERIAL FACTS ================
+- Agency disclosure (item 1): box checked = "the buyer, not the seller" (2nd of 4 boxes; other three blank). Broker Colleen Antoon represents the BUYERS.
+- Buyers BOTH e-signed (dotloop): Keith Cardona 06/19/26 6:25 PM EDT; Danielle Cardona 06/19/26 6:22 PM EDT (Danielle signed first, 3 min earlier).
+- ALL SELLER signature/date lines BLANK. Listing Broker / Selling Broker lines BLANK.
+- Prepared by: Colleen Antoon.
+
+================ UNCERTAIN ================
+- None. Printed text from machine export; checkbox + signatures zoom-verified against image.

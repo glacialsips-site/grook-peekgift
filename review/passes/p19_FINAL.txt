@@ -1,0 +1,71 @@
+=== PAGE 19 — LOCKED FINAL TRANSCRIPTION ===
+IMAGE FILE: /tmp/pages_full/hi-19-19.png
+DOCUMENT TYPE: Screenshot (emailed as image0.jpeg) of the first page of a
+Synchrony Bank "High Yield Savings" account statement. Proof-of-funds bank
+statement showing an ending balance. Account holder name redacted with a black
+box; only the tail of the surname ("UOPOLO") is visible.
+
+--- BROWSER / EMAIL CHROME (screenshot edges) ---
+[Top-left]: 6/19/26, 3:52 PM
+[Top-center]: image0.jpeg
+[Bottom-left URL]: https://mail.google.com/mail/u/0/?tab=rm&ogbl#search/dani/FMfcgzGgMVlvlmBWzrZRKhmJdPXjcDvh?projector=1&messagePartId=0.1
+[Bottom-right]: 1/1
+
+--- TOP LEFT (Synchrony logo / return address) ---
+synchrony  [logo, lowercase, with stylized bars]
+P.O. Box 669802, Dallas, TX 75266-0955
+ADDRESS SERVICE REQUESTED
+
+[Left vertical margin code]:
+00000648
+A102
+
+--- ADDRESSEE BLOCK (REDACTED) ---
+[Large black redaction box covering the addressee's first name, the start of
+the surname, and the mailing address. Only the tail of the surname is visible:]
+            UOPOLO
+[i.e. "...UOPOLO" — consistent with surname PUOPOLO. First name FULLY REDACTED.
+Street/city/state/ZIP of addressee FULLY REDACTED by the black box.]
+
+[Below the address: USPS Intelligent Mail barcode (postal barcode), not readable as text.]
+
+--- HEADER (top right) ---
+Statement Ending 06/07/2026
+Page 1 of 4
+
+--- MANAGING YOUR ACCOUNTS (right column box) ---
+Managing Your Accounts
+  Phone    (866) 226-5638
+  Online   synchrony.com/banking
+  Mail     Synchrony Bank
+           P.O. Box 669802
+           Dallas, TX 75266-0955
+
+--- PROMO BANNER ---
+SPRING CLEANING (FOR STATEMENTS).
+Switch to eStatements and tidy up your life, this spring. It's easy:
+  • In the mobile app, click Go paperless, under the More tab.
+  • Sign in at synchrony.com/banking and click ePreferences under Inbox.
+
+--- SUMMARY OF ACCOUNTS ---
+Summary of Accounts
+Spring ahead, in organizing your finances!
+Enjoy 24/7 access to track your savings, manage alerts and more! Plus, the
+freedom to bank wherever it's convenient for you. Download our app at
+synchrony.com/banking/mobile-app.
+
+Account Type            Account Number          Ending Balance
+HIGH YIELD SAVINGS                              $488,178.21
+
+HIGH YIELD SAVINGS - XXXXXXXX1021
+
+--- FOOTER ---
+Visit us at synchrony.com/banking
+Member FDIC
+
+--- VERIFIED KEY FIELDS (zoom-resolved) ---
+Ending Balance: $488,178.21
+Account (last 4): 1021  (shown as XXXXXXXX1021)
+Statement Ending: 06/07/2026
+Page: Page 1 of 4
+Visible surname tail: UOPOLO (surname PUOPOLO, partially redacted)

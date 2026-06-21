@@ -1,0 +1,77 @@
+DOCUMENT TYPE: NJ REALTORS Form 140 — Seller's Property Condition Disclosure Statement (Page 7 of 14). Sections: RADON GAS and MAJOR APPLIANCES AND OTHER ITEMS.
+
+=== PAGE HEADER ===
+MLS # 22617358        115 Browns Dock Rd, Atlantic Highlands, NJ 07716        $894,900
+
+=== BODY (line numbers in left margin) ===
+
+351   RADON GAS Instructions to Owners
+352   By law (N.J.S.A. 26:2D-73), a Property owner who has had his or her Property tested or treated for radon gas may require that information
+353   about such testing and treatment be kept confidential until the time that the owner and a buyer enter into a contract of sale, at which time
+354   a copy of the test results and evidence of any subsequent mitigation or treatment shall be provided to the buyer. The law also provides that
+355   owners may waive, in writing, this right of confidentiality. As the owner(s) of this Property, do you wish to waive this right?
+356       Yes      No
+357       [ ]      [X]            ___________        ___________
+358                               (Initials)         (Initials)
+359
+360   If you responded "yes," answer the following questions. If you responded "no," proceed to the next section.
+361
+362       Yes      No    Unknown
+363       [ ]      [ ]            100.   Are you aware if the Property has been tested for radon gas? (Attach a copy of each test report if
+364                                      available.)
+365       [ ]      [ ]            101.   Are you aware if the Property has been treated in an effort to mitigate the presence of radon gas?
+366                                      (If "yes," attach a copy of any evidence of such mitigation or treatment.)
+367       [ ]      [ ]            102.   Is radon remediation equipment now present in the Property?
+368       [ ]      [ ]            102a.  If "yes," is such equipment in good working order?
+369
+370   MAJOR APPLIANCES AND OTHER ITEMS
+371   The terms of any final contract executed by the Seller shall be controlling as to what appliances or other items, if any, shall be included
+372   in the sale of the Property. Which of the following items are present in the Property? (For items that are not present, indicate "not
+373   applicable.")
+374
+375       Yes      No    Unknown    N/A
+376       [ ]      [ ]              [X]    103.   Electric Garage Door Opener
+377       [ ]      [ ]              [X]    103a.  If "yes," are they reversible? Number of Transmitters ____________
+378       [X]      [ ]      [ ]     [ ]    104.   Smoke Detectors
+379                                               [X] Battery  [ ] Electric  [ ] Both  How many ____ | Various
+380                                               [X] Carbon Monoxide Detectors  How many ____ | Various
+381                                               Location ____ | Throughout house
+382       [ ]      [X]              [ ]    105.   With regard to the above items, are you aware that any item is not in working order?
+383                                        105a.  If "yes," identify each item that is not in working order or defective and explain the nature
+384                                               of the problem: ____________________________________________________
+385                                               ____________________________________________________________________
+386       [X]      [ ]              [ ]    106.   [X] In-ground pool  [ ] Above-ground pool  [ ] Pool Heater  [ ] Spa/Hot Tub
+387       [ ]      [ ]      [ ]     [X]    106a.  Were proper permits and approvals obtained?
+388       [X]      [ ]              [ ]    106b.  Are you aware of any leaks or other defects with the filter or the walls or other structural or
+389                                               | In-ground pool; liner due for replacement. | r spa/hot tub?
+390       [ ]      [X]              [ ]    106c.  If an in-ground pool, are you aware of any water seeping behind the walls of the pool?
+391                                        107.   Indicate which of the following may be included in the sale? (Indicate Y for yes N for no.)
+392       Y                                       [  ] Refrigerator
+393       Y                                       [  ] Range
+394       N                                       [  ] Microwave Oven
+395       Y                                       [  ] Dishwasher
+396       N                                       [  ] Trash Compactor
+397       N                                       [  ] Garbage Disposal
+398       N                                       [  ] In-Ground Sprinkler System
+399       N                                       [  ] Central Vacuum System
+400       N                                       [  ] Security System
+401       Y                                       [  ] Washer
+402       Y                                       [  ] Dryer
+403       N                                       [  ] Intercom
+404       N                                       [  ] Other
+405                                        108.   Of those that may be included, is each in working order?  ____ Yes
+406                                               If "no," identify each item not in working order, explain the nature of the problem: ____
+407                                               ____________________________________________________________________
+408
+409
+410
+
+NJ REALTORS® | Form 140 | 05/2025.2   Page 7 of 14
+
+=== NOTES ===
+- Item 107: the printed boxes next to each appliance are EMPTY; the Y/N answers are written as handwritten/typed letters in the margin column to the left of the boxes.
+- Item 108: answer "Yes" written on the blank line.
+- Radon waiver (357): No [X]. All radon questions 100-102a blank.
+- 104 Smoke Detectors: Yes [X]; [X] Battery; [X] Carbon Monoxide; "How many" lines blank, "Various" written; Location "Throughout house".
+- 106 pool: Yes [X], [X] In-ground pool only. 106a N/A [X]. 106b Yes [X] "In-ground pool; liner due for replacement." 106c No [X].
+- Footer revision code is "05/2025.2" (period, not hyphen).
