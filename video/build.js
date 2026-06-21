@@ -21,9 +21,8 @@ const OUTDIR = path.join(ROOT, 'mockup', 'demo');
 const FRAMES_OUT = path.join(OUTDIR, 'frames');
 
 const FFMPEG = execSync('python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"').toString().trim();
-// High-quality (22.05kHz) LibriTTS model; speaker 80 = a warm, lower-pitched female read.
-const VOICE = path.join(ROOT, '.voiceover', 'voices', 'tmp_libritts', 'en-us-libritts-high.onnx');
-const SPEAKER = 80;
+// Voiceover is synthesized by Kokoro (see kokoro_tts.py) — natural 24kHz neural TTS,
+// voice af_bella. Model/voices live under .voiceover/kokoro (git-ignored).
 
 function sh(cmd, args) { return execFileSync(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] }); }
 function ensure(d) { fs.mkdirSync(d, { recursive: true }); }
@@ -44,27 +43,28 @@ function wavDuration(file) {
 /* ---------- 1. Voiceover ---------- */
 function synthVO() {
   ensure(WORK);
-  // Clean, gentle warmth — a slight 3% pitch-down for a sultry register, a touch of
-  // low-end body, mild de-ess, and a single loudnorm pass. No stacked dynamics (which
-  // is what made the earlier take sound "compressed").
-  const sultry = [
-    'asetrate=22050*0.96', 'aresample=44100', 'atempo=1.041667',  // ~4% down for a warmer, lower register
-    'highpass=f=58',
-    'bass=g=3.5:f=150',                       // low-mid body — kills the "tinny" thinness
-    'equalizer=f=2900:t=q:w=1.5:g=-2.5',      // tame the harsh/robotic presence
-    'equalizer=f=7200:t=q:w=2:g=-3',          // de-ess
-    'treble=g=-2.5:f=9000',                   // gentle roll-off of the fizzy top
-    'aecho=0.86:0.9:33|47:0.06|0.04',         // a hint of room so it reads less dry/synthetic
+  // Synth all lines in one Kokoro process (natural offline neural TTS; loads model once).
+  const lines = {};
+  SCENES.forEach((sc, i) => { lines[i] = sc.vo; });
+  const linesPath = path.join(WORK, 'lines.json');
+  fs.writeFileSync(linesPath, JSON.stringify(lines));
+  execSync(`python3 ${JSON.stringify(path.join(__dirname, 'kokoro_tts.py'))} ${JSON.stringify(linesPath)} ${JSON.stringify(WORK)}`,
+    { stdio: ['ignore', 'inherit', 'inherit'] });
+
+  // Light, natural finishing only — a touch of warmth + gentle de-ess + loudnorm.
+  // No pitch-shifting (that is what made earlier Piper takes sound robotic); Kokoro
+  // is already warm and full-band at 24kHz.
+  const finish = [
+    'highpass=f=55',
+    'equalizer=f=160:t=q:w=1.0:g=1.5',
+    'equalizer=f=7600:t=q:w=2.0:g=-1.5',
     'loudnorm=I=-15:TP=-1.5:LRA=11',
     'aresample=44100'
   ].join(',');
   SCENES.forEach((sc, i) => {
     const raw = path.join(WORK, `raw_${i}.wav`);
     const out = path.join(WORK, `vo_${i}.wav`);
-    execSync(`echo ${JSON.stringify(sc.vo)} | piper -m ${JSON.stringify(VOICE)} --speaker ${SPEAKER} ` +
-      `--length-scale 1.1 --noise-scale 0.7 --noise-w-scale 0.9 --sentence-silence 0.28 -f ${JSON.stringify(raw)}`,
-      { stdio: ['pipe', 'ignore', 'ignore'] });
-    sh(FFMPEG, ['-y', '-i', raw, '-af', sultry, out]);
+    sh(FFMPEG, ['-y', '-i', raw, '-af', finish, out]);
     sc._voDur = wavDuration(out);
     process.stdout.write(`  · VO ${sc.name}: ${sc._voDur.toFixed(2)}s\n`);
   });
@@ -176,7 +176,7 @@ function exportStills() {
 
 (async () => {
   console.log('Mitti demo film — building');
-  console.log('1/5 voiceover (Piper, sultry female)…'); synthVO();
+  console.log('1/5 voiceover (Kokoro — af_bella)…'); synthVO();
   const total = buildTimeline();
   console.log(`    timeline: ${total.toFixed(1)}s across ${SCENES.length} scenes`);
   console.log('2/5 storyboard stills…'); await exportStills();

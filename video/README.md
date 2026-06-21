@@ -11,10 +11,10 @@ video/
 ```
 
 ## How it works
-1. **Voiceover** — each scene's narration is synthesized with [Piper](https://github.com/rhasspy/piper)
-   (high-quality 22 kHz `en-us-libritts` model, speaker 80 — a warm, lower-pitched
-   female voice), then nudged ~3% down in pitch and gently warmed (low-end body,
-   mild de-ess, single loudnorm pass) with ffmpeg for a clean, sultry read.
+1. **Voiceover** — each scene's narration is synthesized with [Kokoro](https://github.com/thewh1teagle/kokoro-onnx)
+   (a natural 24 kHz neural TTS; voice `af_bella`, a warm female read — see `kokoro_tts.py`),
+   then lightly finished with ffmpeg (a touch of warmth, gentle de-ess, single loudnorm
+   pass). No pitch-shifting — that's what made earlier takes sound robotic.
 2. **Timeline** — each scene's length is stretched to fit its narration.
 3. **Frames** — every frame is an animated SVG (shared `mockup/lib` art) rasterized
    to PNG by `sharp` at 1920×1080 / 30 fps.
