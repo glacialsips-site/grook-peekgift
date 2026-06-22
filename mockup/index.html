@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mitti — Handmade Stoneware, Thrown by Hand</title>
+<meta name="description" content="Mitti — wheel-thrown stoneware made in small batches. Kulhads, surahis, bowls and bud vases, glazed by hand in Jaipur blue, marigold and Longpi black."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body data-view="home">
+
+<div class="announce">Small-batch studio · <b>Free kiln-safe shipping over $75</b> · Made to order in our New Jersey workshop</div>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#" data-nav="home" aria-label="Mitti home">
+      <span class="deva">मिट्टी</span>
+      <span class="word">mit<b>ti</b></span>
+    </a>
+    <ul>
+      <li><a href="#" data-nav="shop" data-col="All" class="navlink">Shop</a></li>
+      <li><a href="#" data-nav="shop" data-col="Chai &amp; Coffee" class="navlink">Chai &amp; Coffee</a></li>
+      <li><a href="#" data-nav="shop" data-col="Table" class="navlink">Table</a></li>
+      <li><a href="#story" class="navlink">Our Studio</a></li>
+    </ul>
+    <div class="spacer"></div>
+    <div class="nav-actions">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <!-- Clerk: signed-in user -->
+      <div class="user-chip" title="Signed in with Clerk">
+        <span class="avatar">AM</span>
+        <span class="uname">Arjun</span>
+        <span class="clerk-dot" title="Authenticated"></span>
+      </div>
+      <button class="cart-btn" id="openCart">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M6 6 5 3H2"/></svg>
+        Cart <span class="count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ HOME ============ -->
+  <section class="view" id="view-home">
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Wheel-thrown · small batch · made to order</span>
+        <h1>Stoneware, born from the <em>earth</em> up.</h1>
+        <p class="lede">Mitti is a one-woman studio throwing everyday ceramics by hand — kulhads, surahis, bowls and bud vases, glazed in colours pulled straight from an Indian kitchen.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#" data-nav="shop" data-col="All">Shop the collection
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#story">Our story</a>
+        </div>
+      </div>
+      <div class="hero-stage">
+        <div class="hero-badge">
+          <span class="seal">म</span>
+          <div>Hand-thrown in<br/>small batches</div>
+        </div>
+        <div class="hero-vessels" id="heroVessels"></div>
+      </div>
+    </div>
+
+    <div class="trust">
+      <div><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h13v8H4z"/><path d="M17 10h3l2 3v2h-5z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="18" cy="17" r="1.6"/></svg></span> Free shipping over $75</div>
+      <div><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8c0-3 3-5 7-5M19 16c0 3-3 5-7 5"/></svg></span> Made to order, never mass-produced</div>
+      <div><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 8 8 8 8s8-3 8-8V6z"/><path d="m9 12 2 2 4-4"/></svg></span> Lead-free, food-safe glazes</div>
+    </div>
+
+    <section class="sec">
+      <div class="sec-head">
+        <div>
+          <div class="kicker">The collection</div>
+          <h2>Pieces for the everyday table</h2>
+        </div>
+        <a class="more" href="#" data-nav="shop" data-col="All">View all →</a>
+      </div>
+      <div class="grid" id="homeGrid"></div>
+    </section>
+
+    <section class="sec" id="story">
+      <div class="story">
+        <figure class="img">
+          <div class="wheel"></div>
+          <div class="clay"></div>
+          <figcaption>The wheel · New Jersey</figcaption>
+        </figure>
+        <div>
+          <div class="kicker" style="color:var(--clay-deep);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:12.5px;margin-bottom:12px">Our studio</div>
+          <h2>One potter, one wheel, a very patient kiln.</h2>
+          <p>I learned to throw on my grandmother's veranda in Jaipur, watching the local kumhar turn river clay into something that held water and held memory. Mitti is that, transplanted to a garage studio in New Jersey.</p>
+          <p>Every piece is thrown, trimmed, bisque-fired, glazed and fired again — by hand, by me. Which is why no two are quite alike, and why I wouldn't have it any other way.</p>
+          <div class="sign">— Arjun</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spinning studio cube. Each face is a <video> that shows its poster image
+         until a clip is dropped in: set src="assets/cube/clips/0X.mp4" on the video. -->
+    <section class="cube-sec">
+      <div class="kicker" style="color:var(--clay-deep);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:12.5px;margin-bottom:12px">In the studio</div>
+      <h2 style="font-size:34px">Earth, wheel, glaze, fire</h2>
+      <div class="cube-stage">
+        <div class="drum">
+          <div class="face face-1"><video poster="assets/cube/01.jpg" src="assets/cube/clips/01.mp4" muted loop autoplay playsinline></video></div>
+          <div class="face face-2"><video poster="assets/cube/02.jpg" muted loop autoplay playsinline></video></div>
+          <div class="face face-3"><video poster="assets/cube/03.jpg" muted loop autoplay playsinline></video></div>
+          <div class="face face-4"><video poster="assets/cube/04.jpg" muted loop autoplay playsinline></video></div>
+          <div class="face face-5"><video poster="assets/cube/05.jpg" muted loop autoplay playsinline></video></div>
+          <div class="face face-6"><video poster="assets/cube/06.jpg" muted loop autoplay playsinline></video></div>
+        </div>
+      </div>
+      <div class="cube-shadow"></div>
+      <p class="cube-hint">Hover to pause · drop 9:16 clips into <code>assets/cube/clips/</code> (02.mp4 … 06.mp4) to bring every face to life</p>
+    </section>
+
+    <section class="sec" style="text-align:center">
+      <div class="kicker" style="color:var(--clay-deep);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:12.5px;margin-bottom:12px">Mixed by hand</div>
+      <h2 style="font-size:34px;margin-bottom:30px">Our glaze kitchen</h2>
+      <div class="glazes" id="glazeStrip"></div>
+    </section>
+  </section>
+
+  <!-- ============ SHOP ============ -->
+  <section class="view" id="view-shop">
+    <div class="shop-head">
+      <a class="back" href="#" data-nav="home">← Home</a>
+      <h1>The collection</h1>
+      <p>Everything is thrown to order. Choose a glaze, give the kiln two weeks, and a one-of-a-kind piece arrives wrapped in newsprint.</p>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="grid" id="shopGrid"></div>
+    <div style="height:60px"></div>
+  </section>
+
+  <!-- ============ PRODUCT ============ -->
+  <section class="view" id="view-product">
+    <a class="back" href="#" data-nav="shop" data-col="All">← Back to shop</a>
+    <div class="pd" id="pdBody"></div>
+  </section>
+
+  <!-- ============ CHECKOUT ============ -->
+  <section class="view" id="view-checkout">
+    <div class="checkout" id="checkoutBody"></div>
+  </section>
+
+  <!-- ============ DONE ============ -->
+  <section class="view" id="view-done">
+    <div class="done-wrap" id="doneBody"></div>
+  </section>
+
+</main>
+
+<!-- ============ CART DRAWER ============ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Cart">
+  <header>
+    <h3>Your cart</h3>
+    <button class="close" id="closeCart" aria-label="Close">✕</button>
+  </header>
+  <div class="cart-items" id="cartItems"></div>
+  <footer id="cartFooter"></footer>
+</aside>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"></div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="brand" href="#" data-nav="home"><span class="deva" style="color:var(--marigold)">मिट्टी</span><span class="word">mit<b>ti</b></span></a>
+        <p class="about">Wheel-thrown stoneware made in small batches in a New Jersey garage studio. Earth in, heirloom out.</p>
+      </div>
+      <div><h5>Shop</h5><ul>
+        <li><a href="#" data-nav="shop" data-col="Chai &amp; Coffee">Chai &amp; Coffee</a></li>
+        <li><a href="#" data-nav="shop" data-col="Table">Table</a></li>
+        <li><a href="#" data-nav="shop" data-col="Home">Home</a></li>
+        <li><a href="#" data-nav="shop" data-col="All">Gift cards</a></li>
+      </ul></div>
+      <div><h5>Studio</h5><ul>
+        <li><a href="#story">Our story</a></li>
+        <li><a href="#">Care &amp; glazes</a></li>
+        <li><a href="#">Wholesale</a></li>
+        <li><a href="#">Journal</a></li>
+      </ul></div>
+      <div><h5>Help</h5><ul>
+        <li><a href="#">Shipping &amp; returns</a></li>
+        <li><a href="#">Track an order</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Mitti Ceramics · Made by hand in NJ</div>
+      <div class="status" title="Demo environment — backend services live">
+        <span class="svc"><span class="d"></span> Clerk</span>
+        <span class="svc"><span class="d"></span> Stripe</span>
+        <span class="svc"><span class="d"></span> Supabase</span>
+        <span class="svc"><span class="d"></span> Resend</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="lib/art.js"></script>
+<script src="lib/catalog.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
