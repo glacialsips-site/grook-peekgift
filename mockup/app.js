@@ -178,9 +178,9 @@
   }
   function reviewsBlock() {
     return '<div class="reviews"><h4>What buyers say · 4.9 ★</h4>' +
-      review('Arjun M.', 'Verified buyer', 5,
-        'A friend bet me you couldn’t build a whole working shop like this. I was very confident. ' +
-        'I am no longer very confident. The pieces are lovely too — ordered a second set.') +
+      review('Meera R.', 'Verified buyer', 5,
+        'Everyone assumes a whole team makes these — one person, one wheel, every piece by hand. ' +
+        'I ordered a second set the next day.') +
       review('Priya S.', 'Verified buyer', 5,
         'The glaze is even better in person, and somehow my morning chai tastes like it has opinions now.') +
       review('Devin R.', 'Verified buyer', 5,
