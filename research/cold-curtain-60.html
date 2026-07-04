@@ -1,4 +1,4 @@
-<title>Cold Curtain — 60 Seconds</title>
+<title>Cold Curtain — Executive Brief</title>
 <style>
   /* Committed single-theme: night-operations dark. */
   :root {
@@ -22,87 +22,84 @@
   .frame:nth-child(even) { background: var(--bg2); }
   .kick {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12.5px; letter-spacing: .22em; color: var(--muted); margin-bottom: 2.2dvh;
+    font-size: 12px; letter-spacing: .22em; color: var(--muted); margin-bottom: 2dvh;
   }
   .kick b { color: var(--cryo); font-weight: 700; }
-  .kick .fire { color: var(--ember); }
   h1 {
-    margin: 0 0 1.2dvh; font-weight: 800; letter-spacing: -0.025em;
-    font-size: clamp(32px, 5.2vw, 70px); line-height: 1.02; text-wrap: balance; max-width: 20ch;
+    margin: 0 0 1.2dvh; font-weight: 800; letter-spacing: -0.02em;
+    font-size: clamp(30px, 4.6vw, 62px); line-height: 1.05; text-wrap: balance; max-width: 24ch;
   }
   h1 .c { color: var(--cryo); } h1 .e { color: var(--ember); }
-  .sub { font-size: clamp(15px, 1.7vw, 21px); color: var(--ink-2); max-width: 58ch; margin: 0 0 2.6dvh; }
+  .sub { font-size: clamp(15px, 1.6vw, 20px); color: var(--ink-2); max-width: 64ch; margin: 0 0 2.4dvh; }
   .sub strong { color: var(--ink); }
   .whisper {
-    position: absolute; bottom: 2.6dvh; left: 6vw; right: 6vw;
+    position: absolute; bottom: 2.4dvh; left: 6vw; right: 6vw;
     display: flex; justify-content: space-between; gap: 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 10.5px; letter-spacing: .1em; color: var(--muted);
   }
-  .dots { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); display: grid; gap: 9px; z-index: 10; }
-  .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--hair); border: 1px solid var(--muted); }
+  .dots { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); display: grid; gap: 8px; z-index: 10; }
+  .dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--hair); border: 1px solid var(--muted); }
   .dots span.on { background: var(--cryo); border-color: var(--cryo); }
 
   svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: var(--muted); }
-  .tag {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: clamp(10.5px, 1.05vw, 13px); letter-spacing: .1em; padding: 7px 13px; border-radius: 999px;
+  .chip {
+    border: 1px solid var(--hair); border-radius: 999px; padding: 8px 16px;
+    font-size: clamp(12px, 1.2vw, 15px); color: var(--ink-2); background: rgba(74,157,240,.05);
     align-self: flex-start;
   }
-  .tag.them { color: var(--ember-2); border: 1px solid rgba(255,106,61,.35); }
-  .tag.us { color: var(--frost); border: 1px solid rgba(74,157,240,.45); background: rgba(74,157,240,.08); font-weight: 700; }
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+  .chip b { color: var(--frost); font-weight: 700; }
+  .chiprow { display: flex; flex-wrap: wrap; gap: 9px; align-content: flex-start; }
 
-  /* F1 */
-  .f1grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 4vw; align-items: center; }
-  @media (max-width: 820px) { .f1grid { grid-template-columns: 1fr; } }
-  .giant {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-weight: 700; color: var(--ember); font-variant-numeric: tabular-nums;
-    font-size: clamp(40px, 6.2vw, 96px); letter-spacing: -0.02em; line-height: 1; margin: 0 0 2dvh;
-  }
-  #camap60 { width: 100%; max-width: 440px; height: auto; justify-self: center; }
-  #camap60 .state { fill: #0f1722; stroke: var(--cryo-dim); stroke-width: 1.5; }
-  #camap60 .mk { fill: var(--ember); fill-opacity: .55; stroke: var(--ember); stroke-width: 1.5; }
-  #camap60 .halo { fill: none; stroke: var(--ember); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
-  @media (prefers-reduced-motion: no-preference) {
-    #camap60 .halo { animation: halo 2.4s ease-out infinite; }
-    @keyframes halo { 0% { transform: scale(.5); opacity: .8; } 70% { transform: scale(1.8); opacity: 0; } 100% { opacity: 0; } }
-  }
-  #camap60 .mklab60 { font-size: 12px; fill: var(--ink-2); }
+  /* F1 escalation chart */
+  .esc { width: 100%; max-width: 1000px; }
 
-  /* F2 */
+  /* F2 cross-section */
   .xsec { width: 100%; max-width: 1100px; }
   @media (prefers-reduced-motion: no-preference) {
     .spray { animation: spray 1.6s ease-in-out infinite; }
     @keyframes spray { 0%,100% { opacity: .18; } 50% { opacity: .5; } }
   }
 
-  /* F3 layers */
-  .lay { width: 100%; max-width: 1000px; }
+  /* F3 deployment */
+  .depgrid { display: grid; grid-template-columns: minmax(240px, 380px) 1fr; gap: 3.5vw; align-items: center; }
+  @media (max-width: 860px) { .depgrid { grid-template-columns: 1fr; } }
+  #camapP { width: 100%; height: auto; }
+  #camapP .state { fill: #0f1722; stroke: var(--cryo-dim); stroke-width: 1.5; }
+  .ph-table { border-collapse: collapse; width: 100%; max-width: 560px; }
+  .ph-table th, .ph-table td { text-align: left; padding: 9px 14px 9px 0; border-bottom: 1px solid var(--hair); font-size: clamp(12.5px, 1.3vw, 15.5px); }
+  .ph-table th {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .12em; color: var(--muted); font-weight: 600;
+  }
+  .ph-table td.num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ph-badge {
+    display: inline-block; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 700; margin-right: 8px;
+  }
+  .p1 { background: var(--ember); color: #14060222; color: #140602; }
+  .p2 { background: var(--ember-dim); color: var(--ember-2); }
+  .p3 { background: none; border: 2px solid var(--ember-dim); color: var(--ember-2); line-height: 16px; }
 
-  /* F4 endurance */
-  .endur { width: 100%; max-width: 1050px; }
-
-  /* F5 clean/free */
+  /* F4 agent */
   .clean { width: 100%; max-width: 1050px; }
 
-  /* F6 ROI */
-  .roi { width: 100%; max-width: 1050px; }
-  .statrow { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 1.6dvh; }
-  .chip {
-    border: 1px solid var(--hair); border-radius: 999px; padding: 8px 16px;
-    font-size: clamp(12px, 1.25vw, 15px); color: var(--ink-2); background: rgba(74,157,240,.05);
-  }
-  .chip b { color: var(--frost); font-weight: 700; }
+  /* F5 layers */
+  .lay { width: 100%; max-width: 1000px; }
 
-  /* F7 close */
+  /* F6 endurance */
+  .endur { width: 100%; max-width: 1050px; }
+
+  /* F7 ROI */
+  .roi { width: 100%; max-width: 1050px; }
+
+  /* F8 close */
   .dsvg { width: 100%; max-width: 950px; }
-  .kicker { font-size: clamp(18px, 2.2vw, 28px); color: var(--ink-2); margin-top: 2.4dvh; }
+  .kicker { font-size: clamp(17px, 2vw, 25px); color: var(--ink-2); margin-top: 2.2dvh; max-width: 60ch; }
   .kicker strong { color: var(--ink); }
   .closer-mark {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    letter-spacing: .3em; color: var(--cryo); font-weight: 700; font-size: 14px; margin-top: 2.4dvh;
+    letter-spacing: .3em; color: var(--cryo); font-weight: 700; font-size: 14px; margin-top: 2.2dvh;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -114,34 +111,57 @@
   }
 </style>
 
-<div class="dots" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+<div class="dots" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
-<!-- 0:00 PROBLEM -->
+<!-- 1 PROBLEM -->
 <section class="frame" id="f1">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:00 · <span class="fire">THE PROBLEM</span></div>
-  <div class="f1grid">
-    <div>
-      <div class="giant">$250B</div>
-      <h1>One month.<br>Los Angeles.</h1>
-      <p class="sub">Same neighborhoods. Every few years. <strong>Rebuilt in the same ash.</strong></p>
-    </div>
-    <svg id="camap60" viewBox="0 0 500 590" aria-label="California map: the repeat-burn corridors, pulsing"></svg>
-  </div>
-  <div class="whisper"><span>40-YEAR US OUTLOOK: $5–36 TRILLION</span><span>CLICK / ↓ · 0:09</span></div>
+  <div class="kick"><b>COLD CURTAIN</b> · 1/8 · THE PROBLEM</div>
+  <h1>Projected 40-year US wildfire losses: <span class="e">$5–36 trillion.</span></h1>
+  <p class="sub">Losses are escalating year over year, concentrated at a known set of wildland–urban edges. January 2025 alone: <strong>$250B+ in economic loss and ~30 lives</strong> — over 300 lives in these corridors since 2017.</p>
+  <svg class="esc" viewBox="0 0 1000 300" aria-label="Chronological insured losses per event, 2017 to 2025, rising from 11 billion to over 31 billion, with projection continuing upward">
+    <line x1="60" y1="240" x2="960" y2="240" stroke="var(--hair)" stroke-width="2"/>
+    <!-- bars: insured $B — 11.1, 12.5, 2.0, 3.2, 31.5 -->
+    <g fill="var(--ember)">
+      <rect x="80"  y="163" width="90" height="77"  rx="3" opacity=".65"/>
+      <rect x="240" y="153" width="90" height="87"  rx="3" opacity=".7"/>
+      <rect x="400" y="226" width="90" height="14"  rx="3" opacity=".75"/>
+      <rect x="560" y="218" width="90" height="22"  rx="3" opacity=".8"/>
+      <rect x="720" y="21"  width="90" height="219" rx="3"/>
+    </g>
+    <g fill="var(--ink-2)" font-size="13" text-anchor="middle" font-weight="700">
+      <text x="125" y="152" fill="var(--ink-2)">$11.1B</text>
+      <text x="285" y="142" fill="var(--ink-2)">$12.5B</text>
+      <text x="445" y="215" fill="var(--ink-2)">$2.0B</text>
+      <text x="605" y="207" fill="var(--ink-2)">$3.2B</text>
+      <text x="765" y="12"  fill="var(--ember-2)">$28–45B INSURED · $250B+ TOTAL</text>
+    </g>
+    <g font-size="11.5" text-anchor="middle">
+      <text x="125" y="262">TUBBS · 2017</text><text x="125" y="278">22 LIVES</text>
+      <text x="285" y="262">CAMP · 2018</text><text x="285" y="278">85 LIVES</text>
+      <text x="445" y="262">MARSHALL · 2021</text><text x="445" y="278">2 LIVES</text>
+      <text x="605" y="262">LAHAINA · 2023</text><text x="605" y="278">102 LIVES</text>
+      <text x="765" y="262">LA · 2025</text><text x="765" y="278">~30 LIVES</text>
+    </g>
+    <!-- projection -->
+    <path d="M 830 60 C 880 40, 910 30, 945 22" stroke="var(--ember)" stroke-width="2.5" fill="none" stroke-dasharray="7 6"/>
+    <polygon points="955,20 938,16 941,30" fill="var(--ember)"/>
+    <text x="952" y="48" font-size="11.5" text-anchor="end" fill="var(--ember-2)">TREND</text>
+  </svg>
+  <div class="whisper"><span>SOURCES: VERISK · NFPA · US JOINT ECONOMIC COMMITTEE</span><span>2/8 →</span></div>
 </section>
 
-<!-- 0:09 SOLUTION -->
+<!-- 2 PROPOSAL -->
 <section class="frame" id="f2">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:09 · THE SOLUTION</div>
-  <h1>A permanent wall of <span class="c">−109°F.</span></h1>
-  <p class="sub">Fire arrives → valves open → <strong>the front dies at the line.</strong></p>
-  <svg class="xsec" viewBox="0 0 1000 260" aria-label="Fire meets mowed strip, then three automated cold lines, then two miles of distance; the community is untouched">
+  <div class="kick"><b>COLD CURTAIN</b> · 2/8 · THE PROPOSAL</div>
+  <h1>Fixed suppression infrastructure at the point of attack.</h1>
+  <p class="sub">Every commercial building in America is required to have a sprinkler system. <strong>No equivalent exists at community scale.</strong> This is that system: buried liquid-CO2 lines, automated nozzles, sited where the fires historically arrive.</p>
+  <svg class="xsec" viewBox="0 0 1000 260" aria-label="Fire meets mowed strip, then three automated cold lines, then two miles of distance; the community is intact">
     <line x1="0" y1="190" x2="1000" y2="190" stroke="var(--hair)" stroke-width="3"/>
     <polygon points="15,190 45,84 68,150 95,60 122,144 150,88 178,190" fill="var(--ember)"/>
     <polygon points="50,190 74,130 94,166 118,118 140,160 162,138 182,190" fill="#c24a20"/>
     <text x="95" y="216" font-size="14" text-anchor="middle" fill="var(--ember)">FIRE</text>
     <rect x="205" y="180" width="120" height="10" fill="var(--cryo)" opacity=".18"/>
-    <text x="265" y="216" font-size="12" text-anchor="middle">MOWED STRIP</text>
+    <text x="265" y="216" font-size="12" text-anchor="middle">FUEL BREAK</text>
     <g stroke="var(--cryo)" stroke-width="6" stroke-linecap="round">
       <line x1="370" y1="190" x2="370" y2="120"/><line x1="460" y1="190" x2="460" y2="120"/><line x1="550" y1="190" x2="550" y2="120"/>
     </g>
@@ -153,116 +173,60 @@
       <polygon points="460,118 400,186 520,186"/>
       <polygon points="550,118 490,186 610,186"/>
     </g>
-    <text x="460" y="216" font-size="13" text-anchor="middle" fill="var(--frost)">3 AUTOMATED COLD LINES · −109°F</text>
+    <text x="460" y="216" font-size="13" text-anchor="middle" fill="var(--frost)">3 AUTOMATED SUPPRESSION LINES · −109°F DISCHARGE</text>
     <line x1="640" y1="190" x2="830" y2="190" stroke="var(--muted)" stroke-width="2" stroke-dasharray="8 7"/>
-    <text x="735" y="168" font-size="12" text-anchor="middle">2 MILES — EMBERS DIE OF DISTANCE</text>
+    <text x="735" y="168" font-size="12" text-anchor="middle">2-MILE STANDOFF — EMBER EXPOSURE FALLS ~100×</text>
     <g stroke="var(--ink-2)" stroke-width="2.5" fill="none">
       <rect x="856" y="152" width="42" height="38" fill="var(--bg2)"/><polygon points="850,152 877,126 904,152"/>
       <rect x="922" y="158" width="36" height="32" fill="var(--bg2)"/><polygon points="917,158 940,136 963,158"/>
     </g>
-    <text x="908" y="216" font-size="12" text-anchor="middle" fill="var(--ink-2)">UNTOUCHED</text>
+    <text x="908" y="216" font-size="12" text-anchor="middle" fill="var(--ink-2)">COMMUNITY</text>
   </svg>
-  <div class="whisper"><span>NO PUMPS · NO GRID POWER · NO ONE IN HARM'S WAY</span><span>CLICK / ↓ · 0:17</span></div>
+  <div class="whisper"><span>SECTIONS DISCHARGE ONLY WHERE FIRE CONTACTS THE LINE · NO PUMPS · NO GRID DEPENDENCY</span><span>3/8 →</span></div>
 </section>
 
-<!-- 0:17 LAYERS -->
+<!-- 3 DEPLOYMENT -->
 <section class="frame" id="f3">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:17 · NOT INSTEAD — IN FRONT OF</div>
-  <h1>Keep the drones.<br><span class="c">Add the goal line.</span></h1>
-  <p class="sub">Detection and attack already have players. <strong>Nobody plays defense.</strong></p>
-  <svg class="lay" viewBox="0 0 1000 290" aria-label="Three defense layers: detect from space, attack from the air, hold at the ground — the Cold Curtain is the hold layer in front of the community">
-    <!-- layer 1: detect -->
-    <rect x="20" y="18" width="960" height="62" rx="9" fill="none" stroke="var(--hair)" stroke-width="2"/>
-    <g stroke="var(--muted)" stroke-width="2" fill="none">
-      <rect x="52" y="36" width="22" height="14"/>
-      <line x1="42" y1="43" x2="52" y2="43"/><line x1="74" y1="43" x2="84" y2="43"/>
-      <line x1="38" y1="36" x2="42" y2="50"/><line x1="88" y1="36" x2="84" y2="50"/>
-    </g>
-    <text x="115" y="43" font-size="14" fill="var(--ink-2)" font-weight="700">DETECT</text>
-    <text x="115" y="62" font-size="12">satellites · cameras · AI — exists, keep it</text>
-    <text x="962" y="52" font-size="12" text-anchor="end">THEIRS ✓</text>
-    <!-- layer 2: attack -->
-    <rect x="20" y="96" width="960" height="62" rx="9" fill="none" stroke="var(--hair)" stroke-width="2"/>
-    <g fill="var(--muted)">
-      <polygon points="46,128 88,136 46,144 56,136"/>
-    </g>
-    <g stroke="var(--muted)" stroke-width="2" fill="none">
-      <circle cx="105" cy="136" r="6"/>
-      <line x1="95" y1="126" x2="115" y2="146"/><line x1="115" y1="126" x2="95" y2="146"/>
-    </g>
-    <text x="140" y="121" font-size="14" fill="var(--ink-2)" font-weight="700">ATTACK</text>
-    <text x="140" y="140" font-size="12">aircraft · drones · crews — exists, keep it (XPRIZE et al.)</text>
-    <text x="962" y="130" font-size="12" text-anchor="end">THEIRS ✓</text>
-    <!-- layer 3: hold -->
-    <rect x="20" y="174" width="960" height="86" rx="9" fill="rgba(74,157,240,.09)" stroke="var(--cryo)" stroke-width="2.5"/>
-    <line x1="52" y1="192" x2="52" y2="244" stroke="var(--cryo)" stroke-width="7" stroke-linecap="round"/>
-    <g fill="var(--frost)">
-      <circle cx="52" cy="200" r="4"/><circle cx="52" cy="218" r="4"/><circle cx="52" cy="236" r="4"/>
-    </g>
-    <g stroke="var(--ink-2)" stroke-width="2" fill="none">
-      <rect x="80" y="216" width="26" height="22" fill="var(--bg)"/><polygon points="76,216 93,200 110,216"/>
-      <rect x="120" y="220" width="22" height="18" fill="var(--bg)"/><polygon points="116,220 131,206 146,220"/>
-    </g>
-    <text x="180" y="207" font-size="15" fill="var(--frost)" font-weight="700">HOLD — THE COLD CURTAIN</text>
-    <text x="180" y="228" font-size="12.5" fill="var(--ink-2)">the permanent line between every fire that gets through — and the town</text>
-    <text x="962" y="212" font-size="13" text-anchor="end" fill="var(--cryo)" font-weight="700">OURS — MISSING</text>
-    <text x="962" y="232" font-size="12" text-anchor="end" fill="var(--ink-2)">until now</text>
-  </svg>
-  <div class="tags" style="margin-top:1.6dvh">
-    <span class="tag us">COMPLEMENTS EVERYTHING</span><span class="tag us">REPLACES NOTHING</span><span class="tag us">THE ONLY LAYER THAT NEVER MISSES A FIRE</span>
+  <div class="kick"><b>COLD CURTAIN</b> · 3/8 · DEPLOYMENT</div>
+  <h1>Three phases. Highest expected loss first.</h1>
+  <p class="sub">Priority = probability of recurrence × value at risk. All ten corridors have already burned at least once.</p>
+  <div class="depgrid">
+    <svg id="camapP" viewBox="0 0 500 590" aria-label="California map with corridors marked by deployment phase"></svg>
+    <div>
+      <table class="ph-table">
+        <tr><th></th><th>CORRIDORS</th><th>BUILD</th><th>HISTORICAL LOSS</th></tr>
+        <tr>
+          <td><span class="ph-badge p1">1</span></td>
+          <td>Palisades–Malibu · Altadena · Santa Rosa · Paradise</td>
+          <td class="num">$580M</td><td class="num">$59.5B</td>
+        </tr>
+        <tr>
+          <td><span class="ph-badge p2">2</span></td>
+          <td>Oakland–Berkeley Hills · San Diego · Ventura–Santa Barbara</td>
+          <td class="num">$350M</td><td class="num">$10.5B</td>
+        </tr>
+        <tr>
+          <td><span class="ph-badge p3">3</span></td>
+          <td>Redding · Tahoe · Boulder CO · West Maui HI</td>
+          <td class="num">$300M</td><td class="num">$8.0B</td>
+        </tr>
+      </table>
+      <div class="chiprow" style="margin-top:14px">
+        <div class="chip">Phase 1 alone: <b>$580M protecting $59.5B of demonstrated loss — 103:1</b></div>
+        <div class="chip">Full 20-corridor program: <b>$2.5B</b></div>
+      </div>
+    </div>
   </div>
-  <div class="whisper"><span>OFFENSE CHASES FIRES · DEFENSE PROTECTS DOLLARS</span><span>CLICK / ↓ · 0:26</span></div>
+  <div class="whisper"><span>RANKING METHODOLOGY & PER-CORRIDOR ESTIMATES IN THE TECHNICAL ANNEX</span><span>4/8 →</span></div>
 </section>
 
-<!-- 0:26 ENDURANCE -->
+<!-- 4 THE AGENT -->
 <section class="frame" id="f4">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:26 · LASTING INFRASTRUCTURE</div>
-  <h1>Gadgets expire.<br><span class="c">Infrastructure endures.</span></h1>
-  <svg class="endur" viewBox="0 0 1000 250" aria-label="Timeline 2026 to 2066: drone fleets must be re-bought roughly 13 times; the Cold Curtain is built once and still stands in 2066">
-    <!-- year axis -->
-    <line x1="60" y1="210" x2="960" y2="210" stroke="var(--hair)" stroke-width="2"/>
-    <text x="60" y="234" font-size="12" text-anchor="middle">2026</text>
-    <text x="285" y="234" font-size="12" text-anchor="middle">2036</text>
-    <text x="510" y="234" font-size="12" text-anchor="middle">2046</text>
-    <text x="735" y="234" font-size="12" text-anchor="middle">2056</text>
-    <text x="960" y="234" font-size="12" text-anchor="middle">2066</text>
-    <!-- drones track -->
-    <text x="60" y="52" font-size="13" fill="var(--ember)">DRONE / AIRCRAFT FLEETS</text>
-    <g fill="var(--ember-dim)" stroke="var(--ember)" stroke-width="1">
-      <rect x="60"  y="62" width="61" height="26" rx="4"/><rect x="129" y="62" width="61" height="26" rx="4"/>
-      <rect x="198" y="62" width="61" height="26" rx="4"/><rect x="267" y="62" width="61" height="26" rx="4"/>
-      <rect x="336" y="62" width="61" height="26" rx="4"/><rect x="405" y="62" width="61" height="26" rx="4"/>
-      <rect x="474" y="62" width="61" height="26" rx="4"/><rect x="543" y="62" width="61" height="26" rx="4"/>
-      <rect x="612" y="62" width="61" height="26" rx="4"/><rect x="681" y="62" width="61" height="26" rx="4"/>
-      <rect x="750" y="62" width="61" height="26" rx="4"/><rect x="819" y="62" width="61" height="26" rx="4"/>
-      <rect x="888" y="62" width="61" height="26" rx="4"/>
-    </g>
-    <text x="960" y="106" font-size="12.5" text-anchor="end" fill="var(--ember-2)">RE-BOUGHT & RETRAINED ×13</text>
-    <!-- curtain track -->
-    <text x="60" y="142" font-size="13" fill="var(--cryo)">COLD CURTAIN</text>
-    <rect x="60" y="152" width="900" height="26" rx="6" fill="rgba(74,157,240,.16)" stroke="var(--cryo)" stroke-width="2.5"/>
-    <text x="510" y="170" font-size="12.5" text-anchor="middle" fill="var(--frost)" font-weight="700">BUILT ONCE · STILL STANDING IN 2066</text>
-    <g stroke="var(--cryo)" stroke-width="1" opacity=".5">
-      <line x1="150" y1="178" x2="150" y2="186"/><line x1="240" y1="178" x2="240" y2="186"/><line x1="330" y1="178" x2="330" y2="186"/>
-      <line x1="420" y1="178" x2="420" y2="186"/><line x1="510" y1="178" x2="510" y2="186"/><line x1="600" y1="178" x2="600" y2="186"/>
-      <line x1="690" y1="178" x2="690" y2="186"/><line x1="780" y1="178" x2="780" y2="186"/><line x1="870" y1="178" x2="870" y2="186"/>
-    </g>
-    <text x="60" y="196" font-size="10.5">MAINTENANCE = MOW THE STRIP · INSPECT THE HEADS</text>
-  </svg>
-  <div class="tags" style="margin-top:1.4dvh">
-    <span class="tag them">THEIR TECH DEPRECIATES</span>
-    <span class="tag us">OUR PIPE APPRECIATES — IT RESTORES INSURABILITY</span>
-  </div>
-  <div class="whisper"><span>GAS MAINS & HYDRANTS ALREADY PROVE THE 40-YEAR LIFE</span><span>CLICK / ↓ · 0:34</span></div>
-</section>
-
-<!-- 0:34 CLEAN + FREE -->
-<section class="frame" id="f5">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:34 · THE AGENT</div>
-  <h1>Cold, not chemicals.<br><span class="c">And it's free.</span></h1>
-  <svg class="clean" viewBox="0 0 1000 270" aria-label="Left: retardant chemicals rained on neighborhoods, with litigation. Right: captured CO2 from data-center power, trucked to the wall, zero residue.">
-    <!-- left: chemicals -->
-    <text x="235" y="28" font-size="13" text-anchor="middle" fill="var(--ember)">TODAY: RETARDANT RAIN</text>
+  <div class="kick"><b>COLD CURTAIN</b> · 4/8 · THE AGENT</div>
+  <h1>A captured byproduct, <span class="c">not a chemical.</span></h1>
+  <p class="sub">The CO2 is already being produced — new gas-fired data-center campuses will vent millions of tonnes a year. Captured and staged, it becomes suppression capacity. <strong>To our knowledge, this use has never been proposed.</strong></p>
+  <svg class="clean" viewBox="0 0 1000 250" aria-label="Left: current practice, retardant chemicals applied over neighborhoods with litigation pending. Right: proposed, captured CO2 trucked to community storage, zero residue.">
+    <text x="235" y="28" font-size="13" text-anchor="middle" fill="var(--ember)">CURRENT PRACTICE</text>
     <g fill="var(--muted)"><polygon points="120,60 175,70 120,80 133,70"/></g>
     <g stroke="var(--ember)" stroke-width="3" opacity=".7">
       <line x1="180" y1="78" x2="172" y2="108"/><line x1="205" y1="82" x2="197" y2="112"/>
@@ -273,40 +237,117 @@
       <rect x="175" y="150" width="34" height="28" fill="var(--bg2)"/><polygon points="170,150 192,130 214,150"/>
       <rect x="235" y="156" width="30" height="22" fill="var(--bg2)"/><polygon points="230,156 250,138 270,156"/>
     </g>
-    <text x="235" y="212" font-size="11.5" text-anchor="middle" fill="var(--ember-2)">ON THE HOUSES · IN THE WATERSHED</text>
-    <text x="235" y="234" font-size="11.5" text-anchor="middle" fill="var(--ember-2)">HEAVY-METAL & PFAS LITIGATION PENDING</text>
-    <!-- divider -->
-    <line x1="500" y1="20" x2="500" y2="250" stroke="var(--hair)" stroke-width="2"/>
-    <!-- right: our loop -->
-    <text x="765" y="28" font-size="13" text-anchor="middle" fill="var(--cryo)">OURS: A CLOSED COLD LOOP</text>
+    <text x="235" y="208" font-size="11.5" text-anchor="middle" fill="var(--ember-2)">RETARDANT ON HOMES & WATERSHEDS</text>
+    <text x="235" y="228" font-size="11.5" text-anchor="middle" fill="var(--ember-2)">HEAVY-METAL & PFAS LITIGATION PENDING</text>
+    <line x1="500" y1="20" x2="500" y2="230" stroke="var(--hair)" stroke-width="2"/>
+    <text x="765" y="28" font-size="13" text-anchor="middle" fill="var(--cryo)">PROPOSED</text>
     <rect x="545" y="70" width="80" height="52" rx="7" fill="none" stroke="var(--muted)" stroke-width="2"/>
     <rect x="558" y="82" width="16" height="28" fill="var(--hair)"/><rect x="582" y="90" width="16" height="20" fill="var(--hair)"/>
-    <text x="585" y="146" font-size="11" text-anchor="middle">DATA-CENTER POWER</text>
-    <text x="585" y="162" font-size="11" text-anchor="middle" fill="var(--frost)">CAPTURED CO2 · 1.5 MT/YR</text>
+    <text x="585" y="142" font-size="11" text-anchor="middle">CAPTURE AT SOURCE</text>
+    <text x="585" y="158" font-size="11" text-anchor="middle" fill="var(--frost)">≈1.5 MT/YR PER CAMPUS</text>
     <g stroke="var(--muted)" stroke-width="2.5" fill="var(--muted)">
       <line x1="630" y1="96" x2="672" y2="96"/><polygon points="682,96 668,89 668,103"/>
     </g>
     <rect x="690" y="80" width="66" height="30" rx="12" fill="rgba(74,157,240,.2)" stroke="var(--cryo)" stroke-width="2"/>
     <circle cx="705" cy="115" r="7" fill="var(--muted)"/><circle cx="740" cy="115" r="7" fill="var(--muted)"/>
-    <text x="723" y="146" font-size="11" text-anchor="middle">TRUCKS — NOT PIPELINES</text>
+    <text x="723" y="142" font-size="11" text-anchor="middle">TRUCK & RAIL</text>
     <g stroke="var(--muted)" stroke-width="2.5" fill="var(--muted)">
       <line x1="765" y1="96" x2="805" y2="96"/><polygon points="815,96 801,89 801,103"/>
     </g>
     <line x1="835" y1="60" x2="835" y2="130" stroke="var(--cryo)" stroke-width="7" stroke-linecap="round"/>
     <g fill="var(--frost)"><circle cx="835" cy="72" r="4"/><circle cx="835" cy="95" r="4"/><circle cx="835" cy="118" r="4"/></g>
-    <text x="880" y="90" font-size="11" fill="var(--frost)" font-weight="700">THE WALL</text>
-    <text x="765" y="212" font-size="11.5" text-anchor="middle" fill="var(--frost)">ZERO RESIDUE — SUBLIMES BACK TO SKY</text>
-    <text x="765" y="234" font-size="11.5" text-anchor="middle" fill="var(--frost)">USFS-LISTED BIO-FOAM OPTION · NO PFAS, EVER</text>
+    <text x="885" y="90" font-size="11" fill="var(--frost)" font-weight="700">STAGED RESERVE</text>
+    <text x="765" y="208" font-size="11.5" text-anchor="middle" fill="var(--frost)">ZERO RESIDUE — RETURNS TO ATMOSPHERE AS IT WOULD HAVE ANYWAY</text>
+    <text x="765" y="228" font-size="11.5" text-anchor="middle" fill="var(--frost)">DELAYED, AND PUT TO WORK ON THE WAY</text>
   </svg>
-  <div class="whisper"><span>PERMIT CONDITION: "YOU BUILD THE CAMPUS — YOU SUPPLY THE RESERVE"</span><span>CLICK / ↓ · 0:43</span></div>
+  <div class="whisper"><span>SUPPLY MECHANISM: PERMIT CONDITION ON NEW CAMPUS GENERATION · TRUCKED, NOT PIPED</span><span>5/8 →</span></div>
 </section>
 
-<!-- 0:43 ROI -->
+<!-- 5 COMPATIBILITY -->
+<section class="frame" id="f5">
+  <div class="kick"><b>COLD CURTAIN</b> · 5/8 · COMPATIBILITY</div>
+  <h1>Additive to every existing program.</h1>
+  <p class="sub">Detection and aerial response continue unchanged. This proposal fills the one layer no current program occupies: <strong>a fixed line at the community edge.</strong></p>
+  <svg class="lay" viewBox="0 0 1000 290" aria-label="Three defense layers: detection exists, aerial attack exists, the fixed ground line is the missing layer this proposal fills">
+    <rect x="20" y="18" width="960" height="62" rx="9" fill="none" stroke="var(--hair)" stroke-width="2"/>
+    <g stroke="var(--muted)" stroke-width="2" fill="none">
+      <rect x="52" y="36" width="22" height="14"/>
+      <line x1="42" y1="43" x2="52" y2="43"/><line x1="74" y1="43" x2="84" y2="43"/>
+      <line x1="38" y1="36" x2="42" y2="50"/><line x1="88" y1="36" x2="84" y2="50"/>
+    </g>
+    <text x="115" y="43" font-size="14" fill="var(--ink-2)" font-weight="700">DETECTION</text>
+    <text x="115" y="62" font-size="12">satellites · camera networks · AI</text>
+    <text x="962" y="52" font-size="12" text-anchor="end">EXISTING — UNCHANGED</text>
+    <rect x="20" y="96" width="960" height="62" rx="9" fill="none" stroke="var(--hair)" stroke-width="2"/>
+    <g fill="var(--muted)"><polygon points="46,128 88,136 46,144 56,136"/></g>
+    <g stroke="var(--muted)" stroke-width="2" fill="none">
+      <circle cx="105" cy="136" r="6"/>
+      <line x1="95" y1="126" x2="115" y2="146"/><line x1="115" y1="126" x2="95" y2="146"/>
+    </g>
+    <text x="140" y="121" font-size="14" fill="var(--ink-2)" font-weight="700">AERIAL RESPONSE</text>
+    <text x="140" y="140" font-size="12">aircraft · autonomous systems · ground crews</text>
+    <text x="962" y="130" font-size="12" text-anchor="end">EXISTING — UNCHANGED</text>
+    <rect x="20" y="174" width="960" height="86" rx="9" fill="rgba(74,157,240,.09)" stroke="var(--cryo)" stroke-width="2.5"/>
+    <line x1="52" y1="192" x2="52" y2="244" stroke="var(--cryo)" stroke-width="7" stroke-linecap="round"/>
+    <g fill="var(--frost)">
+      <circle cx="52" cy="200" r="4"/><circle cx="52" cy="218" r="4"/><circle cx="52" cy="236" r="4"/>
+    </g>
+    <g stroke="var(--ink-2)" stroke-width="2" fill="none">
+      <rect x="80" y="216" width="26" height="22" fill="var(--bg)"/><polygon points="76,216 93,200 110,216"/>
+      <rect x="120" y="220" width="22" height="18" fill="var(--bg)"/><polygon points="116,220 131,206 146,220"/>
+    </g>
+    <text x="180" y="207" font-size="15" fill="var(--frost)" font-weight="700">FIXED COMMUNITY LINE</text>
+    <text x="180" y="228" font-size="12.5" fill="var(--ink-2)">operates when aircraft are grounded, the grid is down, and crews are overwhelmed</text>
+    <text x="962" y="212" font-size="13" text-anchor="end" fill="var(--cryo)" font-weight="700">THE GAP</text>
+    <text x="962" y="232" font-size="12" text-anchor="end" fill="var(--ink-2)">this proposal</text>
+  </svg>
+  <div class="whisper"><span>HIGH-WIND EVENTS GROUND AIRCRAFT — PRECISELY WHEN LOSSES OCCUR</span><span>6/8 →</span></div>
+</section>
+
+<!-- 6 SERVICE LIFE -->
 <section class="frame" id="f6">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:43 · 40-YEAR ROI</div>
-  <h1>The cost line <span class="c">disappears.</span></h1>
-  <svg class="roi" viewBox="0 0 1000 330" aria-label="Cumulative chart over 40 years: avoided losses climb to roughly 700 billion dollars while total system cost stays under 15 billion — the cost line hugs zero">
-    <!-- grid -->
+  <div class="kick"><b>COLD CURTAIN</b> · 6/8 · SERVICE LIFE</div>
+  <h1>A 40-year asset, not a technology cycle.</h1>
+  <p class="sub">Buried pressure pipe is the same asset class as gas mains and water systems — <strong>proven multi-decade service life.</strong> Aerial technology refreshes on a 2–3 year cycle.</p>
+  <svg class="endur" viewBox="0 0 1000 250" aria-label="Timeline 2026 to 2066: aerial fleets require roughly 13 replacement cycles; the fixed system is built once and remains in service">
+    <line x1="60" y1="210" x2="960" y2="210" stroke="var(--hair)" stroke-width="2"/>
+    <text x="60" y="234" font-size="12" text-anchor="middle">2026</text>
+    <text x="285" y="234" font-size="12" text-anchor="middle">2036</text>
+    <text x="510" y="234" font-size="12" text-anchor="middle">2046</text>
+    <text x="735" y="234" font-size="12" text-anchor="middle">2056</text>
+    <text x="960" y="234" font-size="12" text-anchor="middle">2066</text>
+    <text x="60" y="52" font-size="13" fill="var(--ember)">AERIAL FLEET LIFECYCLE</text>
+    <g fill="var(--ember-dim)" stroke="var(--ember)" stroke-width="1">
+      <rect x="60"  y="62" width="61" height="26" rx="4"/><rect x="129" y="62" width="61" height="26" rx="4"/>
+      <rect x="198" y="62" width="61" height="26" rx="4"/><rect x="267" y="62" width="61" height="26" rx="4"/>
+      <rect x="336" y="62" width="61" height="26" rx="4"/><rect x="405" y="62" width="61" height="26" rx="4"/>
+      <rect x="474" y="62" width="61" height="26" rx="4"/><rect x="543" y="62" width="61" height="26" rx="4"/>
+      <rect x="612" y="62" width="61" height="26" rx="4"/><rect x="681" y="62" width="61" height="26" rx="4"/>
+      <rect x="750" y="62" width="61" height="26" rx="4"/><rect x="819" y="62" width="61" height="26" rx="4"/>
+      <rect x="888" y="62" width="61" height="26" rx="4"/>
+    </g>
+    <text x="960" y="106" font-size="12.5" text-anchor="end" fill="var(--ember-2)">~13 PROCUREMENT CYCLES</text>
+    <text x="60" y="142" font-size="13" fill="var(--cryo)">COLD CURTAIN</text>
+    <rect x="60" y="152" width="900" height="26" rx="6" fill="rgba(74,157,240,.16)" stroke="var(--cryo)" stroke-width="2.5"/>
+    <text x="510" y="170" font-size="12.5" text-anchor="middle" fill="var(--frost)" font-weight="700">SINGLE BUILD · IN SERVICE THROUGH 2066</text>
+    <g stroke="var(--cryo)" stroke-width="1" opacity=".5">
+      <line x1="150" y1="178" x2="150" y2="186"/><line x1="240" y1="178" x2="240" y2="186"/><line x1="330" y1="178" x2="330" y2="186"/>
+      <line x1="420" y1="178" x2="420" y2="186"/><line x1="510" y1="178" x2="510" y2="186"/><line x1="600" y1="178" x2="600" y2="186"/>
+      <line x1="690" y1="178" x2="690" y2="186"/><line x1="780" y1="178" x2="780" y2="186"/><line x1="870" y1="178" x2="870" y2="186"/>
+    </g>
+    <text x="60" y="196" font-size="10.5">O&M: VEGETATION MANAGEMENT · ANNUAL HEAD INSPECTION · ≈$0.5–1M/KM/YR</text>
+  </svg>
+  <div class="chiprow" style="margin-top:1.4dvh">
+    <div class="chip">Asset value <b>persists</b> — it restores and holds insurability for the corridor it protects</div>
+  </div>
+  <div class="whisper"><span>COMPARABLE ASSET LIVES: GAS DISTRIBUTION MAINS 50+ YRS · HYDRANT SYSTEMS 60+ YRS</span><span>7/8 →</span></div>
+</section>
+
+<!-- 7 ECONOMICS -->
+<section class="frame" id="f7">
+  <div class="kick"><b>COLD CURTAIN</b> · 7/8 · ECONOMICS</div>
+  <h1>Projected payback: inside year one.</h1>
+  <svg class="roi" viewBox="0 0 1000 330" aria-label="Cumulative 40-year chart: avoided losses reach approximately 700 billion dollars against a total system cost of 14.5 billion">
     <g stroke="var(--hair)" stroke-width="1">
       <line x1="70" y1="30"  x2="950" y2="30"/><line x1="70" y1="105" x2="950" y2="105"/>
       <line x1="70" y1="180" x2="950" y2="180"/><line x1="70" y1="255" x2="950" y2="255"/>
@@ -315,61 +356,57 @@
     <text x="62" y="109" font-size="11" text-anchor="end">$470B</text>
     <text x="62" y="184" font-size="11" text-anchor="end">$230B</text>
     <text x="62" y="259" font-size="11" text-anchor="end">$0</text>
-    <!-- avoided area -->
     <polygon points="70,255 950,30 950,255" fill="rgba(74,157,240,.16)"/>
     <line x1="70" y1="255" x2="950" y2="30" stroke="var(--cryo)" stroke-width="3.5"/>
     <circle cx="950" cy="30" r="6" fill="var(--cryo)"/>
-    <text x="944" y="18" font-size="13.5" text-anchor="end" fill="var(--frost)" font-weight="700">≈$700B AVOIDED (BASE CASE)</text>
-    <!-- cost line -->
+    <text x="944" y="18" font-size="13.5" text-anchor="end" fill="var(--frost)" font-weight="700">CUMULATIVE AVOIDED LOSSES ≈ $700B (BASE CASE)</text>
     <line x1="70" y1="252" x2="950" y2="248" stroke="var(--ember)" stroke-width="3"/>
     <circle cx="950" cy="248" r="5" fill="var(--ember)"/>
-    <text x="944" y="240" font-size="13" text-anchor="end" fill="var(--ember-2)" font-weight="700">$14.5B TOTAL COST — BUILD + 40 YRS O&M</text>
-    <!-- breakeven -->
+    <text x="944" y="238" font-size="13" text-anchor="end" fill="var(--ember-2)" font-weight="700">TOTAL 40-YEAR COST: $14.5B (BUILD + O&M)</text>
     <line x1="86" y1="255" x2="86" y2="285" stroke="var(--frost)" stroke-width="1.5"/>
-    <text x="94" y="288" font-size="12" fill="var(--frost)" font-weight="700">BREAK-EVEN: INSIDE YEAR ONE</text>
-    <!-- x axis -->
+    <text x="94" y="288" font-size="12" fill="var(--frost)" font-weight="700">PROJECTED BREAK-EVEN: YEAR ONE</text>
     <line x1="70" y1="255" x2="950" y2="255" stroke="var(--muted)" stroke-width="1.5"/>
     <text x="70"  y="278" font-size="11" text-anchor="middle">YR 0</text>
     <text x="290" y="278" font-size="11" text-anchor="middle">YR 10</text>
     <text x="510" y="278" font-size="11" text-anchor="middle">YR 20</text>
     <text x="730" y="278" font-size="11" text-anchor="middle">YR 30</text>
     <text x="950" y="278" font-size="11" text-anchor="middle">YR 40</text>
-    <text x="70" y="316" font-size="10.5">BASE CASE: 60% EFFECTIVE × $45B/YR CORRIDOR LOSSES × 65% SHARE ≈ $18B/YR AVOIDED · COST = $2.5B BUILD + $0.3B/YR O&M · NO LOSS ESCALATION ASSUMED</text>
+    <text x="70" y="316" font-size="10.5">BASE CASE: 60% EFFECTIVENESS × $45B/YR CORRIDOR LOSSES × 65% CORRIDOR SHARE ≈ $18B/YR AVOIDED · COST = $2.5B BUILD + $0.3B/YR O&M · NO LOSS ESCALATION ASSUMED</text>
   </svg>
-  <div class="statrow">
-    <div class="chip">Lifetime return ≈ <b>50 : 1</b> (portfolio) · <b>125 : 1</b> (best corridor)</div>
-    <div class="chip">≈ <b>$150/month per protected home</b> — less than the surcharge it removes</div>
-    <div class="chip">Suppression delivered at <b>~$1,400/acre-defended-year</b> vs $2M+/acre rebuilt</div>
+  <div class="chiprow" style="margin-top:1.4dvh">
+    <div class="chip">Lifetime benefit-cost ≈ <b>50:1</b> portfolio · <b>103:1</b> Phase 1</div>
+    <div class="chip">≈ <b>$150/month per protected home</b> over the asset life</div>
+    <div class="chip">Loss escalation is <b>excluded</b> — actuals would run higher</div>
   </div>
-  <div class="whisper"><span>EVERY YEAR OF LOSS ESCALATION MAKES THESE NUMBERS CONSERVATIVE</span><span>CLICK / ↓ · 0:52</span></div>
+  <div class="whisper"><span>ASSUMPTIONS STATED ON CHART · SENSITIVITY ANALYSIS IN TECHNICAL ANNEX</span><span>8/8 →</span></div>
 </section>
 
-<!-- 0:52 CLOSE -->
-<section class="frame" id="f7">
-  <div class="kick"><b>COLD CURTAIN</b> · 0:52 · THE CLOSE</div>
-  <h1>One burn <span class="e">decides it.</span></h1>
-  <svg class="dsvg" viewBox="0 0 1000 250" aria-label="Decision tree: a 30 million dollar pilot burn leads either to building all 20 corridors, or to having spent a rounding error to find out">
+<!-- 8 DECISION -->
+<section class="frame" id="f8">
+  <div class="kick"><b>COLD CURTAIN</b> · 8/8 · THE DECISION</div>
+  <h1>Requested: <span class="c">$30M</span> for a controlled validation burn.</h1>
+  <svg class="dsvg" viewBox="0 0 1000 250" aria-label="Decision structure: a 30 million dollar validation burn either proves the system and unlocks the phased program, or caps the downside at the pilot cost">
     <rect x="10" y="85" width="300" height="80" rx="10" fill="rgba(255,106,61,.10)" stroke="var(--ember)" stroke-width="2"/>
-    <text x="160" y="120" font-size="17" text-anchor="middle" fill="var(--ink)" font-weight="700">$30M PILOT</text>
-    <text x="160" y="145" font-size="12" text-anchor="middle" fill="var(--ink-2)">prescribed burn · CAL FIRE + insurer</text>
+    <text x="160" y="120" font-size="17" text-anchor="middle" fill="var(--ink)" font-weight="700">$30M VALIDATION</text>
+    <text x="160" y="145" font-size="12" text-anchor="middle" fill="var(--ink-2)">prescribed burn · CAL FIRE · insurer partner</text>
     <path d="M 310 110 C 350 105, 355 70, 405 62" stroke="var(--cryo)" stroke-width="3" fill="none"/>
     <path d="M 310 140 C 350 145, 355 185, 405 193" stroke="var(--muted)" stroke-width="2" fill="none" stroke-dasharray="6 6"/>
     <rect x="410" y="20" width="560" height="85" rx="10" fill="rgba(74,157,240,.10)" stroke="var(--cryo)" stroke-width="2.5"/>
-    <text x="432" y="52" font-size="16" fill="var(--frost)" font-weight="700">LINE HOLDS →</text>
-    <text x="432" y="80" font-size="14.5" fill="var(--ink)">20 corridors · $2.5B · insurability restored</text>
+    <text x="432" y="52" font-size="16" fill="var(--frost)" font-weight="700">SYSTEM VALIDATES →</text>
+    <text x="432" y="80" font-size="14.5" fill="var(--ink)">phased build proceeds · $2.5B · insurability restored</text>
     <rect x="410" y="155" width="560" height="75" rx="10" fill="none" stroke="var(--hair)" stroke-width="2"/>
-    <text x="432" y="185" font-size="15" fill="var(--muted)" font-weight="700">LINE FAILS →</text>
-    <text x="432" y="210" font-size="13.5" fill="var(--muted)">we spent 0.01% of one fire season finding out</text>
+    <text x="432" y="185" font-size="15" fill="var(--muted)" font-weight="700">SYSTEM FALLS SHORT →</text>
+    <text x="432" y="210" font-size="13.5" fill="var(--muted)">downside capped at $30M — 0.01% of one severe season</text>
   </svg>
-  <p class="kicker">The fires keep their schedule.<br><strong>It's time we kept ours.</strong></p>
+  <p class="kicker">The exposure is measured in trillions and in lives. The validation cost is a rounding error against either. <strong>Every season of delay is another season at full exposure.</strong></p>
   <div class="closer-mark">COLD CURTAIN</div>
-  <div class="whisper"><span>DWG CC-060 · REV 0.3 · 2026-07-04</span><span>1:00 — END</span></div>
+  <div class="whisper"><span>DWG CC-060 · REV 0.4 · 2026-07-04 · FIGURES ARE ENGINEERING ESTIMATES PENDING VALIDATION</span><span>END</span></div>
 </section>
 
 <script>
-  // F1 map — real lat/lon, pulsing corridor markers
+  // Phased deployment map — real lat/lon
   (function () {
-    var svg = document.getElementById('camap60');
+    var svg = document.getElementById('camapP');
     var NS = 'http://www.w3.org/2000/svg';
     var CA = [
       [-124.21, 42.00], [-120.00, 42.00], [-120.00, 39.00], [-114.63, 35.00],
@@ -386,36 +423,34 @@
     poly.setAttribute('points', CA.map(function (c) { return px(c[0]).toFixed(1) + ',' + py(c[1]).toFixed(1); }).join(' '));
     poly.setAttribute('class', 'state');
     svg.appendChild(poly);
+    // phase 1 solid ember, phase 2 dim fill, phase 3 outline
     var M = [
-      { la: 39.76, lo: -121.62, r: 12, lab: 'PARADISE', side: 'r' },
-      { la: 38.44, lo: -122.71, r: 12, lab: 'SANTA ROSA', side: 'r' },
-      { la: 37.86, lo: -122.23, r: 8 },
-      { la: 40.60, lo: -122.40, r: 6 },
-      { la: 38.85, lo: -120.05, r: 5 },
-      { la: 34.38, lo: -119.48, r: 7 },
-      { la: 34.03, lo: -118.75, r: 17, lab: 'LOS ANGELES', side: 'b' },
-      { la: 34.22, lo: -118.05, r: 11 },
-      { la: 32.95, lo: -116.90, r: 8 }
+      { la: 34.03, lo: -118.75, r: 15, ph: 1 },  // Palisades-Malibu
+      { la: 34.22, lo: -118.05, r: 11, ph: 1 },  // Altadena
+      { la: 38.44, lo: -122.71, r: 11, ph: 1 },  // Santa Rosa
+      { la: 39.76, lo: -121.62, r: 11, ph: 1 },  // Paradise
+      { la: 37.86, lo: -122.23, r: 9,  ph: 2 },  // Oakland Hills
+      { la: 32.95, lo: -116.90, r: 9,  ph: 2 },  // San Diego
+      { la: 34.38, lo: -119.48, r: 8,  ph: 2 },  // Ventura-SB
+      { la: 40.60, lo: -122.40, r: 7,  ph: 3 },  // Redding
+      { la: 38.85, lo: -120.05, r: 7,  ph: 3 }   // Tahoe
     ];
-    M.forEach(function (m, i) {
+    M.forEach(function (m) {
       var cx = px(m.lo), cy = py(m.la);
-      var halo = document.createElementNS(NS, 'circle');
-      halo.setAttribute('cx', cx); halo.setAttribute('cy', cy); halo.setAttribute('r', m.r + 4);
-      halo.setAttribute('class', 'halo');
-      halo.style.animationDelay = (i * 0.28) + 's';
-      svg.appendChild(halo);
       var c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', m.r);
-      c.setAttribute('class', 'mk');
+      if (m.ph === 1) { c.setAttribute('fill', 'var(--ember)'); c.setAttribute('fill-opacity', '.85'); c.setAttribute('stroke', 'var(--ember)'); }
+      else if (m.ph === 2) { c.setAttribute('fill', 'var(--ember-dim)'); c.setAttribute('stroke', 'var(--ember)'); }
+      else { c.setAttribute('fill', 'none'); c.setAttribute('stroke', 'var(--ember)'); }
+      c.setAttribute('stroke-width', '2');
       svg.appendChild(c);
-      if (m.lab) {
-        var t = document.createElementNS(NS, 'text');
-        t.setAttribute('class', 'mklab60');
-        if (m.side === 'b') { t.setAttribute('x', cx); t.setAttribute('y', cy + m.r + 18); t.setAttribute('text-anchor', 'middle'); }
-        else { t.setAttribute('x', cx + m.r + 6); t.setAttribute('y', cy + 4); }
-        t.textContent = m.lab;
-        svg.appendChild(t);
-      }
+      var t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', cx); t.setAttribute('y', cy + 4.5);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('font-size', '13'); t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', m.ph === 1 ? '#140602' : 'var(--ember-2)');
+      t.textContent = m.ph;
+      svg.appendChild(t);
     });
   })();
 
