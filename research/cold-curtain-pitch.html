@@ -100,6 +100,21 @@
   .thesis { max-width: 60ch; font-size: 19px; color: var(--ink-2); margin: 0 0 30px; }
   .thesis strong { color: var(--ink); }
 
+  .pitchbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 12px; margin-top: 26px; }
+  .pb {
+    border-left: 3px solid var(--cryo); background: var(--surface);
+    border-radius: 0 6px 6px 0; padding: 12px 15px;
+  }
+  .pb.fire { border-left-color: var(--ember); }
+  .pb .t {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .12em; color: var(--muted); font-weight: 700; margin-bottom: 5px;
+  }
+  .pb .s { font-size: 16.5px; font-weight: 700; line-height: 1.3; letter-spacing: -0.005em; }
+  .pblabel {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; letter-spacing: .14em; color: var(--muted); margin: 30px 0 0;
+  }
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
   .tile {
     background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px;
@@ -293,7 +308,15 @@
       <span>2026-07-04 · INTERNAL — NUMBERS ARE ENGINEERING ESTIMATES</span>
     </div>
     <h1>A fixed wall of <span class="cold">cold</span><br>where the fires keep coming.</h1>
-    <p class="thesis"><strong>Cold Curtain</strong> is permanent wildfire-defense infrastructure: a buried, sectionalized liquid-CO2 distribution grid with automated discharge nozzles, installed in depth across the fire corridors that hit the same high-value communities year after year. Built once, standing ready for 40+ years, fed by captured CO2 the power industry already produces.</p>
+    <p class="thesis"><strong>Cold Curtain</strong>: buried liquid-CO2 lines with automated nozzles, built once across the corridors that burn America's most valuable neighborhoods on repeat — standing ready for 40 years, fed free by captured CO2.</p>
+    <p class="pblabel">THE 10-SECOND VERSION</p>
+    <div class="pitchbar">
+      <div class="pb fire"><div class="t">THE PROBLEM</div><div class="s">LA burned $250B+ in one month. The same edges burn every few years.</div></div>
+      <div class="pb"><div class="t">THE FIX</div><div class="s">A permanent cold wall — automated CO2 fire lines — where the fires repeat.</div></div>
+      <div class="pb"><div class="t">THE MATH</div><div class="s">All 20 walls: ~$2.5B. That's 1% of that one LA event.</div></div>
+      <div class="pb"><div class="t">THE ASK</div><div class="s">A $30M pilot on a prescribed burn, with an insurer at the table.</div></div>
+    </div>
+    <p class="pblabel" style="margin-top:26px">KEY NUMBERS</p>
     <div class="tiles">
       <div class="tile"><div class="v fire">$250B+</div><div class="k">One event — LA, Jan 2025</div></div>
       <div class="tile"><div class="v fire">$5–36T</div><div class="k">40-yr projected US losses</div></div>
@@ -306,8 +329,8 @@
 <section id="threat">
   <div class="wrap">
     <p class="eyebrow"><b>01</b> · THE THREAT</p>
-    <h2>The losses concentrate where value meets recurrent fire.</h2>
-    <p class="lede">Eighteen of the twenty costliest US wildfires happened in the last 25 years, and the curve is bending the wrong way. The dollars are not spread across the wilderness — they detonate at a short list of wildland–urban edges that burn again and again.</p>
+    <h2>One month in Los Angeles: $250 billion.</h2>
+    <p class="lede">18 of the 20 costliest US wildfires hit in the last 25 years — and not in the wilderness. They detonate at a short list of edges that burn on repeat.</p>
     <div class="panel">
       <div class="chart" role="img" aria-label="Bar chart of insured losses of the costliest US wildfires, in billions of dollars">
         <div class="crow" tabindex="0" title="Palisades + Eaton, Jan 2025 — insured $28–35B (Verisk); total economic loss $250–275B (AccuWeather); 18,000+ structures">
@@ -343,8 +366,8 @@
 <section id="where">
   <div class="wrap">
     <p class="eyebrow"><b>02</b> · WHERE IT GETS BUILT</p>
-    <h2>The target corridors are already known — they burn on repeat.</h2>
-    <p class="lede">Phase-1 candidates: the wildland–urban edges where recurrence and value concentration meet. Marker size = historical insured losses. Geography is real (plotted from coordinates); the ranked list with terrain overlays is the next work product. <strong>Hover or tap a corridor.</strong></p>
+    <h2>Nine corridors hold the bulk of it. We know exactly where to build.</h2>
+    <p class="lede">Marker size = historical insured losses. <strong>Hover or tap a corridor.</strong></p>
     <div class="panel">
       <div class="maprow">
         <svg id="camap" viewBox="0 0 500 590" aria-label="Map of California with Phase-1 target fire corridors, marker size proportional to historical insured losses"></svg>
@@ -373,14 +396,32 @@
         <div class="dd">Nine California corridors carry the bulk of US WUI dollar losses. Selection criteria for the final ranked list: loss recurrence × insured value density × terrain/wind alignment × constructability of the standoff band.</div>
       </div>
     </div>
+
+    <div class="panel" style="margin-top:14px">
+      <p class="eyebrow" style="margin-bottom:12px"><b>BUILD ORDER</b> · RANKED BY PROTECTION RATIO (HISTORICAL LOSS ÷ BUILD ESTIMATE)</p>
+      <table class="spec">
+        <tr><th>#</th><th>Corridor</th><th>Build est.</th><th>Historical insured loss</th><th>Protects : costs</th></tr>
+        <tr><td class="num">1</td><td>Palisades – Malibu, CA</td><td class="num">$200M</td><td class="num">$25B</td><td class="num"><strong>125 : 1</strong></td></tr>
+        <tr><td class="num">2</td><td>Paradise / Sierra foothills, CA</td><td class="num">$110M</td><td class="num">$12.5B</td><td class="num"><strong>114 : 1</strong></td></tr>
+        <tr><td class="num">3</td><td>Santa Rosa / Sonoma–Napa, CA</td><td class="num">$150M</td><td class="num">$13B</td><td class="num"><strong>87 : 1</strong></td></tr>
+        <tr><td class="num">4</td><td>Altadena / San Gabriel front, CA</td><td class="num">$120M</td><td class="num">$9B</td><td class="num"><strong>75 : 1</strong></td></tr>
+        <tr><td class="num">5</td><td>Oakland–Berkeley Hills, CA</td><td class="num">$90M</td><td class="num">$4B</td><td class="num"><strong>44 : 1</strong></td></tr>
+        <tr><td class="num">6</td><td>San Diego backcountry, CA</td><td class="num">$150M</td><td class="num">$4B</td><td class="num"><strong>27 : 1</strong></td></tr>
+        <tr><td class="num">7</td><td>Boulder corridor, CO</td><td class="num">$75M</td><td class="num">$2B</td><td class="num"><strong>27 : 1</strong></td></tr>
+        <tr><td class="num">8</td><td>Ventura / Santa Barbara, CA</td><td class="num">$110M</td><td class="num">$2.5B</td><td class="num"><strong>23 : 1</strong></td></tr>
+        <tr><td class="num">9</td><td>Redding / Carr corridor, CA</td><td class="num">$75M</td><td class="num">$1.6B</td><td class="num"><strong>21 : 1</strong></td></tr>
+        <tr><td class="num">10</td><td>Tahoe / Caldor corridor, CA</td><td class="num">$75M</td><td class="num">$1.2B</td><td class="num"><strong>16 : 1</strong></td></tr>
+      </table>
+      <p class="cap">Build estimates: defended length × $7M/km midpoint + interior spokes; engineering-estimate class. Ratios use <em>insured</em> historical losses only — total economic ratios run 3–8× higher. Every row pays for itself by preventing a fraction of one repeat event.</p>
+    </div>
   </div>
 </section>
 
 <section id="concept">
   <div class="wrap">
     <p class="eyebrow"><b>03</b> · THE CONCEPT</p>
-    <h2>Defense in depth: three suppression lines behind a treated approach.</h2>
-    <p class="lede">The band is not a fence — it is a <strong>kill zone for the flame front</strong>. A maintained low-fuel approach strip forces any arriving crown fire down to a ground fire; three independent nozzle lines then stop it with flashing liquid CO2 (−109&nbsp;°F snow + gas) delivered straight into the fuel bed. The ~2-mile standoff behind the band is what defeats ember rain: distance collapses ember arrival ~100×, and interior spokes mop up strays. <strong>Hover or tap any zone.</strong></p>
+    <h2>Three cold lines behind a mowed strip. Two miles of distance.</h2>
+    <p class="lede">The strip forces any fire down to the ground. The nozzles kill ground fire at −109 °F. The two miles starve the ember rain. <strong>Hover or tap any zone.</strong></p>
     <div class="panel">
       <svg viewBox="0 0 1000 250" width="100%" style="min-width:720px" aria-label="Cross-section of the Cold Curtain defense band from fire side to community">
         <!-- ground -->
@@ -471,8 +512,8 @@
 <section id="system">
   <div class="wrap">
     <p class="eyebrow"><b>04</b> · THE SYSTEM</p>
-    <h2>Spine → hubs → spokes. Aimed by valves, not by people.</h2>
-    <p class="lede">Plan view of one defended community. The storage farm and trunk spine sit on the wildland side; sectional hubs feed the three lines and the interior spokes. Everything runs on the CO2's own pressure — <strong>no pumps, no grid power</strong> — because the grid is down in every one of these events.</p>
+    <h2>No pumps. No grid power. Nobody in harm's way.</h2>
+    <p class="lede">The CO2's own pressure does the work, valves do the aiming, and detection is solar-powered — because the grid is down in every one of these events.</p>
     <div class="panel">
       <svg viewBox="0 0 900 470" width="100%" style="min-width:680px" aria-label="Plan-view schematic of the Cold Curtain system around a community">
         <!-- wind arrow -->
@@ -562,8 +603,8 @@
 <section id="supply">
   <div class="wrap">
     <p class="eyebrow"><b>05</b> · THE SUPPLY</p>
-    <h2>The CO2 is free — the data-center buildout makes it.</h2>
-    <p class="lede">New gas-fired data-center campuses are being permitted over community objections everywhere. Condition those permits: <strong>capture your stack CO2 and deliver it to the regional fire-defense reserve.</strong> The quantities are trivially in the campuses' favor — and delivery is by ordinary cryo truck and rail, which sidesteps California's CO2-pipeline moratorium entirely.</p>
+    <h2>The ammunition is free. Data centers make it anyway.</h2>
+    <p class="lede">Permit condition on new gas-fired campuses: capture your CO2, deliver it to the fire-defense reserve. Trucks, not pipelines — no moratorium exposure.</p>
     <div class="panel">
       <svg viewBox="0 0 960 190" width="100%" style="min-width:700px" aria-label="Supply chain: data center campus to capture to truck to storage farm to curtain">
         <g text-anchor="middle">
@@ -642,8 +683,8 @@
 <section id="return">
   <div class="wrap">
     <p class="eyebrow"><b>07</b> · THE RETURN</p>
-    <h2>Move the sliders. The conclusion doesn't move.</h2>
-    <p class="lede">The system does not need to be perfect — at these loss magnitudes the difference between 50% and 90% effective is which multiple of a trillion gets saved. Assumptions are yours to set:</p>
+    <h2>Payback in months. Move the sliders — it stays true.</h2>
+    <p class="lede">It doesn't need to be perfect: at these magnitudes, 50% vs 90% effective is just which multiple of a trillion gets saved.</p>
     <div class="panel">
       <div class="calc">
         <div class="cin">
