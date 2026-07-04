@@ -321,6 +321,43 @@ discipline, pressure/nozzle engineering, CO2+water hybrid option.
 Noted but not adopted: aquifer depletion as root driver (speculative,
 not needed for the case).
 
+### 9b. Second idea-index review (rev 1)
+
+Adopted:
+1. **Dual-redundant head activation** (design requirement): every head
+   carries an autonomous thermal trigger (fusible-link class — sprinkler
+   heritage) AND remote addressable control at head/main/sub-main level;
+   neither is "the backup." System discharges correctly even with the
+   controller dead or comms cut. Strengthens the no-grid resilience story.
+2. **Emitters-pay funding model** (pitch frame): primary payer = regulated
+   CO2 emitters (data centers, their power plants, O&G ops) via permit
+   conditions; government's role = lever-puller, not check-writer; public
+   appropriation is backstop only. "Free to the public" is the headline.
+3. **Beneficiary reframe**: the emitters' own campuses sit in/near fire
+   country — funding the curtain protects THEIR assets. Ask becomes
+   protective, not punitive.
+4. **CA carbon-management tie-in (supply chapter upgrades)**:
+   - Curtain as a SECOND OFFTAKE / strategic reserve for captured CO2
+     that otherwise only gets buried — rides CCS money and politics
+     (first CA CCS project reported operational, Kern County 2026 —
+     verify status).
+   - Cheapest supply tap = streams where CO2 is ALREADY separated and
+     compressed (gas-processing CO2), not flue-gas capture from scratch.
+   - Cost fork to resolve in annex: Kern hub is ~100+ mi from LA fire
+     zones — feeder line vs. localized capture near the zones.
+   - CO2-EOR framing is a dead end in California (steam-based heavy oil,
+     hostile politics) — keep EOR out of the pitch. Consistent with our
+     earlier findings.
+5. **45Q accounting catch (CORRECTION to our materials)**: sprayed CO2 is
+   released, not sequestered — it does NOT earn sequestration credits.
+   Any "free" framing must rest on permit conditions + avoided-venting
+   economics, not tax credits. Scrub any 45Q implication from pitch docs.
+
+Their flagged open gap §4e (crown fire jumping the ground-level curtain):
+**already solved in our design** — the fuel-modified approach strip forces
+crown → surface transition before the line (design-v1 §2); report back as
+closed.
+
 ## 10. Open questions / next steps
 - [ ] Model a reference community (e.g., 500-home WUI edge, 4-mile perimeter): full BOM and cost both versions
 - [ ] Extreme-wind performance: what DOES hold a line at 60+ mph? (Nothing line-based; quantify honestly)
