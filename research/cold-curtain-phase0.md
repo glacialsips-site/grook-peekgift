@@ -284,7 +284,44 @@ Roadmap:
 - **3 Standard:** building/planning code integration for new WUI
   development (curtain-served = insurable).
 
-## 9. Open questions / next steps
+## 9. New inputs from idea-index review (2026-07-04)
+
+Adopted into the concept (genuinely new):
+1. **Compartmentalization metric** — grid cells as bulkheads: even without
+   extinguishment, maximum possible burn acreage becomes a DESIGN PARAMETER
+   ("no fire inside the grid can exceed X acres"). Strong exec metric;
+   reframes success away from binary stop/no-stop.
+2. **Co-trenching / dual-use corridor** — lay fiber, water, or utility
+   conduit in the same trench; critically, CA utilities are ALREADY
+   spending billions undergrounding power lines in the exact same WUI
+   zones (PG&E ~10k-mile program, SCE equivalents). Sharing trench with
+   funded undergrounding programs could cut civil cost 30–50% and ride
+   existing environmental clearances. HIGH-VALUE research item.
+3. **Ignition-origin stubs + topographic line placement** — spur lines
+   toward mapped ignition hotspots (utility corridors, canyon mouths,
+   roadsides) to kill fires at origin; study ridge vs. mountain-front vs.
+   community-edge siting per corridor. Pilot siting-study item.
+4. **Line-pack storage (quantified)** — the pipe network as storage:
+   8" trunk holds only ~28 t/km of liquid CO2 ≈ 4–5% of the 600 t/km
+   requirement. Real but supplemental; dedicated vessels remain the design
+   basis. (Honest-annex note.)
+5. **Legislative vehicle (verified)** — California is in a "study-first"
+   data-center moment: SB 57 (Padilla, signed Oct 2025) directs a CPUC
+   study of data-center grid impacts; AB 222 (PUE/energy reporting)
+   pending into 2026; Padilla has announced follow-on data-center energy
+   standards legislation. The CPUC study docket + next-session standards
+   bill are the natural insertion points for the "capture-and-supply the
+   fire-defense reserve" permit condition. Public-comment channel is open.
+
+Already covered by existing docs (no action): drone critique, perimeter
+architecture, hub-and-spoke, CO2 sourcing/free lever, EOR context,
+PFAS/dispersant contrast, phasing logic, LA-foothills Phase 1, cost-model
+discipline, pressure/nozzle engineering, CO2+water hybrid option.
+
+Noted but not adopted: aquifer depletion as root driver (speculative,
+not needed for the case).
+
+## 10. Open questions / next steps
 - [ ] Model a reference community (e.g., 500-home WUI edge, 4-mile perimeter): full BOM and cost both versions
 - [ ] Extreme-wind performance: what DOES hold a line at 60+ mph? (Nothing line-based; quantify honestly)
 - [ ] Parcel-level layer: integrate structure wetting (the ember answer) into the same buried network
