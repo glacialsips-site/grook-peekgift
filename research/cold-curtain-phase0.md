@@ -110,7 +110,63 @@ extreme-wind performance decide it. That comparison favors water.**
 | 7 | Embers fly over any line (60–90% of losses) | Move curtain out past ember range | REFUTED — embers launch from the fire's position, not the stopped line; needs structure-level layer regardless |
 | 8 | CO2 loses head-to-head to water/gel on cost, physics, permitting | — | STANDING. Strongest surviving role for CO2: **propellant** (gas-pressurized water delivery → zero grid-power dependence) |
 
-## 6. Open questions / next steps
+## 6. v3 — "No rules" redesign: reallocate CO2 to its actual strengths
+
+Premise shift: stop asking CO2 to be the coolant in open air (water's job).
+CO2's real superpowers: (a) certified enclosure flooding since the 1920s
+(NFPA 12), (b) self-pressurization — stored pneumatic energy, no pumps, no
+grid, no freeze, decade shelf life, (c) proven foam energizer at oilfield
+scale (Baker Hughes/Linde commercial CO2-energized frac foam, 60–85% gas
+quality), (d) zero residue / zero water damage.
+
+### Layer 1 — Attic/enclosure flooding ("the enclosure isn't the perimeter,
+it's the building")
+- Attacks the dominant loss mechanism directly: 60–90% of losses are ember
+  intrusions igniting homes from inside (attic, eave, crawlspace).
+- Pair with self-closing intumescent vents (Vulcan-type, ASTM E2886, seal at
+  450°F) → attic becomes a *sealable enclosure* → CO2 flooding is on-label.
+- Homes are under mandatory evacuation during these events → classic CO2
+  occupancy risk at minimum; interlocks + placarding for re-entry.
+- No water damage (vs attic sprinklers), no plumbing, no power, no freeze.
+- Sizing (honest): NFPA-12-style surface flooding of a ~8,000 ft³ attic
+  ≈ 600–900 lb CO2 (several cylinders or micro-bulk tank) + sustained bleed
+  for leakage; ~$4–8k/home hardware guess. Retrofit product potential:
+  insurance-discount-driven, sellable in ~18 months.
+- Open issue: hold time in leaky construction; requires vent sealing as
+  part of install (which is itself proven mitigation).
+
+### Layer 2 — CO2-energized foam ("Cold Foam") for perimeter + parcel
+- The buried network discharges 70–85% quality CO2 foam: mostly CO2 by
+  volume, 10–20× less water than sprinklers → directly answers the
+  water-scarcity objection with oilfield-proven fluid engineering.
+- Foam blanket = dwell of hours (vs seconds for gas), pre-applied on
+  forecast, holds in wind far better than gas or mist, smothers ember beds.
+- Liquid CO2 doubles as the pump: self-pressurized discharge, zero grid
+  dependence (grid is always down in these events).
+- Industry transfer: frac service companies already own the CO2-foam
+  pumping/blending tech, equipment, and workforce — the "reuse the fracking
+  infrastructure" instinct lands here (the transferable asset is the
+  technology + fleet, not the pipe route). Mobile variant: CO2-foam frac
+  fleets repositioned during red-flag warnings.
+- Open issues: CO2 acidifies/destabilizes some Class A surfactants —
+  formulation work needed (frac industry solved analogous chemistry);
+  cost head-to-head vs compressed-air foam (free air + diesel pump) — CO2
+  wins on grid-independence and water reduction, loses on commodity cost.
+
+### Layer 3 — v2 trench curtain as final line
+- Fuel break + trench-pooled sectionalized CO2 discharge (Section 3 v2),
+  now demoted to last-ditch role killing surface fire crossing an
+  already-foamed band. 360 t/km sizing stands.
+
+### Economic/narrative layer
+- CO2 offtake: capture projects need buyers; "captured carbon defending
+  communities" is a fundable climate-adaptation narrative.
+- Install labor = oilfield services (trenching, pressure pipe, foam
+  pumping — their literal trade; countercyclical work story).
+- Customer = insurers/FAIR Plan + HOAs/municipalities: product is
+  restored insurability, not fire suppression per se.
+
+## 7. Open questions / next steps
 - [ ] Model a reference community (e.g., 500-home WUI edge, 4-mile perimeter): full BOM and cost both versions
 - [ ] Extreme-wind performance: what DOES hold a line at 60+ mph? (Nothing line-based; quantify honestly)
 - [ ] Parcel-level layer: integrate structure wetting (the ember answer) into the same buried network
