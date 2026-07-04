@@ -248,7 +248,43 @@ P(structure ignition) = flux(d) × P(still-glowing | d) × P(receptive bed).
   structure-brand chain reaction (burning houses are the worst launch
   platforms — bigger brands, zero distance).
 
-## 8. Open questions / next steps
+## 8. Phase 1 deployment plan (business case first — effectiveness need
+NOT be 100%; at these loss magnitudes even 50% capture is trillions)
+
+Reference unit: one defended community ≈ 500–2,000 homes on a WUI edge,
+~4-mile threatened perimeter, 2-mile standoff band (lasagna: piped foam
+strips alternating with mowed/grazed gaps), spine + hubs + spokes grid.
+All-in estimate per community: **$75–150M** (pipe, heads, CO2 storage,
+bio-foam stock, controls; CO2-foam variant pricing).
+
+Phase 1 portfolio: 20 highest-value/highest-recurrence corridors
+(Palisades/Malibu, Altadena foothills, Oakland–Berkeley hills, Santa Rosa,
+San Diego backcountry, Boulder/Marshall corridor, etc.)
+→ capex ≈ **$2–3B total**.
+
+Benefit math:
+- One Palisades-class event = $250B+. Phase 1 pays for itself if it
+  prevents ~1% of ONE such event.
+- Corridor direct losses trend ~$50B/yr escalating; over 40-yr asset life,
+  50% effectiveness ≈ **~$1T+ avoided**; 90%+ ≈ multiple $T.
+  BCR on the order of 300–1,000 : 1. No drone fleet, aircraft program, or
+  retardant campaign is within two orders of magnitude of this ratio.
+- Funding precedent: CA utilities already spend $5–10B per multi-year
+  cycle on wildfire mitigation plans; FAIR Plan exposure + reinsurers are
+  motivated buyers of risk reduction.
+
+Roadmap:
+- **1a Pilot (~$25–50M):** one community, one insurer partner, one oilfield
+  services contractor, CAL FIRE liaison. Validate foam blanket persistence,
+  sectional discharge, detection triggers on prescribed burns.
+- **1b Validation:** instrumented prescribed-fire tests of band segments;
+  insurance actuarial sign-off → premium reduction product.
+- **2 Rollout:** the 20-corridor portfolio, $2–3B, project-financed against
+  premium reductions + public resilience funds.
+- **3 Standard:** building/planning code integration for new WUI
+  development (curtain-served = insurable).
+
+## 9. Open questions / next steps
 - [ ] Model a reference community (e.g., 500-home WUI edge, 4-mile perimeter): full BOM and cost both versions
 - [ ] Extreme-wind performance: what DOES hold a line at 60+ mph? (Nothing line-based; quantify honestly)
 - [ ] Parcel-level layer: integrate structure wetting (the ember answer) into the same buried network
