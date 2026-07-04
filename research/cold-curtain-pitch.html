@@ -57,6 +57,7 @@
 
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  section, header.hero { scroll-margin-top: 54px; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0; background: var(--paper); color: var(--ink);
@@ -166,6 +167,23 @@
     font-size: 12.5px; color: var(--ink); font-variant-numeric: tabular-nums;
   }
 
+  /* ---- map ---- */
+  .maprow { display: grid; grid-template-columns: minmax(280px, 460px) 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 720px) { .maprow { grid-template-columns: 1fr; } }
+  #camap { width: 100%; height: auto; }
+  #camap .state { fill: var(--cryo-wash); stroke: var(--cryo-deep); stroke-width: 1.5; }
+  #camap .mk { fill: var(--ember); fill-opacity: .45; stroke: var(--ember-deep); stroke-width: 1.5; cursor: pointer; }
+  #camap .mk:hover, #camap .mk:focus-visible { fill-opacity: .8; stroke-width: 2.5; outline: none; }
+  #camap .mklab { font-size: 10.5px; fill: var(--ink-2); pointer-events: none; }
+  .mapside { display: grid; gap: 12px; align-content: start; }
+  .mapcard { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px; }
+  .mapcard .mc-t {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; font-weight: 700;
+  }
+  .mapcard .mc-item { font-size: 13.5px; color: var(--ink-2); margin-bottom: 8px; }
+  .mapcard .mc-item:last-child { margin-bottom: 0; }
+
   /* ---- diagrams ---- */
   svg text {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -258,12 +276,13 @@
   <div class="wrap">
     <span class="brand">COLD&nbsp;CURTAIN</span>
     <a href="#threat">01·THREAT</a>
-    <a href="#concept">02·CONCEPT</a>
-    <a href="#system">03·SYSTEM</a>
-    <a href="#supply">04·SUPPLY</a>
-    <a href="#cost">05·COST</a>
-    <a href="#return">06·RETURN</a>
-    <a href="#roadmap">07·ROADMAP</a>
+    <a href="#where">02·WHERE</a>
+    <a href="#concept">03·CONCEPT</a>
+    <a href="#system">04·SYSTEM</a>
+    <a href="#supply">05·SUPPLY</a>
+    <a href="#cost">06·COST</a>
+    <a href="#return">07·RETURN</a>
+    <a href="#roadmap">08·ROADMAP</a>
   </div>
 </nav>
 
@@ -321,9 +340,45 @@
   </div>
 </section>
 
+<section id="where">
+  <div class="wrap">
+    <p class="eyebrow"><b>02</b> · WHERE IT GETS BUILT</p>
+    <h2>The target corridors are already known — they burn on repeat.</h2>
+    <p class="lede">Phase-1 candidates: the wildland–urban edges where recurrence and value concentration meet. Marker size = historical insured losses. Geography is real (plotted from coordinates); the ranked list with terrain overlays is the next work product. <strong>Hover or tap a corridor.</strong></p>
+    <div class="panel">
+      <div class="maprow">
+        <svg id="camap" viewBox="0 0 500 590" aria-label="Map of California with Phase-1 target fire corridors, marker size proportional to historical insured losses"></svg>
+        <div class="mapside">
+          <div class="mapcard">
+            <div class="mc-t">SAME PLAYBOOK, OUTSIDE CA</div>
+            <div class="mc-item"><strong>Boulder corridor, CO</strong> — Marshall 2021, $2.0B insured. A December grass fire into suburbs: proof this is not only a forest problem.</div>
+            <div class="mc-item"><strong>West Maui, HI</strong> — Lahaina 2023, $3.2B insured, ~$5.5B+ total, 102 dead. Isolated grid, no evacuation depth: perimeter defense fits.</div>
+          </div>
+          <div class="mapcard">
+            <div class="mc-t">LEGEND</div>
+            <div class="mc-item mono" style="font-size:12px">
+              <svg width="150" height="46" aria-hidden="true">
+                <circle cx="18" cy="24" r="16" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+                <circle cx="58" cy="24" r="9" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+                <circle cx="88" cy="24" r="5" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+              </svg>
+              <br>circle area ∝ historical insured losses
+            </div>
+            <div class="mc-item" style="font-size:12.5px">9 CA corridors shown ≈ <strong>$70B+ insured</strong> historical losses (multiples of that in total economic terms) — on a combined defended length of roughly 100–150 km.</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail" id="mapDetail" aria-live="polite">
+        <div class="dt">Target corridors · hover a marker</div>
+        <div class="dd">Nine California corridors carry the bulk of US WUI dollar losses. Selection criteria for the final ranked list: loss recurrence × insured value density × terrain/wind alignment × constructability of the standoff band.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="concept">
   <div class="wrap">
-    <p class="eyebrow"><b>02</b> · THE CONCEPT</p>
+    <p class="eyebrow"><b>03</b> · THE CONCEPT</p>
     <h2>Defense in depth: three suppression lines behind a treated approach.</h2>
     <p class="lede">The band is not a fence — it is a <strong>kill zone for the flame front</strong>. A maintained low-fuel approach strip forces any arriving crown fire down to a ground fire; three independent nozzle lines then stop it with flashing liquid CO2 (−109&nbsp;°F snow + gas) delivered straight into the fuel bed. The ~2-mile standoff behind the band is what defeats ember rain: distance collapses ember arrival ~100×, and interior spokes mop up strays. <strong>Hover or tap any zone.</strong></p>
     <div class="panel">
@@ -415,7 +470,7 @@
 
 <section id="system">
   <div class="wrap">
-    <p class="eyebrow"><b>03</b> · THE SYSTEM</p>
+    <p class="eyebrow"><b>04</b> · THE SYSTEM</p>
     <h2>Spine → hubs → spokes. Aimed by valves, not by people.</h2>
     <p class="lede">Plan view of one defended community. The storage farm and trunk spine sit on the wildland side; sectional hubs feed the three lines and the interior spokes. Everything runs on the CO2's own pressure — <strong>no pumps, no grid power</strong> — because the grid is down in every one of these events.</p>
     <div class="panel">
@@ -506,7 +561,7 @@
 
 <section id="supply">
   <div class="wrap">
-    <p class="eyebrow"><b>04</b> · THE SUPPLY</p>
+    <p class="eyebrow"><b>05</b> · THE SUPPLY</p>
     <h2>The CO2 is free — the data-center buildout makes it.</h2>
     <p class="lede">New gas-fired data-center campuses are being permitted over community objections everywhere. Condition those permits: <strong>capture your stack CO2 and deliver it to the regional fire-defense reserve.</strong> The quantities are trivially in the campuses' favor — and delivery is by ordinary cryo truck and rail, which sidesteps California's CO2-pipeline moratorium entirely.</p>
     <div class="panel">
@@ -561,7 +616,7 @@
 
 <section id="cost">
   <div class="wrap">
-    <p class="eyebrow"><b>05</b> · THE COST</p>
+    <p class="eyebrow"><b>06</b> · THE COST</p>
     <h2>$5.5–8.5M per defended kilometer, all-in.</h2>
     <p class="lede">Rough-order-of-magnitude, engineering-estimate class. The dominant <em>recurring</em> cost is mowing the approach strip — vegetation, not CO2.</p>
     <div class="panel">
@@ -586,7 +641,7 @@
 
 <section id="return">
   <div class="wrap">
-    <p class="eyebrow"><b>06</b> · THE RETURN</p>
+    <p class="eyebrow"><b>07</b> · THE RETURN</p>
     <h2>Move the sliders. The conclusion doesn't move.</h2>
     <p class="lede">The system does not need to be perfect — at these loss magnitudes the difference between 50% and 90% effective is which multiple of a trillion gets saved. Assumptions are yours to set:</p>
     <div class="panel">
@@ -620,7 +675,7 @@
 
 <section id="roadmap">
   <div class="wrap">
-    <p class="eyebrow"><b>07</b> · THE ROADMAP</p>
+    <p class="eyebrow"><b>08</b> · THE ROADMAP</p>
     <h2>One pilot buys the whole argument.</h2>
     <div class="road">
       <div class="rstep">
@@ -669,6 +724,87 @@
 </footer>
 
 <script>
+  // ---- California corridor map (built from real lat/lon, equirectangular) ----
+  (function () {
+    var svg = document.getElementById('camap');
+    if (!svg) return;
+    var NS = 'http://www.w3.org/2000/svg';
+    // simplified CA outline, [lon, lat]
+    var CA = [
+      [-124.21, 42.00], [-120.00, 42.00], [-120.00, 39.00], [-114.63, 35.00],
+      [-114.13, 34.30], [-114.72, 32.72], [-117.13, 32.53], [-117.32, 33.10],
+      [-118.26, 33.74], [-118.55, 34.03], [-119.22, 34.15], [-120.47, 34.45],
+      [-120.64, 35.15], [-121.90, 36.60], [-122.50, 37.50], [-122.51, 37.78],
+      [-122.97, 38.23], [-123.73, 38.95], [-124.11, 40.10], [-124.41, 40.44],
+      [-124.16, 41.00]
+    ];
+    var K = 57, KX = K * Math.cos(37 * Math.PI / 180);
+    function px(lon) { return (lon + 124.85) * KX + 8; }
+    function py(lat) { return (42.25 - lat) * K + 8; }
+    var pts = CA.map(function (c) { return px(c[0]).toFixed(1) + ',' + py(c[1]).toFixed(1); }).join(' ');
+    var poly = document.createElementNS(NS, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('class', 'state');
+    svg.appendChild(poly);
+
+    var CORRIDORS = [
+      { n: 'Paradise / Sierra foothills', la: 39.76, lo: -121.62, loss: 12.5, lab: 'Paradise', ly: -1,
+        d: 'Camp Fire 2018 — $12.5B insured, 18,804 structures, 85 dead. The town is rebuilding inside the same fuel corridor.' },
+      { n: 'Santa Rosa / Sonoma–Napa', la: 38.44, lo: -122.71, loss: 13, lab: 'Santa Rosa', ly: -1,
+        d: 'Tubbs 2017 ($11.1B) plus Glass, Kincade, Nuns. Tubbs crossed a six-lane highway into dense suburbia — the case study for why lines need depth.' },
+      { n: 'Oakland–Berkeley Hills', la: 37.86, lo: -122.23, loss: 4, lab: 'Oakland Hills', ly: 1,
+        d: '1991 Tunnel Fire: 25 dead, ~$4B in today’s dollars, 2,900 structures in one afternoon. Densest value-at-risk WUI edge in Northern California.' },
+      { n: 'Lake Tahoe / Caldor corridor', la: 38.85, lo: -120.05, loss: 1.2, lab: 'Tahoe', ly: -1,
+        d: 'Caldor 2021 burned to the basin edge. Resort value concentration; single evacuation highway.' },
+      { n: 'Redding / Carr corridor', la: 40.60, lo: -122.40, loss: 1.6, lab: 'Redding', ly: -1,
+        d: 'Carr 2018 — $1.6B, produced a genuine fire tornado inside city limits.' },
+      { n: 'Ventura / Santa Barbara', la: 34.38, lo: -119.48, loss: 2.5, lab: 'SB · Ventura', side: 'l',
+        d: 'Thomas 2017 (then the largest fire in CA history) plus the Montecito debris flows it triggered.' },
+      { n: 'Palisades / Malibu', la: 34.03, lo: -118.75, loss: 25, lab: 'Palisades–Malibu', side: 'b',
+        d: 'Palisades 2025 ($20–25B insured) + Woolsey 2018 ($5.3B). The highest value density on the list; burns on a Santa Ana cycle.' },
+      { n: 'Altadena / San Gabriel foothills', la: 34.22, lo: -118.05, loss: 9, lab: 'Altadena', side: 'r', ly: -1,
+        d: 'Eaton 2025 — $8–10B insured, 9,000+ structures, 18 dead. Flat street grid met a mountain-front fire at 100 mph winds.' },
+      { n: 'San Diego backcountry', la: 32.95, lo: -116.90, loss: 4, lab: 'San Diego', ly: 1,
+        d: 'Cedar 2003, Witch 2007. Santa Ana corridor pointed at a county of 3 million.' }
+    ];
+    var panel = document.getElementById('mapDetail');
+    var dt = panel.querySelector('.dt'), dd = panel.querySelector('.dd');
+    var d0t = dt.textContent, d0d = dd.textContent;
+    CORRIDORS.forEach(function (c) {
+      var r = 4.5 + Math.sqrt(c.loss) * 3.2;
+      var cx = px(c.lo), cy = py(c.la);
+      var mk = document.createElementNS(NS, 'circle');
+      mk.setAttribute('cx', cx); mk.setAttribute('cy', cy); mk.setAttribute('r', r);
+      mk.setAttribute('class', 'mk'); mk.setAttribute('tabindex', '0');
+      var t = document.createElementNS(NS, 'title');
+      t.textContent = c.n + ' — ~$' + c.loss + 'B insured';
+      mk.appendChild(t);
+      function show() {
+        dt.textContent = c.n + ' · ~$' + c.loss + 'B insured historical losses';
+        dd.textContent = c.d;
+      }
+      function reset() { dt.textContent = d0t; dd.textContent = d0d; }
+      mk.addEventListener('mouseenter', show); mk.addEventListener('focus', show);
+      mk.addEventListener('click', show);
+      mk.addEventListener('mouseleave', reset); mk.addEventListener('blur', reset);
+      svg.appendChild(mk);
+      var lb = document.createElementNS(NS, 'text');
+      if (c.side === 'l') {
+        lb.setAttribute('x', cx - r - 5); lb.setAttribute('y', cy + 3);
+        lb.setAttribute('text-anchor', 'end');
+      } else if (c.side === 'b') {
+        lb.setAttribute('x', cx); lb.setAttribute('y', cy + r + 13);
+        lb.setAttribute('text-anchor', 'middle');
+      } else {
+        lb.setAttribute('x', cx + r + 4);
+        lb.setAttribute('y', cy + ((c.ly || 1) < 0 ? -r * 0.4 : r * 0.7) + 3);
+      }
+      lb.setAttribute('class', 'mklab');
+      lb.textContent = c.lab;
+      svg.appendChild(lb);
+    });
+  })();
+
   // cross-section hover -> detail panel
   (function () {
     var panel = document.getElementById('xsDetail');
