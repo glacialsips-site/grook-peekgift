@@ -141,3 +141,72 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# TURBULENCE EXTENSION (user challenge: "that's turbulent air, it could feel
+# way more than terminal velocity, and a flat brand could be tumbling")
+#
+# Worst-case treatment: gusts modeled as an Ornstein-Uhlenbeck process with
+# RMS = 20% of mean wind (aggressive for the atmospheric surface layer) and
+# 1.5 s correlation time, applied as PURE SLIP: the ember is assumed to
+# follow gusts NOT AT ALL, so every gust is felt fully across its face and
+# fully accelerates the burn. Reality is gentler (embers ride eddies larger
+# than their ~0.5 s response time), so this brackets the turbulence effect
+# from above.
+# ---------------------------------------------------------------------------
+import random
+
+
+def simulate_flight_turb(d0, rho_p, wind, height, ti=0.20, tcorr=1.5, seed=1):
+    rng = random.Random(seed)
+    sigma = ti * wind
+    gx = gz = 0.0
+    r = d0 / 2.0
+    x, z = 0.0, height
+    vx, vz = 0.0, 0.0
+    t = 0.0
+    while z > 0 and t < 3600:
+        m = rho_p * (4.0 / 3.0) * math.pi * r ** 3
+        if m <= 0:
+            break
+        # OU gusts (horizontal + vertical)
+        a = DT / tcorr
+        gx += -gx * a + sigma * math.sqrt(2 * a) * rng.gauss(0, 1)
+        gz += -gz * a + sigma * math.sqrt(2 * a) * rng.gauss(0, 1)
+        area = math.pi * r ** 2
+        rvx = wind + gx - vx
+        rvz = gz - vz
+        vrel = math.hypot(rvx, rvz)
+        fd = 0.5 * RHO_AIR * CD * area * vrel
+        ax = fd * rvx / m
+        az = fd * rvz / m - G
+        vx += ax * DT
+        vz += az * DT
+        x += vx * DT
+        z += vz * DT
+        if 2 * r > MIN_GLOW_DIAM:
+            re = vrel * (2 * r) / NU_AIR
+            r -= R0 * frossling(re) * DT
+        t += DT
+    return x / 1000.0, max(2 * r, 0) * 1000.0, t
+
+
+def turb_comparison():
+    print("TURBULENCE WORST CASE: 20% RMS gusts felt as 100% slip (no eddy-riding)")
+    print(f"{'case':>28} | {'laminar':>16} | {'turbulent (3 seeds)':>34}")
+    cases = [(5e-3, 300, 20.0, 800.0), (5e-3, 300, 30.0, 800.0),
+             (8e-3, 150, 30.0, 800.0), (8e-3, 300, 30.0, 1500.0),
+             (12e-3, 300, 30.0, 1500.0)]
+    for d0, rho, w, h in cases:
+        km, dl, _, _, _ = simulate_flight(d0, rho, w, h)
+        lam = f"{km:5.2f}km {dl:4.1f}mm"
+        outs = []
+        for s in (1, 2, 3):
+            km2, dl2, _ = simulate_flight_turb(d0, rho, w, h, seed=s)
+            outs.append(f"{km2:5.2f}km {dl2:4.1f}mm")
+        label = f"{d0*1000:.0f}mm rho={rho:.0f} U={w:.0f} H={h:.0f}"
+        print(f"{label:>28} | {lam:>16} | {' / '.join(outs)}")
+
+
+turb_comparison()
