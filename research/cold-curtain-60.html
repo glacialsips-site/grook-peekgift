@@ -1,0 +1,246 @@
+<title>Cold Curtain — 60 Seconds</title>
+<style>
+  /* Committed single-theme: night-operations dark. */
+  :root {
+    --bg: #0a0e13;
+    --bg2: #0e141b;
+    --ink: #f2f5f8;
+    --ink-2: #aab6c2;
+    --muted: #66707b;
+    --cryo: #4a9df0;
+    --frost: #a7cbf5;
+    --ember: #ff6a3d;
+    --ember-2: #ffb18f;
+    --hair: #1d2530;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  html { scroll-snap-type: y mandatory; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  .frame {
+    min-height: 100dvh; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8dvh 7vw; position: relative; cursor: pointer;
+    border-bottom: 1px solid var(--hair);
+  }
+  .frame:nth-child(even) { background: var(--bg2); }
+  .kick {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; letter-spacing: .22em; color: var(--muted); margin-bottom: 3dvh;
+  }
+  .kick b { color: var(--cryo); font-weight: 700; }
+  .kick .fire { color: var(--ember); }
+  h1 {
+    margin: 0 0 2.5dvh; font-weight: 800; letter-spacing: -0.025em;
+    font-size: clamp(40px, 7.2vw, 96px); line-height: 1.0; text-wrap: balance; max-width: 16ch;
+  }
+  h1 .c { color: var(--cryo); }
+  h1 .e { color: var(--ember); }
+  .sub { font-size: clamp(18px, 2vw, 24px); color: var(--ink-2); max-width: 52ch; margin: 0 0 4dvh; }
+  .sub strong { color: var(--ink); }
+  .whisper {
+    position: absolute; bottom: 3.5dvh; left: 7vw; right: 7vw;
+    display: flex; justify-content: space-between; gap: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .12em; color: var(--muted);
+  }
+
+  /* dots */
+  .dots { position: fixed; right: 18px; top: 50%; transform: translateY(-50%); display: grid; gap: 10px; z-index: 10; }
+  .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--hair); border: 1px solid var(--muted); }
+  .dots span.on { background: var(--cryo); border-color: var(--cryo); }
+
+  /* frame 1 */
+  .giant {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700; color: var(--ember);
+    font-size: clamp(44px, 9vw, 120px); letter-spacing: -0.02em; line-height: 1;
+    margin: 0 0 2dvh; font-variant-numeric: tabular-nums;
+  }
+  .burnrow { display: flex; gap: 8px; align-items: flex-end; height: 11dvh; margin-top: 4dvh; max-width: 720px; }
+  .burnrow div { background: var(--ember); opacity: .8; border-radius: 3px 3px 0 0; flex: 1; }
+  .burnrow div.big { opacity: 1; }
+  .burnlab { display: flex; gap: 8px; max-width: 720px; }
+  .burnlab span {
+    flex: 1; text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; color: var(--muted); padding-top: 8px; letter-spacing: .04em;
+  }
+
+  /* frame 2 visual: mini cross-section */
+  svg text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: var(--muted); }
+  .xsec { max-width: 860px; width: 100%; }
+
+  /* frame 3: versus rows */
+  .vs { display: grid; gap: 14px; max-width: 780px; }
+  .vsrow { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; }
+  .vsrow .them, .vsrow .us { padding: 16px 20px; font-size: clamp(15px, 1.6vw, 19px); }
+  .vsrow .them { color: var(--muted); background: rgba(255, 106, 61, .05); }
+  .vsrow .them s { text-decoration-color: var(--ember); text-decoration-thickness: 2px; }
+  .vsrow .us { color: var(--ink); background: rgba(74, 157, 240, .08); border-left: 2px solid var(--cryo); font-weight: 650; }
+  .vslab {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: .16em; display: block; margin-bottom: 5px;
+  }
+  .them .vslab { color: var(--ember); }
+  .us .vslab { color: var(--cryo); }
+
+  /* frame 4: proof chips + ratio */
+  .ratio {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700; color: var(--cryo); line-height: 1;
+    font-size: clamp(54px, 10vw, 140px); margin: 1dvh 0 1dvh;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; max-width: 860px; margin-top: 3dvh; }
+  .chip {
+    border: 1px solid var(--hair); border-radius: 999px; padding: 9px 18px;
+    font-size: clamp(13px, 1.4vw, 16px); color: var(--ink-2); background: rgba(74,157,240,.05);
+  }
+  .chip b { color: var(--frost); font-weight: 650; }
+
+  /* frame 5 */
+  .closer-mark {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: .3em; color: var(--cryo); font-weight: 700; font-size: 15px; margin-top: 5dvh;
+  }
+  .ask { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1dvh; }
+  .ask .chip { background: rgba(255,106,61,.06); }
+  .ask .chip b { color: var(--ember-2); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .frame > * { animation: rise .5s ease both; }
+    .frame > *:nth-child(2) { animation-delay: .06s; }
+    .frame > *:nth-child(3) { animation-delay: .12s; }
+    .frame > *:nth-child(4) { animation-delay: .18s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<div class="dots" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span><span></span></div>
+
+<section class="frame" id="f1">
+  <div class="kick"><b>COLD CURTAIN</b> · 0:00 · <span class="fire">THE PROBLEM</span></div>
+  <div class="giant">$250,000,000,000</div>
+  <p class="sub"><strong>One month of wildfire. Los Angeles, January 2025.</strong> Not the wilderness — the same short list of neighborhoods, burning on a schedule, rebuilt in the same ash.</p>
+  <div class="burnrow" aria-hidden="true">
+    <div style="height:22%"></div><div style="height:34%"></div><div style="height:30%"></div>
+    <div style="height:16%"></div><div style="height:12%"></div><div class="big" style="height:100%"></div>
+  </div>
+  <div class="burnlab"><span>TUBBS ’17</span><span>CAMP ’18</span><span>WOOLSEY ’18</span><span>MARSHALL ’21</span><span>LAHAINA ’23</span><span>LA ’25</span></div>
+  <div class="whisper"><span>US 40-YEAR OUTLOOK: $5–36 TRILLION</span><span>CLICK / ↓&nbsp;&nbsp;0:10</span></div>
+</section>
+
+<section class="frame" id="f2">
+  <div class="kick"><b>COLD CURTAIN</b> · 0:10 · THE SOLUTION</div>
+  <h1>A permanent wall of <span class="c">−109°F</span> where fires repeat.</h1>
+  <p class="sub">Buried liquid-CO2 lines with automated nozzles across the known fire corridors. Fire arrives → valves open → <strong>the front dies at the line.</strong> Standing ready for 40 years.</p>
+  <svg class="xsec" viewBox="0 0 900 150" aria-label="Cross-section: fire meets mowed strip, then three cold lines, then two miles of distance to the community">
+    <line x1="0" y1="112" x2="900" y2="112" stroke="var(--hair)" stroke-width="2"/>
+    <polygon points="20,112 42,52 58,88 76,38 92,84 108,54 124,112" fill="var(--ember)"/>
+    <text x="70" y="134" font-size="11" text-anchor="middle" fill="var(--ember)">FIRE</text>
+    <rect x="146" y="104" width="100" height="8" fill="var(--cryo)" opacity=".22"/>
+    <text x="196" y="134" font-size="10" text-anchor="middle">MOWED STRIP</text>
+    <g stroke="var(--cryo)" stroke-width="4">
+      <line x1="280" y1="112" x2="280" y2="74"/><line x1="360" y1="112" x2="360" y2="74"/><line x1="440" y1="112" x2="440" y2="74"/>
+    </g>
+    <g fill="var(--cryo)">
+      <circle cx="280" cy="70" r="5"/><circle cx="360" cy="70" r="5"/><circle cx="440" cy="70" r="5"/>
+    </g>
+    <g fill="var(--cryo)" opacity=".28">
+      <polygon points="280,74 246,106 314,106"/><polygon points="360,74 326,106 394,106"/><polygon points="440,74 406,106 474,106"/>
+    </g>
+    <text x="360" y="134" font-size="10" text-anchor="middle" fill="var(--frost)">3 AUTOMATED COLD LINES</text>
+    <line x1="500" y1="112" x2="740" y2="112" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="7 6"/>
+    <text x="620" y="96" font-size="10" text-anchor="middle">2 MILES — EMBERS DIE OF DISTANCE</text>
+    <g stroke="var(--ink-2)" stroke-width="2" fill="none">
+      <rect x="774" y="86" width="30" height="26" fill="var(--bg2)"/><polygon points="770,86 789,68 808,86"/>
+      <rect x="826" y="90" width="26" height="22" fill="var(--bg2)"/><polygon points="822,90 839,74 856,90"/>
+    </g>
+    <text x="812" y="134" font-size="10" text-anchor="middle">COMMUNITY · UNTOUCHED</text>
+  </svg>
+  <div class="whisper"><span>SECTIONS OPEN ONLY WHERE FIRE TOUCHES THE LINE</span><span>CLICK / ↓&nbsp;&nbsp;0:20</span></div>
+</section>
+
+<section class="frame" id="f3">
+  <div class="kick"><b>COLD CURTAIN</b> · 0:20 · THE DIFFERENCE</div>
+  <h1>Infrastructure, <span class="c">not heroics.</span></h1>
+  <div class="vs">
+    <div class="vsrow">
+      <div class="them"><span class="vslab">TODAY</span>Chase every fire with aircraft, drones, and crews — technology obsolete in two years</div>
+      <div class="us"><span class="vslab">CURTAIN</span>Waits 40 years without blinking. Never late, never overwhelmed — it just opens valves</div>
+    </div>
+    <div class="vsrow">
+      <div class="them"><span class="vslab">TODAY</span>Needs the grid, water pressure, and people standing in the flames</div>
+      <div class="us"><span class="vslab">CURTAIN</span>Zero pumps, zero grid power, zero people in harm's way — the CO2's own pressure does the work</div>
+    </div>
+    <div class="vsrow">
+      <div class="them"><span class="vslab">TODAY</span>Retardant chemicals rained over neighborhoods, year after year</div>
+      <div class="us"><span class="vslab">CURTAIN</span>Cold and CO2 — captured from data-center power plants that must make it anyway. The ammunition is free</div>
+    </div>
+  </div>
+  <div class="whisper"><span>NOBODY ELSE IS BUILDING FIXED DEFENSE — EVERYONE IS CHASING</span><span>CLICK / ↓&nbsp;&nbsp;0:35</span></div>
+</section>
+
+<section class="frame" id="f4">
+  <div class="kick"><b>COLD CURTAIN</b> · 0:35 · FEASIBILITY</div>
+  <h1>Every piece is <span class="c">already proven.</span></h1>
+  <div class="ratio">125 : 1</div>
+  <p class="sub">Palisades–Malibu corridor: a <strong>$200M build</strong> against <strong>$25B of demonstrated loss</strong>. All 20 corridors: ~$2.5B — one percent of the January 2025 event alone.</p>
+  <div class="chips">
+    <div class="chip">CO2 knockdown — <b>certified since 1924</b> (NFPA 12)</div>
+    <div class="chip">Pipe at this pressure — <b>every US city has it</b></div>
+    <div class="chip">CO2 handling at scale — <b>the oilfield's day job</b></div>
+    <div class="chip">Detection & valves — <b>off-the-shelf</b></div>
+    <div class="chip">Payback — <b>months, not decades</b></div>
+  </div>
+  <div class="whisper"><span>NO INVENTION REQUIRED — ONLY INTEGRATION</span><span>CLICK / ↓&nbsp;&nbsp;0:50</span></div>
+</section>
+
+<section class="frame" id="f5">
+  <div class="kick"><b>COLD CURTAIN</b> · 0:50 · THE CLOSE</div>
+  <h1>One prescribed burn <span class="e">decides it.</span></h1>
+  <p class="sub"><strong>The ask: $30M.</strong> One community, one insurer, CAL&nbsp;FIRE at the table. We light the test fire on our terms — and watch it die at the line.</p>
+  <div class="ask">
+    <div class="chip">If the line holds → <b>20 corridors, $2.5B, insurability restored</b></div>
+    <div class="chip">If it doesn't → <b>we spent 0.01% of one fire season finding out</b></div>
+  </div>
+  <p class="sub" style="margin-top:5dvh">The fires keep their schedule.<br><strong>It's time we kept ours.</strong></p>
+  <div class="closer-mark">COLD CURTAIN</div>
+  <div class="whisper"><span>DWG CC-060 · REV 0.1 · 2026-07-04</span><span>1:00 — END</span></div>
+</section>
+
+<script>
+  var frames = [].slice.call(document.querySelectorAll('.frame'));
+  var dots = [].slice.call(document.querySelectorAll('.dots span'));
+  frames.forEach(function (f, i) {
+    f.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var n = frames[i + 1];
+      if (n) n.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    var idx = frames.findIndex(function (f) {
+      var r = f.getBoundingClientRect();
+      return r.top > -window.innerHeight / 2 && r.top <= window.innerHeight / 2;
+    });
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      if (frames[idx + 1]) { e.preventDefault(); frames[idx + 1].scrollIntoView({ behavior: 'smooth' }); }
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (frames[idx - 1]) { e.preventDefault(); frames[idx - 1].scrollIntoView({ behavior: 'smooth' }); }
+    }
+  });
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (en) {
+      if (en.isIntersecting) {
+        var i = frames.indexOf(en.target);
+        dots.forEach(function (d, j) { d.className = j === i ? 'on' : ''; });
+      }
+    });
+  }, { threshold: 0.55 });
+  frames.forEach(function (f) { io.observe(f); });
+</script>
