@@ -207,7 +207,48 @@ can't answer that; an area grid can.
 - Customer = insurers/FAIR Plan + HOAs/municipalities: product is
   restored insurability, not fire suppression per se.
 
-## 7. Open questions / next steps
+## 7. Ember flight budget (first-principles check of spotting claims)
+
+What embers are: bark flakes, twig segments, cone scales (vegetation);
+shingle/fence fragments once structures burn (structure-generated brands
+run larger). Measured dominant brands: 3–5 mm dia × 40–50 mm, ~0.1–0.5 g,
+char density ~300 kg/m³.
+
+Energy budget of a 0.25 g char pencil-stub:
+- Char heat of combustion ~30 MJ/kg → ~7,500 J on board.
+- Glowing smolder at terminal-velocity airflow (~4–8 m/s across face):
+  ~25–75 W heat release → burnout lifetime ~2–5 min. (Matches Tarifa
+  wind-tunnel lifetimes; small flecks <0.05 g die in <1 min.)
+
+Flight-time budget (ember rides wind; horizontal speed ≈ wind speed):
+| Distance | @20 m/s (45 mph) | @30 m/s (67 mph) |
+|---|---|---|
+| 1.6 km (1 mi) | 80 s | 53 s |
+| 3.2 km (2 mi) | 160 s | 107 s |
+| 5.0 km | 250 s | 167 s |
+| 6.3 km (Camp Fire max) | 315 s | 210 s |
+
+Loft: severe convection columns reach 1–3 km altitude, updraft 20–40 m/s;
+fall from 1.5 km at ~4 m/s terminal velocity ≈ 6 min airborne available.
+
+Conclusion: range is limited by burnout for small brands (die <1–2 km)
+and by mass/lift for large ones. The survivors at 5+ km are "Goldilocks"
+brands — low-terminal-velocity bark plates with grams of char, lofted
+high. Physics filter explains observed pattern: bulk of flux lands
+<2 km; sparse tail to ~6–8 km (CA fuels/wind; 30 km Australian records
+are eucalyptus ribbon-bark specific). Model and field data agree.
+
+### Band-sizing rule that falls out
+P(structure ignition) = flux(d) × P(still-glowing | d) × P(receptive bed).
+- Hold the flame front ≥ ~2 mi from first structure (curtain width + gap)
+  → glowing-brand flux at homes drops ~2 orders of magnitude.
+- Foam pre-blanket in gap + community cuts bed receptivity ~10×.
+- Interior spokes kill the residual tail as spot fires.
+- Secondary effect: preventing edge-row structure ignition removes the
+  structure-brand chain reaction (burning houses are the worst launch
+  platforms — bigger brands, zero distance).
+
+## 8. Open questions / next steps
 - [ ] Model a reference community (e.g., 500-home WUI edge, 4-mile perimeter): full BOM and cost both versions
 - [ ] Extreme-wind performance: what DOES hold a line at 60+ mph? (Nothing line-based; quantify honestly)
 - [ ] Parcel-level layer: integrate structure wetting (the ember answer) into the same buried network
