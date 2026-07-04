@@ -158,6 +158,47 @@ it's the building")
   now demoted to last-ditch role killing surface fire crossing an
   already-foamed band. 360 t/km sizing stands.
 
+### v4 — hub-and-spoke area grid (supersedes line-only perimeter)
+Driven by NIST Camp Fire reconstruction: long-range spotting ignited spot
+fires up to 6.3 km INSIDE Paradise; losses driven by dozens of simultaneous
+spot fires + structure-to-structure spread overwhelming suppression. A line
+can't answer that; an area grid can.
+- **Spine**: high-pressure CO2 trunk from dedicated storage farm (or
+  pipeline tee where one exists).
+- **Hubs**: neighborhood valve stations — bio-foam concentrate totes,
+  venturi injection, sectional valves. CO2 self-pressurization drives all
+  discharge; no pumps, no grid power.
+- **Spokes**: laterals along perimeter band, streets, greenbelts, parks —
+  pop-up foam monitors covering interior receptive fuel beds, not just the
+  edge.
+- **Concept of operations**: (1) red-flag + fire within threshold →
+  pre-blanket perimeter band and interior receptive fuels with foam (hours
+  of dwell, 10–20× less water than sprinklers); (2) during ember storm →
+  thermal/camera detection triggers sectional discharge wherever spot
+  fires ignite. The grid's advantage over crews: it cannot be overwhelmed
+  by simultaneity.
+- Ember position resolved: don't stop embers arriving — make every landing
+  zone non-receptive and kill every spot fire in minutes.
+
+### Surfactant — RESOLVED (organic requirement is already met by market)
+- USFS Qualified Products List (spec FS 5100-307b, incl. fish-toxicity
+  testing) already lists fluorine-free foams.
+- BIOEX ECOPOL F: 100% biodegradable, PFAS-free, GreenScreen certified,
+  USFS QPL.
+- SoyFoam TF 1122: soy-based, 84% biobased (USDA BioPreferred), OECD
+  ready-biodegradable, no detectable fluorine, GreenScreen Gold.
+- Narrative holds: captured waste CO2 + food-crop-derived foam vs.
+  Corexit-style chemistry. No new chemistry development required —
+  formulation work is limited to verifying these foams tolerate CO2 as
+  the energizing gas (acidification/stability test program).
+
+### Retrofit positioning (decision 2026-07-04)
+- Community-scale grid is THE product; per-home attic flooding demoted to
+  optional add-on / new-construction code pathway. Not the wedge.
+- "Leak" concern clarified: prior note referred to attic AIR leakage (gas
+  hold time in vented attics), not pipe leaks. Pipeline integrity at
+  2,400 psi is solved practice (gas transmission lines everywhere).
+
 ### Economic/narrative layer
 - CO2 offtake: capture projects need buyers; "captured carbon defending
   communities" is a fundable climate-adaptation narrative.
