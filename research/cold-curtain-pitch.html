@@ -1,0 +1,902 @@
+<title>Cold Curtain — Pitch Draft</title>
+<style>
+  :root {
+    --paper: #f4f6f8;
+    --surface: #ffffff;
+    --ink: #10151a;
+    --ink-2: #49535d;
+    --muted: #7b8590;
+    --hairline: #dfe4e9;
+    --cryo: #2a78d6;
+    --cryo-deep: #1c5cab;
+    --cryo-text: #1c5cab;
+    --frost: #cde2fb;
+    --frost-2: #86b6ef;
+    --ember: #eb6834;
+    --ember-deep: #b6491d;
+    --ember-text: #b6491d;
+    --ember-wash: #fdeee6;
+    --cryo-wash: #e8f1fc;
+    --good: #0ca30c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0e1216;
+      --surface: #161b21;
+      --ink: #f0f3f6;
+      --ink-2: #b3bcc5;
+      --muted: #79838d;
+      --hairline: #262d35;
+      --cryo: #3987e5;
+      --cryo-deep: #6da7ec;
+      --cryo-text: #6da7ec;
+      --frost: #1a2f4a;
+      --frost-2: #2a4a75;
+      --ember: #d95926;
+      --ember-deep: #e87b4e;
+      --ember-text: #e87b4e;
+      --ember-wash: #2a1a12;
+      --cryo-wash: #14212f;
+      --good: #2fbf2f;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1216; --surface: #161b21; --ink: #f0f3f6; --ink-2: #b3bcc5;
+    --muted: #79838d; --hairline: #262d35; --cryo: #3987e5; --cryo-deep: #6da7ec;
+    --cryo-text: #6da7ec; --frost: #1a2f4a; --frost-2: #2a4a75; --ember: #d95926;
+    --ember-deep: #e87b4e; --ember-text: #e87b4e; --ember-wash: #2a1a12;
+    --cryo-wash: #14212f; --good: #2fbf2f;
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f6f8; --surface: #ffffff; --ink: #10151a; --ink-2: #49535d;
+    --muted: #7b8590; --hairline: #dfe4e9; --cryo: #2a78d6; --cryo-deep: #1c5cab;
+    --cryo-text: #1c5cab; --frost: #cde2fb; --frost-2: #86b6ef; --ember: #eb6834;
+    --ember-deep: #b6491d; --ember-text: #b6491d; --ember-wash: #fdeee6;
+    --cryo-wash: #e8f1fc; --good: #0ca30c;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  section, header.hero { scroll-margin-top: 54px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- top nav ---- */
+  nav {
+    position: sticky; top: 0; z-index: 50; background: var(--paper);
+    border-bottom: 1px solid var(--hairline);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 4px; overflow-x: auto; padding: 0 16px; }
+  nav .brand {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700; font-size: 13px; letter-spacing: .08em; padding: 12px 10px 12px 0;
+    white-space: nowrap; color: var(--cryo-text);
+  }
+  nav a {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; color: var(--ink-2); text-decoration: none; white-space: nowrap;
+    padding: 12px 10px; border-bottom: 2px solid transparent;
+  }
+  nav a:hover, nav a:focus-visible { color: var(--ink); border-bottom-color: var(--cryo); outline: none; }
+
+  /* ---- title block ---- */
+  header.hero { padding: 56px 0 40px; border-bottom: 1px solid var(--hairline); }
+  .tblock {
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; color: var(--muted); letter-spacing: .06em; margin-bottom: 28px;
+  }
+  h1 {
+    font-size: clamp(38px, 6vw, 64px); line-height: 1.02; margin: 0 0 18px;
+    font-weight: 800; letter-spacing: -0.02em; text-wrap: balance;
+  }
+  h1 .cold { color: var(--cryo-text); }
+  .thesis { max-width: 60ch; font-size: 19px; color: var(--ink-2); margin: 0 0 30px; }
+  .thesis strong { color: var(--ink); }
+
+  .pitchbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 12px; margin-top: 26px; }
+  .pb {
+    border-left: 3px solid var(--cryo); background: var(--surface);
+    border-radius: 0 6px 6px 0; padding: 12px 15px;
+  }
+  .pb.fire { border-left-color: var(--ember); }
+  .pb .t {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .12em; color: var(--muted); font-weight: 700; margin-bottom: 5px;
+  }
+  .pb .s { font-size: 16.5px; font-weight: 700; line-height: 1.3; letter-spacing: -0.005em; }
+  .pblabel {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; letter-spacing: .14em; color: var(--muted); margin: 30px 0 0;
+  }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .tile .v { font-size: 26px; font-weight: 750; letter-spacing: -0.01em; }
+  .tile .v.cold { color: var(--cryo-text); }
+  .tile .v.fire { color: var(--ember-text); }
+  .tile .k {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-top: 3px;
+  }
+
+  /* ---- sections ---- */
+  section { padding: 52px 0 40px; border-bottom: 1px solid var(--hairline); }
+  .eyebrow {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .eyebrow b { color: var(--cryo-text); font-weight: 700; }
+  h2 { font-size: 30px; margin: 0 0 10px; font-weight: 750; letter-spacing: -0.015em; text-wrap: balance; }
+  .lede { max-width: 62ch; color: var(--ink-2); margin: 0 0 26px; }
+  .lede strong { color: var(--ink); }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 8px;
+    padding: 20px; overflow-x: auto;
+  }
+  .cap { font-size: 13px; color: var(--muted); margin-top: 10px; max-width: 75ch; }
+
+  /* ---- bar chart ---- */
+  .chart { display: grid; gap: 7px; }
+  .crow { display: grid; grid-template-columns: 190px 1fr; gap: 12px; align-items: center; min-width: 520px; }
+  .crow .lab { font-size: 13.5px; color: var(--ink-2); text-align: right; line-height: 1.25; }
+  .crow .lab small { display: block; color: var(--muted); font-size: 11px; }
+  .crow .track { position: relative; height: 22px; }
+  .crow .bar {
+    position: absolute; inset: 2px auto 2px 0; border-radius: 0 4px 4px 0;
+    background: var(--ember); min-width: 3px;
+  }
+  .crow:hover .bar, .crow:focus-within .bar { background: var(--ember-deep); }
+  .crow .val {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; color: var(--ink); white-space: nowrap; padding-left: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .note-flag {
+    display: inline-block; background: var(--ember-wash); color: var(--ember-text);
+    border-radius: 4px; padding: 2px 8px; font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  /* ---- stacked cost bar ---- */
+  .stack { display: flex; height: 34px; border-radius: 5px; overflow: hidden; gap: 2px; min-width: 560px; }
+  .seg { position: relative; }
+  .seg:first-child { border-radius: 5px 0 0 5px; }
+  .seg:last-child { border-radius: 0 5px 5px 0; }
+  .slegend { display: flex; flex-wrap: wrap; gap: 14px 22px; margin-top: 14px; }
+  .slegend .li { display: flex; align-items: baseline; gap: 8px; font-size: 13.5px; color: var(--ink-2); }
+  .slegend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; transform: translateY(1px); }
+  .slegend .n {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- map ---- */
+  .maprow { display: grid; grid-template-columns: minmax(280px, 460px) 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 720px) { .maprow { grid-template-columns: 1fr; } }
+  #camap { width: 100%; height: auto; }
+  #camap .state { fill: var(--cryo-wash); stroke: var(--cryo-deep); stroke-width: 1.5; }
+  #camap .mk { fill: var(--ember); fill-opacity: .45; stroke: var(--ember-deep); stroke-width: 1.5; cursor: pointer; }
+  #camap .mk:hover, #camap .mk:focus-visible { fill-opacity: .8; stroke-width: 2.5; outline: none; }
+  #camap .mklab { font-size: 10.5px; fill: var(--ink-2); pointer-events: none; }
+  .mapside { display: grid; gap: 12px; align-content: start; }
+  .mapcard { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px; }
+  .mapcard .mc-t {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; font-weight: 700;
+  }
+  .mapcard .mc-item { font-size: 13.5px; color: var(--ink-2); margin-bottom: 8px; }
+  .mapcard .mc-item:last-child { margin-bottom: 0; }
+
+  /* ---- diagrams ---- */
+  svg text {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    fill: var(--muted);
+  }
+  .zone { fill: transparent; cursor: pointer; }
+  .zone:hover, .zone:focus-visible { fill: var(--cryo); fill-opacity: .08; outline: none; stroke: var(--cryo); stroke-width: 1.5; }
+  .detail {
+    margin-top: 14px; padding: 14px 16px; border-left: 3px solid var(--cryo);
+    background: var(--cryo-wash); border-radius: 0 6px 6px 0; min-height: 74px;
+  }
+  .detail .dt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--cryo-text);
+    margin-bottom: 4px; font-weight: 700;
+  }
+  .detail .dd { font-size: 14.5px; color: var(--ink-2); max-width: 90ch; }
+
+  /* ---- calculator ---- */
+  .calc { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 26px; }
+  @media (max-width: 760px) { .calc { grid-template-columns: 1fr; } }
+  .cin label {
+    display: block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    margin: 18px 0 6px;
+  }
+  .cin label:first-child { margin-top: 0; }
+  .cin input[type=range] { width: 100%; accent-color: var(--cryo); }
+  .cin .rv {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .cin .opts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cin .opts button {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; padding: 6px 12px; border-radius: 5px; cursor: pointer;
+    border: 1px solid var(--hairline); background: var(--surface); color: var(--ink-2);
+  }
+  .cin .opts button[aria-pressed=true] {
+    border-color: var(--cryo); color: var(--cryo-text); background: var(--cryo-wash); font-weight: 700;
+  }
+  .cin .opts button:focus-visible { outline: 2px solid var(--cryo); outline-offset: 1px; }
+  .couts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-content: start; }
+  .cout { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 16px; }
+  .cout .v { font-size: 30px; font-weight: 780; letter-spacing: -0.015em; color: var(--cryo-text); font-variant-numeric: tabular-nums; }
+  .cout .v.plain { color: var(--ink); }
+  .cout .k {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-top: 4px;
+  }
+  .formula {
+    grid-column: 1 / -1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; color: var(--muted); padding-top: 4px;
+  }
+
+  /* ---- roadmap ---- */
+  .road { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .rstep { background: var(--surface); border: 1px solid var(--hairline); border-radius: 6px; padding: 16px; }
+  .rstep .ph {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; letter-spacing: .1em; color: var(--cryo-text); font-weight: 700;
+  }
+  .rstep h3 { margin: 6px 0 6px; font-size: 16.5px; }
+  .rstep p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+  .rstep .cost {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; color: var(--ink); margin-top: 10px; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- open items ---- */
+  .open { display: grid; gap: 8px; max-width: 78ch; }
+  .oi { display: flex; gap: 10px; font-size: 14.5px; color: var(--ink-2); }
+  .oi .b { color: var(--ember-text); font-weight: 700; flex: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; padding-top: 2px; }
+
+  footer { padding: 34px 0 60px; color: var(--muted); font-size: 13px; }
+  footer .mono { letter-spacing: .06em; }
+
+  table.spec { border-collapse: collapse; width: 100%; min-width: 540px; font-size: 14px; }
+  table.spec th, table.spec td { text-align: left; padding: 8px 14px 8px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  table.spec th {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+  }
+  table.spec td.num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+
+<nav aria-label="Sections">
+  <div class="wrap">
+    <span class="brand">COLD&nbsp;CURTAIN</span>
+    <a href="#threat">01·THREAT</a>
+    <a href="#where">02·WHERE</a>
+    <a href="#concept">03·CONCEPT</a>
+    <a href="#system">04·SYSTEM</a>
+    <a href="#supply">05·SUPPLY</a>
+    <a href="#cost">06·COST</a>
+    <a href="#return">07·RETURN</a>
+    <a href="#roadmap">08·ROADMAP</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="tblock">
+      <span>DWG&nbsp;CC-000 · REV&nbsp;0.1 · WORKING PITCH DRAFT</span>
+      <span>2026-07-04 · INTERNAL — NUMBERS ARE ENGINEERING ESTIMATES</span>
+    </div>
+    <h1>A fixed wall of <span class="cold">cold</span><br>where the fires keep coming.</h1>
+    <p class="thesis"><strong>Cold Curtain</strong>: buried liquid-CO2 lines with automated nozzles, built once across the corridors that burn America's most valuable neighborhoods on repeat — standing ready for 40 years, fed free by captured CO2.</p>
+    <p class="pblabel">THE 10-SECOND VERSION</p>
+    <div class="pitchbar">
+      <div class="pb fire"><div class="t">THE PROBLEM</div><div class="s">LA burned $250B+ in one month. The same edges burn every few years.</div></div>
+      <div class="pb"><div class="t">THE FIX</div><div class="s">A permanent cold wall — automated CO2 fire lines — where the fires repeat.</div></div>
+      <div class="pb"><div class="t">THE MATH</div><div class="s">All 20 walls: ~$2.5B. That's 1% of that one LA event.</div></div>
+      <div class="pb"><div class="t">THE ASK</div><div class="s">A $30M pilot on a prescribed burn, with an insurer at the table.</div></div>
+    </div>
+    <p class="pblabel" style="margin-top:26px">KEY NUMBERS</p>
+    <div class="tiles">
+      <div class="tile"><div class="v fire">$250B+</div><div class="k">One event — LA, Jan 2025</div></div>
+      <div class="tile"><div class="v fire">$5–36T</div><div class="k">40-yr projected US losses</div></div>
+      <div class="tile"><div class="v cold">$2–3B</div><div class="k">Phase-1 build, 20 corridors</div></div>
+      <div class="tile"><div class="v cold">&lt;1 yr</div><div class="k">Expected payback</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="threat">
+  <div class="wrap">
+    <p class="eyebrow"><b>01</b> · THE THREAT</p>
+    <h2>One month in Los Angeles: $250 billion.</h2>
+    <p class="lede">18 of the 20 costliest US wildfires hit in the last 25 years — and not in the wilderness. They detonate at a short list of edges that burn on repeat.</p>
+    <div class="panel">
+      <div class="chart" role="img" aria-label="Bar chart of insured losses of the costliest US wildfires, in billions of dollars">
+        <div class="crow" tabindex="0" title="Palisades + Eaton, Jan 2025 — insured $28–35B (Verisk); total economic loss $250–275B (AccuWeather); 18,000+ structures">
+          <div class="lab">Palisades + Eaton · 2025<small>Los Angeles</small></div>
+          <div class="track"><div class="bar" style="width:100%"></div><div class="val" style="left:100%">$31.5B <span style="color:var(--muted)">(28–35)</span></div></div>
+        </div>
+        <div class="crow" tabindex="0" title="Camp Fire, 2018 — insured ~$12.5B (2024$); 18,804 structures; 85 deaths">
+          <div class="lab">Camp Fire · 2018<small>Paradise, CA</small></div>
+          <div class="track"><div class="bar" style="width:39.7%"></div><div class="val" style="left:39.7%">$12.5B</div></div>
+        </div>
+        <div class="crow" tabindex="0" title="Tubbs Fire, 2017 — insured ~$11.1B; 5,636 structures; jumped Hwy 101 into Santa Rosa">
+          <div class="lab">Tubbs · 2017<small>Santa Rosa, CA</small></div>
+          <div class="track"><div class="bar" style="width:35.2%"></div><div class="val" style="left:35.2%">$11.1B</div></div>
+        </div>
+        <div class="crow" tabindex="0" title="Woolsey Fire, 2018 — insured ~$5.3B; 1,643 structures">
+          <div class="lab">Woolsey · 2018<small>Malibu, CA</small></div>
+          <div class="track"><div class="bar" style="width:16.8%"></div><div class="val" style="left:16.8%">$5.3B</div></div>
+        </div>
+        <div class="crow" tabindex="0" title="Lahaina Fire, 2023 — insured ~$3.2B; large uninsured share; ~2,200 structures">
+          <div class="lab">Lahaina · 2023<small>Maui, HI</small></div>
+          <div class="track"><div class="bar" style="width:10.2%"></div><div class="val" style="left:10.2%">$3.2B</div></div>
+        </div>
+        <div class="crow" tabindex="0" title="Marshall Fire, 2021 — insured ~$2.0B; grass fire into suburbs in December">
+          <div class="lab">Marshall · 2021<small>Boulder Co., CO</small></div>
+          <div class="track"><div class="bar" style="width:6.3%"></div><div class="val" style="left:6.3%">$2.0B</div></div>
+        </div>
+      </div>
+      <p class="cap">Insured losses, US$B (hover any bar for detail). Insured is the consistent metric across events; it badly understates the real hit — <span class="note-flag">LA 2025 total economic loss: $250–275B</span> — roughly 8× its insured figure. Broad-measure US wildfire burden runs $394–893B <em>per year</em> (US JEC, 2023).</p>
+    </div>
+  </div>
+</section>
+
+<section id="where">
+  <div class="wrap">
+    <p class="eyebrow"><b>02</b> · WHERE IT GETS BUILT</p>
+    <h2>Nine corridors hold the bulk of it. We know exactly where to build.</h2>
+    <p class="lede">Marker size = historical insured losses. <strong>Hover or tap a corridor.</strong></p>
+    <div class="panel">
+      <div class="maprow">
+        <svg id="camap" viewBox="0 0 500 590" aria-label="Map of California with Phase-1 target fire corridors, marker size proportional to historical insured losses"></svg>
+        <div class="mapside">
+          <div class="mapcard">
+            <div class="mc-t">SAME PLAYBOOK, OUTSIDE CA</div>
+            <div class="mc-item"><strong>Boulder corridor, CO</strong> — Marshall 2021, $2.0B insured. A December grass fire into suburbs: proof this is not only a forest problem.</div>
+            <div class="mc-item"><strong>West Maui, HI</strong> — Lahaina 2023, $3.2B insured, ~$5.5B+ total, 102 dead. Isolated grid, no evacuation depth: perimeter defense fits.</div>
+          </div>
+          <div class="mapcard">
+            <div class="mc-t">LEGEND</div>
+            <div class="mc-item mono" style="font-size:12px">
+              <svg width="150" height="46" aria-hidden="true">
+                <circle cx="18" cy="24" r="16" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+                <circle cx="58" cy="24" r="9" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+                <circle cx="88" cy="24" r="5" fill="var(--ember)" opacity=".45" stroke="var(--ember-deep)"></circle>
+              </svg>
+              <br>circle area ∝ historical insured losses
+            </div>
+            <div class="mc-item" style="font-size:12.5px">9 CA corridors shown ≈ <strong>$70B+ insured</strong> historical losses (multiples of that in total economic terms) — on a combined defended length of roughly 100–150 km.</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail" id="mapDetail" aria-live="polite">
+        <div class="dt">Target corridors · hover a marker</div>
+        <div class="dd">Nine California corridors carry the bulk of US WUI dollar losses. Selection criteria for the final ranked list: loss recurrence × insured value density × terrain/wind alignment × constructability of the standoff band.</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <p class="eyebrow" style="margin-bottom:12px"><b>BUILD ORDER</b> · RANKED BY PROTECTION RATIO (HISTORICAL LOSS ÷ BUILD ESTIMATE)</p>
+      <table class="spec">
+        <tr><th>#</th><th>Corridor</th><th>Build est.</th><th>Historical insured loss</th><th>Protects : costs</th></tr>
+        <tr><td class="num">1</td><td>Palisades – Malibu, CA</td><td class="num">$200M</td><td class="num">$25B</td><td class="num"><strong>125 : 1</strong></td></tr>
+        <tr><td class="num">2</td><td>Paradise / Sierra foothills, CA</td><td class="num">$110M</td><td class="num">$12.5B</td><td class="num"><strong>114 : 1</strong></td></tr>
+        <tr><td class="num">3</td><td>Santa Rosa / Sonoma–Napa, CA</td><td class="num">$150M</td><td class="num">$13B</td><td class="num"><strong>87 : 1</strong></td></tr>
+        <tr><td class="num">4</td><td>Altadena / San Gabriel front, CA</td><td class="num">$120M</td><td class="num">$9B</td><td class="num"><strong>75 : 1</strong></td></tr>
+        <tr><td class="num">5</td><td>Oakland–Berkeley Hills, CA</td><td class="num">$90M</td><td class="num">$4B</td><td class="num"><strong>44 : 1</strong></td></tr>
+        <tr><td class="num">6</td><td>San Diego backcountry, CA</td><td class="num">$150M</td><td class="num">$4B</td><td class="num"><strong>27 : 1</strong></td></tr>
+        <tr><td class="num">7</td><td>Boulder corridor, CO</td><td class="num">$75M</td><td class="num">$2B</td><td class="num"><strong>27 : 1</strong></td></tr>
+        <tr><td class="num">8</td><td>Ventura / Santa Barbara, CA</td><td class="num">$110M</td><td class="num">$2.5B</td><td class="num"><strong>23 : 1</strong></td></tr>
+        <tr><td class="num">9</td><td>Redding / Carr corridor, CA</td><td class="num">$75M</td><td class="num">$1.6B</td><td class="num"><strong>21 : 1</strong></td></tr>
+        <tr><td class="num">10</td><td>Tahoe / Caldor corridor, CA</td><td class="num">$75M</td><td class="num">$1.2B</td><td class="num"><strong>16 : 1</strong></td></tr>
+      </table>
+      <p class="cap">Build estimates: defended length × $7M/km midpoint + interior spokes; engineering-estimate class. Ratios use <em>insured</em> historical losses only — total economic ratios run 3–8× higher. Every row pays for itself by preventing a fraction of one repeat event.</p>
+    </div>
+  </div>
+</section>
+
+<section id="concept">
+  <div class="wrap">
+    <p class="eyebrow"><b>03</b> · THE CONCEPT</p>
+    <h2>Three cold lines behind a mowed strip. Two miles of distance.</h2>
+    <p class="lede">The strip forces any fire down to the ground. The nozzles kill ground fire at −109 °F. The two miles starve the ember rain. <strong>Hover or tap any zone.</strong></p>
+    <div class="panel">
+      <svg viewBox="0 0 1000 250" width="100%" style="min-width:720px" aria-label="Cross-section of the Cold Curtain defense band from fire side to community">
+        <!-- ground -->
+        <line x1="0" y1="200" x2="1000" y2="200" stroke="var(--hairline)" stroke-width="2"/>
+        <!-- fire -->
+        <g>
+          <polygon points="20,200 40,140 55,175 70,120 85,170 100,135 115,200" fill="var(--ember)" opacity=".9"/>
+          <polygon points="45,200 60,160 72,185 88,150 100,180 112,160 125,200" fill="var(--ember-deep)" opacity=".75"/>
+          <text x="66" y="222" font-size="11" text-anchor="middle">FIRE</text>
+        </g>
+        <!-- approach strip -->
+        <rect x="145" y="192" width="115" height="8" fill="var(--frost)" opacity=".55"/>
+        <g stroke="var(--muted)" stroke-width="1.5">
+          <line x1="160" y1="200" x2="160" y2="192"/><line x1="180" y1="200" x2="180" y2="194"/>
+          <line x1="200" y1="200" x2="200" y2="191"/><line x1="220" y1="200" x2="220" y2="194"/>
+          <line x1="240" y1="200" x2="240" y2="192"/>
+        </g>
+        <text x="202" y="222" font-size="11" text-anchor="middle">STRIP · 100 FT</text>
+        <!-- lines 1-3 -->
+        <g id="noz1">
+          <line x1="280" y1="200" x2="280" y2="168" stroke="var(--cryo)" stroke-width="3"/>
+          <polygon points="280,168 250,192 262,198" fill="var(--cryo)" opacity=".35"/>
+          <polygon points="280,168 310,192 298,198" fill="var(--cryo)" opacity=".35"/>
+          <circle cx="280" cy="166" r="4" fill="var(--cryo)"/>
+          <rect x="266" y="203" width="28" height="7" rx="2" fill="var(--frost-2)" opacity=".8"/>
+          <text x="280" y="222" font-size="11" text-anchor="middle">LINE 1</text>
+        </g>
+        <g>
+          <line x1="400" y1="200" x2="400" y2="168" stroke="var(--cryo)" stroke-width="3"/>
+          <polygon points="400,168 370,192 382,198" fill="var(--cryo)" opacity=".35"/>
+          <polygon points="400,168 430,192 418,198" fill="var(--cryo)" opacity=".35"/>
+          <circle cx="400" cy="166" r="4" fill="var(--cryo)"/>
+          <rect x="386" y="203" width="28" height="7" rx="2" fill="var(--frost-2)" opacity=".8"/>
+          <text x="400" y="222" font-size="11" text-anchor="middle">LINE 2</text>
+        </g>
+        <g>
+          <line x1="520" y1="200" x2="520" y2="168" stroke="var(--cryo)" stroke-width="3"/>
+          <polygon points="520,168 490,192 502,198" fill="var(--cryo)" opacity=".35"/>
+          <polygon points="520,168 550,192 538,198" fill="var(--cryo)" opacity=".35"/>
+          <circle cx="520" cy="166" r="4" fill="var(--cryo)"/>
+          <rect x="556" y="192" width="44" height="8" fill="var(--muted)" opacity=".45"/>
+          <text x="520" y="222" font-size="11" text-anchor="middle">LINE 3</text>
+          <text x="578" y="222" font-size="10" text-anchor="middle">ROAD</text>
+        </g>
+        <!-- detection mast -->
+        <line x1="340" y1="200" x2="340" y2="130" stroke="var(--muted)" stroke-width="2"/>
+        <circle cx="340" cy="127" r="5" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <text x="340" y="118" font-size="10" text-anchor="middle">IR MAST</text>
+        <!-- standoff with break -->
+        <line x1="620" y1="200" x2="810" y2="200" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="7 6"/>
+        <line x1="705" y1="188" x2="717" y2="212" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="717" y1="188" x2="729" y2="212" stroke="var(--muted)" stroke-width="2"/>
+        <text x="715" y="182" font-size="11" text-anchor="middle">STANDOFF ≈ 2 MI (not to scale)</text>
+        <!-- community -->
+        <g>
+          <rect x="838" y="172" width="34" height="28" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2"/>
+          <polygon points="833,172 855,152 877,172" fill="none" stroke="var(--ink-2)" stroke-width="2"/>
+          <rect x="898" y="176" width="30" height="24" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2"/>
+          <polygon points="894,176 913,158 932,176" fill="none" stroke="var(--ink-2)" stroke-width="2"/>
+          <rect x="952" y="180" width="26" height="20" fill="var(--surface)" stroke="var(--ink-2)" stroke-width="2"/>
+          <polygon points="948,180 965,164 982,180" fill="none" stroke="var(--ink-2)" stroke-width="2"/>
+          <text x="908" y="222" font-size="11" text-anchor="middle">COMMUNITY</text>
+        </g>
+        <!-- hover zones -->
+        <rect class="zone" x="0" y="20" width="140" height="215" rx="4" tabindex="0"
+          data-t="Design fire" data-d="Wind-driven crown fire arriving at 20,000–100,000 kW per meter of front. The curtain never fights this directly — the approach strip forces it to the ground first. Design point at the line: 500 kW/m surface fire (2,000 kW/m ultimate)."/>
+        <rect class="zone" x="140" y="20" width="122" height="215" rx="4" tabindex="0"
+          data-t="Fuel-modified approach strip — 100 ft" data-d="Mowed / grazed / thinned. A crown fire cannot sustain itself in it: it must drop to a surface fire to cross, capping intensity at the nozzle line. Maintenance of this strip is the single largest recurring O&amp;M item — vegetation, not CO2."/>
+        <rect class="zone" x="262" y="20" width="120" height="215" rx="4" tabindex="0"
+          data-t="Suppression Line 1" data-d="Nozzle heads every 5 m on 0.75 m risers, aimed down into the fuel bed and a gravel discharge swale. Each head flashes 1.25–5 kg/s of liquid CO2 to ~45% dry-ice snow at −109 °F. Heads open in 50 m sections commanded by the detection layer — aiming by WHICH sections fire, no moving parts to jam."/>
+        <rect class="zone" x="382" y="20" width="120" height="215" rx="4" tabindex="0"
+          data-t="Suppression Line 2 (+ IR detection)" data-d="Identical hardware 100 ft behind Line 1 — anything that breaches the first line meets a second, on chilled, snow-dusted fuel. Dual-band IR cameras on 15 m masts every 200 m plus linear heat-sensing cable provide detection and section targeting."/>
+        <rect class="zone" x="502" y="20" width="112" height="215" rx="4" tabindex="0"
+          data-t="Suppression Line 3 + service road" data-d="Final line. The parallel service road doubles as a firebreak, maintenance access, and a safe anchor line for fire crews (with CO2 exclusion-zone protocol during discharge)."/>
+        <rect class="zone" x="614" y="20" width="204" height="215" rx="4" tabindex="0"
+          data-t="Standoff ≈ 2 miles" data-d="The ember answer. Ember arrival flux decays steeply with distance from the flame front: holding the front at the band's outer edge cuts still-burning ember arrival at homes by roughly two orders of magnitude versus fence-line contact. It also prevents first-row structure ignition — the trigger for the house-to-house chain reaction that levels whole blocks."/>
+        <rect class="zone" x="818" y="20" width="180" height="215" rx="4" tabindex="0"
+          data-t="Community + interior spokes" data-d="Laterals along streets, greenbelts and parks kill the sparse surviving spot fires as singles — a fight a grid wins trivially, because a grid is never overwhelmed by simultaneous ignitions. It just opens more valves."/>
+      </svg>
+      <div class="detail" id="xsDetail" aria-live="polite">
+        <div class="dt">Cross-section · hover a zone</div>
+        <div class="dd">Fire side → 100 ft treated approach strip → three CO2 nozzle lines 100 ft apart (≈500 ft of active hardware) → ~2 mi standoff → community with interior spokes. Band follows the prevailing-wind threat arc, not a full ring.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="system">
+  <div class="wrap">
+    <p class="eyebrow"><b>04</b> · THE SYSTEM</p>
+    <h2>No pumps. No grid power. Nobody in harm's way.</h2>
+    <p class="lede">The CO2's own pressure does the work, valves do the aiming, and detection is solar-powered — because the grid is down in every one of these events.</p>
+    <div class="panel">
+      <svg viewBox="0 0 900 470" width="100%" style="min-width:680px" aria-label="Plan-view schematic of the Cold Curtain system around a community">
+        <!-- wind arrow -->
+        <g stroke="var(--ember)" stroke-width="3" fill="none">
+          <line x1="800" y1="40" x2="720" y2="105"/>
+          <polygon points="712,112 736,102 722,88" fill="var(--ember)" stroke="none"/>
+        </g>
+        <text x="812" y="34" font-size="12" text-anchor="end" fill="var(--ember-text)">DESIGN WIND · NE</text>
+        <!-- fire threat arc -->
+        <polygon points="560,10 890,10 890,240" fill="var(--ember)" opacity=".10"/>
+        <text x="855" y="140" font-size="11" text-anchor="end" fill="var(--ember-text)">THREAT ARC</text>
+        <!-- three band lines (diagonal, NE of community) -->
+        <line x1="430" y1="30" x2="880" y2="330" stroke="var(--cryo)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="455" y1="12" x2="893" y2="305" stroke="var(--cryo)" stroke-width="3" opacity=".6" stroke-linecap="round"/>
+        <line x1="408" y1="52" x2="862" y2="356" stroke="var(--cryo)" stroke-width="3" opacity=".6" stroke-linecap="round"/>
+        <text x="640" y="118" font-size="12" fill="var(--cryo-text)" transform="rotate(34 640 118)">SUPPRESSION LINES 1–3 · HEADS @ 5 M</text>
+        <!-- section hubs on main line -->
+        <g fill="var(--surface)" stroke="var(--cryo)" stroke-width="3">
+          <circle cx="500" cy="77" r="8"/><circle cx="590" cy="137" r="8"/>
+          <circle cx="680" cy="197" r="8"/><circle cx="770" cy="257" r="8"/>
+        </g>
+        <text x="510" y="62" font-size="10">HUB</text>
+        <!-- storage farm -->
+        <g>
+          <rect x="330" y="55" width="20" height="46" rx="9" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <rect x="356" y="55" width="20" height="46" rx="9" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <rect x="304" y="55" width="20" height="46" rx="9" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <text x="340" y="122" font-size="11" text-anchor="middle">STORAGE · 600 T/KM</text>
+          <text x="340" y="137" font-size="10" text-anchor="middle">graded to drain away from town</text>
+        </g>
+        <!-- spine from storage to line -->
+        <line x1="376" y1="78" x2="492" y2="77" stroke="var(--cryo-deep)" stroke-width="4" stroke-dasharray="1 0"/>
+        <line x1="500" y1="85" x2="590" y2="129" stroke="var(--cryo-deep)" stroke-width="4" opacity=".9"/>
+        <line x1="590" y1="145" x2="680" y2="189" stroke="var(--cryo-deep)" stroke-width="4" opacity=".9"/>
+        <line x1="680" y1="205" x2="770" y2="249" stroke="var(--cryo-deep)" stroke-width="4" opacity=".9"/>
+        <text x="420" y="66" font-size="11">8" SPINE</text>
+        <!-- community street grid -->
+        <g stroke="var(--hairline)" stroke-width="6" fill="none">
+          <rect x="120" y="215" width="300" height="200" rx="10" fill="var(--surface)"/>
+        </g>
+        <g stroke="var(--hairline)" stroke-width="3">
+          <line x1="120" y1="268" x2="420" y2="268"/><line x1="120" y1="318" x2="420" y2="318"/>
+          <line x1="120" y1="368" x2="420" y2="368"/>
+          <line x1="195" y1="215" x2="195" y2="415"/><line x1="270" y1="215" x2="270" y2="415"/>
+          <line x1="345" y1="215" x2="345" y2="415"/>
+        </g>
+        <text x="270" y="443" font-size="12" text-anchor="middle">COMMUNITY · 500–2,000 HOMES</text>
+        <!-- interior spokes -->
+        <g stroke="var(--cryo)" stroke-width="2.5" opacity=".75">
+          <line x1="430" y1="243" x2="130" y2="243"/>
+          <line x1="440" y1="293" x2="130" y2="293"/>
+          <line x1="450" y1="343" x2="130" y2="343"/>
+        </g>
+        <g fill="var(--cryo)">
+          <circle cx="232" cy="243" r="3.5"/><circle cx="307" cy="243" r="3.5"/><circle cx="382" cy="243" r="3.5"/>
+          <circle cx="232" cy="293" r="3.5"/><circle cx="307" cy="293" r="3.5"/><circle cx="382" cy="293" r="3.5"/>
+          <circle cx="232" cy="343" r="3.5"/><circle cx="307" cy="343" r="3.5"/><circle cx="382" cy="343" r="3.5"/>
+        </g>
+        <text x="128" y="233" font-size="11">INTERIOR SPOKES · SPOT-FIRE KILL</text>
+        <!-- spoke feeds from band -->
+        <line x1="500" y1="85" x2="440" y2="243" stroke="var(--cryo-deep)" stroke-width="3" opacity=".55"/>
+        <line x1="590" y1="145" x2="450" y2="293" stroke="var(--cryo-deep)" stroke-width="3" opacity=".55"/>
+        <line x1="680" y1="205" x2="460" y2="343" stroke="var(--cryo-deep)" stroke-width="3" opacity=".55"/>
+        <!-- standoff annotation -->
+        <line x1="430" y1="180" x2="524" y2="118" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 5"/>
+        <text x="452" y="152" font-size="11" transform="rotate(-33 452 152)">≈ 2 MI STANDOFF</text>
+        <!-- low threat arc note -->
+        <text x="128" y="205" font-size="10">low-threat arcs: single line + patrol access</text>
+      </svg>
+      <div class="cap">Autonomous activation is interlocked to mandatory-evacuation status; manual override always available. Fire-crew exclusion-zone protocol applies during discharge (co-developed with CAL&nbsp;FIRE — open item).</div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <table class="spec">
+        <tr><th>Parameter</th><th>Spec</th><th>Why</th></tr>
+        <tr><td>Nozzle spacing / rate</td><td class="num">5 m · 1.25–5 kg/s per head</td><td>Energy balance: absorb ≥50% of the 500–2,000 kW/m surface fire the strip permits</td></tr>
+        <tr><td>Agent state at discharge</td><td class="num">~45% dry-ice snow + gas · −109 °F</td><td>Cold + inerting delivered into the fuel layer, where the fire actually lives</td></tr>
+        <tr><td>Line pressure rule</td><td class="num">liquid-full ≥ 200 psi · flash at tip only</td><td>Below 75 psi liquid CO2 freezes to dry ice <em>inside the pipe</em> and plugs it</td></tr>
+        <tr><td>Storage per defended km</td><td class="num">600 t · 12 × 50 t vessels</td><td>Design event (400–800 t/attacked km) + one re-attack; solar + battery reliquefaction</td></tr>
+        <tr><td>Activation quantum</td><td class="num">50 m sections · 10 heads</td><td>Only segments in fire contact discharge — consumption tracks the threat, not the map</td></tr>
+        <tr><td>Power requirement</td><td class="num">zero grid</td><td>Stored-pressure delivery; detection on solar + battery</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="supply">
+  <div class="wrap">
+    <p class="eyebrow"><b>05</b> · THE SUPPLY</p>
+    <h2>The ammunition is free. Data centers make it anyway.</h2>
+    <p class="lede">Permit condition on new gas-fired campuses: capture your CO2, deliver it to the fire-defense reserve. Trucks, not pipelines — no moratorium exposure.</p>
+    <div class="panel">
+      <svg viewBox="0 0 960 190" width="100%" style="min-width:700px" aria-label="Supply chain: data center campus to capture to truck to storage farm to curtain">
+        <g text-anchor="middle">
+          <!-- campus -->
+          <rect x="20" y="45" width="170" height="80" rx="8" fill="var(--surface)" stroke="var(--hairline)" stroke-width="2"/>
+          <rect x="40" y="62" width="36" height="46" fill="var(--hairline)"/>
+          <rect x="84" y="72" width="36" height="36" fill="var(--hairline)"/>
+          <rect x="128" y="58" width="14" height="50" fill="var(--muted)"/>
+          <text x="105" y="148" font-size="12" fill="var(--ink-2)">GAS-FIRED DC CAMPUS</text>
+          <text x="105" y="166" font-size="11">500 MW class</text>
+          <!-- capture -->
+          <rect x="260" y="45" width="150" height="80" rx="8" fill="var(--cryo-wash)" stroke="var(--cryo)" stroke-width="2"/>
+          <text x="335" y="80" font-size="13" fill="var(--cryo-text)" font-weight="700">CAPTURE</text>
+          <text x="335" y="102" font-size="12" fill="var(--ink-2)">≈1.5 Mt/yr</text>
+          <text x="335" y="148" font-size="12" fill="var(--ink-2)">PERMIT CONDITION</text>
+          <text x="335" y="166" font-size="11">"you build, you supply"</text>
+          <!-- truck -->
+          <rect x="480" y="55" width="130" height="46" rx="8" fill="var(--surface)" stroke="var(--hairline)" stroke-width="2"/>
+          <rect x="482" y="63" width="86" height="30" rx="14" fill="var(--frost-2)"/>
+          <circle cx="510" cy="106" r="9" fill="var(--muted)"/><circle cx="580" cy="106" r="9" fill="var(--muted)"/>
+          <text x="545" y="148" font-size="12" fill="var(--ink-2)">TRUCK + RAIL · 20 T CRYO</text>
+          <text x="545" y="166" font-size="11">no pipelines → no moratorium</text>
+          <!-- storage -->
+          <rect x="680" y="42" width="18" height="60" rx="8" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <rect x="704" y="42" width="18" height="60" rx="8" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <rect x="728" y="42" width="18" height="60" rx="8" fill="var(--frost-2)" stroke="var(--cryo)" stroke-width="2"/>
+          <text x="713" y="148" font-size="12" fill="var(--ink-2)">COMMUNITY STORAGE</text>
+          <text x="713" y="166" font-size="11">600 t / defended km</text>
+          <!-- curtain -->
+          <line x1="830" y1="100" x2="940" y2="100" stroke="var(--cryo)" stroke-width="5" stroke-linecap="round"/>
+          <g fill="var(--cryo)">
+            <circle cx="845" cy="100" r="4"/><circle cx="870" cy="100" r="4"/>
+            <circle cx="895" cy="100" r="4"/><circle cx="920" cy="100" r="4"/>
+          </g>
+          <text x="885" y="148" font-size="12" fill="var(--ink-2)">COLD CURTAIN</text>
+          <text x="885" y="166" font-size="11">standby, 40-yr asset</text>
+        </g>
+        <!-- arrows -->
+        <g stroke="var(--muted)" stroke-width="2.5" fill="var(--muted)">
+          <line x1="196" y1="85" x2="248" y2="85"/><polygon points="258,85 244,78 244,92"/>
+          <line x1="416" y1="85" x2="466" y2="85"/><polygon points="476,85 462,78 462,92"/>
+          <line x1="616" y1="85" x2="662" y2="85"/><polygon points="672,85 658,78 658,92"/>
+          <line x1="756" y1="85" x2="812" y2="85"/><polygon points="822,85 808,78 808,92"/>
+        </g>
+      </svg>
+      <div class="cap">Scale check: the full 20-community Phase-1 initial fill is ≈120 kt — <strong>under one month of one campus's captured output</strong>. Annual make-up (activations + losses) is 10–30 kt, a rounding error. Interim supply before campuses come online: merchant liquid CO2, ≈$20–40M for the entire portfolio fill.</div>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <p class="eyebrow"><b>06</b> · THE COST</p>
+    <h2>$5.5–8.5M per defended kilometer, all-in.</h2>
+    <p class="lede">Rough-order-of-magnitude, engineering-estimate class. The dominant <em>recurring</em> cost is mowing the approach strip — vegetation, not CO2.</p>
+    <div class="panel">
+      <div class="stack" role="img" aria-label="Stacked bar of capital cost per defended kilometer, midpoint 6.9 million dollars">
+        <div class="seg" style="flex:2.0; background:var(--cryo-deep)" title="3 nozzle lines: pipe, 600 heads, valves — $1.5–2.5M"></div>
+        <div class="seg" style="flex:1.25; background:var(--cryo)" title="Trunk + laterals + trenching — $1.0–1.5M"></div>
+        <div class="seg" style="flex:2.5; background:var(--frost-2)" title="Storage: 12 × 50 t vessels + reliquefaction skid — $2.0–3.0M"></div>
+        <div class="seg" style="flex:0.75; background:var(--frost)" title="Detection, controls, solar power, comms — $0.5–1.0M"></div>
+        <div class="seg" style="flex:0.4; background:var(--hairline)" title="Fuel-strip establishment + service road — $0.3–0.5M"></div>
+      </div>
+      <div class="slegend">
+        <div class="li"><span class="sw" style="background:var(--cryo-deep)"></span>Nozzle lines ×3 <span class="n">$2.0M</span></div>
+        <div class="li"><span class="sw" style="background:var(--cryo)"></span>Trunk + trenching <span class="n">$1.25M</span></div>
+        <div class="li"><span class="sw" style="background:var(--frost-2)"></span>CO2 storage <span class="n">$2.5M</span></div>
+        <div class="li"><span class="sw" style="background:var(--frost)"></span>Detection + controls <span class="n">$0.75M</span></div>
+        <div class="li"><span class="sw" style="background:var(--hairline)"></span>Fuel strip + road <span class="n">$0.4M</span></div>
+      </div>
+      <p class="cap">Midpoints shown; hover segments for ranges. Per community (≈10 km defended line + interior spokes): <strong>$75–150M</strong>. O&amp;M ≈ $0.5–1M/km/yr, dominated by vegetation management. Phase-1 portfolio (20 corridors): <strong>$2–3B</strong> — less than California utilities already spend on wildfire mitigation in one planning cycle.</p>
+    </div>
+  </div>
+</section>
+
+<section id="return">
+  <div class="wrap">
+    <p class="eyebrow"><b>07</b> · THE RETURN</p>
+    <h2>Payback in months. Move the sliders — it stays true.</h2>
+    <p class="lede">It doesn't need to be perfect: at these magnitudes, 50% vs 90% effective is just which multiple of a trillion gets saved.</p>
+    <div class="panel">
+      <div class="calc">
+        <div class="cin">
+          <label for="eff">System effectiveness (share of corridor losses prevented)</label>
+          <input type="range" id="eff" min="20" max="95" value="60" step="5">
+          <div class="rv" id="effV">60%</div>
+          <label>Average annual US corridor-relevant direct losses</label>
+          <div class="opts" id="lossOpts">
+            <button data-v="30" aria-pressed="false">$30B · quiet</button>
+            <button data-v="45" aria-pressed="true">$45B · trend</button>
+            <button data-v="60" aria-pressed="false">$60B · severe</button>
+          </div>
+          <label for="capex">Phase-1 capital ($B)</label>
+          <input type="range" id="capex" min="2" max="4" value="2.5" step="0.5">
+          <div class="rv" id="capexV">$2.5B</div>
+        </div>
+        <div class="couts">
+          <div class="cout"><div class="v" id="oAvoid">—</div><div class="k">Avoided losses / yr</div></div>
+          <div class="cout"><div class="v" id="oPayback">—</div><div class="k">Expected payback</div></div>
+          <div class="cout"><div class="v" id="o40">—</div><div class="k">40-yr avoided (flat, undiscounted)</div></div>
+          <div class="cout"><div class="v plain" id="oBCR">—</div><div class="k">Benefit : cost (40 yr, incl. O&amp;M)</div></div>
+          <div class="formula" id="oFormula"></div>
+        </div>
+      </div>
+      <p class="cap">Phase-1 corridors historically host ~65% of corridor dollar losses (that share is fixed in the math below). O&amp;M held at $0.3B/yr. No loss escalation is assumed — with losses trending up, these are underestimates. Not modeled: fatalities avoided (85 Camp Fire, ~30 LA 2025), smoke-health burden, insurance-market stabilization.</p>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="wrap">
+    <p class="eyebrow"><b>08</b> · THE ROADMAP</p>
+    <h2>One pilot buys the whole argument.</h2>
+    <div class="road">
+      <div class="rstep">
+        <div class="ph">PHASE 1A</div>
+        <h3>Pilot</h3>
+        <p>One community. One insurer partner, one oilfield-services contractor, CAL&nbsp;FIRE liaison. Live sectional discharge on prescribed burns.</p>
+        <div class="cost">$25–50M</div>
+      </div>
+      <div class="rstep">
+        <div class="ph">PHASE 1B</div>
+        <h3>Validation</h3>
+        <p>Instrumented burn tests: stop/no-stop envelope, snow persistence vs. wind, detection latency. Actuarial sign-off → premium-reduction product.</p>
+        <div class="cost">included</div>
+      </div>
+      <div class="rstep">
+        <div class="ph">PHASE 2</div>
+        <h3>20 corridors</h3>
+        <p>Highest-value, highest-recurrence WUI edges. Project-financed against premium reductions + resilience funds + data-center supply conditions.</p>
+        <div class="cost">$2–3B</div>
+      </div>
+      <div class="rstep">
+        <div class="ph">PHASE 3</div>
+        <h3>Standard</h3>
+        <p>Code integration for new WUI development: curtain-served = insurable. The asset class becomes as boring as fire hydrants. That's the point.</p>
+        <div class="cost">self-funding</div>
+      </div>
+    </div>
+
+    <div style="margin-top:34px">
+      <p class="eyebrow"><b>⚠</b> · OPEN ITEMS — STATED, NOT BURIED</p>
+      <div class="open">
+        <div class="oi"><span class="b">01</span><span><strong>Regulatory classification</strong> of the on-site network (fire-protection system vs. CO2 pipeline) decides moratorium exposure. Highest-priority legal question.</span></div>
+        <div class="oi"><span class="b">02</span><span><strong>Extreme-wind envelope</strong>: gas-phase performance degrades in 60–100 mph events; the treated strip + snow-in-fuel-bed pathway carries the design there. Pilot burns must bound it.</span></div>
+        <div class="oi"><span class="b">03</span><span><strong>Firefighter co-location</strong>: exclusion-zone protocol during discharge must be co-developed with CAL&nbsp;FIRE, not imposed.</span></div>
+        <div class="oi"><span class="b">04</span><span><strong>Ember tail</strong>: interior spokes handle sparse long-range spot fires; sizing validated by simulation, needs field data.</span></div>
+        <div class="oi"><span class="b">05</span><span><strong>Dual-agent option</strong> kept open: same pipes can push CO2-energized bio-foam (USFS-listed, 100% biodegradable) for pre-blanket mode hours ahead, straight CO2 for the minutes of contact.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">COLD CURTAIN · DWG CC-000 · REV 0.1 · 2026-07-04 — working draft for internal discussion; all figures engineering estimates pending pilot validation. Full derivations: research/cold-curtain-phase0.md · cold-curtain-design-v1.md (PR #21).</span>
+  </div>
+</footer>
+
+<script>
+  // ---- California corridor map (built from real lat/lon, equirectangular) ----
+  (function () {
+    var svg = document.getElementById('camap');
+    if (!svg) return;
+    var NS = 'http://www.w3.org/2000/svg';
+    // simplified CA outline, [lon, lat]
+    var CA = [
+      [-124.21, 42.00], [-120.00, 42.00], [-120.00, 39.00], [-114.63, 35.00],
+      [-114.13, 34.30], [-114.72, 32.72], [-117.13, 32.53], [-117.32, 33.10],
+      [-118.26, 33.74], [-118.55, 34.03], [-119.22, 34.15], [-120.47, 34.45],
+      [-120.64, 35.15], [-121.90, 36.60], [-122.50, 37.50], [-122.51, 37.78],
+      [-122.97, 38.23], [-123.73, 38.95], [-124.11, 40.10], [-124.41, 40.44],
+      [-124.16, 41.00]
+    ];
+    var K = 57, KX = K * Math.cos(37 * Math.PI / 180);
+    function px(lon) { return (lon + 124.85) * KX + 8; }
+    function py(lat) { return (42.25 - lat) * K + 8; }
+    var pts = CA.map(function (c) { return px(c[0]).toFixed(1) + ',' + py(c[1]).toFixed(1); }).join(' ');
+    var poly = document.createElementNS(NS, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('class', 'state');
+    svg.appendChild(poly);
+
+    var CORRIDORS = [
+      { n: 'Paradise / Sierra foothills', la: 39.76, lo: -121.62, loss: 12.5, lab: 'Paradise', ly: -1,
+        d: 'Camp Fire 2018 — $12.5B insured, 18,804 structures, 85 dead. The town is rebuilding inside the same fuel corridor.' },
+      { n: 'Santa Rosa / Sonoma–Napa', la: 38.44, lo: -122.71, loss: 13, lab: 'Santa Rosa', ly: -1,
+        d: 'Tubbs 2017 ($11.1B) plus Glass, Kincade, Nuns. Tubbs crossed a six-lane highway into dense suburbia — the case study for why lines need depth.' },
+      { n: 'Oakland–Berkeley Hills', la: 37.86, lo: -122.23, loss: 4, lab: 'Oakland Hills', ly: 1,
+        d: '1991 Tunnel Fire: 25 dead, ~$4B in today’s dollars, 2,900 structures in one afternoon. Densest value-at-risk WUI edge in Northern California.' },
+      { n: 'Lake Tahoe / Caldor corridor', la: 38.85, lo: -120.05, loss: 1.2, lab: 'Tahoe', ly: -1,
+        d: 'Caldor 2021 burned to the basin edge. Resort value concentration; single evacuation highway.' },
+      { n: 'Redding / Carr corridor', la: 40.60, lo: -122.40, loss: 1.6, lab: 'Redding', ly: -1,
+        d: 'Carr 2018 — $1.6B, produced a genuine fire tornado inside city limits.' },
+      { n: 'Ventura / Santa Barbara', la: 34.38, lo: -119.48, loss: 2.5, lab: 'SB · Ventura', side: 'l',
+        d: 'Thomas 2017 (then the largest fire in CA history) plus the Montecito debris flows it triggered.' },
+      { n: 'Palisades / Malibu', la: 34.03, lo: -118.75, loss: 25, lab: 'Palisades–Malibu', side: 'b',
+        d: 'Palisades 2025 ($20–25B insured) + Woolsey 2018 ($5.3B). The highest value density on the list; burns on a Santa Ana cycle.' },
+      { n: 'Altadena / San Gabriel foothills', la: 34.22, lo: -118.05, loss: 9, lab: 'Altadena', side: 'r', ly: -1,
+        d: 'Eaton 2025 — $8–10B insured, 9,000+ structures, 18 dead. Flat street grid met a mountain-front fire at 100 mph winds.' },
+      { n: 'San Diego backcountry', la: 32.95, lo: -116.90, loss: 4, lab: 'San Diego', ly: 1,
+        d: 'Cedar 2003, Witch 2007. Santa Ana corridor pointed at a county of 3 million.' }
+    ];
+    var panel = document.getElementById('mapDetail');
+    var dt = panel.querySelector('.dt'), dd = panel.querySelector('.dd');
+    var d0t = dt.textContent, d0d = dd.textContent;
+    CORRIDORS.forEach(function (c) {
+      var r = 4.5 + Math.sqrt(c.loss) * 3.2;
+      var cx = px(c.lo), cy = py(c.la);
+      var mk = document.createElementNS(NS, 'circle');
+      mk.setAttribute('cx', cx); mk.setAttribute('cy', cy); mk.setAttribute('r', r);
+      mk.setAttribute('class', 'mk'); mk.setAttribute('tabindex', '0');
+      var t = document.createElementNS(NS, 'title');
+      t.textContent = c.n + ' — ~$' + c.loss + 'B insured';
+      mk.appendChild(t);
+      function show() {
+        dt.textContent = c.n + ' · ~$' + c.loss + 'B insured historical losses';
+        dd.textContent = c.d;
+      }
+      function reset() { dt.textContent = d0t; dd.textContent = d0d; }
+      mk.addEventListener('mouseenter', show); mk.addEventListener('focus', show);
+      mk.addEventListener('click', show);
+      mk.addEventListener('mouseleave', reset); mk.addEventListener('blur', reset);
+      svg.appendChild(mk);
+      var lb = document.createElementNS(NS, 'text');
+      if (c.side === 'l') {
+        lb.setAttribute('x', cx - r - 5); lb.setAttribute('y', cy + 3);
+        lb.setAttribute('text-anchor', 'end');
+      } else if (c.side === 'b') {
+        lb.setAttribute('x', cx); lb.setAttribute('y', cy + r + 13);
+        lb.setAttribute('text-anchor', 'middle');
+      } else {
+        lb.setAttribute('x', cx + r + 4);
+        lb.setAttribute('y', cy + ((c.ly || 1) < 0 ? -r * 0.4 : r * 0.7) + 3);
+      }
+      lb.setAttribute('class', 'mklab');
+      lb.textContent = c.lab;
+      svg.appendChild(lb);
+    });
+  })();
+
+  // cross-section hover -> detail panel
+  (function () {
+    var panel = document.getElementById('xsDetail');
+    var dt = panel.querySelector('.dt'), dd = panel.querySelector('.dd');
+    var d0t = dt.textContent, d0d = dd.textContent;
+    document.querySelectorAll('.zone').forEach(function (z) {
+      function show() { dt.textContent = z.dataset.t; dd.textContent = z.dataset.d; }
+      function reset() { dt.textContent = d0t; dd.textContent = d0d; }
+      z.addEventListener('mouseenter', show);
+      z.addEventListener('focus', show);
+      z.addEventListener('click', show);
+      z.addEventListener('mouseleave', reset);
+      z.addEventListener('blur', reset);
+    });
+  })();
+
+  // calculator
+  (function () {
+    var eff = document.getElementById('eff'), capex = document.getElementById('capex');
+    var lossBtns = document.querySelectorAll('#lossOpts button');
+    var loss = 45, SHARE = 0.65, OM = 0.3;
+    function fmtB(x) {
+      if (x >= 1000) return '$' + (x / 1000).toFixed(1) + 'T';
+      return '$' + (x >= 100 ? Math.round(x) : x.toFixed(1)) + 'B';
+    }
+    function upd() {
+      var e = +eff.value / 100, c = +capex.value;
+      document.getElementById('effV').textContent = eff.value + '%';
+      document.getElementById('capexV').textContent = '$' + (+capex.value).toFixed(1) + 'B';
+      var avoid = loss * SHARE * e;
+      var payback = c / avoid;                       // years
+      var forty = avoid * 40;
+      var bcr = forty / (c + OM * 40);
+      document.getElementById('oAvoid').textContent = fmtB(avoid) + '/yr';
+      document.getElementById('oPayback').textContent =
+        payback < 1 ? Math.max(1, Math.round(payback * 12)) + ' mo' : payback.toFixed(1) + ' yr';
+      document.getElementById('o40').textContent = fmtB(forty);
+      document.getElementById('oBCR').textContent = Math.round(bcr) + ' : 1';
+      document.getElementById('oFormula').textContent =
+        'avoided/yr = $' + loss + 'B × 65% corridor share × ' + eff.value + '% = ' + fmtB(avoid) +
+        '   ·   payback = $' + c.toFixed(1) + 'B ÷ ' + fmtB(avoid);
+    }
+    lossBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        lossBtns.forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+        loss = +b.dataset.v; upd();
+      });
+    });
+    eff.addEventListener('input', upd);
+    capex.addEventListener('input', upd);
+    upd();
+  })();
+</script>
